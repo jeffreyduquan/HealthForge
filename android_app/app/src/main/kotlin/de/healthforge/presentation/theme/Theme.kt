@@ -90,8 +90,12 @@ fun HealthForgeTheme(
     }
     val colorScheme = if (darkTheme) DarkColors else LightColors
     val semantic = if (darkTheme) DarkSemanticColors else LightSemanticColors
+    val hmTokens = if (darkTheme) DarkHmTokens else LightHmTokens
 
-    CompositionLocalProvider(LocalSemanticColors provides semantic) {
+    CompositionLocalProvider(
+        LocalSemanticColors provides semantic,
+        LocalHmTokens provides hmTokens,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = HealthForgeTypography,
