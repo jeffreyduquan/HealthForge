@@ -1388,83 +1388,213 @@ Letzter Release-Gate-Punkt: Operations-Doku für v1.0 Go-Live.
 
 ---
 
-## 4b. Phase P6 — Histamind-Fusion + Scope-Refinement (eingefügt 2026-05-26)
+## 4b. Phase P6 — Histamind-Fusion + Scope-Refinement (eingefügt 2026-05-26, autonomy-ready 2026-05-26)
 
-**Ziel:** Vor Wiederaufnahme von P5-Battle-Tests wird das UI/UX-Konzept neu kalibriert anhand der Run-1-Findings F-003..F-012. Fokus: visuelle Modernisierung (70% Histamind / 30% HealthForge), Re-Spec Log-Konzept, individuelle Nutrient-Ziele, Home-Nutrition-Selektion, fehlende destruktive Wasser-Aktion, Listen-Vorbefüllung, Glossary-Konsistenz.
+**Ziel:** UI/UX-Refit anhand der Run-1-Findings F-003..F-012 mit Histamind als Design-Referenz (https://github.com/endgeardev/Histamind). Findings sind kompletter P6-Scope; keine Erweiterungen.
 
-**Phasen-Charakter:** Hybrid aus Spec-Re-Lock (P6.S1) + Implementation-Sprints (P6.S2..S5). Keine neuen Domain-Features außerhalb der Findings — Scope geschlossen auf F-003..F-012.
+**Quelle:** Design-Tokens + Component-Idiome in `/memories/repo/histamind-design-system.md` gespiegelt. Histamind ist Flutter, HealthForge bleibt Kotlin/Compose — wir portieren das Design, nicht den Code.
 
-### Sprint P6.S1 — Re-Spec & Vision-Reklärung
+### 4b.0 Autonomy-Doktrin (LOCKED 2026-05-26)
 
-**Deliverables:**
-- **MOD ReqSpec.md:** Re-Spec REQ-LOG-001..006 (Tagebuch → Event-Log für punktuelle Beschwerden; Schlaf/Mood raus oder optional Sub-Feature); Erweiterung REQ-PROFILE-* um per-Nutrient-Goals; UX-Constraints zu REQ-WATER-* (Entfernen-Aktion) und REQ-INTAKE-* (Flow „Hinzufügen" → Lebensmittel-Screen).
-- **MOD docs/GUI.md + docs/UsabilityMap.md:** Histamind-Style-Referenz dokumentieren (Screenshot-Refs oder Style-Tokens), 70/30-Fusion-Prinzipien, Home-Nutrition-Selektion-Pattern (N visible / Rest collapsed mit Sparkline).
-- **MOD docs/Architecture.md (Glossary-Sektion):** „Zutat" vs. „Lebensmittel" final entschieden + überall konsistent.
-- **MOD docs/TraceabilityMatrix.md:** Neue REQ-IDs verlinkt mit P6.S2..S5.
-- **NEW Backlog:** Falls F-006 (Wasser-Alarm-UX) als Polish bleibt → POLISH-WATER-ALARM-001.
+User-Direktive: P6 wird autonom ausgeführt. Es werden nur **Critical-Decision-Questions** an den User gestellt. Triviale Fragen sind verboten; sie werden hier ein- für allemal vor-entschieden.
 
-**Akzeptanz:** Alle Docs gegen F-003..F-012 cross-referenziert; jeder Finding hat entweder REQ-ID + Sprint-Zuweisung oder Polish-Backlog-Eintrag.
+**Pre-Locked Decisions (keine Rückfragen):**
 
-**REQ-IDs (Re-Spec):** REQ-LOG-001..006 (invertiert), REQ-PROFILE-* (erweitert), REQ-WATER-* (Entfernen-Aktion), REQ-INTAKE-* (Flow), REQ-HOME-001..005 (Nutrition-Selektion).
+| Decision | Lock | Begründung |
+|---|---|---|
+| Visual-Identity-Replace | Violet→Cyan ersetzt Olive-Green komplett (Primary). | User-Brief 70/30 + Olive-Green war kein expliziter Brand-Wunsch. |
+| Light-Theme-Retain | Light bleibt erhalten, aber ohne Glas-Effekte (Clean-Cards auf hellem Bg, gleicher Akzent). | Toggle-Infrastruktur (`ThemePreference`) bleibt funktional; A11y-User mit Light-Präferenz versorgt. |
+| Font | Manrope via Google Fonts (OFL). | Histamind 1:1 + Lizenz unproblematisch. |
+| Log-Inversion-Detail (F-010) | Mood + Schlaf werden komplett entfernt. Log = Event-Log mit Severity 1–5 + Symptom-Tags + Notiz + Timestamp. | User-Wortlaut: „Schlaf und Mood machen keinen Sinn". |
+| Per-Nutrient-Goals-Storage (F-011) | DB-Migration V12 fügt `users.daily_nutrient_goals JSONB` hinzu. | Forward-only Flyway; JSONB erlaubt frei wachsende Nutrient-Liste ohne Schema-Drift. |
+| Pinned-Nutrients-Default (F-004) | 4 Pins: kcal, Protein, Carbs, Fat. Server-seitig in `users.pinned_nutrients TEXT[]` (V12 mit). | Default deckt 90% der User; alle weiteren collapsed mit Mini-Progress. |
+| Wasser-Entfernen-Pattern (F-005) | Long-Press auf letztes Wasser-Quick-Add-Chip → Snackbar „Entfernt — Rückgängig"; reversibel 5 Sek. | Konsistent mit existierendem Undo-Pattern. |
+| Add-Flow-Konsolidierung (F-007) | „Hinzufügen"-Buttons in Home/Plan navigieren direkt zu `LebensmittelScreen` mit Pre-Selection-Mode (Result-Callback). Eigenes Add-Sheet entfällt. | Reduziert Navigation-Tiefe; ein Pattern statt zwei. |
+| Listen-Vorbefüllung (F-009) | `IngredientScreen` + `RecipeScreen` laden bei Open Paginated-Page (50 Items alphabetisch); Search filtert clientseitig + serverseitig. | Bestehende Endpoints supporten Paged-List; nur UI-Flag. |
+| Wording-Fix (F-008) | Plan-Add-Sheet: „Rezept oder Lebensmittel" (ersetzt „Zutat"). Glossary-Lock: „Zutat" = Bestandteil EINES Rezepts; „Lebensmittel" = Standalone-Eintrag in Datenbank. | Klarer Glossary-Split. |
+| Bottom-Nav-Structure | Bleibt 5 Tabs in aktueller Reihenfolge (Home/Essen/Plan/Log/Profil). | Keine Nav-Strukturänderung — matched Histamind nah genug. |
+| Slider-Granularität (F-003) | Age 14–100 step 1; Height 140–220 cm step 1; Weight 30–200 kg step 0.5. | Decken realistische Range; halb-kg-Granularität fürs Tracking. |
 
-### Sprint P6.S2 — Visual Restyle (Histamind-Fusion 70/30)
+**Critical-Decision-Trigger** (askQuestion nur bei):
 
-**Deliverables:**
-- `android_app/.../presentation/theme/`: Color-Palette + Typography aligned mit Histamind-Referenz (P6.S1 Style-Tokens).
-- Compose-Components-Sweep: Cards, Buttons, Progress-Rings, Sliders, ListItems.
-- Light + Dark Variante.
-- Screenshot-Galerie pro Screen (vorher/nachher) im PR.
+1. Spec-Konflikt zwischen Histamind-Idiom und HealthForge-Domain (z.B. Histamine-Load-Card vs. Allergen-Card auf Home).
+2. Datenmigration mit Daten-Risiko (z.B. wenn Log-Entries existieren → was mit alten Mood-Werten).
+3. Visuelle Geschmacks-Entscheidungen mit 2+ gleichwertigen Optionen (z.B. Onboarding-Step-Indikator Punkte vs. Stepper).
+4. Wenn die Pre-Locked-Decision auf eine Realität trifft, die sie ad absurdum führt.
+5. Nach jedem Sprint-Abschluss: Sign-Off-Frage „Sprint Sx ok / Fix nötig / Abbruch".
 
-**Akzeptanz:** Visual Pass auf allen Top-Level-Screens (Home, Plan, Log, Essen, Profil); Histamind-Vergleichs-Score subjektiv „70%-ähnlich" (User-Sign-Off).
+Alles andere = autonome Implementation + Doc-Drift-Eval + Commit + Push.
 
-**REQ-IDs:** F-012; betrifft REQ-NAV-* + REQ-THEME-* (falls existiert) nur visuell, keine Logik-Änderung.
+### 4b.1 Sprint-Reihenfolge (LOCKED Dependency-Order)
 
-### Sprint P6.S3 — Onboarding-Slider + Profil-Goals
+```
+P6.S1  Spec-Lock          → reine Doc-Arbeit, kein Code
+  ↓
+P6.S2  Theme-Foundation   → Color.kt + Theme.kt + Manrope + Typography
+  ↓
+P6.S3  Component-Library  → GlassCard, SectionPill, GradientFab, AmbientBackdrop, GradientText, SegmentedTabs
+  ↓
+P6.S4  Screen-Wave-1      → Home + Onboarding (mit F-003 Slidern + F-004 Pinned-Nutrients-Skeleton)
+  ↓
+P6.S5  Screen-Wave-2      → Plan + Essen + Profil (mit F-008 Wording + F-009 Listen-Vorbefüllung + F-011 Goals)
+  ↓
+P6.S6  Log-Refactor       → F-010 (DB-Migration V13 + LogScreen-Rewrite + DTO-Update)
+  ↓
+P6.S7  Polish-Sweep       → F-005 Wasser-Undo, F-006 Wasser-Alarm-Helper, F-007 Add-Flow-Konsolidierung
+  ↓
+P6.S8  P5-Resume-Prep     → BattleTestPlan §1.3–§1.12 + §2.* gegen neues UI updaten + Trockenlauf
+```
 
-**Deliverables:**
-- `OnboardingScreen.kt`: Zahlen-Inputs für Alter/Größe/Gewicht → Material3 Slider mit Live-Anzeige.
-- `ProfileScreen.kt`: Neue Sektion „Tagesziele" mit per-Nutrient-Editor (kcal, Protein, Fett, Carbs, ggf. Mikronährstoffe falls bereits modelliert).
-- `User`-Entity / DB-Migration `V12__per_nutrient_goals.sql` falls neue Spalten nötig.
+Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuestion „Sprint Sx ok?".
 
-**Akzeptanz:** Slider funktional + Werte persistent; Profil-Goals override Default-Berechnung; Home-Ringe nutzen die individuellen Goals.
+### Sprint P6.S1 — Spec-Lock (DOC-ONLY)
 
-**REQ-IDs:** F-003, F-011; REQ-ONBOARD-001, REQ-PROFILE-*.
+**Deliverables (autonom):**
+- MOD `docs/ReqSpec.md`: 
+  - REQ-LOG-001..006 invertiert (Tagebuch → Event-Log mit Severity+Tags+Note+Timestamp).
+  - Neue REQ-PROFILE-NUTRIENT-GOALS-001 für per-Nutrient-Tagesziele.
+  - REQ-HOME-NUTRITION-PIN-001 für Pinned-Nutrients-Pattern.
+  - REQ-WATER-REMOVE-001 für Entfernen-Aktion.
+  - REQ-INTAKE-ADD-FLOW-001 für Pre-Selection-Mode in LebensmittelScreen.
+  - REQ-DESIGN-001 ersetzt Olive-Green-Lock durch Glas-Dark-Token-Lock.
+- MOD `docs/GUI.md` §2: Color-Tokens komplett auf Hm-Tokens umgeschrieben; Typography auf Manrope; Component-Idiome dokumentiert (GlassCard/SectionPill/GradientFab/AmbientBackdrop).
+- MOD `docs/UsabilityMap.md`: Home-Sektion neu (Pinned + Collapsed-Nutrients); Onboarding-Steps mit Slidern; Log-Sektion neu (Event-Log statt Tagebuch); Plan-Add-Sheet-Wording.
+- MOD `docs/Architecture.md` (Glossary): „Zutat" vs. „Lebensmittel" gelockt.
+- MOD `docs/TraceabilityMatrix.md`: neue REQ-IDs angelegt; alte Log-IDs als „superseded" markiert.
+- NEW `docs/HistamindDesignReference.md`: Spiegel des Memory-Notes für Repo-Persistence + Screenshot-Slots (User füllt später).
 
-### Sprint P6.S4 — Home-Nutrition-UI + Wasser-Fix + Listen-Vorbefüllung
+**Doc-Drift-Eval 00–09:** voll. Touched: 04 ReqSpec, GUI, UsabilityMap, 03 Architecture/Glossary, TraceabilityMatrix, NEW HistamindDesignReference. Untouched: Runbook (kein Bootstrap-Change), TestStrategy (Methodik bleibt).
 
-**Deliverables:**
-- `HomeScreen.kt`: Nutrition-Sektion umbauen — User wählt N primäre Nutrients (z.B. 4), Rest collapsed darunter mit kleinem Progress-Bar + Verlaufs-Sparkline (7 Tage). Settings dafür in Profil.
-- `WaterTracker.kt`: Entfernen-Aktion (Long-Press oder Swipe → Snackbar Undo). Helper-Text für Wasser-Alarm-Toggle.
-- `IngredientScreen.kt` + `RecipeScreen.kt`: Listen on-open mit DB-Items vorbefüllen (alphabetisch sortiert, Pagination ab N=50). Search-Bar bleibt obenauf.
-- `PlanScreen.kt` Add-Sheet: Wording „Rezept oder **Lebensmittel**" (statt „Zutat").
-- `IntakeAddFlow`: „Hinzufügen" navigiert direkt zum Lebensmittel-Screen statt eigenes Add-Sheet (siehe F-007).
+**Critical-Decisions to ask:** keine erwartet. Wenn Konflikte auftauchen → askQuestion mit Optionen.
 
-**Akzeptanz:** Manuelle Re-Verifikation der F-004 / F-005 / F-006 / F-007 / F-008 / F-009 — alle „open" → „fixed".
+**Akzeptanz:** alle 6 Doc-Diffs konsistent; jedes Finding F-003..F-012 hat min. 1 REQ-Anker oder Polish-Backlog-Entry.
 
-**REQ-IDs:** F-004, F-005, F-006, F-007, F-008, F-009; REQ-HOME-001..005, REQ-WATER-*, REQ-INGR-*, REQ-PLAN-*, REQ-INTAKE-*.
+### Sprint P6.S2 — Theme-Foundation
 
-### Sprint P6.S5 — Log-Konzept-Inversion (Event-Log)
+**Deliverables (autonom):**
+- MOD `android_app/app/src/main/kotlin/de/healthforge/presentation/theme/Color.kt`: 
+  - Komplett ersetzt: `HmTokens`-äquivalente Compose-Vals (background, glassFill, glassBorder, ambientViolet, ambientCyan, fgPrimary/Secondary/Tertiary, statusOverUl, statusRelax, statusGood, accentGradient[]).
+  - Light-Variante als reduzierte Clean-Card-Palette (gleicher Akzent, ohne Glass).
+- MOD `android_app/app/src/main/kotlin/de/healthforge/presentation/theme/Theme.kt`:
+  - `HealthForgeTheme(...)` updated mit neuen ColorSchemes (dark = Glas-Pfad, light = Clean-Pfad).
+  - `LocalSemanticColors` erweitert (statusOverUl/Relax/Good).
+  - Neuer `LocalHmTokens` CompositionLocal für Gradient/GlassFill-Listen.
+- NEW `android_app/app/src/main/kotlin/de/healthforge/presentation/theme/Typography.kt` (falls noch nicht vorhanden): Manrope via `androidx.compose.ui.text.googlefonts`, alle Text-Styles per Histamind-Werte.
+- MOD `android_app/app/build.gradle.kts`: `androidx.compose.ui:ui-text-google-fonts` Dependency.
+- MOD `android_app/app/src/main/res/values/font_certs.xml` + `res/font/`-XML für GoogleFonts-Provider falls nötig.
 
-**Deliverables:**
-- `LogScreen.kt` Re-Architecture: Event-Log mit Severity + Symptom-Tag + Notiz + Timestamp. Mood/Schlaf entweder entfernt oder als optionales Sub-Tab.
-- DB-Migration `V13__log_event_schema.sql`: ggf. neue Tabelle `log_events` oder Schema-Erweiterung von `log_entries` (forward-only, Daten-Migration definieren falls bestehende Test-Daten).
-- Server-DTOs angepasst.
-- Insight-Engine (`InsightService`) auf Event-Häufigkeiten umstellen falls existiert.
+**Akzeptanz:** App startet, Login-Screen + Home zeigen sofort Glas-Dark-Look (alte Layouts noch, aber Farben+Font sind neu). Kein Crash. `./gradlew :app:assembleDebug` grün.
 
-**Akzeptanz:** Event-Eintrag in <10 Sek erfassbar; Histogramm-/Trend-Ansicht für die letzten 14 Tage.
+**Critical-Decisions to ask:** Visual-Sign-Off nach Slice (Screenshot/User-Feedback).
 
-**REQ-IDs:** F-010; REQ-LOG-001..006 (invertiert), REQ-INSIGHT-001..003.
+### Sprint P6.S3 — Component-Library
 
-### Sprint P6.S6 — P5-Resume-Vorbereitung
+**Deliverables (autonom):**
+- NEW `presentation/common/components/`:
+  - `GlassCard.kt` — Wraps `Box` mit Linear-Gradient white@12→0 + 1dp Border @ 10% white + 40dp Drop-Shadow.
+  - `SectionPill.kt` — 3×14dp Gradient-Strip + 8dp Gap + UPPERCASE Label.
+  - `GradientFab.kt` — Standard FAB mit Violet→Cyan + Violet-Glow-Shadow.
+  - `GradientButton.kt` — Primary-Button mit Gradient-Background.
+  - `AmbientBackdrop.kt` — Canvas mit 3 driftenden Blobs (`InfiniteTransition` + `Brush.radialGradient`).
+  - `GradientText.kt` — `Brush.linearGradient`-Shader-Mask für Headings.
+  - `SegmentedTabs.kt` — Custom Two-Tab-Toggle (kein Material TabRow).
+  - `SeverityBar.kt` — 4×56dp vertikaler Balken in Severity-Farbe (für Log).
+- NEW `presentation/common/components/Preview.kt` — Compose-Preview-Sammlung aller Components.
 
-**Deliverables:**
-- BattleTestPlan §1.3–§1.12 + §2.* aktualisieren wo P6-Changes die Pass-Kriterien verschieben.
-- Trockenlauf 1.3 + 2 weitere kritische Cases.
-- Run 2 in BattleTestPlan Run-Log eintragen, dann zurück in **P5.S1 Resume**.
+**Akzeptanz:** Alle Components in Preview gerendert; Lint grün; KEINE Verwendung in Screens (noch).
 
-**Akzeptanz:** BattleTestPlan reflektiert P6-State; R2 startet ohne Doc-Drift.
+**Critical-Decisions to ask:** keine erwartet.
 
-**REQ-IDs:** Cross-cuts P5.
+### Sprint P6.S4 — Screen-Wave-1 (Home + Onboarding)
+
+**Deliverables (autonom):**
+- MOD `presentation/home/HomeScreen.kt`: AmbientBackdrop, Header mit GradientText-Greeting, SectionPills, GlassCards für Nutrition/Wasser/Heute-geplant, Pinned-Nutrients-Card mit 4-Default-Pins + Collapsed-Rest mit Mini-Progress + 7-Tage-Sparkline (`fl_chart` Compose-Pendant: AndroidView mit MPAndroidChart oder eigene Canvas).
+- NEW `presentation/home/PinnedNutrientsManager.kt` — BottomSheet zum Pin-Verwalten.
+- MOD `presentation/onboarding/OnboardingScreen.kt`: 
+  - Step-Inputs für Alter/Größe/Gewicht → `Slider` mit Live-Value-Label (F-003).
+  - Step-Indikator als 14 Punkte (active = gradient-filled, inactive = glassBorder).
+  - Forward-only NavBar (Weiter rechts, Zurück nur sichtbar bei step>0 ohne Skip).
+- NEW DataStore key `pinned_nutrients` (List<String>, default `["kcal","protein","carbs","fat"]`).
+
+**Akzeptanz:** Home + Onboarding visuell auf Histamind-Niveau; Slider funktional; Pin-Mgmt-Sheet öffnet.
+
+**Critical-Decisions to ask:** Wenn Sparkline-Lib nötig (MPAndroidChart vs. native Canvas) → askQuestion.
+
+### Sprint P6.S5 — Screen-Wave-2 (Plan + Essen + Profil)
+
+**Deliverables (autonom):**
+- MOD `presentation/plan/PlanScreen.kt`: SectionPills, GlassCards für Slots, Add-Sheet-Wording „Rezept oder Lebensmittel" (F-008), Day-Strip mit Gradient-Pill für „heute".
+- MOD `presentation/essen/EssenScreen.kt` + `presentation/lebensmittel/LebensmittelScreen.kt`: 
+  - Listen lazy-load Page 50 alphabetisch beim Open (F-009).
+  - Visual auf Glas-Cards.
+  - Pre-Selection-Mode für Add-Flow (F-007): wenn `navArg.preselect == true`, FAB wird zu „Auswählen", Tap auf Item → Result-Callback an aufrufenden Screen.
+- MOD `presentation/profile/ProfileScreen.kt`: 
+  - Glas-Look.
+  - Neue Sektion „Tagesziele" mit per-Nutrient-Sliders/Input-Felder (F-011).
+  - Verbindet sich mit DB-Migration V12 (siehe S6).
+
+**Akzeptanz:** Alle 3 Bereiche visuell durchgezogen; F-007/008/009/011 verifizierbar.
+
+**Critical-Decisions to ask:** keine erwartet.
+
+### Sprint P6.S6 — Log-Refactor (F-010, schemenrelevant)
+
+**Deliverables (autonom):**
+- NEW Flyway-Migration `server/src/main/resources/db/migration/V13__log_event_schema.sql`:
+  - Existierende `log_entries`-Tabelle (falls Mood/Sleep-Spalten) → Drop Mood/Sleep-Spalten.
+  - Neue Spalten: `severity SMALLINT NOT NULL DEFAULT 3`, `symptom_tags TEXT[] NOT NULL DEFAULT '{}'`, `occurred_at TIMESTAMPTZ NOT NULL`.
+  - Daten-Migration: existierende Einträge → severity=3, tags='{legacy}'.
+- NEW Flyway-Migration `V12__per_nutrient_goals.sql`:
+  - `ALTER TABLE users ADD COLUMN daily_nutrient_goals JSONB NOT NULL DEFAULT '{}'::jsonb;`
+  - `ALTER TABLE users ADD COLUMN pinned_nutrients TEXT[] NOT NULL DEFAULT '{kcal,protein,carbs,fat}';`
+- MOD Server-DTOs + Repository für Log + Profile.
+- MOD `presentation/log/LogScreen.kt` komplett neu: Event-Liste mit SeverityBar, QuickEntrySheet (Severity-Picker + Symptom-Tag-Chips + Notiz + Time), SegmentedTabs Entries+Insights (Insights = einfaches Histogramm 14-Tage).
+- MOD Android `LogRepository.kt` + ViewModels.
+
+**Akzeptanz:** Server-Restart läuft V12+V13 sauber; LogScreen funktional; alte Mood/Sleep-UI raus.
+
+**Critical-Decisions to ask:** 
+1. Falls produktive Mood/Sleep-Daten in einer Test-DB existieren → askQuestion „Daten preserven (separate `log_legacy_mood_sleep` Tabelle) oder droppen?". In Dev-State sind keine produktiven Daten → wahrscheinlich autonome Drop-Entscheidung.
+
+### Sprint P6.S7 — Polish-Sweep
+
+**Deliverables (autonom):**
+- F-005: `WaterTracker.kt` Long-Press auf letztes Quick-Add → Undo-Snackbar 5s.
+- F-006: Helper-Text unter Wasser-Alarm-Toggle: „Erinnerung alle 2h zwischen 08:00–22:00". 
+- F-007 Final-Check: Pre-Selection-Mode in allen drei Hinzufügen-Pfaden (Home, Plan, Essen) konsistent.
+- Globaler Component-Audit: jedes Material-Default-Widget gegen GlassCard-Idiom geprüft.
+
+**Akzeptanz:** alle 10 Findings F-003..F-012 sind „fixed" in BattleTestPlan §6.
+
+**Critical-Decisions to ask:** keine erwartet.
+
+### Sprint P6.S8 — P5-Resume-Prep
+
+**Deliverables (autonom):**
+- MOD `docs/BattleTestPlan.md` §1.3–§1.12 + §2.*: Pass-Kriterien an neues UI angepasst (z.B. „Slider-Position 28" statt „Eingabefeld '28'").
+- MOD §6 Failures-Log: F-003..F-012 alle als „fixed" + Fix-Commit verlinkt.
+- Trockenlauf Case 1.3 + 1.5 + 1.10 (kritische Cases auf neuem UI).
+- Update Run-Log: R1 abgeschlossen + Übergang zu R2.
+
+**Akzeptanz:** BattleTestPlan ready für R2 (Cases 1.3–1.12 + §2–§5).
+
+**Critical-Decisions to ask:** Sign-Off „P6 abgeschlossen, P5 resumen?".
+
+### 4b.2 Doc-Drift-Eval (Phase-Level)
+
+**Touched Docs (über alle P6-Sprints kumuliert):**
+- `docs/ReqSpec.md` (P6.S1)
+- `docs/GUI.md` (P6.S1)
+- `docs/UsabilityMap.md` (P6.S1)
+- `docs/Architecture.md` (P6.S1 Glossary)
+- `docs/TraceabilityMatrix.md` (P6.S1)
+- `docs/HistamindDesignReference.md` NEW (P6.S1)
+- `docs/BattleTestPlan.md` (P6.S8)
+- `docs/SprintPlan.md` (dieser Block + Slice-Updates pro Sprint)
+
+**Untouched (begründet, Phase-Level):**
+- `docs/Runbook.md` — kein Bootstrap-/Deployment-Change.
+- `docs/TestStrategy.md` — Methodik bleibt (REQ+Usability-Hybrid).
 
 ---
 
