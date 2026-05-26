@@ -51,6 +51,8 @@ data class SupplementEditState(
     val saving: Boolean = false,
     val saved: Boolean = false,
     val error: String? = null,
+    val suggesting: Boolean = false,
+    val suggestMessage: String? = null,
 )
 
 @HiltViewModel
@@ -171,4 +173,51 @@ class SupplementEditViewModel @Inject constructor(
             enabled = true,
             createdAt = 0L,
         )
+
+    /** REQ-SUPP-004 — propose the current supplement entry to the global catalog (Admin-Review). */
+    fun suggestPublic() {
+        val s = _state.value
+        val dose = s.defaultDose.replace(',', '.').toDoubleOrNull()
+        if (s.name.isBlank()) {
+            _state.value = s.copy(error = "Name darf nicht leer sein"); return
+        }
+        if (dose == null || dose <= 0.0) {
+            _state.value = s.copy(error = "Dosis muss > 0 sein"); return
+        }
+        _state.value = s.copy(suggesting = true, suggestMessage = null, error = null)
+        viewModelScope.launch {
+            val local = SupplementEntity(
+                id = 0L,
+                nameDe = s.name.trim(),
+                brand = s.brand.trim().ifEmpty { null },
+                unitLabel = s.unitLabel.trim().ifEmpty { "Stück" },
+                defaultDose = dose,
+                kcalPerDose = s.kcal.replace(',', '.').toDoubleOrNull(),
+                proteinPerDose = s.protein.replace(',', '.').toDoubleOrNull(),
+                carbsPerDose = s.carbs.replace(',', '.').toDoubleOrNull(),
+                fatPerDose = s.fat.replace(',', '.').toDoubleOrNull(),
+                notes = s.notes.trim().ifEmpty { null },
+                createdAt = 0L,
+                updatedAt = 0L,
+            )
+            repo.suggestPublic(local).fold(
+                onSuccess = {
+                    _state.value = _state.value.copy(
+                        suggesting = false,
+                        suggestMessage = "Vorschlag eingereicht. Ein Admin prüft den Eintrag.",
+                    )
+                },
+                onFailure = { e ->
+                    _state.value = _state.value.copy(
+                        suggesting = false,
+                        suggestMessage = "Vorschlag fehlgeschlagen: ${e.message ?: "Unbekannter Fehler"}",
+                    )
+                },
+            )
+        }
+    }
+
+    fun clearSuggestMessage() {
+        _state.value = _state.value.copy(suggestMessage = null)
+    }
 }

@@ -10,6 +10,7 @@ import java.util.UUID
 interface IngredientRepository : JpaRepository<IngredientEntity, UUID> {
     fun findByBarcode(barcode: String): Optional<IngredientEntity>
     fun findBySourceAndSourceId(source: IngredientSource, sourceId: String): Optional<IngredientEntity>
+    fun findAllByStatusOrderByCreatedAtAsc(status: String): List<IngredientEntity>
 }
 
 /**
@@ -26,6 +27,7 @@ class IngredientSearchRepository(
         limit: Int = 20,
         excludeAllergens: List<String> = emptyList(),
         excludeFodmap: List<String> = emptyList(),
+        viewerId: UUID? = null,
     ): List<IngredientEntity> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
@@ -52,6 +54,7 @@ class IngredientSearchRepository(
                 hf_immutable_unaccent(lower(name_de)) ILIKE hf_immutable_unaccent(lower(:q))
                 OR hf_immutable_unaccent(lower(coalesce(brand,''))) ILIKE hf_immutable_unaccent(lower(:q))
             )
+            AND (status = 'APPROVED' OR (status = 'PENDING' AND submitted_by = :viewer))
             $filterClauses
             ORDER BY
                 CASE WHEN hf_immutable_unaccent(lower(name_de)) ILIKE hf_immutable_unaccent(lower(:qPrefix)) THEN 0 ELSE 1 END,
@@ -64,6 +67,7 @@ class IngredientSearchRepository(
             .setParameter("q", "%$trimmed%")
             .setParameter("qPrefix", "$trimmed%")
             .setParameter("lim", safeLimit)
+            .setParameter("viewer", viewerId)
             .resultList as List<IngredientEntity>
     }
 

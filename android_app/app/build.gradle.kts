@@ -26,6 +26,7 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080/\"")
+            buildConfigField("String", "MEDIA_BASE_URL", "\"http://10.0.2.2:9000/\"")
         }
         release {
             isMinifyEnabled = true
@@ -35,6 +36,7 @@ android {
                 "proguard-rules.pro",
             )
             buildConfigField("String", "API_BASE_URL", "\"https://api.healthforge.endgear.de/\"")
+            buildConfigField("String", "MEDIA_BASE_URL", "\"https://cdn.healthforge.endgear.de/\"")
         }
     }
 
@@ -110,6 +112,7 @@ dependencies {
 
     // Image loading
     implementation(libs.coil.compose)
+    implementation(libs.exifinterface)
 
     // WorkManager
     implementation(libs.work.runtime.ktx)

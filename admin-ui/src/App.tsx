@@ -1,8 +1,16 @@
-import { AppBar, Box, Button, Container, Stack, Toolbar, Typography } from '@mui/material';
-import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import StatisticsPage from './pages/StatisticsPage';
+import AuditLogPage from './pages/AuditLogPage';
 import InvitesPage from './pages/InvitesPage';
-import { tokens, logout } from './api/client';
+import RecipeReportsPage from './pages/RecipeReportsPage';
+import SupplementsQueuePage from './pages/SupplementsQueuePage';
+import IngredientQueuePage from './pages/IngredientQueuePage';
+import FieldPrPage from './pages/FieldPrPage';
+import UsersPage from './pages/UsersPage';
+import Layout from './components/Layout';
+import { tokens } from './api/client';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -10,48 +18,6 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   return <>{children}</>;
-}
-
-function DashboardPlaceholder() {
-  return (
-    <Container sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>HealthForge Admin</Typography>
-      <Typography>
-        Willkommen. Nutze die Navigation oben, um Einladungen zu verwalten.
-        Weitere Module (Zutaten, Jobs, Rezepte, Reports) folgen in den nächsten Sprints.
-      </Typography>
-    </Container>
-  );
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const onLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="sticky" color="primary">
-        <Toolbar>
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/"
-            sx={{ color: 'inherit', textDecoration: 'none', flexGrow: 1 }}
-          >
-            HealthForge Admin
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button component={Link} to="/" color="inherit">Übersicht</Button>
-            <Button component={Link} to="/invites" color="inherit">Einladungen</Button>
-            <Button onClick={onLogout} color="inherit">Abmelden</Button>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-      <Box component="main" sx={{ flexGrow: 1 }}>{children}</Box>
-    </Box>
-  );
 }
 
 export function App() {
@@ -62,13 +28,20 @@ export function App() {
         path="/*"
         element={
           <RequireAuth>
-            <Shell>
+            <Layout>
               <Routes>
-                <Route path="/" element={<DashboardPlaceholder />} />
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/statistics" element={<StatisticsPage />} />
+                <Route path="/audit" element={<AuditLogPage />} />
                 <Route path="/invites" element={<InvitesPage />} />
-                <Route path="*" element={<DashboardPlaceholder />} />
+                <Route path="/reports" element={<RecipeReportsPage />} />
+                <Route path="/supplements" element={<SupplementsQueuePage />} />
+                <Route path="/ingredients" element={<IngredientQueuePage />} />
+                <Route path="/field-prs" element={<FieldPrPage />} />
+                <Route path="/users" element={<UsersPage />} />
+                <Route path="*" element={<DashboardPage />} />
               </Routes>
-            </Shell>
+            </Layout>
           </RequireAuth>
         }
       />

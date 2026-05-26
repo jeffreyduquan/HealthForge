@@ -26,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,6 +61,15 @@ fun SupplementEditScreen(
     val s by vm.state.collectAsStateWithLifecycle()
     var editingReminder by remember { mutableStateOf<SupplementReminderEntity?>(null) }
     var requestNotifPerm by remember { mutableStateOf(false) }
+    var confirmSuggest by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(s.suggestMessage) {
+        s.suggestMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.clearSuggestMessage()
+        }
+    }
 
     RequestNotificationPermissionEffect(trigger = requestNotifPerm) { granted ->
         requestNotifPerm = false
@@ -79,6 +91,7 @@ fun SupplementEditScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -142,6 +155,17 @@ fun SupplementEditScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(if (s.saving) "Speichern…" else "Speichern") }
 
+            OutlinedButton(
+                onClick = { confirmSuggest = true },
+                enabled = !s.suggesting,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    if (s.suggesting) "Wird gesendet…"
+                    else "Für globalen Katalog vorschlagen",
+                )
+            }
+
             if (s.id > 0) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -180,6 +204,27 @@ fun SupplementEditScreen(
             onSave = {
                 vm.saveReminder(it)
                 editingReminder = null
+            },
+        )
+    }
+
+    if (confirmSuggest) {
+        AlertDialog(
+            onDismissRequest = { confirmSuggest = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmSuggest = false
+                    vm.suggestPublic()
+                }) { Text("Senden") }
+            },
+            dismissButton = { TextButton(onClick = { confirmSuggest = false }) { Text("Abbrechen") } },
+            title = { Text("Vorschlag einreichen?") },
+            text = {
+                Text(
+                    "Dieses Supplement wird zur Aufnahme in den globalen Katalog vorgeschlagen. " +
+                        "Ein Administrator prüft den Eintrag manuell. " +
+                        "Deine User-ID wird mit dem Vorschlag verknüpft.",
+                )
             },
         )
     }

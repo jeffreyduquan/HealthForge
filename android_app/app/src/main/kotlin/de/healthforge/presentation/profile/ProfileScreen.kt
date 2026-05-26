@@ -31,6 +31,10 @@ import de.healthforge.presentation.theme.ThemePreference
 @Composable
 fun ProfileScreen(
     onRestartOnboarding: () -> Unit,
+    onOpenGroups: () -> Unit = {},
+    onOpenSymptomManager: () -> Unit = {},
+    onOpenExport: () -> Unit = {},
+    onOpenInsights: () -> Unit = {},
     vm: ProfileViewModel = hiltViewModel(),
 ) {
     val full by vm.profile.collectAsStateWithLifecycle()
@@ -92,6 +96,22 @@ fun ProfileScreen(
                 steps = 8, // 500 .. 5000 in 500ml-Schritten
             )
             Spacer(Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = onOpenGroups,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Meine Gruppen") }
+            OutlinedButton(
+                onClick = onOpenSymptomManager,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Symptome verwalten") }
+            OutlinedButton(
+                onClick = onOpenExport,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Daten exportieren") }
+            OutlinedButton(
+                onClick = onOpenInsights,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Erkenntnisse") }
             OutlinedButton(
                 onClick = {
                     vm.restartOnboarding()

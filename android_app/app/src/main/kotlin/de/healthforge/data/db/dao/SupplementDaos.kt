@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.Flow
 interface SupplementDao {
 
     @Query("SELECT * FROM supplement ORDER BY nameDe COLLATE NOCASE ASC")
+    suspend fun listAll(): List<SupplementEntity>
+
+    @Query("SELECT * FROM supplement ORDER BY nameDe COLLATE NOCASE ASC")
     fun observeAll(): Flow<List<SupplementEntity>>
 
     @Query("SELECT * FROM supplement WHERE id = :id")
@@ -43,6 +46,9 @@ interface SupplementReminderDao {
 
     @Query("SELECT * FROM supplement_reminder WHERE enabled = 1")
     suspend fun listEnabled(): List<SupplementReminderEntity>
+
+    @Query("SELECT * FROM supplement_reminder ORDER BY createdAt DESC")
+    suspend fun listAll(): List<SupplementReminderEntity>
 
     @Query("SELECT * FROM supplement_reminder WHERE id = :id")
     suspend fun byId(id: Long): SupplementReminderEntity?

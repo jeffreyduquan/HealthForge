@@ -41,6 +41,9 @@ interface IntakeEntryDao {
 
     @Query("DELETE FROM intake_entry WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("SELECT * FROM intake_entry ORDER BY loggedAt DESC")
+    suspend fun listAll(): List<IntakeEntryEntity>
 }
 
 @Dao
@@ -57,4 +60,7 @@ interface WaterIntakeDao {
 
     @Query("DELETE FROM water_intake WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("SELECT * FROM water_intake ORDER BY loggedAt DESC")
+    suspend fun listAll(): List<WaterIntakeEntity>
 }

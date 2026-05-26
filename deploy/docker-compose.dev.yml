@@ -9,7 +9,9 @@ services:
       POSTGRES_PASSWORD: changeme-pg-pass
       TZ: UTC
     ports:
-      - "5432:5432"
+      # Dev-Maschine hat ggf. anderen Postgres auf 5432 (marbletrace etc.);
+      # 5434 = HealthForge-Dev. Server-application.yml folgt diesem Mapping.
+      - "5434:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:

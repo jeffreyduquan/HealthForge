@@ -42,7 +42,7 @@ docker compose -f docker-compose.dev.yml up -d
 Verify:
 - API health: http://localhost:8080/actuator/health
 - MinIO console: http://localhost:9001 (admin / changeme-minio-pass)
-- PostgreSQL: localhost:5432 (healthforge / changeme-pg-pass)
+- PostgreSQL: localhost:5434 (healthforge / changeme-pg-pass)
 
 ### Run Server (local, outside Docker)
 ```powershell

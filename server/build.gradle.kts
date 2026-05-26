@@ -60,6 +60,9 @@ dependencies {
     // Image processing
     implementation("net.coobird:thumbnailator:0.4.20")
 
+    // PDF export (REQ-EXPORT-001/004) — OpenPDF (LGPL 2.1) statt iText 7 (AGPL).
+    implementation("com.github.librepdf:openpdf:1.3.43")
+
     // Monitoring
     implementation("io.micrometer:micrometer-registry-prometheus")
 

@@ -4,6 +4,10 @@ import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientApi
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.data.network.IngredientSuggestRequest
+import de.healthforge.data.network.IngredientSuggestResponse
+import de.healthforge.data.network.FieldPrRequest
+import de.healthforge.data.network.FieldPrResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,4 +37,17 @@ class IngredientRepository @Inject constructor(
     suspend fun byId(id: String): Result<IngredientDto> = runCatching { api.byId(id) }
 
     suspend fun byBarcode(barcode: String): Result<IngredientDto> = runCatching { api.byBarcode(barcode) }
+
+    /** REQ-INGR-USER-001 — submit a new ingredient (PENDING until admin review). */
+    suspend fun suggest(body: IngredientSuggestRequest): Result<IngredientSuggestResponse> = runCatching {
+        api.suggest(body)
+    }
+
+    /** REQ-FIELDPR-001 — propose a single-field correction on an existing ingredient. */
+    suspend fun proposeFieldChange(
+        ingredientId: String,
+        body: FieldPrRequest,
+    ): Result<FieldPrResponse> = runCatching {
+        api.proposeFieldChange(ingredientId, body)
+    }
 }

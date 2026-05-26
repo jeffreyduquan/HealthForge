@@ -99,6 +99,7 @@ app/
 ├── domain/             ← UseCases (suspend functions), pure Kotlin
 │   ├── model/          ← domain entities (no Android deps)
 │   ├── usecase/
+│   ├── insights/       ← Bayesian Lift-Korrelations-Rechner, **local-only** (kein Network-Import, REQ-INSIGHT-004) (P4.S3)
 │   └── repository/     ← Repository interfaces
 ├── data/               ← Repository implementations
 │   ├── local/          ← Room DAOs, entities, SQLCipher
@@ -192,15 +193,16 @@ server/
 │   ├── HealthForgeApplication.kt
 │   ├── auth/           ← JWT, Login, Refresh, Register, Invite-Validation
 │   ├── user/           ← Profile, Devices, Preferences (server-side mirror)
-│   ├── ingredient/     ← CRUD, Search, ETL-trigger, Field-PR-Approve
+│   ├── ingredient/     ← CRUD, Search, ETL-trigger, User-Suggest (PENDING), Field-PR (Whitelist-11) + Admin-Approve (P4.S1)
 │   ├── recipe/         ← CRUD, Browse, Like, Report, Comment-FREE-TEXT-OUT
-│   ├── supplement/     ← Suggestions queue + global catalog
+│   ├── autoplan/       ← Beam-Search-Mahlzeitenplaner, stateless `POST /v1/plans/generate` (P4.S2)
+│   ├── supplement/     ← Public catalog + Peer-Review-Queue (P3.S4 Slice 2)
 │   ├── group/          ← Privat/Öffentlich, Members, Invites, Feed
-│   ├── community/      ← Community Ratings (RECOMMEND/NOT_RECOMMEND)
-│   ├── admin/          ← Endpoints für Admin-Web-UI (Mod + Approval)
+│   ├── community/      ← Community Ratings (RECOMMEND/NOT_RECOMMEND) + Recipe-Reports (P3.S3)
+│   ├── admin/          ← Endpoints für Admin-Web-UI (Mod + Approval); cross-cutting Stats/Audit: `AdminStatsController` (/v1/stats/{dashboard,statistics}) + `AdminAuditController` (/v1/audit) (P4.S4)
 │   ├── etl/            ← OFF Importer, Scheduled Jobs (@Scheduled / Quartz)
 │   ├── media/          ← MinIO Presigned URLs + image-resize pipeline
-│   ├── export/         ← PDF/JSON DSGVO Export (P3)
+│   ├── export/         ← PDF/JSON DSGVO Export (P3.S4 Slice 3 — Server-Anteil: Account + eigene Rezepte + Supplement-Vorschläge; OpenPDF 1.3.43 LGPL)
 │   │── ~~notification/~~   ← ENTFERNT (FCM gestrichen)
 │   ├── ratelimit/      ← Bucket4j Filter
 │   ├── config/         ← Beans, Properties
@@ -238,23 +240,29 @@ server/
   proposed_by FK, status, reviewed_by FK NULL, reviewed_at)
 - `ingredient_user_suggestions` (id UUID PK, name_de, per_100g JSONB, proposed_by FK, status)
 
-**Recipes:**
+**Recipes (LOCKED 2026-05-26 — P2.S1 Schema, aligned with REQ-RECIPE-001..009):**
 
-- `recipes` (id UUID PK, author_id FK, title, description, image_key NULL, servings,
-  prep_minutes, cook_minutes, status, visibility ENUM[PRIVATE/PUBLIC],
-  is_official BOOL, created_at, updated_at)
-- `recipe_ingredients` (recipe_id FK, ingredient_id FK, quantity, unit, position)
-- `recipe_steps` (recipe_id FK, position, text)
-- `recipe_likes` (recipe_id FK, user_id FK, PRIMARY KEY composite)
-- `recipe_reports` (id UUID PK, recipe_id FK, reporter_id FK, reason, status)
-- `recipe_ratings_community` (recipe_id FK, user_id FK, value ENUM[RECOMMEND/NOT_RECOMMEND],
-  PRIMARY KEY composite)
+- `recipes` (id UUID PK, author_id FK→users, title, description NULL, image_key NULL,
+  servings INT DEFAULT 1, prep_minutes INT, cook_minutes INT NULL (optional, nicht von ReqSpec verlangt),
+  slot_tags TEXT[] NOT NULL CHECK (cardinality(slot_tags) >= 1) — Werte aus {BREAKFAST,LUNCH,DINNER,SNACK},
+  status ENUM[PUBLISHED/REMOVED] DEFAULT 'PUBLISHED' (Soft-Delete für REQ-RECIPE-009 Snapshot-Resilienz),
+  visibility ENUM[PUBLIC/PRIVATE/GROUP] NOT NULL (REQ-RECIPE-003),
+  group_id UUID NULL FK→groups (only when visibility=GROUP; CHECK constraint),
+  is_official BOOL DEFAULT FALSE (für Admin-curated Recipes, in P2 ungenutzt aber bereitgehalten),
+  created_at, updated_at)
+  - Index: `gin(to_tsvector('german', hf_immutable_unaccent(title || ' ' || coalesce(description,''))))` für FTS
+  - Index: `(status, visibility, created_at DESC)` für Browse
+  - Index: `(author_id)` für "Meine Rezepte"
+- `recipe_ingredients` (recipe_id FK, ingredient_id FK→ingredients, quantity NUMERIC, unit TEXT, position INT, optional BOOL DEFAULT FALSE, PK (recipe_id, position))
+- `recipe_steps` (recipe_id FK, position INT, text TEXT, image_key TEXT NULL, PK (recipe_id, position))
+- `recipe_likes` (recipe_id FK, user_id FK, created_at, PK (recipe_id, user_id)) — REQ-RECIPE-004 Saved-Liste
+- `recipe_reports` (id UUID PK, recipe_id FK, reporter_id FK, reason TEXT, status ENUM[OPEN/RESOLVED] DEFAULT 'OPEN', created_at) — Schema in P2, Endpoints P3
+- `recipe_ratings_community` (recipe_id FK, user_id FK, value ENUM[RECOMMEND/NOT_RECOMMEND], created_at, PK (recipe_id, user_id)) — REQ-RATING-002/005
 
 **Supplements:**
 
-- `supplements_catalog` (id UUID PK, name_de, brand, form, default_dose, nutrients JSONB,
-  status, created_by FK NULL)
-- `supplement_suggestions` (id UUID PK, name_de, brand, proposer_id FK, status, payload JSONB)
+- `supplements_public` (id UUID PK, name_de, brand, unit_label, default_dose, kcal/protein/carbs/fat_per_dose, micronutrients_json JSONB, notes, created_by FK NULL, created_at) — REQ-SUPP-004 globaler Lese-Katalog (P3.S4 Slice 2)
+- `supplement_suggestions` (id UUID PK, proposer_id FK, name_de, brand, unit_label, default_dose, Nährwerte, status ENUM[PENDING/APPROVED/REJECTED] DEFAULT 'PENDING', reviewer_id FK NULL, reviewed_at, review_note, public_id FK NULL, created_at) — Admin-Peer-Review-Queue (P3.S4 Slice 2)
 
 **Community Ratings (Lebensmittel):**
 
@@ -280,9 +288,16 @@ server/
 
 ### 4.3 Flyway Migrations
 
-- Pro Phase eigene Migration-Files: `V1__p1_init.sql`, `V2__p2_recipes.sql`,
-  `V3__p3_community.sql`, `V4__p4_power.sql`.
-- Nur **forward-only**, never editieren.
+Die ursprüngliche Phasen-Numerierung (V1=P1, V2=P2, ...) wurde durch das natürliche Sprint-Wachstum überholt — Flyway ist forward-only-strict-monoton, also gilt jetzt **sequentiell-pro-Sprint**:
+
+- `V1__bootstrap.sql` — Postgres-Extensions (P1.S1)
+- `V2__auth_schema.sql` — users/refresh_tokens/invites (P1.S2)
+- `V3__ingredient_schema.sql` — ingredients + ETL-Tabellen + `hf_immutable_unaccent`-Wrapper (P1.S4)
+- `V4__dev_seed_ingredients.sql` — Dev-Seed (P1.S4)
+- `V5__ingredient_trgm_indexes.sql` — pg_trgm-Indizes für Fuzzy-Search (P1.S5)
+- `V6__recipes.sql` — Rezepte + Likes + Reports + Community-Ratings (P2.S1, **next**)
+- Weitere Sprints: V7+ entsprechend (siehe SprintPlan).
+- Nur **forward-only**, never editieren bestehende Files.
 - Repeatable: `R__seed_official_supplements.sql` für statische Refdaten.
 
 ### 4.4 MinIO Bucket-Struktur

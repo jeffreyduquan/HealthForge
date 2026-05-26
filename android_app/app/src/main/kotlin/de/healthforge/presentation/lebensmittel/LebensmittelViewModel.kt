@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.data.network.IngredientSuggestRequest
+import de.healthforge.data.network.FieldPrRequest
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.ProfileRepository
 import kotlinx.coroutines.FlowPreview
@@ -29,6 +31,8 @@ data class LebensmittelState(
     val applyProfileFilters: Boolean = true,
     val excludedAllergens: Set<AllergenType> = emptySet(),
     val excludedFodmap: Set<FodmapType> = emptySet(),
+    val submitting: Boolean = false,
+    val toast: String? = null,
 )
 
 @OptIn(FlowPreview::class)
@@ -111,5 +115,50 @@ class LebensmittelViewModel @Inject constructor(
                     )
                 }
         }
+    }
+
+    /** REQ-INGR-USER-001 — submit a new ingredient as PENDING. */
+    fun submitSuggestion(input: IngredientSuggestRequest) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(submitting = true)
+            ingredients.suggest(input)
+                .onSuccess {
+                    _state.value = _state.value.copy(
+                        submitting = false,
+                        toast = "Vorschlag eingereicht — wartet auf Freigabe",
+                    )
+                    runSearch(_state.value.query)
+                }
+                .onFailure {
+                    _state.value = _state.value.copy(
+                        submitting = false,
+                        toast = "Fehler: ${it.message ?: "konnte nicht eingereicht werden"}",
+                    )
+                }
+        }
+    }
+
+    /** REQ-FIELDPR-001 — propose a single-field correction on an existing ingredient. */
+    fun submitFieldPr(ingredientId: String, body: FieldPrRequest) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(submitting = true)
+            ingredients.proposeFieldChange(ingredientId, body)
+                .onSuccess {
+                    _state.value = _state.value.copy(
+                        submitting = false,
+                        toast = "Korrektur eingereicht — wartet auf Freigabe",
+                    )
+                }
+                .onFailure {
+                    _state.value = _state.value.copy(
+                        submitting = false,
+                        toast = "Fehler: ${it.message ?: "konnte nicht eingereicht werden"}",
+                    )
+                }
+        }
+    }
+
+    fun clearToast() {
+        _state.value = _state.value.copy(toast = null)
     }
 }

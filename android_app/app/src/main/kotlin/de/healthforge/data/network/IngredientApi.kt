@@ -1,7 +1,9 @@
 package de.healthforge.data.network
 
 import com.squareup.moshi.JsonClass
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -40,4 +42,44 @@ interface IngredientApi {
 
     @GET("v1/ingredients/by-barcode/{barcode}")
     suspend fun byBarcode(@Path("barcode") barcode: String): IngredientDto
+
+    @POST("v1/ingredients/suggest")
+    suspend fun suggest(@Body body: IngredientSuggestRequest): IngredientSuggestResponse
+
+    @POST("v1/ingredients/{id}/field-pr")
+    suspend fun proposeFieldChange(
+        @Path("id") ingredientId: String,
+        @Body body: FieldPrRequest,
+    ): FieldPrResponse
 }
+
+@JsonClass(generateAdapter = true)
+data class IngredientSuggestRequest(
+    val name_de: String,
+    val brand: String? = null,
+    val barcode: String? = null,
+    val energy_kcal_per_100g: Double? = null,
+    val protein_g_per_100g: Double? = null,
+    val carbs_g_per_100g: Double? = null,
+    val sugar_g_per_100g: Double? = null,
+    val fat_g_per_100g: Double? = null,
+    val satfat_g_per_100g: Double? = null,
+    val fiber_g_per_100g: Double? = null,
+    val salt_g_per_100g: Double? = null,
+    val histamine_score: Int? = null,
+    val allergens: List<String> = emptyList(),
+    val fodmap_flags: List<String> = emptyList(),
+)
+
+@JsonClass(generateAdapter = true)
+data class IngredientSuggestResponse(val id: String, val status: String)
+
+@JsonClass(generateAdapter = true)
+data class FieldPrRequest(
+    val field_name: String,
+    val new_value: String,
+    val rationale: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class FieldPrResponse(val id: String, val status: String)

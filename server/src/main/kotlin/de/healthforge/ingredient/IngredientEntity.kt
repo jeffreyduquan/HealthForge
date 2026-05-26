@@ -14,6 +14,8 @@ import java.util.UUID
 
 enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL }
 
+enum class IngredientStatus { PENDING, APPROVED, REJECTED }
+
 @Entity
 @Table(name = "ingredients")
 class IngredientEntity(
@@ -73,6 +75,26 @@ class IngredientEntity(
 
     @Column(name = "locked", nullable = false)
     var locked: Boolean = true,
+
+    @Column(name = "status", nullable = false)
+    var status: String = IngredientStatus.APPROVED.name,
+
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "submitted_by", columnDefinition = "uuid")
+    var submittedBy: UUID? = null,
+
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "reviewer_id", columnDefinition = "uuid")
+    var reviewerId: UUID? = null,
+
+    @Column(name = "reviewed_at")
+    var reviewedAt: Instant? = null,
+
+    @Column(name = "review_note")
+    var reviewNote: String? = null,
+
+    @Column(name = "last_admin_edit_at")
+    var lastAdminEditAt: Instant? = null,
 
     @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: Instant = Instant.now(),

@@ -16,16 +16,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.healthforge.presentation.essen.rezepte.RecipesScreen
 import de.healthforge.presentation.lebensmittel.LebensmittelScreen
 import de.healthforge.presentation.supplements.SupplementsScreen
 
 /**
  * Essen-Tab mit drei Top-Sub-Tabs (REQ-NAV-002).
- * P1: nur Lebensmittel funktional, Rezepte/Supplements Placeholder (REQ-NAV-003).
+ * P1: Lebensmittel + Supplements funktional, Rezepte ab P2.S2 funktional (REQ-NAV-003).
  */
 @Composable
 fun EssenScreen(
     onOpenSupplementEdit: (id: Long) -> Unit = {},
+    onOpenRecipeDetail: (String) -> Unit = {},
+    onCreateRecipe: () -> Unit = {},
 ) {
     var selected by remember { mutableIntStateOf(0) }
     val tabs = listOf("Lebensmittel", "Rezepte", "Supplements")
@@ -42,7 +45,7 @@ fun EssenScreen(
         }
         when (selected) {
             0 -> LebensmittelScreen()
-            1 -> SubTabPlaceholder("Rezepte", "Rezept-Engine kommt in P2.")
+            1 -> RecipesScreen(onOpenDetail = onOpenRecipeDetail, onCreate = onCreateRecipe)
             2 -> SupplementsScreen(onOpenEdit = onOpenSupplementEdit)
         }
     }

@@ -8,12 +8,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import de.healthforge.data.db.AppDatabase
+import de.healthforge.data.db.LogDefaultSymptomSeed
 import de.healthforge.data.db.SqlCipherKeyProvider
 import de.healthforge.data.db.dao.AllergyDao
 import de.healthforge.data.db.dao.IntakeEntryDao
 import de.healthforge.data.db.dao.IntoleranceDao
+import de.healthforge.data.db.dao.LogEntryDao
+import de.healthforge.data.db.dao.MealPlanDao
+import de.healthforge.data.db.dao.ShoppingListDao
 import de.healthforge.data.db.dao.SupplementDao
 import de.healthforge.data.db.dao.SupplementReminderDao
+import de.healthforge.data.db.dao.SymptomDefDao
 import de.healthforge.data.db.dao.UserProfileDao
 import de.healthforge.data.db.dao.WaterIntakeDao
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
@@ -35,6 +40,7 @@ object DatabaseModule {
         val factory = SupportOpenHelperFactory(passphrase)
         return Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DB_NAME)
             .openHelperFactory(factory)
+            .addCallback(LogDefaultSymptomSeed.callback())
             .fallbackToDestructiveMigration()  // P1 only; remove from P2
             .build()
     }
@@ -47,4 +53,8 @@ object DatabaseModule {
     @Provides fun provideSupplementDao(db: AppDatabase): SupplementDao = db.supplementDao()
     @Provides fun provideSupplementReminderDao(db: AppDatabase): SupplementReminderDao =
         db.supplementReminderDao()
+    @Provides fun provideMealPlanDao(db: AppDatabase): MealPlanDao = db.mealPlanDao()
+    @Provides fun provideSymptomDefDao(db: AppDatabase): SymptomDefDao = db.symptomDefDao()
+    @Provides fun provideLogEntryDao(db: AppDatabase): LogEntryDao = db.logEntryDao()
+    @Provides fun provideShoppingListDao(db: AppDatabase): ShoppingListDao = db.shoppingListDao()
 }
