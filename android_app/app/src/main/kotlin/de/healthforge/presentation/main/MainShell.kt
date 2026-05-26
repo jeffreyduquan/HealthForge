@@ -25,8 +25,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import de.healthforge.presentation.essen.EssenScreen
+import de.healthforge.presentation.essen.rezepte.RecipeCreateWizardScreen
 import de.healthforge.presentation.essen.rezepte.RecipeDetailScreen
 import de.healthforge.presentation.essen.rezepte.RecipeEditScreen
+import de.healthforge.presentation.lebensmittel.IngredientSuggestWizardScreen
 import de.healthforge.presentation.groups.GroupDetailScreen
 import de.healthforge.presentation.groups.GroupsScreen
 import de.healthforge.presentation.home.HomeScreen
@@ -79,6 +81,14 @@ object MainRoutes {
     const val SHOPPING_LIST = "main/shopping-list"
     const val EXPORT = "main/export"
     const val INSIGHTS = "main/insights"
+    /** REQ-INGREDIENT-CREATE-WIZARD-001 — 4-Step Wizard. */
+    const val INGREDIENT_SUGGEST_WIZARD = "main/ingredient-suggest-wizard"
+    const val INGREDIENT_SUGGEST_WIZARD_ARG = "name"
+    fun ingredientSuggestWizard(initialName: String = ""): String =
+        if (initialName.isBlank()) INGREDIENT_SUGGEST_WIZARD
+        else "$INGREDIENT_SUGGEST_WIZARD?$INGREDIENT_SUGGEST_WIZARD_ARG=${java.net.URLEncoder.encode(initialName, "UTF-8")}"
+    /** REQ-RECIPE-CREATE-WIZARD-001 — 5-Step Wizard. */
+    const val RECIPE_CREATE_WIZARD = "main/recipe-create-wizard"
 }
 
 private val TABS = listOf(
@@ -150,7 +160,10 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                         navController.navigate(MainRoutes.recipeDetail(id))
                     },
                     onCreateRecipe = {
-                        navController.navigate(MainRoutes.recipeEdit(null))
+                        navController.navigate(MainRoutes.RECIPE_CREATE_WIZARD)
+                    },
+                    onSuggestIngredient = { initialName ->
+                        navController.navigate(MainRoutes.ingredientSuggestWizard(initialName))
                     },
                 )
             }
@@ -256,6 +269,35 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
             }
             composable(MainRoutes.INSIGHTS) {
                 InsightsScreen(onBack = { navController.popBackStack() })
+            }
+            // P6.S5: 4-Step Wizard zum Vorschlagen eines neuen Lebensmittels.
+            composable(
+                route = "${MainRoutes.INGREDIENT_SUGGEST_WIZARD}?${MainRoutes.INGREDIENT_SUGGEST_WIZARD_ARG}={${MainRoutes.INGREDIENT_SUGGEST_WIZARD_ARG}}",
+                arguments = listOf(
+                    navArgument(MainRoutes.INGREDIENT_SUGGEST_WIZARD_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                val raw = entry.arguments?.getString(MainRoutes.INGREDIENT_SUGGEST_WIZARD_ARG)
+                val decoded = raw?.let { java.net.URLDecoder.decode(it, "UTF-8") }.orEmpty()
+                IngredientSuggestWizardScreen(
+                    initialName = decoded,
+                    onBack = { navController.popBackStack() },
+                    onSubmitted = { navController.popBackStack() },
+                )
+            }
+            // P6.S5: 5-Step Wizard zum Erstellen eines Rezepts.
+            composable(MainRoutes.RECIPE_CREATE_WIZARD) {
+                RecipeCreateWizardScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.popBackStack()
+                        navController.navigate(MainRoutes.recipeDetail(id))
+                    },
+                )
             }
         }
     }
