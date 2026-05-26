@@ -1177,12 +1177,46 @@ Final-Review der TraceabilityMatrix vor v1.0 → 2 echte GAPs + Matrix-Sweep der
 **Touched Docs:** `docs/TraceabilityMatrix.md` (15 🟡-Einträge + 1 ❌-Eintrag + Statistik-Block), `docs/SprintPlan.md` (dieser Block).
 **Untouched (begründet):** 00–02, 03, 04, 05, 07, 08, 09 inhaltlich unverändert; alle Änderungen sind Implementierungen unter bestehender Spec.
 
+### 🛠️ P4.S4 Runbook-Slice (2026-05-26)
+
+Letzter Release-Gate-Punkt: Operations-Doku für v1.0 Go-Live.
+
+**Slice-Inhalt:** Neue Datei `docs/Runbook.md` (~250 LOC, 9 Sektionen):
+1. Servers & Service-Map (Container, Ports, .env-Schablone)
+2. Routine-Operations (Status, Logs, Deploy API + Admin-UI, Android-APK-Bau)
+3. Backups & Restore (Auto-Cron, manuelles Backup, DB-Restore, MinIO-Bucket-Restore)
+4. Rollback-Procedure (API-Image, DB forward-only, Admin-UI)
+5. Common Incidents (502, OOM, TLS-Renewal, gehackter Admin, hohe Latenz)
+6. Monitoring (manuell — kein APM in v1.0)
+7. Update-Strategie (Server, UI, Android, Dependencies)
+8. Kontakte & Eskalation
+9. Pre-Flight Checklist (10 Items vor Go-Live)
+
+**Auflösen offener TODO-Verweise:**
+- `docs/Architecture.md` §7.3 (Restore-Doku) → Verweis auf `Runbook.md §3.3` aufgelöst.
+- `docs/Architecture.md` §10 (Folgedokumente-Liste) → `(TODO)` durch „v1.0 geändert 2026-05-26" ersetzt.
+
+**Doc-Drift-Eval 00–09:**
+- 00 Plan — kein Drift.
+- 01 Vision — kein Drift.
+- 02 Glossary — kein Drift.
+- 03 Architecture — **Drift akzeptiert (Re-Verweis):** Zwei TODO-Marker zu Runbook.md aufgelöst; semantisch identische Aussage, nur Forward-Reference statt Platzhalter.
+- 04 Requirements — kein Drift (Runbook ist Operations-, nicht Spec-Doku).
+- 05 Milestones — kein Drift (Runbook war als Release-Gate-Punkt §P4 explizit vorgesehen).
+- 06 Progress — kein Drift (kein REQ-ID-Status berührt).
+- 07 Coding Conventions — kein Drift (Runbook stützt Flyway-forward-only-Konvention explizit in §4.2).
+- 08 Test Strategy — kein Drift (Runbook kodifiziert „manual smoke before deploy" aus LOCKED Q10 in §2.3 + §9 Pre-Flight).
+- 09 Bootstrap — kein Drift (Runbook ist Prod-Operations, nicht Dev-Setup).
+
+**Touched Docs:** `docs/Runbook.md` (NEW), `docs/Architecture.md` (2 TODO-Marker → Verweise), `docs/SprintPlan.md` (Phase-Abschluss-Häkchen + dieser Block).
+**Untouched (begründet):** 00, 01, 02, 04, 05, 06, 07, 08, 09 — Runbook ist eigenständiges Operations-Dokument, keine Spec-/Vision-/Code-Auswirkung.
+
 ### P4 Phase-Abschluss = v1.0 Release-Gate
 
 - ✅ Alle non-META REQ-IDs in TraceabilityMatrix
 - ✅ Release-Checklist abgearbeitet (siehe §0 Release-Gate)
 - ✅ APK signed, ready für Verteilung
-- ✅ Runbook.md geschrieben
+- ✅ Runbook.md geschrieben (v1.0, 2026-05-26 — Routine + Backup/Restore + Rollback + Incidents + Pre-Flight-Checklist)
 
 ---
 

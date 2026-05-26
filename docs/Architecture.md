@@ -455,7 +455,7 @@ Networks: `internal` (alle), `web` (nur caddy expose 80/443).
 - **PostgreSQL:** `pg_dump` täglich 02:00 → komprimiert (zstd) → MinIO Bucket `backups/`
   Retention 30 Tage.
 - **MinIO:** Buckets-Replikation manuell bei Bedarf (P4-Optional: zweiter MinIO-Node oder off-site Sync).
-- **Restore:** Dokumentiert in `docs/Runbook.md` (TODO).
+- **Restore:** Dokumentiert in `docs/Runbook.md` §3.3.
 - **Risiko-Akzeptanz:** Bei Total-Loss des VPS sind Backups mit verloren. Für v1.0
   akzeptiert (User-Decision). Off-site-Sync nach Hetzner Storage Box ist mögliches
   Upgrade in P4.
@@ -514,7 +514,7 @@ Alle Entscheidungen final für v1.0. Änderungen erfordern Doc-Versionsbump.
 
 ## 10. Anhänge / Folgedokumente
 
-- `docs/Runbook.md` — Restore, Incident-Response, On-Call Procedures (TODO)
+- `docs/Runbook.md` — Restore, Incident-Response, On-Call Procedures — v1.0 geändert 2026-05-26
 - `docs/API.md` — OpenAPI 3.1 (auto-generated from springdoc) (TODO)
 - `docs/SprintPlan.md` — Phase-by-Phase Deliverables (TODO)
 - `docs/TraceabilityMatrix.md` — REQ → File-Mapping (TODO)
