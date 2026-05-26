@@ -81,3 +81,10 @@ admin-ui/tsconfig.tsbuildinfo
 
 # ============ Memory / Session ============
 /memories/session/
+
+# ============ P6 debug artefacts ============
+android_app/.kotlin/sessions/
+screenshot-*.png
+ui-*.xml
+screenshots/
+
