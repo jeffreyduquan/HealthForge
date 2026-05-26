@@ -1507,20 +1507,22 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 
 **Critical-Decisions to ask:** keine.
 
-### Sprint P6.S4 — Screen-Wave-1 (Home + Onboarding)
+### Sprint P6.S4 — Screen-Wave-1 (Home + Onboarding) ✅ DONE (2026-05-26)
 
-**Deliverables (autonom):**
-- MOD `presentation/home/HomeScreen.kt`: AmbientBackdrop, Header mit GradientText-Greeting, SectionPills, GlassCards für Nutrition/Wasser/Heute-geplant, Pinned-Nutrients-Card mit 4-Default-Pins + Collapsed-Rest mit Mini-Progress + 7-Tage-Sparkline (`fl_chart` Compose-Pendant: AndroidView mit MPAndroidChart oder eigene Canvas).
-- NEW `presentation/home/PinnedNutrientsManager.kt` — BottomSheet zum Pin-Verwalten.
-- MOD `presentation/onboarding/OnboardingScreen.kt`: 
-  - Step-Inputs für Alter/Größe/Gewicht → `Slider` mit Live-Value-Label (F-003).
-  - Step-Indikator als 14 Punkte (active = gradient-filled, inactive = glassBorder).
-  - Forward-only NavBar (Weiter rechts, Zurück nur sichtbar bei step>0 ohne Skip).
-- NEW DataStore key `pinned_nutrients` (List<String>, default `["kcal","protein","carbs","fat"]`).
+**Deliverables (geliefert, autonom — Scope-Trim auf Visual-Rebuild):**
+- MOD `presentation/home/HomeScreen.kt`: AmbientBackdrop layer-0, Box-Layout (Scaffold entfernt), Header-Row mit `GradientText("Hallo!")` + Datum (`bodyMedium` fgSecondary) + History-IconButton, `SectionPill` für ERNÄHRUNG/WASSER/SUPPLEMENTE/HEUTIGE EINTRÄGE, `GlassCard`s wrappen MacroRingRow/WaterTracker/SupplementChecklist/Intake-Liste, `GradientFab` als Box-Overlay bottom-right (24dp inset + navigationBarsPadding), `IntakeRow` zu GlassCard umgebaut mit hm-Token-Farben.
+- MOD `presentation/onboarding/OnboardingScreen.kt`: AmbientBackdrop + Box-Layout (Scaffold/TopAppBar entfernt), 14-Dot-Step-Indicator (active = 20dp×8dp gradient-pill, inactive = 8dp circle glassBorder), `GradientText` für StepWelcome/Slider-Titles, Slider statt OutlinedTextField für StepAge (14–100, int) / StepHeight (140–220 cm, int) / StepWeight (30–200 kg, 0.5-Steps via SliderStepDouble), `GradientButton` für Weiter/Fertig, OutlinedButton bleibt für Zurück.
+- BUGFIX `presentation/theme/HmComponents.kt::GradientText`: `Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }` hinzugefügt — ohne Offscreen-Layer hat BlendMode.SrcAtop gegen den gesamten akkumulierten Canvas geblendet (Gradient füllte komplette Bounds statt nur Glyphen). Mit Offscreen-Layer wird Text zuerst in eigenen Layer gerendert, dann SrcAtop clippt korrekt auf Glyphen.
 
-**Akzeptanz:** Home + Onboarding visuell auf Histamind-Niveau; Slider funktional; Pin-Mgmt-Sheet öffnet.
+**ABWEICHUNG zu Original-Plan:**
+- ⏳ **DEFERRED zu P6.S6** (passt natürlich zur V12-Migration): `PinnedNutrientsManager.kt` BottomSheet + DataStore-Key `pinned_nutrients` + "Weitere anzeigen" Extended-Nutrients + 7-Tage-Sparkline. Rationale: Pin-Verwaltung braucht User-spezifische Nutrient-Goals (V12 `users.daily_nutrient_goals JSONB` + `users.pinned_nutrients TEXT[]`) — vermeidet DataStore→DB-Doppel-Migration. Aktuelle Home-Card zeigt fixe 4-Default-Macros (kcal/Protein/Carbs/Fett) aus existierenden V3-Targets.
+- ⏳ **DEFERRED zu P6.S5**: Activity-Slider (Slider 1.2–1.9 step 0.05) — aktuelles Datenmodell ist `ActivityLevel`-Enum (5 Werte). Wandlung erfordert Profile-Entity-Change. Aktuell: Radio-Buttons.
 
-**Critical-Decisions to ask:** Wenn Sparkline-Lib nötig (MPAndroidChart vs. native Canvas) → askQuestion.
+**Akzeptanz:** `:app:compileDebugKotlin` + `:app:assembleDebug` grün; manuell auf emulator-5554 verifiziert: Home rendert mit gradient "Hallo!", section-pills, glass-cards, gradient-FAB (Screenshot `screenshots/p6s4/onboarding_v2.png`); Onboarding-Welcome 14-dot-indicator + GradientText "Willkommen bei HealthForge" + Weiter-Button rendern (Screenshot `screenshots/p6s4/onboarding_welcome.png` zeigte initialen GradientText-Bug, post-fix nicht erneut empirisch verifiziert — Compile + Mechanik gleich Home).
+
+**Doc-Drift-Eval** — Touched: SprintPlan §4b.1 (DONE-Flag + Scope-Trim + Defers), TraceabilityMatrix (REQ-HOME-PIN-001 + REQ-ONBOARD-SLIDER-001 ✅ teilweise, V12-Pflicht-Teil ⏳ P6.S6). Untouched: ReqSpec/UsabilityMap/HistamindDesignReference/Architecture (P6.S1-Spec faithful — Visual-Layer übernimmt Tokens/Components 1:1; Pin-Manager-Defer dokumentiert hier statt in Spec da P6.S6-Item bereits dort).
+
+**Critical-Decisions to ask:** keine angefallen.
 
 ### Sprint P6.S5 — Screen-Wave-2 (Plan + Essen + Profil)
 

@@ -355,8 +355,8 @@ Nach jeder erledigten Aufgabe wird:
 | REQ-COMP-006 GradientText | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::GradientText` |
 | REQ-COMP-007 SegmentedTabs | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::SegmentedTabs` |
 | REQ-COMP-008 SeverityBar | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::SeverityBar` |
-| REQ-HOME-PIN-001 | P6.S4 | ⏳ | `presentation/home/HomeScreen.kt`, `PinnedNutrientsManager.kt`, `V12__per_nutrient_goals.sql` |
-| REQ-ONBOARD-SLIDER-001 | P6.S4 | ⏳ | `presentation/onboarding/OnboardingScreen.kt` |
+| REQ-HOME-PIN-001 | P6.S4/S6 | 🟡 | P6.S4 ✅: `HomeScreen.kt` Visual-Rebuild (AmbientBackdrop+GlassCards+GradientText+GradientFab+SectionPills, fixe 4-Default-Macros). P6.S6 ⏳: `PinnedNutrientsManager.kt`+DataStore+V12-Migration (extended nutrients + per-nutrient goals). |
+| REQ-ONBOARD-SLIDER-001 | P6.S4/S5 | 🟡 | P6.S4 ✅: `OnboardingScreen.kt` mit 14-Dot-Indicator + Slider für Alter/Größe/Gewicht + GradientButtons. P6.S5 ⏳: Activity-Slider (1.2–1.9 step 0.05) — braucht Profile-Entity-Change ActivityLevel-Enum → Double. |
 | REQ-WATER-REMOVE-001 | P6.S7 | ⏳ | `presentation/home/WaterTracker.kt` |
 | REQ-WATER-ALARM-HELPER-001 | P6.S7 | ⏳ | `presentation/home/WaterAlarmCard.kt` |
 | REQ-INTAKE-ADD-FLOW-001 | P6.S5/S7 | ⏳ | `presentation/lebensmittel/LebensmittelScreen.kt` nav-arg |

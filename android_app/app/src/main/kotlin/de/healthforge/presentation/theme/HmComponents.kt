@@ -39,6 +39,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -277,12 +279,14 @@ fun GradientText(
     Text(
         text = text,
         style = style.copy(color = Color.White),
-        modifier = modifier.drawWithCache {
-            onDrawWithContent {
-                drawContent()
-                drawRect(brush = hm.accentGradient, blendMode = BlendMode.SrcAtop)
-            }
-        },
+        modifier = modifier
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(brush = hm.accentGradient, blendMode = BlendMode.SrcAtop)
+                }
+            },
     )
 }
 

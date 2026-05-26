@@ -1,6 +1,8 @@
 package de.healthforge.presentation.onboarding
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,25 +11,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,7 +48,12 @@ import de.healthforge.data.db.entities.DietGoal
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.db.entities.HistamineSensitivity
 import de.healthforge.data.db.entities.MealSlot
+import de.healthforge.presentation.theme.AmbientBackdrop
+import de.healthforge.presentation.theme.GradientButton
+import de.healthforge.presentation.theme.GradientText
+import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.ThemePreference
+import kotlin.math.roundToInt
 
 private const val TOTAL_STEPS = 14
 
@@ -50,25 +64,28 @@ fun OnboardingScreen(
     vm: OnboardingViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsStateWithLifecycle()
+    val hm = LocalHmTokens.current
     LaunchedEffect(s.done) { if (s.done) onFinished() }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Onboarding (${s.stepIndex + 1}/$TOTAL_STEPS)") })
-        },
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(hm.background),
+    ) {
+        AmbientBackdrop(Modifier.fillMaxSize())
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            LinearProgressIndicator(
-                progress = { (s.stepIndex + 1f) / TOTAL_STEPS },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Spacer(Modifier.height(8.dp))
+            StepDots(currentIndex = s.stepIndex, total = TOTAL_STEPS)
+            Spacer(Modifier.height(4.dp))
+
             when (s.stepIndex) {
                 0 -> StepWelcome()
                 1 -> StepDisplayName(s.displayName, vm::setDisplayName)
@@ -93,6 +110,28 @@ fun OnboardingScreen(
                 onNext = vm::next,
                 onFinish = vm::commit,
             )
+            Spacer(Modifier.height(24.dp).navigationBarsPadding())
+        }
+    }
+}
+
+@Composable
+private fun StepDots(currentIndex: Int, total: Int) {
+    val hm = LocalHmTokens.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(total) { i ->
+            val active = i <= currentIndex
+            Box(
+                modifier = Modifier
+                    .height(8.dp)
+                    .let { if (active) it.width(20.dp) else it.size(8.dp) }
+                    .clip(if (active) RoundedCornerShape(4.dp) else CircleShape)
+                    .background(if (active) hm.accentGradient else androidx.compose.ui.graphics.SolidColor(hm.glassBorder)),
+            )
         }
     }
 }
@@ -113,20 +152,21 @@ private fun NavButtons(
             OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("Zur\u00fcck") }
         }
         if (stepIndex < TOTAL_STEPS - 1) {
-            Button(onClick = onNext, modifier = Modifier.weight(1f)) { Text("Weiter") }
+            GradientButton(text = "Weiter", onClick = onNext, modifier = Modifier.weight(1f))
         } else {
-            Button(
+            GradientButton(
+                text = if (committing) "Speichern\u2026" else "Fertig",
                 onClick = onFinish,
                 enabled = !committing,
                 modifier = Modifier.weight(1f),
-            ) { Text(if (committing) "Speichern\u2026" else "Fertig") }
+            )
         }
     }
 }
 
 @Composable
 private fun StepWelcome() {
-    Text("Willkommen bei HealthForge", style = MaterialTheme.typography.headlineMedium)
+    GradientText("Willkommen bei HealthForge", style = MaterialTheme.typography.headlineMedium)
     Text(
         "Wir richten dein Profil ein, damit Empfehlungen zu deinen Bed\u00fcrfnissen passen. " +
             "Alle Daten bleiben verschl\u00fcsselt auf diesem Ger\u00e4t.",
@@ -147,9 +187,14 @@ private fun StepDisplayName(value: String, onChange: (String) -> Unit) {
 
 @Composable
 private fun StepAge(value: Int?, onChange: (Int?) -> Unit) {
-    NumberStep("Wie alt bist du?", "Alter (Jahre)", value?.toString().orEmpty()) {
-        onChange(it.toIntOrNull())
-    }
+    SliderStepInt(
+        title = "Wie alt bist du?",
+        unit = "Jahre",
+        value = value ?: 30,
+        range = 14f..100f,
+        steps = 100 - 14 - 1,
+        onChange = { onChange(it) },
+    )
 }
 
 @Composable
@@ -173,18 +218,88 @@ private fun StepSex(value: BiologicalSex?, onChange: (BiologicalSex) -> Unit) {
 
 @Composable
 private fun StepHeight(value: Int?, onChange: (Int?) -> Unit) {
-    NumberStep("K\u00f6rpergr\u00f6\u00dfe", "Gr\u00f6\u00dfe (cm)", value?.toString().orEmpty()) {
-        onChange(it.toIntOrNull())
-    }
+    SliderStepInt(
+        title = "K\u00f6rpergr\u00f6\u00dfe",
+        unit = "cm",
+        value = value ?: 170,
+        range = 140f..220f,
+        steps = 220 - 140 - 1,
+        onChange = { onChange(it) },
+    )
 }
 
 @Composable
 private fun StepWeight(value: Double?, onChange: (Double?) -> Unit) {
-    NumberStep(
+    SliderStepDouble(
         title = "K\u00f6rpergewicht",
-        label = "Gewicht (kg)",
-        value = value?.toString().orEmpty(),
-    ) { onChange(it.replace(',', '.').toDoubleOrNull()) }
+        unit = "kg",
+        value = value ?: 70.0,
+        range = 30f..200f,
+        stepHalfKg = true,
+        onChange = { onChange(it) },
+    )
+}
+
+@Composable
+private fun SliderStepInt(
+    title: String,
+    unit: String,
+    value: Int,
+    range: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    onChange: (Int) -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    GradientText(title, style = MaterialTheme.typography.headlineMedium)
+    Text(
+        text = "$value $unit",
+        style = MaterialTheme.typography.displaySmall,
+        color = hm.fgPrimary,
+    )
+    Slider(
+        value = value.toFloat().coerceIn(range.start, range.endInclusive),
+        onValueChange = { onChange(it.roundToInt()) },
+        valueRange = range,
+        steps = steps,
+        colors = SliderDefaults.colors(
+            thumbColor = hm.ambientViolet,
+            activeTrackColor = hm.ambientViolet,
+            inactiveTrackColor = hm.glassBorder,
+        ),
+    )
+}
+
+@Composable
+private fun SliderStepDouble(
+    title: String,
+    unit: String,
+    value: Double,
+    range: ClosedFloatingPointRange<Float>,
+    stepHalfKg: Boolean,
+    onChange: (Double) -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val steps = if (stepHalfKg) ((range.endInclusive - range.start).toInt() * 2 - 1) else 0
+    GradientText(title, style = MaterialTheme.typography.headlineMedium)
+    Text(
+        text = "%.1f $unit".format(value),
+        style = MaterialTheme.typography.displaySmall,
+        color = hm.fgPrimary,
+    )
+    Slider(
+        value = value.toFloat().coerceIn(range.start, range.endInclusive),
+        onValueChange = { raw ->
+            val rounded = if (stepHalfKg) (kotlin.math.round(raw * 2f) / 2f).toDouble() else raw.toDouble()
+            onChange(rounded)
+        },
+        valueRange = range,
+        steps = steps,
+        colors = SliderDefaults.colors(
+            thumbColor = hm.ambientViolet,
+            activeTrackColor = hm.ambientViolet,
+            inactiveTrackColor = hm.glassBorder,
+        ),
+    )
 }
 
 @Composable
