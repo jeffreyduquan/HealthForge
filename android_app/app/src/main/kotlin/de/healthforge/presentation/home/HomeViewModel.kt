@@ -64,6 +64,12 @@ data class HomeState(
     val waterCustomMl: String = "",
     val waterReminderEnabled: Boolean = false,
     val error: String? = null,
+    /** P6.S7 F-005: id of last water entry added in this session (for Long-Press Undo). */
+    val lastWaterIntakeId: Long? = null,
+    /** P6.S7 F-005: volume of last add, for snackbar message. */
+    val lastWaterVolumeMl: Int? = null,
+    /** P6.S7 F-005: monotonic nonce — triggers snackbar in UI via LaunchedEffect. */
+    val waterUndoTriggerNonce: Long = 0L,
 )
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -206,6 +212,28 @@ class HomeViewModel @Inject constructor(
     fun addWater(volumeMl: Int) {
         viewModelScope.launch {
             runCatching { waterRepo.add(_state.value.date, volumeMl) }
+                .onSuccess { id ->
+                    _state.value = _state.value.copy(
+                        lastWaterIntakeId = id,
+                        lastWaterVolumeMl = volumeMl,
+                        waterUndoTriggerNonce = _state.value.waterUndoTriggerNonce + 1,
+                    )
+                }
+                .onFailure { _state.value = _state.value.copy(error = it.message) }
+        }
+    }
+
+    /** P6.S7 F-005: Undo last water Quick-Add (Long-Press → Snackbar Action). */
+    fun undoLastWater() {
+        val id = _state.value.lastWaterIntakeId ?: return
+        viewModelScope.launch {
+            runCatching { waterRepo.deleteById(id) }
+                .onSuccess {
+                    _state.value = _state.value.copy(
+                        lastWaterIntakeId = null,
+                        lastWaterVolumeMl = null,
+                    )
+                }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
     }

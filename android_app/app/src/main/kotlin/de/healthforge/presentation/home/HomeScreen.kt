@@ -25,9 +25,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,6 +68,20 @@ fun HomeScreen(
     val editableUseCase = IsIntakeEditableUseCase()
     val hm = LocalHmTokens.current
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // P6.S7 F-005: nach jedem Wasser-Add eine Snackbar mit Undo zeigen (5s ~ SnackbarDuration.Short).
+    LaunchedEffect(s.waterUndoTriggerNonce) {
+        if (s.waterUndoTriggerNonce == 0L) return@LaunchedEffect
+        val ml = s.lastWaterVolumeMl ?: return@LaunchedEffect
+        val result = snackbarHostState.showSnackbar(
+            message = "+${ml} ml hinzugef\u00fcgt",
+            actionLabel = "R\u00fcckg\u00e4ngig",
+            withDismissAction = true,
+            duration = SnackbarDuration.Short,
+        )
+        if (result == SnackbarResult.ActionPerformed) vm.undoLastWater()
+    }
 
     Box(
         modifier = Modifier
@@ -129,6 +148,8 @@ fun HomeScreen(
                     onCustom = vm::openWaterCustom,
                     reminderEnabled = s.waterReminderEnabled,
                     onReminderToggle = vm::setWaterReminderEnabled,
+                    onUndoLast = vm::undoLastWater,
+                    canUndo = s.lastWaterIntakeId != null,
                 )
             }
 
@@ -180,6 +201,15 @@ fun HomeScreen(
                 .navigationBarsPadding()
                 .padding(end = 24.dp, bottom = 24.dp),
             icon = { Icon(Icons.Filled.Add, contentDescription = "Hinzuf\u00fcgen", tint = hm.fgPrimary) },
+        )
+
+        // P6.S7 F-005: Snackbar-Host f\u00fcr Wasser-Undo (Long-Press-Hint).
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 96.dp),
         )
     }
 

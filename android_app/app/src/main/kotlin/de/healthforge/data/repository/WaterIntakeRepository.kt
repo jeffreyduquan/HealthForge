@@ -16,9 +16,10 @@ class WaterIntakeRepository @Inject constructor(
 
     fun observeForDay(day: LocalDate): Flow<List<WaterIntakeEntity>> = dao.observeForDay(day.toString())
 
-    suspend fun add(day: LocalDate, volumeMl: Int) {
+    /** Returns the inserted row id (REQ-WATER-001/002, P6.S7 F-005 Undo-Support). */
+    suspend fun add(day: LocalDate, volumeMl: Int): Long {
         require(volumeMl in 1..5000) { "volumeMl must be 1..5000" }
-        dao.insert(
+        return dao.insert(
             WaterIntakeEntity(
                 loggedAt = System.currentTimeMillis(),
                 dayDateIso = day.toString(),
