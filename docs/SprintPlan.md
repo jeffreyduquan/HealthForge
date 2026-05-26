@@ -1335,6 +1335,33 @@ Letzter Release-Gate-Punkt: Operations-Doku für v1.0 Go-Live.
 **Touched Docs:** `docs/TestStrategy.md` (NEW), `docs/BattleTestPlan.md` (NEW), `docs/SprintPlan.md` (§4a + dieser Block).
 **Untouched (begründet):** 00, 01, 02, 03, 04, 06, 07, 09 — kein semantischer Konflikt; P5 ist Prozess-Phase, kein Spec-/Architektur-/Code-Change.
 
+### 🛠️ P5.S1 Run 1 Slice (2026-05-26)
+
+**Slice-Inhalt:** Start P5.S1 Persona-Smoke Run 1 auf Pixel 7 API 35 Emulator. Findings F-001 + F-002 dokumentiert.
+
+- **Setup:** Android SDK CLI-Install (platforms;android-35 + system-image;android-35;google_apis;x86_64 + build-tools 35.0.0 + emulator) + AVD `Pixel_7_API_35` erstellt + Emulator gebootet + `:app:installDebug` erfolgreich.
+- **Case 1.1 ✅:** Login-Screen rendert korrekt (HealthForge-Titel + „Willkommen zurück" + E-Mail/Passwort + disabled „Anmelden" + Links „Passwort vergessen?"/„Konto mit Einladungscode erstellen"). Verifikation via `adb shell uiautomator dump` + Screenshot.
+- **Finding F-001 (S3 Test-Spec-Drift, doc-only):** BattleTestPlan §1 Case 1.1 sagte fälschlich „Welcome-Screen first beim App-Start". Reality: Login-Screen first (REQ-AUTH-001 konform). Welcome ist Wizard-Step 0 nach Register-Submit. **Action:** Case 1.1 = Login-spec umformuliert; Case 1.2 erweitert um Register→Verify→Wizard-Flow.
+- **Finding F-002 (S3 UsabilityMap-Drift, doc-only):** UsabilityMap §2 Step 1 sagte „Logo + 3 Bullet-Points + 'Los geht's'-Button". Reality (`OnboardingScreen.kt:128 StepWelcome()`): nur Heading + Begrüßungstext + „Weiter". **Action:** UsabilityMap §2 Step 1 auf schlanke Variante angeglichen. **Backlog post-v1.0:** Welcome-Screen-Polish (Logo + 3 Bullets + dedicated CTA) ist UX-Polish-Wunsch, kein REQ.
+
+**Doc-Drift-Eval 00–09:**
+- 00 Plan — kein Drift.
+- 01 Vision — kein Drift.
+- 02 Glossary — kein Drift.
+- 03 Architecture — kein Drift (kein Code-Change).
+- 04 Requirements — kein Drift; REQ-AUTH-001 + REQ-ONBOARD-001 bleiben unverändert.
+- 05 Milestones — kein Drift.
+- 06 Progress — wird mit Run-Log in BattleTestPlan getrackt; kein separater Eintrag nötig.
+- 07 Coding Conventions — kein Drift.
+- 08 Test Strategy — kein Drift; F-001/F-002 sind Doc-Realignment-Findings, decken sich mit „Single-Run-Then-Fixes"-Kadenz.
+- 09 Bootstrap — kein Drift (SDK-CLI-Install ist ad-hoc, kein neuer Bootstrap-Schritt nötig solange Android Studio installiert ist).
+
+**Touched Docs:** `docs/UsabilityMap.md` (§2 Step 1), `docs/BattleTestPlan.md` (Case 1.1 + 1.2 + R1-Log), `docs/SprintPlan.md` (dieser Block).
+**Untouched (begründet):** 00, 01, 02, 03 (Architecture), 04 (ReqSpec), 05, 06, 07, 08, 09 — keine REQ-/Code-/Architektur-Änderungen, nur Test-Doc + UsabilityMap-Realignment.
+
+**Backlog post-v1.0 (Polish):**
+- **POLISH-WELCOME-001:** Welcome-Step in OnboardingScreen aufwerten: App-Logo, 3 Bullet-Points (z.B. „Vollständig on-device", „Verschlüsselt", „Keine Werbung"), eigener „Los geht's"-CTA statt generischem „Weiter". Aus F-002 entstanden.
+
 ---
 
 ## 5. Inter-Phase-Wartungs-Tasks

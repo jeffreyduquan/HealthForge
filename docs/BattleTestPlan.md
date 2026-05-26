@@ -30,7 +30,7 @@ Pro Case in der **Result**-Spalte: Symbol + Datum (`✅ 2026-05-27`) + ggf. Run-
 
 | Run | Datum | Surface | Ergebnis kurz |
 |---|---|---|---|
-| R1 | _pending_ | Full Sweep §1–§5 | _ausstehend_ |
+| R1 | 2026-05-26 (in progress) | §1 Persona-Smoke | 1.1 ✅ (Login rendert); F-001 Doc-Drift gefixt (BattleTestPlan Case 1.1 = Login first); F-002 Doc-Drift gefixt (UsabilityMap §2 Step 1 = schlanke Welcome-Variante, Polish-Backlog post-v1.0) |
 | R2 | _pending_ | Re-Run S1+S2 fails | _ausstehend_ |
 
 ---
@@ -41,8 +41,8 @@ Vor §2–§5 durchzuführen. Wenn §1 kippt: erst fixen, dann Tiefe.
 
 | # | Schritt | Pass-Kriterium | REQ-IDs | UsabilityMap-Anker | Result | Notes |
 |---|---|---|---|---|:-:|---|
-| 1.1 | Frischer Emulator: App installieren, Welcome-Screen | Logo + 3 Bullets + „Los geht's"-Button sichtbar; kein Crash | REQ-ONBOARD-001 | §2 Step 1 | ⬜ | |
-| 1.2 | Onboarding 14 Steps mit realistischer Eingabe (Email/Passwort, Marie, weiblich, 168 cm, 62 kg, moderat, Erhalten, Histamin-Toggle ON, Laktose ON) | Alle Steps forward-only, Validierung pro Step, Confetti am Ende | REQ-ONBOARD-001, REQ-PROFILE-001..006, REQ-AUTH-002 | §2 Steps 1–17 | ⬜ | |
+| 1.1 | Frischer Emulator: App installieren + öffnen → **Login-Screen** | Titel „HealthForge" + Heading „Willkommen zurück" + E-Mail/Passwort-Felder + disabled „Anmelden" + Link „Passwort vergessen?" + Link „Konto mit Einladungscode erstellen"; kein Crash | REQ-AUTH-001 | LoginScreen (separat vom Wizard) | ✅ 2026-05-26 | F-001 doc-fix: Spec sagte fälschlich Welcome-first; Reality = Login first |
+| 1.2 | „Konto mit Einladungscode erstellen" → Register-Form (Code/Anzeigename/Email/PW×2) → Submit → Email-Verify → Onboarding-Wizard 14 Steps (Welcome → DisplayName → Age → Sex → Height → Weight → Activity → Goal → Allergies → Intolerances+Histamin → MealSlots → MaxPrep → Theme → Review) → Fertig | Register: Invalid-Code → Fehler; Valid → Verify-Screen. Wizard: forward-only, Validierung pro Step, „Fertig"-Button am Ende. UsabilityMap §2 Step 1 reflektiert die schlanke Welcome-Variante (Heading+Text+Weiter, kein Logo+3 Bullets — F-002 doc-fix, Polish-Backlog post-v1.0). | REQ-AUTH-002/003/004, REQ-ONBOARD-001, REQ-PROFILE-001..006 | §2 Steps 1–14 | ⬜ | |
 | 1.3 | Home öffnet, leere Ringe + Wasser 0/2000 ml + leere Liste | 4 Ringe sichtbar (kcal/P/F/C); Wasser-Block mit +250/+500/Custom; Empty-State „Heute noch nichts geloggt." | REQ-HOME-001..005, REQ-WATER-001 | §3.1 + §12 | ⬜ | |
 | 1.4 | Tag 1: Quick-Add Müsli 80 g → Wasser +500 → +500 → Apfel 150 g | Ringe füllen sich live; Snackbar Undo erscheint; Liste zeigt 2 Items + Wasser 1000 ml | REQ-INTAKE-001..004, REQ-HOME-003, REQ-WATER-002, REQ-INGR-001/002 | §3.2 + §8.1 | ⬜ | |
 | 1.5 | Essen → Rezepte → FAB+ → Rezept „Linsen-Curry" anlegen (4 Portionen, 2 Zutaten, 3 Schritte, public) | Speichern OK; Rezept erscheint in Liste; Detail zeigt Nährwerte live | REQ-RECIPE-001/002/005/007 | §5.4–§5.6 | ⬜ | |

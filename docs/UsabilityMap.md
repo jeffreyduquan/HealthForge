@@ -54,8 +54,8 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 | # | Step | Inhalt | Skippable |
 |---|------|--------|-----------|
-| 1 | Welcome | Logo + 3 Bullet-Points zur App + "Los geht's"-Button | nein |
-| 2 | Auth | Email, Passwort (×2), Invite-Code | nein |
+| 1 | Welcome | Heading „Willkommen bei HealthForge" + kurzer Begrüßungstext (verschlüsselte Daten on-device) + „Weiter"-Button | nein |
+| 2 | Auth | _separater Register-Screen vor Wizard_ — Einladungscode, Anzeigename, Email, Passwort (×2) | nein |
 | 3 | Email-Verify | "Wir haben dir einen Link geschickt" + Wait/Resend-Button | nein |
 | 4 | Display-Name | Textfeld, optional anonymisierbar | ja (Default: "User-{n}") |
 | 5 | Geburtsdatum | Date-Picker | ja (Default: 30 J) |
