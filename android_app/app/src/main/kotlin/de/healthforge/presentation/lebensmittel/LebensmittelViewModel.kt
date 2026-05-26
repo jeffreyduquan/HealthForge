@@ -56,6 +56,9 @@ class LebensmittelViewModel @Inject constructor(
                 excludedAllergens = full.allergies,
                 excludedFodmap = full.intolerances,
             )
+            // REQ-LIST-PRELOAD-001 / F-009: nach Filter-Hydration einmal die alphabetische
+            // Voransicht laden (Server beantwortet leeren Query mit ORDER BY name_de LIMIT 50).
+            runSearch("")
         }
         // Debounced search trigger.
         queryFlow
@@ -94,10 +97,6 @@ class LebensmittelViewModel @Inject constructor(
     private fun runSearch(q: String) {
         searchJob?.cancel()
         val trimmed = q.trim()
-        if (trimmed.isEmpty()) {
-            _state.value = _state.value.copy(results = emptyList(), loading = false, error = null)
-            return
-        }
         searchJob = viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             val s = _state.value

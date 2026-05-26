@@ -30,8 +30,10 @@ class IngredientSearchRepository(
         viewerId: UUID? = null,
     ): List<IngredientEntity> {
         val trimmed = query.trim()
-        if (trimmed.isEmpty()) return emptyList()
         val safeLimit = limit.coerceIn(1, 100)
+        // REQ-LIST-PRELOAD-001 (P6.S5, F-009): leere q liefert alphabetische Seite (max 50/limit)
+        // statt leerer Liste. Verbleibende excludeAllergens/excludeFodmap-Filter werden weiter angewandt.
+        if (trimmed.isEmpty()) return browseAlphabetical(safeLimit, excludeAllergens, excludeFodmap, viewerId)
 
         // Build dynamic NOT-LIKE clauses for the (denormalised) JSON arrays.
         // The arrays are stored as TEXT JSON like `["GLUTEN","SOY"]`; an ILIKE match
@@ -75,5 +77,38 @@ class IngredientSearchRepository(
         val trimmed = code.trim().uppercase()
         if (trimmed.isEmpty() || trimmed.length > 32) return null
         return if (trimmed.all { it.isLetterOrDigit() || it == '_' }) trimmed else null
+    }
+
+    /**
+     * REQ-LIST-PRELOAD-001 — alphabetische Initial-Seite (kein Volltext-Match).
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun browseAlphabetical(
+        limit: Int,
+        excludeAllergens: List<String>,
+        excludeFodmap: List<String>,
+        viewerId: UUID?,
+    ): List<IngredientEntity> {
+        val safeAllergens = excludeAllergens.mapNotNull { sanitiseCode(it) }
+        val safeFodmap = excludeFodmap.mapNotNull { sanitiseCode(it) }
+        val filterClauses = buildString {
+            safeAllergens.forEach { code ->
+                append(" AND allergens_json NOT ILIKE '%\"").append(code).append("\"%'")
+            }
+            safeFodmap.forEach { code ->
+                append(" AND fodmap_flags_json NOT ILIKE '%\"").append(code).append("\"%'")
+            }
+        }
+        val sql = """
+            SELECT * FROM ingredients
+            WHERE (status = 'APPROVED' OR (status = 'PENDING' AND submitted_by = :viewer))
+            $filterClauses
+            ORDER BY name_de
+            LIMIT :lim
+        """.trimIndent()
+        return em.createNativeQuery(sql, IngredientEntity::class.java)
+            .setParameter("lim", limit)
+            .setParameter("viewer", viewerId)
+            .resultList as List<IngredientEntity>
     }
 }

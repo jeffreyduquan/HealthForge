@@ -31,7 +31,7 @@ data class IngredientDto(
 interface IngredientApi {
     @GET("v1/ingredients")
     suspend fun search(
-        @Query("q") query: String,
+        @Query("q") query: String = "",
         @Query("limit") limit: Int = 20,
         @Query("excludeAllergens") excludeAllergens: List<String>? = null,
         @Query("excludeFodmap") excludeFodmap: List<String>? = null,

@@ -26,7 +26,7 @@ class IngredientController(
     /** REQ-INGR-002 / REQ-INGR-USER-002: full-text search; eigene PENDING-Einträge bleiben sichtbar. */
     @GetMapping
     fun search(
-        @RequestParam("q") query: String,
+        @RequestParam("q", required = false, defaultValue = "") query: String,
         @RequestParam("limit", required = false, defaultValue = "20") limit: Int,
         @RequestParam("excludeAllergens", required = false) excludeAllergens: List<String>? = null,
         @RequestParam("excludeFodmap", required = false) excludeFodmap: List<String>? = null,
