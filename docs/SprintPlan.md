@@ -1362,6 +1362,110 @@ Letzter Release-Gate-Punkt: Operations-Doku für v1.0 Go-Live.
 **Backlog post-v1.0 (Polish):**
 - **POLISH-WELCOME-001:** Welcome-Step in OnboardingScreen aufwerten: App-Logo, 3 Bullet-Points (z.B. „Vollständig on-device", „Verschlüsselt", „Keine Werbung"), eigener „Los geht's"-CTA statt generischem „Weiter". Aus F-002 entstanden.
 
+### 🛠️ P5.S1 Run 1 Case 1.2 Result + P5-Pause + P6-Spec (2026-05-26)
+
+**Slice-Inhalt:** Case 1.2 (Register + Email-Verify + 14-Step Onboarding-Wizard) durchlaufen. Resultat: ✅ Funktional PASS, aber 10 substanzielle UX/Scope-Findings. P5 wird pausiert; P6 (Histamind-Fusion + Scope-Refinement) wird neu eingefügt.
+
+- **Case 1.2 ✅:** Register-Flow (Validation/Rate-Limit greifen wie spezifiziert: 400 bei `asD@asD>DE`, 429 nach 3 Versuchen/h pro IP — siehe `RateLimitFilter.kt` Bandwidth `register=3/60min`). 14-Step Wizard durchgespielt mit Marie-Persona, Home-Screen erreicht.
+- **Findings F-003..F-012 in BattleTestPlan §6** dokumentiert. Severity-Verteilung: 2× S1-Scope (F-010 Log, F-012 Style), 5× S2 (F-004/005/007/009/011), 4× S3 (F-003/006/008 + F-006).
+- **Entscheidung:** P5 (Stabilization, „nur Testen") wird pausiert. F-010/F-012/F-004 sind keine Test-Findings, sondern Scope-/Spec-Änderungen. Weiteres Smoke-Testen auf altem UI wäre verschwendete Zeit.
+- **Übergang:** P6 wird neu in den SprintPlan eingeführt (siehe §4b unten). BattleTestPlan §8 P5-Pause-Vermerk + R2 verschoben.
+
+**Doc-Drift-Eval 00–09:**
+- 00 Plan — **Drift akzeptiert:** P6-Phase neu eingefügt; ändert die Phasen-Sequenz P5→Release zu P5(pause)→P6→P5-Resume→Release.
+- 01 Vision — **kein Drift, aber Risiko:** F-010 (Log = Event-Log statt Tagebuch) und F-008/F-009 (Listen-Befüllung + Wording) berühren das Produkt-Konzept; wird in P6.S1 Vision-Reklärung explizit aufgegriffen, nicht jetzt.
+- 02 Glossary — **Drift markiert (P6.S1):** F-008 zeigt Konflikt „Zutat" vs. „Lebensmittel"; Glossary muss in P6.S1 harmonisiert werden. Jetzt noch nicht touched.
+- 03 Architecture — kein Drift jetzt; Style-Fusion (F-012) hat keine Architektur-Auswirkung (nur `theme.ts` / Compose-Theme).
+- 04 Requirements — **Drift markiert (P6.S1):** F-010 invertiert REQ-LOG-001..006 (Tagebuch→Event-Log). F-011 erweitert REQ-PROFILE-* um per-Nutrient-Goals. F-005/F-007 fügen UX-Constraints zu REQ-WATER-* und REQ-INTAKE-* hinzu. Re-Spec in P6.S1.
+- 05 Milestones — **Drift akzeptiert:** Release-Tag rückt um P6-Dauer. v1.0.0 bleibt bestehen (Code-State zum Zeitpunkt des Tags ist immutable); v1.1.0 nach P6+P5-Resume.
+- 06 Progress — kein separater Eintrag; BattleTestPlan Run-Log + §6 Failures-Log sind die kanonische Quelle.
+- 07 Coding Conventions — kein Drift.
+- 08 Test Strategy — kein Drift; F-010 ist „Spec drift discovered during testing" — exakt was BattleTestPlan §6 + Single-Run-Then-Fixes vorsieht.
+- 09 Bootstrap (Runbook) — kein Drift.
+
+**Touched Docs:** `docs/BattleTestPlan.md` (R1 Update + Case 1.2 ✅ + F-003..F-012 + §8), `docs/SprintPlan.md` (dieser Block + neue §4b P6-Phase).
+**Untouched (begründet):** 01 Vision, 02 Glossary, 03 Architecture, 04 ReqSpec, 06 Progress, 07 Coding, 08 Test Strategy, 09 Bootstrap — werden in P6.S1 (Vision/Glossary/ReqSpec Re-Lock) explizit angefasst, NICHT jetzt im laufenden Slice. Jetzt nur Sprint-Plan + Findings-Tracking.
+
+---
+
+## 4b. Phase P6 — Histamind-Fusion + Scope-Refinement (eingefügt 2026-05-26)
+
+**Ziel:** Vor Wiederaufnahme von P5-Battle-Tests wird das UI/UX-Konzept neu kalibriert anhand der Run-1-Findings F-003..F-012. Fokus: visuelle Modernisierung (70% Histamind / 30% HealthForge), Re-Spec Log-Konzept, individuelle Nutrient-Ziele, Home-Nutrition-Selektion, fehlende destruktive Wasser-Aktion, Listen-Vorbefüllung, Glossary-Konsistenz.
+
+**Phasen-Charakter:** Hybrid aus Spec-Re-Lock (P6.S1) + Implementation-Sprints (P6.S2..S5). Keine neuen Domain-Features außerhalb der Findings — Scope geschlossen auf F-003..F-012.
+
+### Sprint P6.S1 — Re-Spec & Vision-Reklärung
+
+**Deliverables:**
+- **MOD ReqSpec.md:** Re-Spec REQ-LOG-001..006 (Tagebuch → Event-Log für punktuelle Beschwerden; Schlaf/Mood raus oder optional Sub-Feature); Erweiterung REQ-PROFILE-* um per-Nutrient-Goals; UX-Constraints zu REQ-WATER-* (Entfernen-Aktion) und REQ-INTAKE-* (Flow „Hinzufügen" → Lebensmittel-Screen).
+- **MOD docs/GUI.md + docs/UsabilityMap.md:** Histamind-Style-Referenz dokumentieren (Screenshot-Refs oder Style-Tokens), 70/30-Fusion-Prinzipien, Home-Nutrition-Selektion-Pattern (N visible / Rest collapsed mit Sparkline).
+- **MOD docs/Architecture.md (Glossary-Sektion):** „Zutat" vs. „Lebensmittel" final entschieden + überall konsistent.
+- **MOD docs/TraceabilityMatrix.md:** Neue REQ-IDs verlinkt mit P6.S2..S5.
+- **NEW Backlog:** Falls F-006 (Wasser-Alarm-UX) als Polish bleibt → POLISH-WATER-ALARM-001.
+
+**Akzeptanz:** Alle Docs gegen F-003..F-012 cross-referenziert; jeder Finding hat entweder REQ-ID + Sprint-Zuweisung oder Polish-Backlog-Eintrag.
+
+**REQ-IDs (Re-Spec):** REQ-LOG-001..006 (invertiert), REQ-PROFILE-* (erweitert), REQ-WATER-* (Entfernen-Aktion), REQ-INTAKE-* (Flow), REQ-HOME-001..005 (Nutrition-Selektion).
+
+### Sprint P6.S2 — Visual Restyle (Histamind-Fusion 70/30)
+
+**Deliverables:**
+- `android_app/.../presentation/theme/`: Color-Palette + Typography aligned mit Histamind-Referenz (P6.S1 Style-Tokens).
+- Compose-Components-Sweep: Cards, Buttons, Progress-Rings, Sliders, ListItems.
+- Light + Dark Variante.
+- Screenshot-Galerie pro Screen (vorher/nachher) im PR.
+
+**Akzeptanz:** Visual Pass auf allen Top-Level-Screens (Home, Plan, Log, Essen, Profil); Histamind-Vergleichs-Score subjektiv „70%-ähnlich" (User-Sign-Off).
+
+**REQ-IDs:** F-012; betrifft REQ-NAV-* + REQ-THEME-* (falls existiert) nur visuell, keine Logik-Änderung.
+
+### Sprint P6.S3 — Onboarding-Slider + Profil-Goals
+
+**Deliverables:**
+- `OnboardingScreen.kt`: Zahlen-Inputs für Alter/Größe/Gewicht → Material3 Slider mit Live-Anzeige.
+- `ProfileScreen.kt`: Neue Sektion „Tagesziele" mit per-Nutrient-Editor (kcal, Protein, Fett, Carbs, ggf. Mikronährstoffe falls bereits modelliert).
+- `User`-Entity / DB-Migration `V12__per_nutrient_goals.sql` falls neue Spalten nötig.
+
+**Akzeptanz:** Slider funktional + Werte persistent; Profil-Goals override Default-Berechnung; Home-Ringe nutzen die individuellen Goals.
+
+**REQ-IDs:** F-003, F-011; REQ-ONBOARD-001, REQ-PROFILE-*.
+
+### Sprint P6.S4 — Home-Nutrition-UI + Wasser-Fix + Listen-Vorbefüllung
+
+**Deliverables:**
+- `HomeScreen.kt`: Nutrition-Sektion umbauen — User wählt N primäre Nutrients (z.B. 4), Rest collapsed darunter mit kleinem Progress-Bar + Verlaufs-Sparkline (7 Tage). Settings dafür in Profil.
+- `WaterTracker.kt`: Entfernen-Aktion (Long-Press oder Swipe → Snackbar Undo). Helper-Text für Wasser-Alarm-Toggle.
+- `IngredientScreen.kt` + `RecipeScreen.kt`: Listen on-open mit DB-Items vorbefüllen (alphabetisch sortiert, Pagination ab N=50). Search-Bar bleibt obenauf.
+- `PlanScreen.kt` Add-Sheet: Wording „Rezept oder **Lebensmittel**" (statt „Zutat").
+- `IntakeAddFlow`: „Hinzufügen" navigiert direkt zum Lebensmittel-Screen statt eigenes Add-Sheet (siehe F-007).
+
+**Akzeptanz:** Manuelle Re-Verifikation der F-004 / F-005 / F-006 / F-007 / F-008 / F-009 — alle „open" → „fixed".
+
+**REQ-IDs:** F-004, F-005, F-006, F-007, F-008, F-009; REQ-HOME-001..005, REQ-WATER-*, REQ-INGR-*, REQ-PLAN-*, REQ-INTAKE-*.
+
+### Sprint P6.S5 — Log-Konzept-Inversion (Event-Log)
+
+**Deliverables:**
+- `LogScreen.kt` Re-Architecture: Event-Log mit Severity + Symptom-Tag + Notiz + Timestamp. Mood/Schlaf entweder entfernt oder als optionales Sub-Tab.
+- DB-Migration `V13__log_event_schema.sql`: ggf. neue Tabelle `log_events` oder Schema-Erweiterung von `log_entries` (forward-only, Daten-Migration definieren falls bestehende Test-Daten).
+- Server-DTOs angepasst.
+- Insight-Engine (`InsightService`) auf Event-Häufigkeiten umstellen falls existiert.
+
+**Akzeptanz:** Event-Eintrag in <10 Sek erfassbar; Histogramm-/Trend-Ansicht für die letzten 14 Tage.
+
+**REQ-IDs:** F-010; REQ-LOG-001..006 (invertiert), REQ-INSIGHT-001..003.
+
+### Sprint P6.S6 — P5-Resume-Vorbereitung
+
+**Deliverables:**
+- BattleTestPlan §1.3–§1.12 + §2.* aktualisieren wo P6-Changes die Pass-Kriterien verschieben.
+- Trockenlauf 1.3 + 2 weitere kritische Cases.
+- Run 2 in BattleTestPlan Run-Log eintragen, dann zurück in **P5.S1 Resume**.
+
+**Akzeptanz:** BattleTestPlan reflektiert P6-State; R2 startet ohne Doc-Drift.
+
+**REQ-IDs:** Cross-cuts P5.
+
 ---
 
 ## 5. Inter-Phase-Wartungs-Tasks

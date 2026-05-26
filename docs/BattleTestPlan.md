@@ -30,8 +30,8 @@ Pro Case in der **Result**-Spalte: Symbol + Datum (`✅ 2026-05-27`) + ggf. Run-
 
 | Run | Datum | Surface | Ergebnis kurz |
 |---|---|---|---|
-| R1 | 2026-05-26 (in progress) | §1 Persona-Smoke | 1.1 ✅ (Login rendert); F-001 Doc-Drift gefixt (BattleTestPlan Case 1.1 = Login first); F-002 Doc-Drift gefixt (UsabilityMap §2 Step 1 = schlanke Welcome-Variante, Polish-Backlog post-v1.0) |
-| R2 | _pending_ | Re-Run S1+S2 fails | _ausstehend_ |
+| R1 | 2026-05-26 (paused) | §1 Persona-Smoke | 1.1 ✅; 1.2 ✅ mit 10 UX/Scope-Findings (F-003..F-012); **P5 pausiert** zugunsten P6 (Histamind-Fusion + Scope-Refinement). Cases 1.3–1.12 verschoben hinter P6, da Home/Plan/Log-UX vor weiterem Smoke umgebaut wird. |
+| R2 | _pending nach P6_ | §1.3–§1.12 + §2–§5 | _ausstehend_ |
 
 ---
 
@@ -42,7 +42,7 @@ Vor §2–§5 durchzuführen. Wenn §1 kippt: erst fixen, dann Tiefe.
 | # | Schritt | Pass-Kriterium | REQ-IDs | UsabilityMap-Anker | Result | Notes |
 |---|---|---|---|---|:-:|---|
 | 1.1 | Frischer Emulator: App installieren + öffnen → **Login-Screen** | Titel „HealthForge" + Heading „Willkommen zurück" + E-Mail/Passwort-Felder + disabled „Anmelden" + Link „Passwort vergessen?" + Link „Konto mit Einladungscode erstellen"; kein Crash | REQ-AUTH-001 | LoginScreen (separat vom Wizard) | ✅ 2026-05-26 | F-001 doc-fix: Spec sagte fälschlich Welcome-first; Reality = Login first |
-| 1.2 | „Konto mit Einladungscode erstellen" → Register-Form (Code/Anzeigename/Email/PW×2) → Submit → Email-Verify → Onboarding-Wizard 14 Steps (Welcome → DisplayName → Age → Sex → Height → Weight → Activity → Goal → Allergies → Intolerances+Histamin → MealSlots → MaxPrep → Theme → Review) → Fertig | Register: Invalid-Code → Fehler; Valid → Verify-Screen. Wizard: forward-only, Validierung pro Step, „Fertig"-Button am Ende. UsabilityMap §2 Step 1 reflektiert die schlanke Welcome-Variante (Heading+Text+Weiter, kein Logo+3 Bullets — F-002 doc-fix, Polish-Backlog post-v1.0). | REQ-AUTH-002/003/004, REQ-ONBOARD-001, REQ-PROFILE-001..006 | §2 Steps 1–14 | ⬜ | |
+| 1.2 | „Konto mit Einladungscode erstellen" → Register-Form (Code/Anzeigename/Email/PW×2) → Submit → Email-Verify → Onboarding-Wizard 14 Steps (Welcome → DisplayName → Age → Sex → Height → Weight → Activity → Goal → Allergies → Intolerances+Histamin → MealSlots → MaxPrep → Theme → Review) → Fertig | Register: Invalid-Code → Fehler; Valid → Verify-Screen. Wizard: forward-only, Validierung pro Step, „Fertig"-Button am Ende. UsabilityMap §2 Step 1 reflektiert die schlanke Welcome-Variante (Heading+Text+Weiter, kein Logo+3 Bullets — F-002 doc-fix, Polish-Backlog post-v1.0). | REQ-AUTH-002/003/004, REQ-ONBOARD-001, REQ-PROFILE-001..006 | §2 Steps 1–14 | ✅ 2026-05-26 | Mit Findings F-003 (Slider statt Zahlen-Inputs). Validation funktioniert (400 bei Email `asD@asD>DE`); Rate-Limit triggert nach 3 Versuchen/h → erwartetes Verhalten. |
 | 1.3 | Home öffnet, leere Ringe + Wasser 0/2000 ml + leere Liste | 4 Ringe sichtbar (kcal/P/F/C); Wasser-Block mit +250/+500/Custom; Empty-State „Heute noch nichts geloggt." | REQ-HOME-001..005, REQ-WATER-001 | §3.1 + §12 | ⬜ | |
 | 1.4 | Tag 1: Quick-Add Müsli 80 g → Wasser +500 → +500 → Apfel 150 g | Ringe füllen sich live; Snackbar Undo erscheint; Liste zeigt 2 Items + Wasser 1000 ml | REQ-INTAKE-001..004, REQ-HOME-003, REQ-WATER-002, REQ-INGR-001/002 | §3.2 + §8.1 | ⬜ | |
 | 1.5 | Essen → Rezepte → FAB+ → Rezept „Linsen-Curry" anlegen (4 Portionen, 2 Zutaten, 3 Schritte, public) | Speichern OK; Rezept erscheint in Liste; Detail zeigt Nährwerte live | REQ-RECIPE-001/002/005/007 | §5.4–§5.6 | ⬜ | |
@@ -256,7 +256,18 @@ Jeder ❌-Fail wird hier mit Severity + Repro + Fix-Status getrackt.
 
 | ID | Datum | Surface | Case | Severity | Repro (3 Zeilen) | Status | Fix-Commit |
 |---|---|---|---|---|---|---|---|
-| _F-001_ | _pending_ | _—_ | _—_ | _—_ | _—_ | _open_ | _—_ |
+| F-001 | 2026-05-26 | Doc | 1.1 | S3 | BattleTestPlan §1 Case 1.1 spec'd Welcome-first; Reality = Login first per REQ-AUTH-001. | fixed | 38ba1e9 |
+| F-002 | 2026-05-26 | Doc | 1.2 | S3 | UsabilityMap §2 Step 1 spec'd Logo+3 Bullets+'Los geht's'; Reality = Heading+Text+Weiter. Polish post-v1.0 (POLISH-WELCOME-001). | fixed (doc) | 38ba1e9 |
+| F-003 | 2026-05-26 | Android Wizard | 1.2 | S3 | Onboarding nutzt Zahlen-Inputs für Alter/Größe/Gewicht; User-Feedback: nervig, Slider gewünscht. | open | — |
+| F-004 | 2026-05-26 | Android Home | post-1.2 | S2 | User kann Nutritions-Anzeige nicht selbst auswählen (N visible / Rest collapsed mit Progress + Trend-Sparkline à la Histamind). | open | — |
+| F-005 | 2026-05-26 | Android Home | post-1.2 | S2 | Wasser kann hinzugefügt, aber nicht entfernt werden → User-Verklick irreversibel. | open | — |
+| F-006 | 2026-05-26 | Android Home | post-1.2 | S3 | Wasser-Alarm-Toggle: Funktion unklar (kein Helper-Text, kein Reminder-Interval-Hinweis). | open | — |
+| F-007 | 2026-05-26 | Android Home/Essen | post-1.2 | S2 | „Hinzufügen" öffnet dediziertes Add-Fenster statt direkt den Lebensmittel-Screen → bricht den natürlichen Flow. | open | — |
+| F-008 | 2026-05-26 | Android Plan | post-1.2 | S3 | Plan→„hinzufügen" zeigt „Rezept oder Zutat" — sollte konsistent „Rezept oder Lebensmittel" sein (Glossary-Konflikt). | open | — |
+| F-009 | 2026-05-26 | Android Listen | post-1.2 | S2 | Lebensmittel-/Rezept-Listen starten leer; sollen schon befüllt sein (alphabetisch sortiert). | open | — |
+| F-010 | 2026-05-26 | Android Log | post-1.2 | S1-Scope | Log ist als Tagebuch (Mood/Schlaf) konzipiert; User-Intent ist Event-Log für punktuelle Beschwerden. Scope-Inversion → Re-Spec nötig. | open | — |
+| F-011 | 2026-05-26 | Android Profil | post-1.2 | S2 | Tagesziele pro Nutrient nicht individuell anpassbar (blockiert Diäten-Use-Case). | open | — |
+| F-012 | 2026-05-26 | Android Theme/Style | global | S1-Scope | Aktueller Style „altbacken"; Ziel: 70% Histamind-Style + 30% HealthForge-Style fusionieren. Major-Visual-Redesign. | open | — |
 
 **Workflow:**
 
@@ -278,6 +289,19 @@ Diese Sektion wird datiert + signiert sobald §1–§5 mindestens 1× ohne offen
 - **Sign-Off (v1.0 ship-ready für Beta):** _Datum offen — Solo-Operator_
 
 > Vor Sign-Off: TraceabilityMatrix-Statistik final reviewen; SprintPlan-Phase-Abschluss-Block ergänzen; ggf. APK signieren und an Beta-User verteilen (siehe Runbook §2.5).
+
+---
+
+---
+
+## §8 P5-Pause-Vermerk (2026-05-26)
+
+Nach Case 1.2 PASS wurde P5 pausiert. Begründung: F-010 (Log-Konzept-Inversion), F-012 (Visual-Redesign Histamind-Fusion) und F-004 (Home-Nutrition-UX-Umbau) sind keine Test-Findings sondern Scope-Änderungen, die vor weiterem Smoke durchgezogen werden müssen — sonst testet R1 ein bekannt-veraltetes UI.
+
+**Übergang nach P6:**
+- Cases 1.3–1.12 verschoben hinter P6.
+- Findings F-003..F-012 sind nun in SprintPlan §P6 als Sprint-Inhalte priorisiert.
+- BattleTestPlan-Re-Run (R2) startet nach P6-Abschluss mit Cases 1.3..1.12 + komplettem §2–§5 auf neuem UI.
 
 ---
 
