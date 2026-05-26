@@ -27,10 +27,8 @@ data class EntryRowUi(
 )
 
 data class QuickAddDraft(
-    val mood: Int = 5,
-    val sleepQuality: Int? = null,
-    val sleepHours: String = "",
-    val selectedSymptoms: Map<Long, Int> = emptyMap(), // symptomId → severity 1..5
+    val severity: Int = 3, // 1..5
+    val selectedSymptomIds: Set<Long> = emptySet(),
     val tags: List<String> = emptyList(),
     val note: String = "",
 )
@@ -86,18 +84,11 @@ class LogViewModel @Inject constructor(
         LogUiState(symptoms = symptoms, rows = rows, draft = draft, message = msg, isSaving = saving)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LogUiState())
 
-    fun setMood(v: Int) = _draft.update { it.copy(mood = v.coerceIn(1, 10)) }
-    fun setSleepQuality(v: Int?) = _draft.update { it.copy(sleepQuality = v?.coerceIn(1, 5)) }
-    fun setSleepHours(v: String) = _draft.update { it.copy(sleepHours = v) }
+    fun setSeverity(v: Int) = _draft.update { it.copy(severity = v.coerceIn(1, 5)) }
     fun toggleSymptom(id: Long) = _draft.update { d ->
-        val cur = d.selectedSymptoms.toMutableMap()
-        if (cur.containsKey(id)) cur.remove(id) else cur[id] = 3
-        d.copy(selectedSymptoms = cur)
-    }
-    fun setSeverity(symptomId: Long, sev: Int) = _draft.update { d ->
-        val cur = d.selectedSymptoms.toMutableMap()
-        cur[symptomId] = sev.coerceIn(1, 5)
-        d.copy(selectedSymptoms = cur)
+        val cur = d.selectedSymptomIds.toMutableSet()
+        if (!cur.add(id)) cur.remove(id)
+        d.copy(selectedSymptomIds = cur)
     }
     fun addTag(tag: String) = _draft.update {
         val t = tag.trim()
@@ -119,23 +110,16 @@ class LogViewModel @Inject constructor(
 
     fun save() {
         val d = _draft.value
-        val hours = d.sleepHours.replace(',', '.').toDoubleOrNull()
-        if (d.sleepHours.isNotBlank() && hours == null) {
-            _message.value = "Schlafstunden ungültig"
-            return
-        }
         _isSaving.value = true
         viewModelScope.launch {
             runCatching {
                 repo.upsert(
                     entry = LogEntryEntity(
                         occurredAtEpochMs = System.currentTimeMillis(),
-                        mood = d.mood,
-                        sleepQuality = d.sleepQuality,
-                        sleepHours = hours,
+                        severity = d.severity,
                         note = d.note.ifBlank { null },
                     ),
-                    symptoms = d.selectedSymptoms.toList(),
+                    symptomIds = d.selectedSymptomIds.toList(),
                     tags = d.tags,
                 )
             }.onSuccess {

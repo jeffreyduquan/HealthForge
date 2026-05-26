@@ -20,21 +20,24 @@ data class SymptomDefEntity(
 )
 
 /**
- * One symptom-diary entry. Multiple entries per day allowed (REQ-LOG-004).
+ * One symptom-event entry. Multiple entries per day allowed (REQ-LOG-004).
  * 7-day editable window enforced in domain layer (REQ-LOG-006).
+ *
+ * P6.S6 (F-010): Mood/Sleep entfernt — Modell ist nun event-basiert mit einer
+ * Severity je Event (1..5) und tagged Symptomen aus dem Katalog. Per-Symptom-
+ * Severity (in `log_entry_symptom`) entfällt zugunsten dieser einen Event-Severity.
  */
 @Entity(tableName = "log_entry")
 data class LogEntryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val occurredAtEpochMs: Long,
-    val mood: Int,
-    val sleepQuality: Int? = null,
-    val sleepHours: Double? = null,
+    val severity: Int = 3, // 1..5; default „mittel"
     val note: String? = null,
 )
 
 /**
- * Join row: which symptoms were tagged on a log entry, with severity 1–5.
+ * Join row: which symptoms were tagged on a log entry. Severity sits on the
+ * parent `LogEntryEntity` (one Severity per Event) since P6.S6 (F-010).
  */
 @Entity(
     tableName = "log_entry_symptom",
@@ -58,7 +61,6 @@ data class LogEntryEntity(
 data class LogEntrySymptomEntity(
     val entryId: Long,
     val symptomId: Long,
-    val severity: Int,
 )
 
 /**

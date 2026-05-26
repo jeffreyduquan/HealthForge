@@ -74,20 +74,20 @@ fun LogChartsScreen(
                 }
             } else {
                 ChartCard(
-                    title = "Mood (1–10)",
-                    values = s.data.map { it.moodAvg },
-                    labels = s.data.map { it.date.format(DateTimeFormatter.ofPattern("dd.MM")) },
-                    yMin = 1f,
-                    yMax = 10f,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                ChartCard(
                     title = "Symptom-Severity (Ø 1–5)",
                     values = s.data.map { it.severityAvg },
                     labels = s.data.map { it.date.format(DateTimeFormatter.ofPattern("dd.MM")) },
                     yMin = 1f,
                     yMax = 5f,
                     color = MaterialTheme.colorScheme.tertiary,
+                )
+                ChartCard(
+                    title = "Einträge pro Tag",
+                    values = s.data.map { it.entryCount.toDouble() },
+                    labels = s.data.map { it.date.format(DateTimeFormatter.ofPattern("dd.MM")) },
+                    yMin = 0f,
+                    yMax = (s.data.maxOfOrNull { it.entryCount }?.toFloat()?.coerceAtLeast(1f) ?: 1f),
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }

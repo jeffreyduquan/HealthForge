@@ -1,14 +1,22 @@
 package de.healthforge.presentation.log
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,10 +26,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -29,14 +34,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,17 +48,32 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.SymptomDefEntity
+import de.healthforge.presentation.theme.AmbientBackdrop
+import de.healthforge.presentation.theme.GlassCard
+import de.healthforge.presentation.theme.GradientButton
+import de.healthforge.presentation.theme.GradientText
+import de.healthforge.presentation.theme.LocalHmTokens
+import de.healthforge.presentation.theme.SectionPill
+import de.healthforge.presentation.theme.StatusGood
+import de.healthforge.presentation.theme.StatusOverUl
+import de.healthforge.presentation.theme.StatusRelax
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * P6.S6 Slice B: Histamind Glass-Rewrite (AmbientBackdrop + GlassCard QuickAdd + GlassCard
+ * EntryRows mit Severity-Bar). Mood/Sleep wurden in Slice A entfernt; pro Event existiert
+ * jetzt nur noch eine Severity 1..5 (REQ-LOG-001..006).
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun LogScreen(
     onOpenCharts: () -> Unit = {},
@@ -66,6 +83,7 @@ fun LogScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val hm = LocalHmTokens.current
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -76,39 +94,53 @@ fun LogScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Symptom-Tagebuch") },
-                actions = {
-                    IconButton(onClick = onOpenCharts) {
-                        Icon(Icons.Filled.BarChart, contentDescription = "Charts")
-                    }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(hm.background),
+    ) {
+        AmbientBackdrop(Modifier.fillMaxSize())
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item { QuickAddCard(state, vm) }
             item {
-                HorizontalDivider()
-                Text(
-                    "Verlauf",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        GradientText(
+                            text = "Symptom-Tagebuch",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        )
+                        Text(
+                            todayLabel(),
+                            color = hm.fgSecondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    IconButton(onClick = onOpenCharts) {
+                        Icon(Icons.Filled.BarChart, contentDescription = "Charts", tint = hm.fgSecondary)
+                    }
+                }
             }
+
+            item { SectionPill(label = "SCHNELLEINTRAG") }
+            item { QuickAddCard(state, vm) }
+
+            item { SectionPill(label = "VERLAUF") }
             if (state.rows.isEmpty()) {
                 item {
-                    Text(
-                        "Noch keine Einträge. Lege oben den ersten an.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+                        Text(
+                            "Noch keine Einträge. Lege oben den ersten an.",
+                            color = hm.fgSecondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
             } else {
                 items(state.rows, key = { it.entry.id }) { row ->
@@ -116,76 +148,62 @@ fun LogScreen(
                 }
             }
         }
+
+        SnackbarHost(snackbar, modifier = Modifier.statusBarsPadding())
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuickAddCard(state: LogUiState, vm: LogViewModel) {
     val draft = state.draft
+    val hm = LocalHmTokens.current
     var symptomPickerOpen by remember { mutableStateOf(false) }
     var addSymptomOpen by remember { mutableStateOf(false) }
     var tagInput by remember { mutableStateOf("") }
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                todayLabel(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-
-            Text("Mood: ${draft.mood}/10", style = MaterialTheme.typography.bodyMedium)
-            Slider(
-                value = draft.mood.toFloat(),
-                onValueChange = { vm.setMood(it.toInt()) },
-                valueRange = 1f..10f,
-                steps = 8,
-            )
-
-            Text(
-                "Schlafqualität: ${draft.sleepQuality?.let { "$it/5" } ?: "—"}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                (1..5).forEach { q ->
-                    FilterChip(
-                        selected = draft.sleepQuality == q,
-                        onClick = { vm.setSleepQuality(if (draft.sleepQuality == q) null else q) },
-                        label = { Text(q.toString()) },
-                    )
-                }
+    GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Severity",
+                    color = hm.fgPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    "${draft.severity}/5",
+                    color = severityColor(draft.severity),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                )
             }
-
-            OutlinedTextField(
-                value = draft.sleepHours,
-                onValueChange = vm::setSleepHours,
-                label = { Text("Schlafdauer (h)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+            Slider(
+                value = draft.severity.toFloat(),
+                onValueChange = { vm.setSeverity(it.toInt()) },
+                valueRange = 1f..5f,
+                steps = 3,
             )
 
-            Text(
-                "Symptome",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            if (draft.selectedSymptoms.isEmpty()) {
+            Text("Symptome", color = hm.fgSecondary, style = MaterialTheme.typography.labelMedium)
+            if (draft.selectedSymptomIds.isEmpty()) {
                 Text(
                     "Keine Symptome ausgewählt.",
+                    color = hm.fgTertiary,
                     style = MaterialTheme.typography.bodySmall,
                 )
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    draft.selectedSymptoms.forEach { (id, sev) ->
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    draft.selectedSymptomIds.forEach { id ->
                         val name = state.symptoms.firstOrNull { it.id == id }?.name ?: "?"
-                        SymptomSeverityChip(
-                            name = name,
-                            severity = sev,
-                            onSeverity = { vm.setSeverity(id, it) },
-                            onRemove = { vm.toggleSymptom(id) },
+                        AssistChip(
+                            onClick = { vm.toggleSymptom(id) },
+                            label = { Text(name) },
+                            trailingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
                         )
                     }
                 }
@@ -199,13 +217,12 @@ private fun QuickAddCard(state: LogUiState, vm: LogViewModel) {
                 TextButton(onClick = { addSymptomOpen = true }) { Text("Eigenes anlegen") }
             }
 
-            Text(
-                "Tags",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
+            Text("Tags", color = hm.fgSecondary, style = MaterialTheme.typography.labelMedium)
             if (draft.tags.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     draft.tags.forEach { t ->
                         AssistChip(
                             onClick = { vm.removeTag(t) },
@@ -237,16 +254,15 @@ private fun QuickAddCard(state: LogUiState, vm: LogViewModel) {
                 minLines = 2,
             )
 
-            Button(
-                onClick = vm::save,
-                enabled = !state.isSaving,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                if (state.isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.height(18.dp))
-                } else {
-                    Text("Speichern")
+            if (state.isSaving) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.height(20.dp))
                 }
+            } else {
+                GradientButton(text = "Speichern", onClick = vm::save)
             }
         }
     }
@@ -254,7 +270,7 @@ private fun QuickAddCard(state: LogUiState, vm: LogViewModel) {
     if (symptomPickerOpen) {
         SymptomPickerDialog(
             available = state.symptoms,
-            selectedIds = state.draft.selectedSymptoms.keys,
+            selectedIds = state.draft.selectedSymptomIds,
             onToggle = vm::toggleSymptom,
             onDismiss = { symptomPickerOpen = false },
         )
@@ -269,42 +285,70 @@ private fun QuickAddCard(state: LogUiState, vm: LogViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EntryRow(row: EntryRowUi, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 1.dp,
+    val hm = LocalHmTokens.current
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        padding = PaddingValues(0.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    timeLabel(row.entry.occurredAtEpochMs),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("· Mood ${row.entry.mood}/10", style = MaterialTheme.typography.bodySmall)
-                if (!row.editable) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(severityColor(row.entry.severity)),
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        timeLabel(row.entry.occurredAtEpochMs),
+                        color = hm.fgPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleSmall,
+                    )
                     Spacer(Modifier.width(8.dp))
-                    AssistChip(onClick = {}, label = { Text("nur lesen") })
+                    Text(
+                        "Severity ${row.entry.severity}/5",
+                        color = severityColor(row.entry.severity),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    if (!row.editable) {
+                        Spacer(Modifier.width(8.dp))
+                        Text("· nur lesen", color = hm.fgTertiary, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
-            }
-            if (row.symptomNames.isNotEmpty()) {
-                Text(
-                    row.symptomNames.joinToString(", "),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            row.entry.note?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall)
+                if (row.symptomNames.isNotEmpty()) {
+                    Text(
+                        row.symptomNames.joinToString(", "),
+                        color = hm.fgSecondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                row.entry.note?.takeIf { it.isNotBlank() }?.let {
+                    Text(it, color = hm.fgTertiary, style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
     }
+}
+
+private fun severityColor(s: Int): Color = when (s) {
+    1, 2 -> StatusGood
+    3 -> StatusRelax
+    else -> StatusOverUl
 }
 
 @Composable
@@ -355,34 +399,6 @@ private fun AddCustomSymptomDialog(onConfirm: (String) -> Unit, onDismiss: () ->
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
     )
-}
-
-@Composable
-internal fun SymptomSeverityChip(
-    name: String,
-    severity: Int,
-    onSeverity: (Int) -> Unit,
-    onRemove: () -> Unit,
-) {
-    Surface(tonalElevation = 1.dp, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            (1..5).forEach { lvl ->
-                FilterChip(
-                    selected = severity == lvl,
-                    onClick = { onSeverity(lvl) },
-                    label = { Text(lvl.toString()) },
-                    modifier = Modifier.padding(horizontal = 1.dp),
-                )
-            }
-            IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Close, contentDescription = "Entfernen")
-            }
-        }
-    }
 }
 
 private fun todayLabel(): String =

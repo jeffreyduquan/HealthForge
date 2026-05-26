@@ -35,7 +35,7 @@ class CalculateInsightsUseCase @Inject constructor(
                             symptomId = r.symptomId,
                             symptomName = def.name,
                             occurredAtEpochMs = entry.occurredAtEpochMs,
-                            severity = r.severity.coerceIn(1, 5),
+                            severity = entry.severity.coerceIn(1, 5),
                         ),
                     )
                 }

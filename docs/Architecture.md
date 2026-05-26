@@ -492,6 +492,7 @@ Alle Entscheidungen final für v1.0. Änderungen erfordern Doc-Versionsbump.
 | Q3b | Domain-Schema | **api.healthforge.endgear.de / admin.healthforge.endgear.de / cdn.healthforge.endgear.de** | User-Domain `endgear.de` mit nested Subdomain |
 | Q4 | Auto-Planner (P4) | **Server-side Beam-Search** | Zentral, simpler |
 | Q5 | Bayesian Insights (P4) | **Nur lokal auf Client** | Privacy maximal |
+| Q5b | Profile + Symptom-Log Storage | **Nur lokal auf Client (Room/SQLCipher)** \u2014 NIE auf Server (REQ-PROFILE-001/002). Server-`users`-Tabelle hat nur Auth-Felder; es gibt KEINE Server-`log_entries`-Tabelle. Konsequenz f\u00fcr P6.S6: Schema-\u00c4nderungen f\u00fcr Profile-Goals + Log-Events laufen \u00fcber Room-Migration (Schema-Bump 6\u21927), nicht Flyway. | Konsistente Privacy-Boundary; Profile-Daten (H\u00f6he, Gewicht, Ziele, Mahlzeiten, Allergien) und Symptom-Tagebuch verlassen das Ger\u00e4t nicht |
 | Q6 | JWT-Algorithmus | **HS512 (symmetrisch)** für v1.0 | Einfach, ausreichend |
 | Q7 | Object-Storage | **MinIO self-hosted** im docker-compose | Volle Kontrolle |
 | Q8 | Backups | **Lokal auf MinIO** im selben VPS + täglich `pg_dump` (30 Tage Retention) | Pragmatisch, Risiko akzeptiert |

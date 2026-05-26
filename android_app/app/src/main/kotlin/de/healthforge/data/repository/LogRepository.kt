@@ -16,7 +16,7 @@ import javax.inject.Singleton
  */
 data class LogEntryWithDetails(
     val entry: LogEntryEntity,
-    val symptoms: List<Pair<SymptomDefEntity, Int>>, // symptom + severity 1..5
+    val symptoms: List<SymptomDefEntity>,
     val tags: List<String>,
 )
 
@@ -63,20 +63,21 @@ class LogRepository @Inject constructor(
         val sympRows = logDao.symptomsForEntry(entryId)
         val tagRows = logDao.tagsForEntry(entryId)
         val defs = symptomDao.all().associateBy { it.id }
-        val symptoms = sympRows.mapNotNull { row -> defs[row.symptomId]?.let { it to row.severity } }
+        val symptoms = sympRows.mapNotNull { row -> defs[row.symptomId] }
         return LogEntryWithDetails(entry, symptoms, tagRows.map { it.tag })
     }
 
     suspend fun upsert(
         entry: LogEntryEntity,
-        symptoms: List<Pair<Long, Int>>, // symptomId, severity
+        symptomIds: List<Long>,
         tags: List<String>,
     ): Long = logDao.upsertWithChildren(
         entry = entry,
-        symptoms = symptoms.map { (sid, sev) ->
-            LogEntrySymptomEntity(entryId = entry.id, symptomId = sid, severity = sev.coerceIn(1, 5))
+        symptoms = symptomIds.map { sid ->
+            LogEntrySymptomEntity(entryId = entry.id, symptomId = sid)
         },
-        tags = tags.map { LogEntryTagEntity(entryId = entry.id, tag = it.trim()) }.filter { it.tag.isNotEmpty() },
+        tags = tags.map { LogEntryTagEntity(entryId = entry.id, tag = it.trim()) }
+            .filter { it.tag.isNotEmpty() },
     )
 
     suspend fun delete(entryId: Long) = logDao.deleteEntry(entryId)

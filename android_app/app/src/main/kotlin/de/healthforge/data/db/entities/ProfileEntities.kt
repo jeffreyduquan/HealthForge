@@ -24,6 +24,18 @@ data class UserProfileEntity(
     val mealSlotsJson: String = "[]",      // comma-stored MealSlot names
     val maxPrepTimeMin: Int? = null,
     val waterGoalMl: Int = 2000,
+    /**
+     * Per-Nutrient-Tagesziele als JSON-Map `{ "kcal": 2200.0, "protein": 110.0, ... }`.
+     * Leeres Objekt = automatisch aus age/sex/weight/activity/goal berechnen.
+     * REQ-PROFILE-GOALS-001 (P6.S6, F-011).
+     */
+    val dailyNutrientGoalsJson: String = "{}",
+    /**
+     * Welche Nährstoffe als Ringe/Karten auf dem Home/Insights-Screen sichtbar sind.
+     * JSON-Array von Nutrient-Keys. Default = Makros.
+     * REQ-PROFILE-GOALS-001 (P6.S6, F-011).
+     */
+    val pinnedNutrientsJson: String = "[\"kcal\",\"protein\",\"carbs\",\"fat\"]",
     val onboardingCompleted: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),

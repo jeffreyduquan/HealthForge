@@ -52,7 +52,7 @@ import de.healthforge.data.db.entities.WaterIntakeEntity
         LogEntryTagEntity::class,
         ShoppingListItemEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(EnumConverters::class)

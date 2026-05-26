@@ -119,51 +119,28 @@ fun LogEntryFormScreen(
                 )
             }
 
-            Text("Mood: ${s.mood}/10", style = MaterialTheme.typography.bodyMedium)
+            Text("Severity: ${s.severity}/5", style = MaterialTheme.typography.bodyMedium)
             Slider(
-                value = s.mood.toFloat(),
-                onValueChange = { vm.setMood(it.toInt()) },
-                valueRange = 1f..10f,
-                steps = 8,
-                enabled = s.editable,
-            )
-
-            Text(
-                "Schlafqualität: ${s.sleepQuality?.let { "$it/5" } ?: "—"}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                (1..5).forEach { q ->
-                    FilterChip(
-                        selected = s.sleepQuality == q,
-                        onClick = { if (s.editable) vm.setSleepQuality(if (s.sleepQuality == q) null else q) },
-                        label = { Text(q.toString()) },
-                        enabled = s.editable,
-                    )
-                }
-            }
-
-            OutlinedTextField(
-                value = s.sleepHours,
-                onValueChange = vm::setSleepHours,
-                label = { Text("Schlafdauer (h)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                value = s.severity.toFloat(),
+                onValueChange = { vm.setSeverity(it.toInt()) },
+                valueRange = 1f..5f,
+                steps = 3,
                 enabled = s.editable,
             )
 
             Text("Symptome", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-            if (s.selectedSymptoms.isEmpty()) {
+            if (s.selectedSymptomIds.isEmpty()) {
                 Text("Keine Symptome.", style = MaterialTheme.typography.bodySmall)
             } else {
-                s.selectedSymptoms.forEach { (id, sev) ->
-                    val name = s.symptoms.firstOrNull { it.id == id }?.name ?: "?"
-                    SymptomSeverityChip(
-                        name = name,
-                        severity = sev,
-                        onSeverity = { if (s.editable) vm.setSeverity(id, it) },
-                        onRemove = { if (s.editable) vm.toggleSymptom(id) },
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    s.selectedSymptomIds.forEach { id ->
+                        val name = s.symptoms.firstOrNull { it.id == id }?.name ?: "?"
+                        AssistChip(
+                            onClick = { if (s.editable) vm.toggleSymptom(id) },
+                            label = { Text(name) },
+                            trailingIcon = { if (s.editable) Icon(Icons.Filled.Close, contentDescription = null) },
+                        )
+                    }
                 }
             }
             if (s.editable) {
@@ -218,7 +195,7 @@ fun LogEntryFormScreen(
     if (pickerOpen) {
         EditPickerDialog(
             available = s.symptoms,
-            selected = s.selectedSymptoms.keys,
+            selected = s.selectedSymptomIds,
             onToggle = vm::toggleSymptom,
             onDismiss = { pickerOpen = false },
         )

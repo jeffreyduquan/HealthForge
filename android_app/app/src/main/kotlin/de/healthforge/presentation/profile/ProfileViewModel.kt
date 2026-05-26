@@ -37,4 +37,31 @@ class ProfileViewModel @Inject constructor(
             repo.upsertProfile(current.copy(waterGoalMl = clamped, updatedAt = System.currentTimeMillis()))
         }
     }
+
+    /**
+     * REQ-PROFILE-GOALS-001 (P6.S6 Slice B): persist per-nutrient daily goal.
+     * Stored as JSON in `dailyNutrientGoalsJson` (key = nutrient slug like "kcal"/"protein"/"carbs"/"fat",
+     * value = Double in grams or kcal).
+     */
+    fun setNutrientGoal(slug: String, value: Double) {
+        viewModelScope.launch {
+            val current = profile.value?.profile ?: return@launch
+            val obj = runCatching { org.json.JSONObject(current.dailyNutrientGoalsJson) }.getOrElse { org.json.JSONObject() }
+            obj.put(slug, value)
+            repo.upsertProfile(current.copy(dailyNutrientGoalsJson = obj.toString(), updatedAt = System.currentTimeMillis()))
+        }
+    }
+
+    /** REQ-PROFILE-GOALS-001 (P6.S6 Slice B): toggle pinned nutrient (de-dup, preserves order). */
+    fun togglePinnedNutrient(slug: String) {
+        viewModelScope.launch {
+            val current = profile.value?.profile ?: return@launch
+            val arr = runCatching { org.json.JSONArray(current.pinnedNutrientsJson) }.getOrElse { org.json.JSONArray() }
+            val list = (0 until arr.length()).map { arr.getString(it) }.toMutableList()
+            if (slug in list) list.remove(slug) else list.add(slug)
+            val out = org.json.JSONArray()
+            list.forEach { out.put(it) }
+            repo.upsertProfile(current.copy(pinnedNutrientsJson = out.toString(), updatedAt = System.currentTimeMillis()))
+        }
+    }
 }
