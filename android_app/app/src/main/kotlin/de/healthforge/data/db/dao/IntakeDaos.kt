@@ -1,0 +1,60 @@
+package de.healthforge.data.db.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import de.healthforge.data.db.entities.IntakeEntryEntity
+import de.healthforge.data.db.entities.WaterIntakeEntity
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface IntakeEntryDao {
+
+    @Query("SELECT * FROM intake_entry WHERE dayDateIso = :day ORDER BY loggedAt DESC")
+    fun observeForDay(day: String): Flow<List<IntakeEntryEntity>>
+
+    @Query("SELECT * FROM intake_entry ORDER BY loggedAt DESC LIMIT :limit OFFSET :offset")
+    fun observeRecent(limit: Int = 200, offset: Int = 0): Flow<List<IntakeEntryEntity>>
+
+    @Query(
+        "SELECT sourceType || ':' || sourceId AS ref " +
+            "FROM intake_entry " +
+            "GROUP BY sourceType, sourceId " +
+            "ORDER BY MAX(loggedAt) DESC LIMIT :limit"
+    )
+    fun observeRecentRefs(limit: Int = 6): Flow<List<String>>
+
+    @Query("SELECT * FROM intake_entry WHERE id = :id")
+    suspend fun byId(id: Long): IntakeEntryEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(entry: IntakeEntryEntity): Long
+
+    @Update
+    suspend fun update(entry: IntakeEntryEntity)
+
+    @Delete
+    suspend fun delete(entry: IntakeEntryEntity)
+
+    @Query("DELETE FROM intake_entry WHERE id = :id")
+    suspend fun deleteById(id: Long)
+}
+
+@Dao
+interface WaterIntakeDao {
+
+    @Query("SELECT COALESCE(SUM(volumeMl), 0) FROM water_intake WHERE dayDateIso = :day")
+    fun observeSumForDay(day: String): Flow<Int>
+
+    @Query("SELECT * FROM water_intake WHERE dayDateIso = :day ORDER BY loggedAt DESC")
+    fun observeForDay(day: String): Flow<List<WaterIntakeEntity>>
+
+    @Insert
+    suspend fun insert(entry: WaterIntakeEntity): Long
+
+    @Query("DELETE FROM water_intake WHERE id = :id")
+    suspend fun deleteById(id: Long)
+}

@@ -1,0 +1,42 @@
+name: android-ci
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'android_app/**'
+      - '.github/workflows/android.yml'
+  pull_request:
+    paths:
+      - 'android_app/**'
+      - '.github/workflows/android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        working-directory: android_app
+        run: chmod +x ./gradlew || true
+
+      - name: Build debug APK
+        working-directory: android_app
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthforge-app-debug
+          path: android_app/app/build/outputs/apk/debug/*.apk
+          retention-days: 14

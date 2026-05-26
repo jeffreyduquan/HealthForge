@@ -1,0 +1,82 @@
+package de.healthforge.ingredient
+
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
+import java.math.BigDecimal
+import java.time.Instant
+import java.util.UUID
+
+enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL }
+
+@Entity
+@Table(name = "ingredients")
+class IngredientEntity(
+    @Id
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "id", columnDefinition = "uuid")
+    var id: UUID = UUID.randomUUID(),
+
+    @Column(name = "name_de", nullable = false)
+    var nameDe: String,
+
+    @Column(name = "brand")
+    var brand: String? = null,
+
+    @Column(name = "barcode")
+    var barcode: String? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", nullable = false)
+    var source: IngredientSource,
+
+    @Column(name = "source_id")
+    var sourceId: String? = null,
+
+    @Column(name = "energy_kcal_per_100g")
+    var energyKcalPer100g: BigDecimal? = null,
+
+    @Column(name = "protein_g_per_100g")
+    var proteinGPer100g: BigDecimal? = null,
+
+    @Column(name = "carbs_g_per_100g")
+    var carbsGPer100g: BigDecimal? = null,
+
+    @Column(name = "sugar_g_per_100g")
+    var sugarGPer100g: BigDecimal? = null,
+
+    @Column(name = "fat_g_per_100g")
+    var fatGPer100g: BigDecimal? = null,
+
+    @Column(name = "satfat_g_per_100g")
+    var satfatGPer100g: BigDecimal? = null,
+
+    @Column(name = "fiber_g_per_100g")
+    var fiberGPer100g: BigDecimal? = null,
+
+    @Column(name = "salt_g_per_100g")
+    var saltGPer100g: BigDecimal? = null,
+
+    @Column(name = "histamine_score")
+    var histamineScore: Short? = null,
+
+    @Column(name = "allergens_json", nullable = false)
+    var allergensJson: String = "[]",
+
+    @Column(name = "fodmap_flags_json", nullable = false)
+    var fodmapFlagsJson: String = "[]",
+
+    @Column(name = "locked", nullable = false)
+    var locked: Boolean = true,
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdAt: Instant = Instant.now(),
+
+    @Column(name = "updated_at", nullable = false)
+    var updatedAt: Instant = Instant.now(),
+)

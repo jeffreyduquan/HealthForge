@@ -1,0 +1,31 @@
+spring:
+  flyway:
+    enabled: true
+  mail:
+    host: localhost
+    port: 2525  # unused; MailService swallows send failures
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+healthforge:
+  jwt:
+    secret: test-secret-key-must-be-at-least-64-bytes-long-XXXXXXXXXXXXXXXXXXXX
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+  invite:
+    require-invite: false
+  cors:
+    allowed-origins: http://localhost:5173
+  minio:
+    endpoint: http://localhost:9000
+    access-key: test
+    secret-key: test
+    public-base-url: http://localhost:9000
+  audit:
+    retention-days: 90
+
+logging:
+  level:
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthforge-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: healthforge
+      POSTGRES_USER: healthforge
+      POSTGRES_PASSWORD: changeme-pg-pass
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthforge -d healthforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: healthforge-minio-dev
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: changeme-minio-pass
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - ./data/minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: healthforge-mailhog-dev
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+  # Server runs locally via `./gradlew bootRun` during dev for fast iteration.
+  # Uncomment when you want to test the Docker image:
+  # api:
+  #   build:
+  #     context: ../server
+  #     dockerfile: Dockerfile
+  #   container_name: healthforge-api-dev
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: dev
+  #     DATABASE_URL: jdbc:postgresql://postgres:5432/healthforge
+  #     DATABASE_USER: healthforge
+  #     DATABASE_PASSWORD: changeme-pg-pass
+  #     MINIO_ENDPOINT: http://minio:9000
+  #     SMTP_HOST: mailhog
+  #     SMTP_PORT: 1025
+  #     CORS_ORIGINS: http://localhost:5173
+  #     JWT_SECRET: dev-only-jwt-secret-must-be-at-least-64-chars-long-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     minio:
+  #       condition: service_healthy

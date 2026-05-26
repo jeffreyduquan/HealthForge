@@ -1,0 +1,86 @@
+# HealthForge — Production Caddyfile
+# Auto-TLS via Let's Encrypt. DNS records must point to VPS IP first.
+
+{
+    email admin@endgear.de
+    # Enable production ACME (default)
+}
+
+# ============ API ============
+api.healthforge.endgear.de {
+    reverse_proxy api:8080 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Reasonable upload limits for image uploads
+    request_body {
+        max_size 10MB
+    }
+
+    encode gzip zstd
+
+    log {
+        output file /var/log/caddy/api.log {
+            roll_size 50MB
+            roll_keep 5
+        }
+    }
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+}
+
+# ============ Admin UI ============
+admin.healthforge.endgear.de {
+    root * /srv/admin
+    try_files {path} /index.html
+    file_server
+
+    encode gzip zstd
+
+    log {
+        output file /var/log/caddy/admin.log
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cdn.healthforge.endgear.de data:; connect-src 'self' https://api.healthforge.endgear.de"
+        -Server
+    }
+}
+
+# ============ CDN (public MinIO bucket) ============
+cdn.healthforge.endgear.de {
+    reverse_proxy minio:9000 {
+        header_up Host {upstream_hostport}
+    }
+
+    encode gzip
+
+    # Public bucket — long cache for image assets
+    @assets path /recipes/* /ingredients/* /supplements/* /avatars/*
+    header @assets {
+        Cache-Control "public, max-age=2592000, immutable"
+    }
+
+    log {
+        output file /var/log/caddy/cdn.log
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+}

@@ -1,0 +1,40 @@
+name: admin-ui-ci
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'admin-ui/**'
+      - '.github/workflows/admin-ui.yml'
+  pull_request:
+    paths:
+      - 'admin-ui/**'
+      - '.github/workflows/admin-ui.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: admin-ui/package-lock.json
+
+      - name: Install
+        working-directory: admin-ui
+        run: npm ci || npm install
+
+      - name: Build
+        working-directory: admin-ui
+        run: npm run build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthforge-admin-ui-dist
+          path: admin-ui/dist
+          retention-days: 14

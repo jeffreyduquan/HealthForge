@@ -1,0 +1,83 @@
+# ============ OS ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ IDE ============
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.fleet/
+*.swp
+*.swo
+
+# ============ Gradle / Kotlin / JVM ============
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+local.properties
+*.hprof
+*.log
+
+# ============ Android ============
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.keystore
+release/
+android_app/app/release/
+android_app/local.properties
+
+# ============ Node / Vite / React ============
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+admin-ui/coverage/
+
+# ============ Python (tooling) ============
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# ============ Docker ============
+.env
+.env.local
+.env.*.local
+
+# ============ MinIO / DB local volumes ============
+deploy/data/
+
+# ============ Secrets / Credentials ============
+*.pem
+*.key
+*-secret.yml
+*-secret.yaml
+secrets/
+firebase-adminsdk-*.json
+
+# ============ Backups ============
+*.dump
+*.sql.gz
+
+# ============ Build logs / local test artifacts ============
+android-build*.txt
+emu-*.png
+
+# ============ TypeScript build artifacts ============
+tsconfig.tsbuildinfo
+admin-ui/tsconfig.tsbuildinfo
+
+# ============ Memory / Session ============
+/memories/session/
