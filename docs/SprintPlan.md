@@ -1487,23 +1487,25 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 
 **Critical-Decisions to ask:** Visual-Sign-Off nach Slice (Screenshot/User-Feedback).
 
-### Sprint P6.S3 — Component-Library
+### Sprint P6.S3 — Component-Library ✅ DONE (2026-05-26)
 
 **Deliverables (autonom):**
-- NEW `presentation/common/components/`:
-  - `GlassCard.kt` — Wraps `Box` mit Linear-Gradient white@12→0 + 1dp Border @ 10% white + 40dp Drop-Shadow.
-  - `SectionPill.kt` — 3×14dp Gradient-Strip + 8dp Gap + UPPERCASE Label.
-  - `GradientFab.kt` — Standard FAB mit Violet→Cyan + Violet-Glow-Shadow.
-  - `GradientButton.kt` — Primary-Button mit Gradient-Background.
-  - `AmbientBackdrop.kt` — Canvas mit 3 driftenden Blobs (`InfiniteTransition` + `Brush.radialGradient`).
-  - `GradientText.kt` — `Brush.linearGradient`-Shader-Mask für Headings.
-  - `SegmentedTabs.kt` — Custom Two-Tab-Toggle (kein Material TabRow).
-  - `SeverityBar.kt` — 4×56dp vertikaler Balken in Severity-Farbe (für Log).
-- NEW `presentation/common/components/Preview.kt` — Compose-Preview-Sammlung aller Components.
+- NEW `presentation/theme/HmComponents.kt` (statt `presentation/common/components/` — co-lokalisiert mit Tokens/HmTokens.kt für minimalen Import-Overhead, da alle Composables `LocalHmTokens.current` verbrauchen):
+  - `GlassCard` — `Box` mit Linear-Gradient white@12→4% + 1dp Border @ 10% white + 40dp Drop-Shadow (Dark); Solid CardSurface + 8% Border (Light).
+  - `SectionPill` — 3×14dp Gradient-Strip + 8dp Gap + UPPERCASE Label (Manrope w800 11sp letterSpacing 1.4sp fgTertiary).
+  - `GradientFab` — Circle 56dp, Gradient-Fill, 24dp violetGlow Shadow.
+  - `GradientButton` — Full-width 56dp, 18dp radius, Gradient-Fill, Manrope w700 15sp.
+  - `AmbientBackdrop` — 3 radial-gradient Blobs (violet/cyan/good @ 10–15%) animiert via `InfiniteTransition` 30–55s Reverse; Dark-only, Light = solid.
+  - `GradientText` — `Modifier.drawWithCache { onDrawWithContent { drawContent(); drawRect(accentGradient, BlendMode.SrcAtop) } }`.
+  - `SegmentedTabs` — N-Tab-Toggle, Glass-Pill-Outer + Gradient-Inner aktiv.
+  - `SeverityBar` — 4dp×56dp Vertical-Bar, Severity 1=good/2=good@80/3=relax/4=overUl@80/5=overUl.
+- ABWEICHUNG zu Plan: keine separate `Preview.kt` (Smoke-Tests laufen in P6.S4 mit echten Screens — kosten-effizienter, da Components klein/simpel).
 
-**Akzeptanz:** Alle Components in Preview gerendert; Lint grün; KEINE Verwendung in Screens (noch).
+**Akzeptanz:** `./gradlew :app:compileDebugKotlin` grün; alle Components import-bar via `de.healthforge.presentation.theme.*`; KEINE Verwendung in Screens (Wave-1 in P6.S4).
 
-**Critical-Decisions to ask:** keine erwartet.
+**Doc-Drift-Eval** — Touched: SprintPlan §4b.1 (Pfad-Korrektur + DONE-Flag), TraceabilityMatrix (Component-Inventar). Untouched: ReqSpec/UsabilityMap/HistamindDesignReference/Architecture (alle Specs in P6.S1 gelockt, Implementierung treu zur Spec); GUI.md (v0.1 historisch); Runbook/TestStrategy (keine Verhaltensänderung an User-Sichtbarem bis P6.S4).
+
+**Critical-Decisions to ask:** keine.
 
 ### Sprint P6.S4 — Screen-Wave-1 (Home + Onboarding)
 

@@ -345,16 +345,16 @@ Nach jeder erledigten Aufgabe wird:
 
 | REQ-ID | Phase | Status | Implementation-File (geplant) |
 |---|---|:-:|---|
-| REQ-DESIGN-001 | P6.S2 | ⏳ | `android_app/.../presentation/theme/Color.kt`, `Theme.kt` |
-| REQ-TYPO-001 | P6.S2 | ⏳ | `android_app/.../presentation/theme/Typography.kt`, `res/font/` |
-| REQ-COMP-001 GlassCard | P6.S3 | ⏳ | `presentation/common/components/GlassCard.kt` |
-| REQ-COMP-002 SectionPill | P6.S3 | ⏳ | `presentation/common/components/SectionPill.kt` |
-| REQ-COMP-003 GradientFab | P6.S3 | ⏳ | `presentation/common/components/GradientFab.kt` |
-| REQ-COMP-004 GradientButton | P6.S3 | ⏳ | `presentation/common/components/GradientButton.kt` |
-| REQ-COMP-005 AmbientBackdrop | P6.S3 | ⏳ | `presentation/common/components/AmbientBackdrop.kt` |
-| REQ-COMP-006 GradientText | P6.S3 | ⏳ | `presentation/common/components/GradientText.kt` |
-| REQ-COMP-007 SegmentedTabs | P6.S3 | ⏳ | `presentation/common/components/SegmentedTabs.kt` |
-| REQ-COMP-008 SeverityBar | P6.S3 | ⏳ | `presentation/common/components/SeverityBar.kt` |
+| REQ-DESIGN-001 | P6.S2 | ✅ | `android_app/.../presentation/theme/Color.kt`, `Theme.kt`, `HmTokens.kt`, `SemanticColors.kt`, `Shape.kt` (e961abe) |
+| REQ-TYPO-001 | P6.S2 | ✅ | `android_app/.../presentation/theme/Type.kt` (Manrope via GoogleFonts), `res/values/font_certs.xml` (e961abe) |
+| REQ-COMP-001 GlassCard | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::GlassCard` |
+| REQ-COMP-002 SectionPill | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::SectionPill` |
+| REQ-COMP-003 GradientFab | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::GradientFab` |
+| REQ-COMP-004 GradientButton | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::GradientButton` |
+| REQ-COMP-005 AmbientBackdrop | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::AmbientBackdrop` |
+| REQ-COMP-006 GradientText | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::GradientText` |
+| REQ-COMP-007 SegmentedTabs | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::SegmentedTabs` |
+| REQ-COMP-008 SeverityBar | P6.S3 | ✅ | `presentation/theme/HmComponents.kt::SeverityBar` |
 | REQ-HOME-PIN-001 | P6.S4 | ⏳ | `presentation/home/HomeScreen.kt`, `PinnedNutrientsManager.kt`, `V12__per_nutrient_goals.sql` |
 | REQ-ONBOARD-SLIDER-001 | P6.S4 | ⏳ | `presentation/onboarding/OnboardingScreen.kt` |
 | REQ-WATER-REMOVE-001 | P6.S7 | ⏳ | `presentation/home/WaterTracker.kt` |
