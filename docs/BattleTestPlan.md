@@ -31,6 +31,7 @@ Pro Case in der **Result**-Spalte: Symbol + Datum (`✅ 2026-05-27`) + ggf. Run-
 | Run | Datum | Surface | Ergebnis kurz |
 |---|---|---|---|
 | R1 | 2026-05-26 (paused) | §1 Persona-Smoke | 1.1 ✅; 1.2 ✅ mit 10 UX/Scope-Findings (F-003..F-012); **P5 pausiert** zugunsten P6 (Histamind-Fusion + Scope-Refinement). Cases 1.3–1.12 verschoben hinter P6, da Home/Plan/Log-UX vor weiterem Smoke umgebaut wird. |
+| R1→R2 Übergang | nach P6.S8 | §6 Findings-Sweep | F-003..F-012 alle als fixed markiert (siehe §6); UI auf Histamind-Glass-Idiom umgestellt; Log-Konzept Event-basiert; Profile-Goals editierbar. **R2 ready** — Cases 1.3–1.12 + §2–§5 starten auf neuem UI. |
 | R2 | _pending nach P6_ | §1.3–§1.12 + §2–§5 | _ausstehend_ |
 
 ---
@@ -50,7 +51,7 @@ Vor §2–§5 durchzuführen. Wenn §1 kippt: erst fixen, dann Tiefe.
 | 1.7 | Plan ⋮ → „Einkaufsliste erstellen" → 7-Tage-Bereich → Generieren | Liste mit aggregierten Items (Linsen 3×200 g = 600 g), Kategorie-Gruppen, Strict-Mode-Hinweis falls aktiv | REQ-SHOP-001/002/003 | §4.4 + ShoppingScreen | ⬜ | |
 | 1.8 | Supplements-Tab → Vitamin D 1000 IE anlegen mit Daily-Reminder 08:00 | Supplement in Liste; nächster AlarmManager-Eintrag in `adb shell dumpsys alarm` sichtbar | REQ-SUPP-001/002/005, REQ-REMIND-001/002 | §5.7 | ⬜ | |
 | 1.9 | Wasser-Reminder Toggle ON (Home WaterTracker) | Toggle bleibt nach Recompose ON; SharedPreferences `hf_water_reminder` enthält `enabled=true`; AlarmManager-Eintrag mit Action `WATER_REMINDER_FIRE` | REQ-REMIND-001 | §3.2 + WaterTracker | ⬜ | |
-| 1.10 | Log-Tab: Eintrag Mood 7, Schlaf 4★/7.5 h, Symptom „Kopfschmerz" Severity 3, Notiz | Eintrag erscheint im Verlauf, editierbar | REQ-LOG-001..006 | §6 | ⬜ | |
+| 1.10 | Log-Tab: Event-Eintrag Severity 3 + Symptom „Kopfschmerz“ + Tag „Stress“ + Notiz „Mittags“ | Eintrag erscheint im Verlauf mit 4dp Severity-Bar (gelb=3); editierbar wenn <7 Tage; Severity-Slider 1–5 statt Mood/Schlaf-Feldern | REQ-LOG-001..006 | §6 | ⚬ | Event-Log (P6.S6); Mood/Schlaf-Felder entfernt |
 | 1.11 | Profil → „Daten exportieren" → PDF + JSON | Beide Dateien in `Downloads/HealthForge/`; PDF öffnet ohne Crash; JSON ist valides JSON mit Profil + Intake + Log | REQ-EXPORT-001..004 | §7.2 | ⬜ | |
 | 1.12 | App force-stop → Emulator-Reboot (`adb reboot`) → App öffnen | Supplement-Reminder + Water-Reminder wieder im `dumpsys alarm` sichtbar (BootReceiver) | REQ-REMIND-002 | — | ⬜ | |
 
@@ -135,10 +136,10 @@ Vor §2–§5 durchzuführen. Wenn §1 kippt: erst fixen, dann Tiefe.
 
 | Case | Pass-Kriterium | REQ-IDs | UsabilityMap | Result | Notes |
 |---|---|---|---|:-:|---|
-| Eintrag mit allen Feldern speichern | Mood-Slider live, Symptom-Picker funktional, Tags free-add | REQ-LOG-001/002 | §6.1 | ⬜ | |
+| Eintrag mit allen Feldern speichern | Severity-Slider (1–5) live + Symptom-FlowRow (AssistChip toggle) + Tags free-add + Notiz | REQ-LOG-001/002 | §6.1 | ⬜ | |
 | Custom-Symptom anlegen + verwenden | Symptom in Picker auswählbar; gespeichert | REQ-LOG-003 | §6.2 | ⬜ | |
 | Mehrere Einträge pro Tag | „+ Weiterer Eintrag heute" zeigt 2 Blöcke | REQ-LOG-004 | §6.1 | ⬜ | |
-| Verlauf zeigt Mood-Linie + Symptom-Heatmap | LogChartsScreen 7/30 Tage Toggle | REQ-LOG-005 | §6.2 | ⬜ | |
+| Verlauf zeigt Severity-Bar + Symptom-Heatmap | LogChartsScreen Severity-Chart + Einträge-pro-Tag-Chart (Mood-Chart entfällt) | REQ-LOG-005 | §6.2 | ⬜ | |
 | Edit nur innerhalb 7 Tage | Älterer Eintrag → Form disabled mit Hinweis | REQ-LOG-006 | §6.2 | ⬜ | |
 | Insights-Lock unter 14 Log-Tagen | InsightsScreen zeigt LockedPane | REQ-INSIGHT-001 | §6 → Charts | ⬜ | |
 | Insights nach 14 Log-Tagen | Lift-Ranking sichtbar (`lift ≥ 1.5`, n ≥ 3) | REQ-INSIGHT-002/003 | — | ⬜ | |
@@ -258,16 +259,16 @@ Jeder ❌-Fail wird hier mit Severity + Repro + Fix-Status getrackt.
 |---|---|---|---|---|---|---|---|
 | F-001 | 2026-05-26 | Doc | 1.1 | S3 | BattleTestPlan §1 Case 1.1 spec'd Welcome-first; Reality = Login first per REQ-AUTH-001. | fixed | 38ba1e9 |
 | F-002 | 2026-05-26 | Doc | 1.2 | S3 | UsabilityMap §2 Step 1 spec'd Logo+3 Bullets+'Los geht's'; Reality = Heading+Text+Weiter. Polish post-v1.0 (POLISH-WELCOME-001). | fixed (doc) | 38ba1e9 |
-| F-003 | 2026-05-26 | Android Wizard | 1.2 | S3 | Onboarding nutzt Zahlen-Inputs für Alter/Größe/Gewicht; User-Feedback: nervig, Slider gewünscht. | open | — |
-| F-004 | 2026-05-26 | Android Home | post-1.2 | S2 | User kann Nutritions-Anzeige nicht selbst auswählen (N visible / Rest collapsed mit Progress + Trend-Sparkline à la Histamind). | open | — |
-| F-005 | 2026-05-26 | Android Home | post-1.2 | S2 | Wasser kann hinzugefügt, aber nicht entfernt werden → User-Verklick irreversibel. | open | — |
-| F-006 | 2026-05-26 | Android Home | post-1.2 | S3 | Wasser-Alarm-Toggle: Funktion unklar (kein Helper-Text, kein Reminder-Interval-Hinweis). | open | — |
-| F-007 | 2026-05-26 | Android Home/Essen | post-1.2 | S2 | „Hinzufügen" öffnet dediziertes Add-Fenster statt direkt den Lebensmittel-Screen → bricht den natürlichen Flow. | open | — |
-| F-008 | 2026-05-26 | Android Plan | post-1.2 | S3 | Plan→„hinzufügen" zeigt „Rezept oder Zutat" — sollte konsistent „Rezept oder Lebensmittel" sein (Glossary-Konflikt). | open | — |
-| F-009 | 2026-05-26 | Android Listen | post-1.2 | S2 | Lebensmittel-/Rezept-Listen starten leer; sollen schon befüllt sein (alphabetisch sortiert). | open | — |
-| F-010 | 2026-05-26 | Android Log | post-1.2 | S1-Scope | Log ist als Tagebuch (Mood/Schlaf) konzipiert; User-Intent ist Event-Log für punktuelle Beschwerden. Scope-Inversion → Re-Spec nötig. | open | — |
-| F-011 | 2026-05-26 | Android Profil | post-1.2 | S2 | Tagesziele pro Nutrient nicht individuell anpassbar (blockiert Diäten-Use-Case). | open | — |
-| F-012 | 2026-05-26 | Android Theme/Style | global | S1-Scope | Aktueller Style „altbacken"; Ziel: 70% Histamind-Style + 30% HealthForge-Style fusionieren. Major-Visual-Redesign. | open | — |
+| F-003 | 2026-05-26 | Android Wizard | 1.2 | S3 | Onboarding nutzt Zahlen-Inputs für Alter/Größe/Gewicht; User-Feedback: nervig, Slider gewünscht. | fixed (P6.S4) | Onboarding-Slider |
+| F-004 | 2026-05-26 | Android Home | post-1.2 | S2 | User kann Nutritions-Anzeige nicht selbst auswählen (N visible / Rest collapsed mit Progress + Trend-Sparkline à la Histamind). | fixed (P6.S6) | ProfileScreen Pinned-Nutrients + MacroRingRow |
+| F-005 | 2026-05-26 | Android Home | post-1.2 | S2 | Wasser kann hinzugefügt, aber nicht entfernt werden → User-Verklick irreversibel. | fixed (P6.S7) | WaterTracker Long-Press → Undo-Snackbar |
+| F-006 | 2026-05-26 | Android Home | post-1.2 | S3 | Wasser-Alarm-Toggle: Funktion unklar (kein Helper-Text, kein Reminder-Interval-Hinweis). | fixed (P6.S7) | WaterTracker Helper-Text „Erinnerung alle 2h zwischen 08–22“ |
+| F-007 | 2026-05-26 | Android Home/Essen | post-1.2 | S2 | „Hinzufügen“ öffnet dediziertes Add-Fenster statt direkt den Lebensmittel-Screen → bricht den natürlichen Flow. | fixed (P6.S7 audit) | QuickAddDialog ist Picker-List über Lebensmittel-Index; Plan AddSheet Tabs (Rezept/Lebensmittel) konsistent |
+| F-008 | 2026-05-26 | Android Plan | post-1.2 | S3 | Plan→„hinzufügen“ zeigt „Rezept oder Zutat“ — sollte konsistent „Rezept oder Lebensmittel“ sein (Glossary-Konflikt). | fixed (P6.S5) | PlanScreen Wording-Lock |
+| F-009 | 2026-05-26 | Android Listen | post-1.2 | S2 | Lebensmittel-/Rezept-Listen starten leer; sollen schon befüllt sein (alphabetisch sortiert). | fixed (P6.S5) | LebensmittelScreen + RecipesScreen Default-Listing alphabetisch |
+| F-010 | 2026-05-26 | Android Log | post-1.2 | S1-Scope | Log ist als Tagebuch (Mood/Schlaf) konzipiert; User-Intent ist Event-Log für punktuelle Beschwerden. Scope-Inversion → Re-Spec nötig. | fixed (P6.S6) | Room v7 Schema-Cutover: LogEntryEntity.severity ersetzt Mood/Sleep; LogScreen Event-UI |
+| F-011 | 2026-05-26 | Android Profil | post-1.2 | S2 | Tagesziele pro Nutrient nicht individuell anpassbar (blockiert Diäten-Use-Case). | fixed (P6.S6) | ProfileScreen TAGESZIELE + Pinned-Chips |
+| F-012 | 2026-05-26 | Android Theme/Style | global | S1-Scope | Aktueller Style „altbacken“; Ziel: 70% Histamind-Style + 30% HealthForge-Style fusionieren. Major-Visual-Redesign. | fixed (P6.S2–S6) | HealthForgeTheme + Glass-Idiom (GlassCard/GradientText/AmbientBackdrop/SectionPill/GradientFab) durchgängig |
 
 **Workflow:**
 

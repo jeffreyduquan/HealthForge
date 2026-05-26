@@ -359,13 +359,13 @@ Nach jeder erledigten Aufgabe wird:
 | REQ-ONBOARD-SLIDER-001 | P6.S4/S5 | 🟡 | P6.S4 ✅: `OnboardingScreen.kt` mit 14-Dot-Indicator + Slider für Alter/Größe/Gewicht + GradientButtons. P6.S5 ⏳: Activity-Slider (1.2–1.9 step 0.05) — braucht Profile-Entity-Change ActivityLevel-Enum → Double. |
 | REQ-WATER-REMOVE-001 | P6.S7 | ⏳ | `presentation/home/WaterTracker.kt` |
 | REQ-WATER-ALARM-HELPER-001 | P6.S7 | ⏳ | `presentation/home/WaterAlarmCard.kt` |
-| REQ-INTAKE-ADD-FLOW-001 | P6.S5/S7 | ⏳ | `presentation/lebensmittel/LebensmittelScreen.kt` nav-arg |
-| REQ-WORDING-LOCK-001 | P6.S5 | ⏳ | `presentation/plan/PlanAddSheet.kt`, `strings.xml` |
-| REQ-LIST-PRELOAD-001 | P6.S5 | ⏳ | `presentation/lebensmittel/IngredientScreen.kt`, `RecipeScreen.kt` |
-| REQ-LOG-EVENT-001..006 | P6.S6 | ⏳ | `presentation/log/LogScreen.kt`, `LogRepository.kt`, `V13__log_event_schema.sql` |
-| REQ-PROFILE-GOALS-001 | P6.S5 | ⏳ | `presentation/profile/ProfileScreen.kt`, `V12__per_nutrient_goals.sql` |
-| REQ-RECIPE-CREATE-WIZARD-001 | P6.S5 | ⏳ | `presentation/recipe/RecipeCreateWizardScreen.kt` (NEW) |
-| REQ-INGREDIENT-CREATE-WIZARD-001 | P6.S5 | ⏳ | `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` (NEW, ersetzt Modal-Dialog) |
+| REQ-INTAKE-ADD-FLOW-001 | P6.S5/S7 | ⏳ | `presentation/lebensmittel/LebensmittelScreen.kt` Public-API (`preselect`/`onPick`) bereit — Home/Plan Picker-Routes folgen in P6.S7 |
+| REQ-WORDING-LOCK-001 | P6.S5 | ✅ | `presentation/plan/PlanScreen.kt` Add-Sheet-Wording „Rezept oder Lebensmittel“ (P6.S3 vorgezogen) |
+| REQ-LIST-PRELOAD-001 | P6.S5 | ✅ | Server `IngredientSearchRepository.browseAlphabetical()`, Android `LebensmittelViewModel.init { runSearch("") }` |
+| REQ-LOG-EVENT-001..006 | P6.S6 | ✅ | P6.S6 Slice A+B: `data/db/entities/LogEntities.kt` (severity auf `LogEntryEntity`, Mood/Sleep entfernt, Room v7 destructive) + `data/repository/LogRepository.kt` (`symptomIds`-API) + `presentation/log/LogScreen.kt` Glass-Rewrite (AmbientBackdrop + GlassCard QuickAdd + Severity-Bar pro Event-Row) + `LogChartsScreen.kt` (Severity-Ø + Entries-pro-Tag). **ABWEICHUNG**: Room-Schema-Bump statt Flyway V13 — Server hat keine `log_entries`-Tabelle (REQ-PROFILE-001/002-Boundary). Legacy-Mood/Sleep-Daten gedroppt (User freigegeben). |
+| REQ-PROFILE-GOALS-001 | P6.S6 | ✅ | P6.S6 Slice B: `data/db/entities/ProfileEntities.kt` (`dailyNutrientGoalsJson` + `pinnedNutrientsJson` auf `UserProfileEntity`, Room v7) + `presentation/profile/ProfileScreen.kt` (Goals-Editor mit Slidern + Pinned-Chips) + `presentation/profile/NutrientCatalog.kt` + `ProfileViewModel.setNutrientGoal/togglePinnedNutrient`. **ABWEICHUNG vom Plan**: Speicherung in Room (lokal) statt Postgres-`users.daily_nutrient_goals` — REQ-PROFILE-001/002 verbietet Profile-Daten auf den Server. Flyway V12 entfällt. |
+| REQ-RECIPE-CREATE-WIZARD-001 | P6.S5 | ✅ | `presentation/essen/rezepte/RecipeCreateWizardScreen.kt` (NEW, 5-Step) — reusing `RecipeEditViewModel` (create-mode) |
+| REQ-INGREDIENT-CREATE-WIZARD-001 | P6.S5 | ✅ | `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` + `IngredientSuggestWizardViewModel.kt` (NEW, 4-Step); MainShell route `INGREDIENT_SUGGEST_WIZARD?name=...` |
 
 **Superseded:** alte REQ-LOG-001..006 (Tagebuch-Modell) sind durch REQ-LOG-EVENT-001..006 ersetzt; im §6 oben als „⛔ superseded by REQ-LOG-EVENT-* (P6.S6)" zu markieren wenn Cleanup nötig.
 

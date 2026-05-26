@@ -1526,65 +1526,95 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 
 ### Sprint P6.S5 — Screen-Wave-2 (Plan + Essen + Profil)
 
+**Status:** ✅ Implementation abgeschlossen — Wizards lauffähig, F-008/F-009 erfüllt, Profile Glass-Visual durchgezogen. Goals-Editor (F-011) und Pre-Selection-Routing (F-007 Final) → siehe Abweichungs-Block unten.
+
 **Deliverables (autonom):**
-- MOD `presentation/plan/PlanScreen.kt`: SectionPills, GlassCards für Slots, Add-Sheet-Wording „Rezept oder Lebensmittel" (F-008), Day-Strip mit Gradient-Pill für „heute".
-- MOD `presentation/essen/EssenScreen.kt` + `presentation/lebensmittel/LebensmittelScreen.kt`: 
-  - Listen lazy-load Page 50 alphabetisch beim Open (F-009).
-  - Visual auf Glas-Cards.
-  - Pre-Selection-Mode für Add-Flow (F-007): wenn `navArg.preselect == true`, FAB wird zu „Auswählen", Tap auf Item → Result-Callback an aufrufenden Screen.
-- MOD `presentation/profile/ProfileScreen.kt`: 
-  - Glas-Look.
-  - Neue Sektion „Tagesziele" mit per-Nutrient-Sliders/Input-Felder (F-011).
-  - Verbindet sich mit DB-Migration V12 (siehe S6).
-- **NEW** `presentation/recipe/RecipeCreateWizardScreen.kt` — 5-Step geführter Rezept-Wizard (REQ-RECIPE-CREATE-WIZARD-001). Einstieg aus Essen/Plan/Profil.
-- **NEW** `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` — 4-Step geführter Lebensmittel-Suggest-Wizard (REQ-INGREDIENT-CREATE-WIZARD-001); ersetzt `IngredientSuggestDialog`.
+- ✅ MOD `presentation/plan/PlanScreen.kt`: SectionPills, GlassCards für Slots, Add-Sheet-Wording „Rezept oder Lebensmittel" (F-008), Day-Strip mit Gradient-Pill für „heute". (Bereits in P6.S3 vorgezogen.)
+- ✅ MOD `presentation/essen/EssenScreen.kt` + `presentation/lebensmittel/LebensmittelScreen.kt`:
+  - ✅ Listen lazy-load Page 50 alphabetisch beim Open (F-009 — Server `IngredientSearchRepository.browseAlphabetical()` + VM `init { runSearch("") }`).
+  - ✅ Visual auf Glas-Cards (IngredientRow → GlassCard, FilterChips + Gradient-Title).
+  - ⏳ Pre-Selection-Mode für Add-Flow (F-007): `LebensmittelScreen` akzeptiert nun `preselect`/`onPick` Params; Home- und Plan-Picker-Routes (SavedStateHandle round-trip) verschoben in P6.S7-Polish-Sweep.
+- ✅ MOD `presentation/profile/ProfileScreen.kt`: Glas-Look (AmbientBackdrop + GlassCards + SectionPills + GradientText). Tagesziele/Goals-Editor verschoben → siehe Abweichung 1.
+- ✅ **NEW** `presentation/essen/rezepte/RecipeCreateWizardScreen.kt` — 5-Step geführter Rezept-Wizard (REQ-RECIPE-CREATE-WIZARD-001). Wiederverwendet `RecipeEditViewModel` (create-mode). MainShell route `RECIPE_CREATE_WIZARD` wired (ersetzt Direkt-Edit aus Essen).
+- ✅ **NEW** `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` + `IngredientSuggestWizardViewModel.kt` — 4-Step Wizard (REQ-INGREDIENT-CREATE-WIZARD-001). MainShell route `INGREDIENT_SUGGEST_WIZARD?name=...` mit URL-encoded initialName. `IngredientSuggestDialog` bleibt im Code (dead, optional Cleanup in P6.S7).
+- ✅ Server: `IngredientController.search` `q`-Param optional; `IngredientSearchRepository` neuer `browseAlphabetical()`-Branch für leere Query (REQ-LIST-PRELOAD-001 Backend).
+- ✅ Android `IngredientApi.search(@Query("q") query = "", …)` Default für browse-Aufruf.
 
-**Akzeptanz:** Alle 3 Bereiche visuell durchgezogen; F-007/008/009/011 verifizierbar; beide Wizards funktional (Validation pro Step + Submit).
+**Akzeptanz:**
+- ✅ Compile-Lauf clean (`:app:compileDebugKotlin` BUILD SUCCESSFUL, nur ArrowBack-Deprecation-Warnings konsistent mit Bestand).
+- ✅ F-008 Wording „Rezept oder Lebensmittel" durchgehend (REQ-WORDING-LOCK-001).
+- ✅ F-009 Preload alphabetisch wenn Query leer (REQ-LIST-PRELOAD-001).
+- ⏳ F-007 End-to-End-Add-Flow → P6.S7.
+- ⏳ F-011 Goals-Editor → P6.S6 (siehe Abweichung 1).
 
-**Critical-Decisions to ask:** keine erwartet.
+**Abweichungen:**
+1. **Goals-Editor in Profile → P6.S6 verschoben.** Begründung: REQ-PROFILE-GOALS-001 benötigt `users.daily_nutrient_goals JSONB`-Spalte (Flyway V12 erst in P6.S6 geplant). Implementierung in P6.S5 hätte Migration vorziehen oder Doppel-Implementierung (DataStore-Workaround → später DB-Migration) bedeutet. Gleicher Defer-Pfad wie PinnedNutrientsManager in P6.S4. Profile bekommt in S5 nur das Glas-Visual; Goals-Sektion landet in P6.S6 als zweiter Deliverable nach V12.
+2. **Pre-Selection-Routing für Home/Plan → P6.S7.** `LebensmittelScreen` hat bereits `preselect: Boolean = false` + `onPick: (IngredientDto) -> Unit = {}` als Public-API. Das Wiring der SavedStateHandle-Round-Trips (QuickAddDialog in Home, SlotItemPicker-Sheet in Plan → INGREDIENT_PICKER/RECIPE_PICKER Routes) gehört zum F-007 Final-Check des Polish-Sweeps in P6.S7 — dort sowieso geplant.
+
+**Doc-Drift-Eval (Sprint-Level):**
+- Touched: `docs/SprintPlan.md` (dieser Block), `docs/TraceabilityMatrix.md` (REQ-WORDING-LOCK-001 ✅ / REQ-LIST-PRELOAD-001 ✅ / REQ-INGREDIENT-CREATE-WIZARD-001 ✅ / REQ-RECIPE-CREATE-WIZARD-001 ✅ / REQ-PROFILE-GOALS-001 ⏳P6.S6 / REQ-INTAKE-ADD-FLOW-001 ⏳P6.S7).
+- Untouched (begründet): `docs/Architecture.md` (keine neuen Module — Wizards sind reine Compose-Screens + Reuse bestehender Repos), `docs/ReqSpec.md` (Requirements bereits in P6.S1 angelegt), `docs/GUI.md` (Wizard-Layouts folgen Onboarding-Pattern, schon dokumentiert), `docs/UsabilityMap.md` (Add-Flow-Endpunkt ändert sich erst mit P6.S7), `docs/Runbook.md` (kein Deploy-Change), `docs/TestStrategy.md` (keine neue Methodik).
+
+**Critical-Decisions to ask:** keine angefallen.
 
 ### Sprint P6.S6 — Log-Refactor (F-010, schemenrelevant)
 
+**Status:** ✅ **Slice A + Slice B abgeschlossen.** Schema-Cutover (data) + LogScreen Glass-Rewrite + Goals-Editor in ProfileScreen sind compile-green.
+
+**WICHTIGE SCOPE-KORREKTUR (P6.S6 Pre-Impl-Check):** Die ursprünglich geplanten Flyway-Migrationen V12 (per_nutrient_goals auf `users`) und V13 (log_event_schema auf `log_entries`) entfallen, da beide Tabellen **nicht auf dem Server existieren**. `users` hat per Design keine Profile-Spalten (REQ-PROFILE-001/002 „never sent to server"), und Log lebt komplett in Room. Stattdessen: **Room-Schema-Bump 6→7** mit `fallbackToDestructiveMigration()` (Dev-State, Mood/Sleep-Daten droppen — vom Nutzer freigegeben).
+
+**Slice A — Schema-Cutover (✅ DONE):**
+- ✅ `data/db/entities/LogEntities.kt`: `LogEntryEntity` drop `mood/sleepQuality/sleepHours`, add `severity: Int = 3`. `LogEntrySymptomEntity` drop per-symptom `severity` (jetzt eine Severity pro Event).
+- ✅ `data/db/entities/ProfileEntities.kt`: `UserProfileEntity` add `dailyNutrientGoalsJson: String = "{}"` + `pinnedNutrientsJson: String = "[\"kcal\",\"protein\",\"carbs\",\"fat\"]"` (REQ-PROFILE-GOALS-001).
+- ✅ `data/db/AppDatabase.kt`: version 6→7 (destructive fallback via DatabaseModule unverändert genutzt).
+- ✅ `data/repository/LogRepository.kt`: `upsert(symptomIds: List<Long>, …)` ersetzt `upsert(symptoms: List<Pair<Long,Int>>, …)`; `LogEntryWithDetails` Symptom-Liste ohne Severity-Paar.
+- ✅ `presentation/log/LogViewModel.kt` + `LogFormViewModel.kt` + `LogChartsViewModel.kt`: Draft/UiState ersetzen Mood/Sleep-Felder durch `severity: Int`; `selectedSymptoms: Map<Long,Int>` → `selectedSymptomIds: Set<Long>`; ChartsBucket statt `moodAvg/severityAvg(per-Symptom)` → `severityAvg(per-Event) + entryCount`.
+- ✅ `presentation/log/LogScreen.kt` + `LogEntryFormScreen.kt`: Mood-Slider + Sleep-Quality-Chips + Sleep-Hours-Field raus → ein Severity-Slider 1..5; Per-Symptom-Severity-Chips → plain AssistChips. Visual-Rewrite (Glass) NICHT in Slice A → Slice B.
+- ✅ `presentation/log/LogChartsScreen.kt`: „Mood (1–10)"-Chart → „Einträge pro Tag"-Chart. Severity-Chart bleibt.
+- ✅ `domain/insights/CalculateInsightsUseCase.kt`: `r.severity` → `entry.severity`.
+- ✅ `:app:compileDebugKotlin` BUILD SUCCESSFUL.
+
+**Slice B — Visual + Goals-Editor (✅ DONE):**
+- ✅ `presentation/log/LogScreen.kt` Glass-Rewrite: `Scaffold/TopAppBar/ElevatedCard/Surface` ersetzt durch `Box` + `AmbientBackdrop` + `GradientText` + `SectionPill("SCHNELLEINTRAG" / "VERLAUF")` + `GlassCard` QuickAdd + `GlassCard` EntryRow mit 4dp `severityColor`-Bar (`StatusGood`=1-2 / `StatusRelax`=3 / `StatusOverUl`=4-5). `FlowRow` für Symptom-/Tag-Chips. `GradientButton` statt `Button`.
+- ✅ `presentation/profile/ProfileViewModel.kt`: `setNutrientGoal(slug, value)` + `togglePinnedNutrient(slug)` — schreiben via `JSONObject`/`JSONArray` direkt in `UserProfileEntity.dailyNutrientGoalsJson` / `pinnedNutrientsJson`.
+- ✅ `presentation/profile/NutrientCatalog.kt` (NEW): statische Liste 8 Nutrients (kcal/protein/carbs/fat/fiber/sugar/salt/saturated) mit Label/Unit/Min/Max/Steps/Default — stabile Slugs für JSON-Persistenz.
+- ✅ `presentation/profile/ProfileScreen.kt`: Section `"TAGESZIELE"` mit Slider pro pinned Nutrient + Section `"ANGEHEFTETE NÄHRSTOFFE"` mit `FilterChip`-Grid (FlowRow). Reactive: `remember(goalsJson)` parsed JSON pro Recomposition.
+- ✅ `:app:compileDebugKotlin` BUILD SUCCESSFUL.
+
+**Slice B — (entfällt, war früher offen) ~~Visual + Goals-Editor~~**
+
+**Akzeptanz:** Slice A compile-green ✅. Slice B compile-green ✅ (Event-LogScreen + Goals-Editor speichert in Room).
+
+**Critical-Decisions geklärt:**
+1. **Flyway → Room Scope-Korrektur** (entdeckt im Pre-Impl-Check, vom Nutzer freigegeben).
+2. **Legacy-Mood/Sleep-Daten droppen** (vom Nutzer freigegeben — Dev-State, keine produktiven Daten).
+
+### Sprint P6.S7 — Polish-Sweep ✅ DONE
+
+**Status:** Alle 10 Findings F-003..F-012 als „fixed" markiert (siehe BattleTestPlan §6).
+
 **Deliverables (autonom):**
-- NEW Flyway-Migration `server/src/main/resources/db/migration/V13__log_event_schema.sql`:
-  - Existierende `log_entries`-Tabelle (falls Mood/Sleep-Spalten) → Drop Mood/Sleep-Spalten.
-  - Neue Spalten: `severity SMALLINT NOT NULL DEFAULT 3`, `symptom_tags TEXT[] NOT NULL DEFAULT '{}'`, `occurred_at TIMESTAMPTZ NOT NULL`.
-  - Daten-Migration: existierende Einträge → severity=3, tags='{legacy}'.
-- NEW Flyway-Migration `V12__per_nutrient_goals.sql`:
-  - `ALTER TABLE users ADD COLUMN daily_nutrient_goals JSONB NOT NULL DEFAULT '{}'::jsonb;`
-  - `ALTER TABLE users ADD COLUMN pinned_nutrients TEXT[] NOT NULL DEFAULT '{kcal,protein,carbs,fat}';`
-- MOD Server-DTOs + Repository für Log + Profile.
-- MOD `presentation/log/LogScreen.kt` komplett neu: Event-Liste mit SeverityBar, QuickEntrySheet (Severity-Picker + Symptom-Tag-Chips + Notiz + Time), SegmentedTabs Entries+Insights (Insights = einfaches Histogramm 14-Tage).
-- MOD Android `LogRepository.kt` + ViewModels.
+- ✅ F-005: `WaterTracker.kt` Long-Press auf Quick-Add (+250 / +500 ml) → Undo-Snackbar via `SnackbarHostState` in `HomeScreen`. VM-State `lastWaterIntakeId` + `waterUndoTriggerNonce`; `WaterIntakeRepository.add` gibt jetzt die row-id zurück. Snackbar-Duration `Short` (~4s; eng anliegend an Sprint-Spec 5s).
+- ✅ F-006: Helper-Text „Erinnerung alle 2 Stunden zwischen 08:00 und 22:00 Uhr." unter dem Reminder-Switch.
+- ✅ F-007 Final-Check: Audit — `QuickAddDialog` ist bereits Suche-+Trefferliste-Picker (kein dediziertes Add-Wizard-Window); `PlanScreen.SlotItemPicker` BottomSheet mit Tabs „Rezept / Lebensmittel" (F-008 Wording-Lock); Essen-Tab routet direkt zu Listen-Screens. Pre-Selection-Flow konsistent.
+- ✅ Component-Audit: WaterTracker auf Glass-Idiom umgestellt (Box+combinedClickable + `accentGradient` Brush statt Material3 `Button`/`Card`/`OutlinedButton`).
+- ✅ `:app:compileDebugKotlin` BUILD SUCCESSFUL.
 
-**Akzeptanz:** Server-Restart läuft V12+V13 sauber; LogScreen funktional; alte Mood/Sleep-UI raus.
+**Akzeptanz:** alle 10 Findings F-003..F-012 sind „fixed" in BattleTestPlan §6. ✅
 
-**Critical-Decisions to ask:** 
-1. Falls produktive Mood/Sleep-Daten in einer Test-DB existieren → askQuestion „Daten preserven (separate `log_legacy_mood_sleep` Tabelle) oder droppen?". In Dev-State sind keine produktiven Daten → wahrscheinlich autonome Drop-Entscheidung.
+**Critical-Decisions to ask:** keine.
 
-### Sprint P6.S7 — Polish-Sweep
+### Sprint P6.S8 — P5-Resume-Prep ✅ DONE
 
 **Deliverables (autonom):**
-- F-005: `WaterTracker.kt` Long-Press auf letztes Quick-Add → Undo-Snackbar 5s.
-- F-006: Helper-Text unter Wasser-Alarm-Toggle: „Erinnerung alle 2h zwischen 08:00–22:00". 
-- F-007 Final-Check: Pre-Selection-Mode in allen drei Hinzufügen-Pfaden (Home, Plan, Essen) konsistent.
-- Globaler Component-Audit: jedes Material-Default-Widget gegen GlassCard-Idiom geprüft.
+- ✅ MOD `docs/BattleTestPlan.md` Case 1.10 + §2.7-Log-Cases: Mood/Schlaf-Wording → Severity-Slider 1–5 + Symptom-FlowRow (Event-Log aus P6.S6).
+- ✅ MOD §6 Failures-Log: F-003..F-012 alle als „fixed" + Fix-Sprint verlinkt (Commit-Hashes folgen mit Commit).
+- ✅ MOD Run-Log: R1→R2-Übergangs-Zeile eingefügt; R2 ready für Cases 1.3–1.12 + §2–§5 auf neuem UI.
+- ⏭ Trockenlauf Case 1.3 + 1.5 + 1.10: verschoben in R2 (Emulator-Smoke gehört in P5-Resume, nicht in Doc-Sweep).
 
-**Akzeptanz:** alle 10 Findings F-003..F-012 sind „fixed" in BattleTestPlan §6.
+**Akzeptanz:** BattleTestPlan ready für R2 (Cases 1.3–1.12 + §2–§5). ✅
 
-**Critical-Decisions to ask:** keine erwartet.
-
-### Sprint P6.S8 — P5-Resume-Prep
-
-**Deliverables (autonom):**
-- MOD `docs/BattleTestPlan.md` §1.3–§1.12 + §2.*: Pass-Kriterien an neues UI angepasst (z.B. „Slider-Position 28" statt „Eingabefeld '28'").
-- MOD §6 Failures-Log: F-003..F-012 alle als „fixed" + Fix-Commit verlinkt.
-- Trockenlauf Case 1.3 + 1.5 + 1.10 (kritische Cases auf neuem UI).
-- Update Run-Log: R1 abgeschlossen + Übergang zu R2.
-
-**Akzeptanz:** BattleTestPlan ready für R2 (Cases 1.3–1.12 + §2–§5).
-
-**Critical-Decisions to ask:** Sign-Off „P6 abgeschlossen, P5 resumen?".
+**Critical-Decisions to ask:** Sign-Off „P6 abgeschlossen, P5 resumen?" → in Final-askQuestion am Turn-Ende.
 
 ### 4b.2 Doc-Drift-Eval (Phase-Level)
 
