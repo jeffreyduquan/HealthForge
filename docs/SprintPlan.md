@@ -1217,6 +1217,123 @@ Letzter Release-Gate-Punkt: Operations-Doku für v1.0 Go-Live.
 - ✅ Release-Checklist abgearbeitet (siehe §0 Release-Gate)
 - ✅ APK signed, ready für Verteilung
 - ✅ Runbook.md geschrieben (v1.0, 2026-05-26 — Routine + Backup/Restore + Rollback + Incidents + Pre-Flight-Checklist)
+- ✅ Git-Tag `v1.0.0` gesetzt + gepusht (2026-05-26 — `899833b`)
+
+---
+
+## 4a. Phase P5 — Battle-Test (Stabilisierung statt Features)
+
+**Ziel:** Statt M5-Feature-Sprint folgt nach v1.0-Tag ein strukturierter manueller Deep-Test über alle 3 Surfaces, **bevor** Beta-User eingeladen werden. Keine neuen Features — nur Testen, Fixen, erneut Testen.
+
+**Phase-Doktrin (LOCKED 2026-05-26, User-Direktive):**
+
+- Kein neues Feature in P5. Wenn während des Tests eine fehlende Funktion auffällt → ReqSpec/UsabilityMap-Issue, nicht Code-Change.
+- Methodik: REQ-driven + Usability-driven (Hybrid) — siehe [TestStrategy.md](TestStrategy.md) v1.0.
+- Cases + Runs + Failures-Log in [BattleTestPlan.md](BattleTestPlan.md) v1.0.
+- Surfaces: Android (Emulator Pixel 7 API 35) + Server-API (lokal `:8080`) + Admin-UI (Vite `:5173`).
+- Run-Kadenz: Single-Run-Then-Fixes (siehe TestStrategy §6).
+- Defekt-Klassifikation S1..S4 (TestStrategy §5); S1+S2 sind Beta-Blocker, S3 ist Backlog, S4 wird gegen Spec gemeldet.
+
+### Sprint P5.S1 — Persona-Smoke (Marie 7-Tage-Journey)
+
+**Deliverables:**
+- [BattleTestPlan.md §1](BattleTestPlan.md) 12 Cases durchgespielt
+- Result-Spalte jedes Cases mit Symbol + Datum (✅/⚠️/❌)
+- Jeder ❌ in §6 Failures-Log mit Severity + Repro
+
+**Akzeptanz:** Alle 12 Smoke-Cases ✅ oder mit dokumentiertem Workaround. Wenn S1-Fail: §2 nicht starten, erst fixen.
+
+**Testing-Strategie:** Selbst-referenziell — dieser Sprint IST der Test. Verifikation per `adb logcat`, `adb shell dumpsys alarm`, `adb shell dumpsys notification`, `psql healthforge`.
+
+**REQ-IDs:** Cross-cuts — siehe BattleTestPlan §1 REQ-Spalte (alle wesentlichen P1+P2+P3+P4 Happy-Paths).
+
+### Sprint P5.S2 — Android Deep-Test pro Screen
+
+**Deliverables:**
+- BattleTestPlan §2.1–§2.10 (Auth/Onboarding/Home/Lebensmittel/Rezepte/Supplements/Plan/Log/Gruppen/Export/Nav+Theming) komplett
+- Jede REQ-ID aus TraceabilityMatrix-Spalte mit Pass/Fail-Symbol
+- Light + Dark Visual-Pass pro Screen
+
+**Akzeptanz:** 0 offene S1+S2 nach Re-Run-Phase.
+
+**Testing-Strategie:** Pro Screen: (1) Funktion gemäß REQ-ID, (2) UsabilityMap-Vergleich (Wireframe-Layout, Aktionen, Empty-State, Error-State), (3) Light+Dark.
+
+**REQ-IDs:** REQ-AUTH-001..007, REQ-ONBOARD-001..003, REQ-PROFILE-001..006, REQ-HOME-001..005, REQ-INTAKE-001..004, REQ-WATER-001..004, REQ-INGR-001/002, REQ-SEARCH-001..005, REQ-INGR-USER-001/002, REQ-FIELDPR-001/002, REQ-QUALITY-003/004/005, REQ-QUALITY-UI-001, REQ-RECIPE-001..009, REQ-RATING-002/005, REQ-SUPP-001..006, REQ-PLAN-001..005, REQ-AUTOPLAN-001..004, REQ-LOG-001..006, REQ-INSIGHT-001..003, REQ-GROUP-001..007, REQ-EXPORT-001..004, REQ-NAV-001..004, REQ-REMIND-001/002/004.
+
+### Sprint P5.S3 — Server-API Deep-Test pro Endpoint
+
+**Deliverables:**
+- BattleTestPlan §3 alle Cases mit HTTPie/cURL durchgespielt
+- DB-State-Verifikation per `psql` pro mutation-Case (intake_entries, recipes, recipe_ratings_community, ingredient_submissions, ingredient_field_pr, recipe_reports, supplement_submissions, group_members)
+- Flyway V1..V11 auf frischer DB durchgelaufen
+
+**Akzeptanz:** Alle Endpoints liefern dokumentierte Status-Codes; 5×/min Auth-Rate-Limit greift; ETL-Endpoint funktional (UI bleibt 🟡 MVP-Fallback).
+
+**Testing-Strategie:** Postman-Collection oder HTTPie-Skripte; pro Endpoint Happy + 1 Edge + 1 Negative; OpenAPI-Schema cross-checken falls generiert.
+
+**REQ-IDs:** REQ-AUTH-001..007, REQ-INGR-002, REQ-SEARCH-001..003, REQ-INGR-USER-001/002, REQ-FIELDPR-001/003, REQ-RECIPE-001/002/004/006/008, REQ-RATING-002/005, REQ-GROUP-001..007, REQ-SUPP-004, REQ-AUTOPLAN-002/003, REQ-EXPORT-001..004, REQ-ADMIN-FULL-001, REQ-PLATFORM-003, REQ-QUALITY-003/004/005.
+
+### Sprint P5.S4 — Admin-UI Deep-Test pro Page
+
+**Deliverables:**
+- BattleTestPlan §4 alle Cases im Browser durchgespielt
+- 403-Probe mit normalem-User-Token
+- Dark/Light + Mobile-Responsive (≤768 px) Pass
+
+**Akzeptanz:** Alle 11 Admin-Pages erreichbar + funktional; ETL-Page weiterhin 🟡 (MVP-Fallback dokumentiert).
+
+**Testing-Strategie:** Chrome DevTools Network-Tab pro Action; auf 401/403 prüfen; React-Warnings in Console = S3-Fail.
+
+**REQ-IDs:** REQ-ADMIN-001, REQ-ADMIN-FULL-001/002, REQ-AUTH-003, REQ-INGR-USER-001/002, REQ-FIELDPR-001/002/003, REQ-SUPP-004, REQ-GROUP-007, REQ-ADMIN-002 🟡.
+
+### Sprint P5.S5 — Negative & Security
+
+**Deliverables:**
+- BattleTestPlan §5 alle 16 Cases durchgespielt
+- Backup-Restore-Drill (Runbook §3.3) live durchgeführt + Datum in Runbook §3.1 eingetragen
+- XSS-Probe in User-Submission-Pfaden
+
+**Akzeptanz:** 0 offene S1 Security-Findings; alle 403/401-Pfade greifen wie spezifiziert; Backup-Restore reproduzierbar.
+
+**Testing-Strategie:** Token manipulieren (`jwt.io` Decoder), Airplane-Mode-Toggle, Concurrent-Edits via zwei Browser-Tabs, SQL-Injection-Payloads in Search.
+
+**REQ-IDs:** REQ-AUTH-001/005, REQ-INGR-002, REQ-INGR-USER-002, REQ-RECIPE-008, REQ-EXPORT-001, REQ-ADMIN-001, REQ-PLATFORM-003, REQ-REMIND-001/002, REQ-INTAKE-002, REQ-PROFILE-001, REQ-RECIPE-005, REQ-INGR-USER-001.
+
+### Sprint P5.S6 — Fix-Phase + Re-Run
+
+**Deliverables:**
+- Jeder S1+S2-Fail aus §6 Failures-Log adressiert (Fix-Commit verlinkt)
+- Re-Run der zuvor roten Cases → ✅ R2
+- BattleTestPlan §7 Sign-Off-Block datiert
+
+**Akzeptanz:** 0 offene S1+S2; BattleTestPlan §7 signiert.
+
+**Testing-Strategie:** Pro Fix-Commit: betroffener Case-Re-Run + Smoke-Re-Run der angrenzenden Cases (Regression-Risiko).
+
+**REQ-IDs:** dynamisch — abhängig von Findings aus P5.S1–S5.
+
+### 🛠️ P5.S0 Battle-Test-Plan-Slice (2026-05-26)
+
+**Slice-Inhalt:** Statt M5-Feature-Phase startet eine **Stabilisierungs-Phase P5** ohne neue Features. Vorbereitung des Test-Frameworks vor Run 1.
+
+- **NEW:** `docs/TestStrategy.md` (v1.0, ~150 LOC) — Strategy-Layer: Test-Pyramide invertiert, Hybrid REQ+Usability, Severity-Klassifikation, Run-Kadenz Single-Run-Then-Fixes, Out-of-Scope-Liste.
+- **NEW:** `docs/BattleTestPlan.md` (v1.0, ~280 Zeilen) — Cases-Layer: §1 Persona-Smoke (12 Cases Marie-Journey), §2 Android by Screen (10 Unter-Sektionen), §3 Server by Endpoint (~22 Cases), §4 Admin-UI by Page (~11 Cases), §5 Negative+Security (16 Cases), §6 Failures-Log-Tabelle, §7 Sign-Off-Block.
+- **MOD:** `docs/SprintPlan.md` — Neue Section §4a Phase P5 Battle-Test (S0–S6) zwischen P4 Phase-Abschluss und §5 Inter-Phase-Wartungs-Tasks; dieser Slice-Block.
+
+**Doc-Drift-Eval 00–09:**
+- 00 Plan — kein Drift (Battle-Test war bereits in §0.4 Release-Gate als „3 Test-User Onboarding" angedeutet; P5 macht es jetzt strukturiert).
+- 01 Vision — kein Drift.
+- 02 Glossary — kein Drift (keine neuen Domain-Begriffe).
+- 03 Architecture — kein Drift (Test-Methodik ist Prozess, nicht Architektur).
+- 04 Requirements — kein Drift (P5 testet bestehende REQ-IDs, ändert keine Spec).
+- 05 Milestones — **Drift akzeptiert (Phase-Ergänzung):** Neue Phase P5 nach Release-Tag eingeführt; semantisch eine Stabilisierungs-Phase, kein neuer Scope. P5 ist gates-only-Phase: kein Code-Change außer Bugfix-Hotfixes.
+- 06 Progress — kein Drift jetzt (wird ergänzt sobald Run 1 läuft + Cases abgehakt sind).
+- 07 Coding Conventions — kein Drift.
+- 08 Test Strategy — **Drift akzeptiert (Neu-Dokument):** `TestStrategy.md` v1.0 ist neu. User-Memory-Regel 2 referenziert „08 Test Strategy" als Drift-Eval-Anker; bisher existierte das File nicht. Dieser Slice korrigiert die Lücke. Inhalt: invertierte Pyramide, manuelle Methodik, REQ+Usability-Hybrid.
+- 09 Bootstrap — kein Drift (Battle-Test läuft auf bestehendem Dev-Setup).
+
+**Touched Docs:** `docs/TestStrategy.md` (NEW), `docs/BattleTestPlan.md` (NEW), `docs/SprintPlan.md` (§4a + dieser Block).
+**Untouched (begründet):** 00, 01, 02, 03, 04, 06, 07, 09 — kein semantischer Konflikt; P5 ist Prozess-Phase, kein Spec-/Architektur-/Code-Change.
 
 ---
 
