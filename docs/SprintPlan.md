@@ -1532,8 +1532,10 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
   - Glas-Look.
   - Neue Sektion „Tagesziele" mit per-Nutrient-Sliders/Input-Felder (F-011).
   - Verbindet sich mit DB-Migration V12 (siehe S6).
+- **NEW** `presentation/recipe/RecipeCreateWizardScreen.kt` — 5-Step geführter Rezept-Wizard (REQ-RECIPE-CREATE-WIZARD-001). Einstieg aus Essen/Plan/Profil.
+- **NEW** `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` — 4-Step geführter Lebensmittel-Suggest-Wizard (REQ-INGREDIENT-CREATE-WIZARD-001); ersetzt `IngredientSuggestDialog`.
 
-**Akzeptanz:** Alle 3 Bereiche visuell durchgezogen; F-007/008/009/011 verifizierbar.
+**Akzeptanz:** Alle 3 Bereiche visuell durchgezogen; F-007/008/009/011 verifizierbar; beide Wizards funktional (Validation pro Step + Submit).
 
 **Critical-Decisions to ask:** keine erwartet.
 

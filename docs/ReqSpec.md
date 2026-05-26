@@ -559,6 +559,25 @@ DB-Migration: V13 (HistamindDesignReference.md §7).
 ### REQ-PROFILE-GOALS-001 — Per-Nutrient-Tagesziele (P6.S5, finding F-011)
 Profil-Sektion „Tagesziele" mit per-Nutrient-Editor (kcal + Protein/Carbs/Fat + erweiterbare Mikronährstoff-Slots). Werte persistiert in `users.daily_nutrient_goals JSONB` (V12). Home-Pinned-Nutrient-Progress nutzt diese Werte, nicht mehr Default-Berechnung.
 
+### REQ-RECIPE-CREATE-WIZARD-001 — Geführter Rezept-Wizard (P6.S5, User-Input 2026-05-26)
+Rezept-Creation als 5-Step-Wizard, forward-only, mit Validation pro Step:
+- Step 1: Name (`OutlinedTextField`) + optional Foto (PhotoPicker).
+- Step 2: Zutaten-Liste — Search aus `ingredients` (mit REQ-LIST-PRELOAD-001 Behavior) → Add-Button fügt Zutat zur Rezept-Definition mit Mengen-Slider + Einheit-Dropdown.
+- Step 3: Portionen (Slider 1–20) + Zubereitungszeit (Slider 0–240 min, step 5).
+- Step 4: Zubereitungstext (multiline, optional, mit Helper „Schritt für Schritt empfohlen").
+- Step 5: Vorschau-Card (GlassCard mit allen Daten) + „Speichern" GradientButton.
+
+Visuell: AmbientBackdrop, Step-Punkte oben (5 Punkte), gleiches Wizard-Pattern wie Onboarding. Einstieg: aus EssenScreen / PlanScreen / Profil über FAB-Variante.
+
+### REQ-INGREDIENT-CREATE-WIZARD-001 — Geführter Lebensmittel-Suggest-Wizard (P6.S5, User-Input 2026-05-26)
+Lebensmittel-Suggest-Flow (ehemals Modal-Dialog `IngredientSuggestDialog`) wird zu 4-Step-Wizard:
+- Step 1: Name + Marke + Barcode (optional, mit Scan-Button).
+- Step 2: Nährwerte pro 100g (kcal/Protein/Carbs/Fat als Slider, Sub-Nutrients als optional Expansion).
+- Step 3: Allergene + Histamin-SIGHI + Diäten (Chip-Multi-Select).
+- Step 4: Vorschau + Submit (Status PENDING; landet auf Admin-Queue).
+
+Visuell wie Rezept-Wizard. Server-Endpoint bleibt `POST /api/ingredients/suggest`.
+
 ### Traceability
 
 | REQ-ID | Finding | Sprint | Implementation-Anker (geplant) |

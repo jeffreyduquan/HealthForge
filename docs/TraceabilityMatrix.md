@@ -364,6 +364,8 @@ Nach jeder erledigten Aufgabe wird:
 | REQ-LIST-PRELOAD-001 | P6.S5 | ⏳ | `presentation/lebensmittel/IngredientScreen.kt`, `RecipeScreen.kt` |
 | REQ-LOG-EVENT-001..006 | P6.S6 | ⏳ | `presentation/log/LogScreen.kt`, `LogRepository.kt`, `V13__log_event_schema.sql` |
 | REQ-PROFILE-GOALS-001 | P6.S5 | ⏳ | `presentation/profile/ProfileScreen.kt`, `V12__per_nutrient_goals.sql` |
+| REQ-RECIPE-CREATE-WIZARD-001 | P6.S5 | ⏳ | `presentation/recipe/RecipeCreateWizardScreen.kt` (NEW) |
+| REQ-INGREDIENT-CREATE-WIZARD-001 | P6.S5 | ⏳ | `presentation/lebensmittel/IngredientSuggestWizardScreen.kt` (NEW, ersetzt Modal-Dialog) |
 
 **Superseded:** alte REQ-LOG-001..006 (Tagebuch-Modell) sind durch REQ-LOG-EVENT-001..006 ersetzt; im §6 oben als „⛔ superseded by REQ-LOG-EVENT-* (P6.S6)" zu markieren wenn Cleanup nötig.
 
