@@ -18,6 +18,8 @@ import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.data.repository.WaterIntakeRepository
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
+import de.healthforge.notification.WaterReminderPrefs
+import de.healthforge.notification.WaterReminderScheduler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +62,7 @@ data class HomeState(
     val quickAddPortion: String = "100",
     val showWaterCustom: Boolean = false,
     val waterCustomMl: String = "",
+    val waterReminderEnabled: Boolean = false,
     val error: String? = null,
 )
 
@@ -70,11 +73,13 @@ class HomeViewModel @Inject constructor(
     private val waterRepo: WaterIntakeRepository,
     private val ingredientRepo: IngredientRepository,
     private val supplementRepo: SupplementRepository,
+    private val waterReminderPrefs: WaterReminderPrefs,
+    private val waterReminderScheduler: WaterReminderScheduler,
     profileRepo: ProfileRepository,
     targetsUseCase: ComputeNutrientTargetsUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HomeState())
+    private val _state = MutableStateFlow(HomeState(waterReminderEnabled = waterReminderPrefs.enabled))
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     private val dateFlow = MutableStateFlow(LocalDate.now())
@@ -212,6 +217,13 @@ class HomeViewModel @Inject constructor(
         if (v <= 0 || v > 5000) return
         addWater(v)
         closeWaterCustom()
+    }
+
+    /** Toggle Wasser-Reminder (REQ-REMIND-001). */
+    fun setWaterReminderEnabled(enabled: Boolean) {
+        waterReminderPrefs.enabled = enabled
+        if (enabled) waterReminderScheduler.schedule() else waterReminderScheduler.cancel()
+        _state.value = _state.value.copy(waterReminderEnabled = enabled)
     }
 
     fun deleteEntry(id: Long) {

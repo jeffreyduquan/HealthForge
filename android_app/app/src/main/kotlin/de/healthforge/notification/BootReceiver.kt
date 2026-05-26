@@ -17,6 +17,7 @@ class BootReceiver : BroadcastReceiver() {
 
     @Inject lateinit var repo: SupplementRepository
     @Inject lateinit var scheduler: AlarmScheduler
+    @Inject lateinit var waterScheduler: WaterReminderScheduler
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED &&
@@ -32,6 +33,8 @@ class BootReceiver : BroadcastReceiver() {
                     val s = repo.byId(r.supplementId) ?: return@forEach
                     scheduler.schedule(r, s.nameDe)
                 }
+                // Wasser-Reminder re-schedule (No-op falls disabled). REQ-REMIND-001.
+                waterScheduler.schedule()
             } finally {
                 pendingResult.finish()
             }

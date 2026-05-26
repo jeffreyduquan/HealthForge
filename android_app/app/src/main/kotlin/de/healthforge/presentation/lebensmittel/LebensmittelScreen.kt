@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,10 +26,14 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +58,16 @@ fun LebensmittelScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     var showFilters by remember { mutableStateOf(false) }
+    var showSuggest by remember { mutableStateOf(false) }
+    var fieldPrTarget by remember { mutableStateOf<IngredientDto?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.toast) {
+        state.toast?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.clearToast()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -89,6 +105,17 @@ fun LebensmittelScreen(
                 modifier = Modifier.padding(top = 8.dp),
             )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                OutlinedButton(onClick = { showSuggest = true }) {
+                    Text("Neues Lebensmittel vorschlagen")
+                }
+            }
+
             Spacer(Modifier.height(8.dp))
             HorizontalDivider()
 
@@ -120,7 +147,7 @@ fun LebensmittelScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     items(items = state.results, key = { it.id }) { item ->
-                        IngredientRow(item)
+                        IngredientRow(item, onCorrect = { fieldPrTarget = item })
                     }
                 }
             }
@@ -135,10 +162,36 @@ fun LebensmittelScreen(
             onDismiss = { showFilters = false },
         )
     }
+
+    if (showSuggest) {
+        IngredientSuggestDialog(
+            initialName = state.query,
+            onDismiss = { showSuggest = false },
+            onSubmit = { req ->
+                vm.submitSuggestion(req)
+                showSuggest = false
+            },
+        )
+    }
+
+    fieldPrTarget?.let { target ->
+        FieldPrDialog(
+            ingredientId = target.id,
+            ingredientName = target.name_de,
+            onDismiss = { fieldPrTarget = null },
+            onSubmit = { id, req ->
+                vm.submitFieldPr(id, req)
+                fieldPrTarget = null
+            },
+        )
+    }
+
+    SnackbarHost(hostState = snackbarHostState)
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun IngredientRow(item: IngredientDto) {
+private fun IngredientRow(item: IngredientDto, onCorrect: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(text = item.name_de, style = androidx.compose.material3.MaterialTheme.typography.titleSmall)
@@ -163,6 +216,32 @@ private fun IngredientRow(item: IngredientDto) {
                     style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 2.dp),
                 )
+            }
+            // REQ-SEARCH-005 / REQ-QUALITY-004: FODMAP-Quality-Badges (German Labels).
+            if (item.fodmap_flags.isNotEmpty()) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    item.fodmap_flags.forEach { flag ->
+                        val label = runCatching { FodmapType.valueOf(flag).germanLabel }.getOrDefault(flag)
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(label) },
+                            colors = AssistChipDefaults.assistChipColors(),
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                TextButton(onClick = onCorrect) { Text("Korrektur vorschlagen") }
             }
         }
     }

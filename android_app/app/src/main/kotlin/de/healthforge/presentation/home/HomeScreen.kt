@@ -91,6 +91,8 @@ fun HomeScreen(
                 goalMl = s.targets.waterMl,
                 onAdd = vm::addWater,
                 onCustom = vm::openWaterCustom,
+                reminderEnabled = s.waterReminderEnabled,
+                onReminderToggle = vm::setWaterReminderEnabled,
             )
 
             if (s.supplementChecklist.isNotEmpty()) {

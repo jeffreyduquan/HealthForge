@@ -80,7 +80,7 @@ export default function LoginPage() {
                 type="submit"
                 variant="contained"
                 size="large"
-                disabled={loading || !email || password.length < 10}
+                disabled={loading || !email || !password}
               >
                 {loading ? <CircularProgress size={24} /> : 'Anmelden'}
               </Button>

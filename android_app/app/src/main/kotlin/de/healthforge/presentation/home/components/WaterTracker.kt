@@ -10,15 +10,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /**
  * Wasser-Tracker: zeigt Tagesfortschritt + Quick-Add 250/500ml + Custom-Button.
  *
- * REQ-WATER-001/002.
+ * REQ-WATER-001/002, REQ-REMIND-001 (Reminder-Toggle).
  */
 @Composable
 fun WaterTracker(
@@ -26,6 +28,8 @@ fun WaterTracker(
     goalMl: Int,
     onAdd: (Int) -> Unit,
     onCustom: () -> Unit,
+    reminderEnabled: Boolean,
+    onReminderToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val ratio = if (goalMl <= 0) 0f else (currentMl.toFloat() / goalMl).coerceIn(0f, 1f)
@@ -53,6 +57,14 @@ fun WaterTracker(
                 Button(onClick = { onAdd(250) }, modifier = Modifier.weight(1f)) { Text("+250 ml") }
                 Button(onClick = { onAdd(500) }, modifier = Modifier.weight(1f)) { Text("+500 ml") }
                 OutlinedButton(onClick = onCustom, modifier = Modifier.weight(1f)) { Text("Anders") }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Erinnerungen (08–22 Uhr)", style = MaterialTheme.typography.bodyMedium)
+                Switch(checked = reminderEnabled, onCheckedChange = onReminderToggle)
             }
         }
     }

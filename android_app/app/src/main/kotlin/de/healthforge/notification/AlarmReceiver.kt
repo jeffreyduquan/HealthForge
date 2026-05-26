@@ -38,8 +38,15 @@ class AlarmReceiver : BroadcastReceiver() {
     @Inject lateinit var repo: SupplementRepository
     @Inject lateinit var scheduler: AlarmScheduler
     @Inject lateinit var intakeRepo: IntakeRepository
+    @Inject lateinit var waterScheduler: WaterReminderScheduler
 
     override fun onReceive(context: Context, intent: Intent) {
+        // Wasser-Reminder hat keine `reminderId` — separat behandeln.
+        if (intent.action == ACTION_WATER_FIRE) {
+            handleWaterFire(context)
+            return
+        }
+
         val reminderId = intent.getLongExtra(EXTRA_REMINDER_ID, -1L)
         val name = intent.getStringExtra(EXTRA_SUPPLEMENT_NAME).orEmpty()
         if (reminderId <= 0) return
@@ -135,11 +142,39 @@ class AlarmReceiver : BroadcastReceiver() {
         mgr.notify(notifId, notif)
     }
 
+    /**
+     * Postet Wasser-Reminder-Notification auf [NotificationChannels.WATER] und
+     * plant den nächsten Tick (Chain-Pattern, REQ-REMIND-001).
+     */
+    private fun handleWaterFire(context: Context) {
+        val mgr = context.getSystemService<NotificationManager>()
+        val launchIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val contentPi = PendingIntent.getActivity(
+            context, WATER_NOTIF_ID, launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notif = NotificationCompat.Builder(context, NotificationChannels.WATER)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("Wasser trinken")
+            .setContentText("Zeit für ein Glas Wasser.")
+            .setAutoCancel(true)
+            .setContentIntent(contentPi)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+        mgr?.notify(WATER_NOTIF_ID, notif)
+        // Chain: nächsten Tick einplanen.
+        waterScheduler.schedule()
+    }
+
     companion object {
         const val ACTION_FIRE = "de.healthforge.action.REMINDER_FIRE"
         const val ACTION_TAKEN = "de.healthforge.action.REMINDER_TAKEN"
+        const val ACTION_WATER_FIRE = "de.healthforge.action.WATER_REMINDER_FIRE"
         const val EXTRA_REMINDER_ID = "reminder_id"
         const val EXTRA_SUPPLEMENT_NAME = "supplement_name"
         private const val ACTION_TAKEN_REQUEST_OFFSET = 1_000_000
+        private const val WATER_NOTIF_ID = 0x57415452 // "WATR"
     }
 }
