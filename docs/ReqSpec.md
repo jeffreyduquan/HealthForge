@@ -489,3 +489,91 @@ A foundational MVP feature that makes incomplete data explicit rather than guess
 ---
 
 *End of ReqSpec.md v0.2 — LOCKED for unified v1.0 scope. UI/API/DB details in companion docs.*
+
+---
+
+## §11 P6 Re-Spec — Histamind-Fusion + UX-Findings (eingefügt 2026-05-26, LOCKED via P6.S1)
+
+**Trigger:** 10 Findings F-003..F-012 aus BattleTestPlan §6, plus User-Direktive „Histamind als Design-Referenz" (https://github.com/endgeardev/Histamind).
+
+**Scope-Disziplin:** Dieser §11 lockt nur die Re-Spec der durch Findings betroffenen REQ-IDs. Keine neuen Domain-Features. Alle visuellen Decisions referenzieren [HistamindDesignReference.md](HistamindDesignReference.md).
+
+### REQ-DESIGN-001 — Visual-Identity-Lock (P6.S2)
+LOCKED auf Hm-Token-System (siehe HistamindDesignReference.md §2). Olive-Green wird komplett ersetzt. Light + Dark + System bleibt; Light = Clean-Variante ohne Glas. **Supersedes:** alle vorherigen Color/Typography-LOCKs in GUI.md §§2–3.
+
+### REQ-TYPO-001 — Manrope (P6.S2)
+App-weite Schrift: Manrope via Google Fonts (OFL). 12 Text-Styles in HistamindDesignReference.md §3 gelockt. Tabular-Figures für numerische Werte verpflichtend.
+
+### REQ-COMP-001..008 — Compose-Component-Library (P6.S3)
+- COMP-001 GlassCard
+- COMP-002 SectionPill
+- COMP-003 GradientFab
+- COMP-004 GradientButton
+- COMP-005 AmbientBackdrop
+- COMP-006 GradientText
+- COMP-007 SegmentedTabs
+- COMP-008 SeverityBar
+
+Implementationsspec: HistamindDesignReference.md §5.
+
+### REQ-HOME-PIN-001 — Pinned Nutrients (P6.S4, finding F-004)
+User pinnt N Nährstoffe (default 4: kcal/Protein/Carbs/Fat). Pinned werden mit Progress-Ring auf Home gezeigt; alle weiteren collapsed mit Mini-Linear-Progress. Pin-Mgmt-Sheet via Home-Header-Icon oder Profil. Server-Persist: `users.pinned_nutrients TEXT[]` (V12).
+
+### REQ-ONBOARD-SLIDER-001 — Slider statt Zahleninputs (P6.S4, finding F-003)
+Alle numerischen Onboarding-Eingaben als Material-3-Slider mit Live-Value-Label:
+- Alter: 14–100, step 1
+- Größe: 140–220 cm, step 1
+- Gewicht: 30–200 kg, step 0.5
+- Aktivitäts-Index: 1.2–1.9, step 0.05
+
+14-Step-Indikator als Punkte (active = gradient-filled, inactive = glassBorder). Forward-only ohne Skip.
+
+### REQ-WATER-REMOVE-001 — Wasser-Entfernen (P6.S7, finding F-005)
+Long-Press auf letzten Wasser-Quick-Add-Chip in Home → Undo-Snackbar 5 Sek; nach Timeout permanent gelöscht.
+
+### REQ-WATER-ALARM-HELPER-001 — Wasser-Alarm-UX (P6.S7, finding F-006)
+Helper-Text unter Wasser-Alarm-Toggle: „Erinnerung alle 2 h zwischen 08:00–22:00". Toggle-State zeigt aktuelles Verhalten ohne Erklärung-Modal.
+
+### REQ-INTAKE-ADD-FLOW-001 — Pre-Selection-Mode (P6.S5/S7, finding F-007)
+„Hinzufügen"-Buttons in Home + Plan navigieren zu `LebensmittelScreen` mit nav-arg `preselect=true`. In diesem Modus wird der FAB zu „Auswählen" und Item-Tap liefert ein `Result` an den aufrufenden Screen. Kein separates Add-Sheet mehr.
+
+### REQ-WORDING-LOCK-001 — Glossary-Wording (P6.S5, finding F-008)
+Plan-Add-Sheet-Titel: „Rezept oder Lebensmittel" (nicht „Zutat"). Glossary in Architecture.md Anhang G lockt:
+- **Zutat** = Bestandteil eines Rezepts (nur intern in Rezept-Definition).
+- **Lebensmittel** = Standalone-Eintrag in Datenbank (`ingredients`-Tabelle).
+
+### REQ-LIST-PRELOAD-001 — Listen-Vorbefüllung (P6.S5, finding F-009)
+`IngredientScreen` + `RecipeScreen` laden bei Open Paginated-Page (50 Items alphabetisch) ohne Search-Eingabe. Search filtert clientseitig sofort + serverseitig bei >50 Treffern.
+
+### REQ-LOG-EVENT-001..006 — Event-Log-Inversion (P6.S6, finding F-010)
+**Supersedes:** vorherige REQ-LOG-001..006 (Tagebuch-Modell mit Mood/Sleep).
+- REQ-LOG-EVENT-001: Log ist Event-Liste, nicht Tagebuch. Mood + Schlaf entfernt.
+- REQ-LOG-EVENT-002: Jeder Event hat: `severity` (1–5), `symptom_tags` (Multi-Tag), `note` (optional Text), `occurred_at` (Timestamp).
+- REQ-LOG-EVENT-003: QuickEntrySheet erfasst Event in <10 Sek (Severity-Picker + Tag-Chips + Notiz + jetzt-Default).
+- REQ-LOG-EVENT-004: Severity-Mapping zu Farben in HistamindDesignReference.md §5.8.
+- REQ-LOG-EVENT-005: SegmentedTabs „Einträge" / „Insights".
+- REQ-LOG-EVENT-006: Insights = 14-Tage-Histogramm + Top-3-Symptome.
+
+DB-Migration: V13 (HistamindDesignReference.md §7).
+
+### REQ-PROFILE-GOALS-001 — Per-Nutrient-Tagesziele (P6.S5, finding F-011)
+Profil-Sektion „Tagesziele" mit per-Nutrient-Editor (kcal + Protein/Carbs/Fat + erweiterbare Mikronährstoff-Slots). Werte persistiert in `users.daily_nutrient_goals JSONB` (V12). Home-Pinned-Nutrient-Progress nutzt diese Werte, nicht mehr Default-Berechnung.
+
+### Traceability
+
+| REQ-ID | Finding | Sprint | Implementation-Anker (geplant) |
+|---|---|---|---|
+| REQ-DESIGN-001 | F-012 | P6.S2 | `presentation/theme/Color.kt`, `Theme.kt`, `Typography.kt` |
+| REQ-TYPO-001 | F-012 | P6.S2 | `presentation/theme/Typography.kt`, `res/font/manrope.xml` |
+| REQ-COMP-001..008 | F-012 | P6.S3 | `presentation/common/components/*.kt` |
+| REQ-HOME-PIN-001 | F-004 | P6.S4 | `presentation/home/HomeScreen.kt`, `PinnedNutrientsManager.kt`, `V12__` |
+| REQ-ONBOARD-SLIDER-001 | F-003 | P6.S4 | `presentation/onboarding/OnboardingScreen.kt` |
+| REQ-WATER-REMOVE-001 | F-005 | P6.S7 | `presentation/home/WaterTracker.kt` |
+| REQ-WATER-ALARM-HELPER-001 | F-006 | P6.S7 | `presentation/home/WaterAlarmCard.kt` |
+| REQ-INTAKE-ADD-FLOW-001 | F-007 | P6.S5/S7 | `presentation/lebensmittel/LebensmittelScreen.kt` nav-arg |
+| REQ-WORDING-LOCK-001 | F-008 | P6.S5 | `presentation/plan/PlanAddSheet.kt`, strings.xml |
+| REQ-LIST-PRELOAD-001 | F-009 | P6.S5 | `IngredientScreen.kt`, `RecipeScreen.kt`, Repos |
+| REQ-LOG-EVENT-001..006 | F-010 | P6.S6 | `presentation/log/LogScreen.kt`, `LogRepository.kt`, `V13__` |
+| REQ-PROFILE-GOALS-001 | F-011 | P6.S5 | `presentation/profile/ProfileScreen.kt`, `V12__` |
+
+**End of §11 P6 Re-Spec.**

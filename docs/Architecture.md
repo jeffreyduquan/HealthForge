@@ -519,7 +519,28 @@ Alle Entscheidungen final für v1.0. Änderungen erfordern Doc-Versionsbump.
 - `docs/SprintPlan.md` — Phase-by-Phase Deliverables (TODO)
 - `docs/TraceabilityMatrix.md` — REQ → File-Mapping (TODO)
 - `docs/GUI.md` — Design-Tokens, Components (TODO)
+- `docs/HistamindDesignReference.md` — P6 Master-Designquelle (LOCKED 2026-05-26)
 
 ---
 
 **Ende Architecture v0.1 DRAFT.**
+
+---
+
+## Anhang G — P6 Glossary-Lock (eingefügt 2026-05-26, P6.S1)
+
+**Trigger:** Finding F-008 (Wording-Inkonsistenz „Zutat" vs. „Lebensmittel" im Plan-Add-Sheet).
+
+| Begriff | LOCKED Definition |
+|---|---|
+| **Lebensmittel** | Standalone-Eintrag in der `ingredients`-Tabelle. Hat Nährwerte, Allergen-Flags, Histamin-SIGHI, Barcode etc. Wird vom User direkt in Intake/Plan gewählt. **Anzeige-Wording app-weit:** „Lebensmittel". |
+| **Zutat** | Bestandteil EINES Rezepts (Rezept-internes Konzept). In der Rezept-Definition referenziert ein Rezept N Zutaten = N `recipe_ingredients`-Rows mit Mengenangabe; jede Zutat verweist auf 1 `ingredients`-Row. Außerhalb von Rezepten taucht „Zutat" nicht auf. |
+| **Rezept** | Komposition aus Zutaten mit Mengen + ggf. Zubereitungstext. Steht in `recipes`-Tabelle. |
+| **Mahlzeit** | Konkreter Intake-Event mit Datum/Uhrzeit/Slot (Frühstück/Mittag/...) und N geplanten/konsumierten Items (Rezept- oder Lebensmittel-Refs). |
+| **Item** (Plan-Slot) | Ein Lebensmittel ODER Rezept im Plan-Slot. Schließt „Zutat" nicht ein. |
+| **Event** (Log) | Symptom-Event-Datensatz im Log (severity + tags + note + time). Ersetzt vorherigen „Log-Entry"-Begriff (Tagebuch-Modell). |
+| **Pinned Nutrient** | Vom User markierter Nährstoff, der auf Home als Progress-Ring sichtbar bleibt. Persistiert in `users.pinned_nutrients TEXT[]`. |
+
+**Wording-Regel:** In UI-Strings/Sheet-Titeln/Buttons: „Lebensmittel" und „Rezept" sind die einzigen erlaubten User-facing-Begriffe für DB-Items. „Zutat" erscheint NUR in der Rezept-Definition-UI (z.B. „Zutaten dieses Rezepts").
+
+**End of Anhang G.**

@@ -338,3 +338,33 @@ Nach jeder erledigten Aufgabe wird:
 ---
 
 **Ende TraceabilityMatrix v0.1.**
+
+---
+
+## §8 P6 Re-Spec REQ-IDs (eingefügt 2026-05-26, LOCKED via P6.S1)
+
+| REQ-ID | Phase | Status | Implementation-File (geplant) |
+|---|---|:-:|---|
+| REQ-DESIGN-001 | P6.S2 | ⏳ | `android_app/.../presentation/theme/Color.kt`, `Theme.kt` |
+| REQ-TYPO-001 | P6.S2 | ⏳ | `android_app/.../presentation/theme/Typography.kt`, `res/font/` |
+| REQ-COMP-001 GlassCard | P6.S3 | ⏳ | `presentation/common/components/GlassCard.kt` |
+| REQ-COMP-002 SectionPill | P6.S3 | ⏳ | `presentation/common/components/SectionPill.kt` |
+| REQ-COMP-003 GradientFab | P6.S3 | ⏳ | `presentation/common/components/GradientFab.kt` |
+| REQ-COMP-004 GradientButton | P6.S3 | ⏳ | `presentation/common/components/GradientButton.kt` |
+| REQ-COMP-005 AmbientBackdrop | P6.S3 | ⏳ | `presentation/common/components/AmbientBackdrop.kt` |
+| REQ-COMP-006 GradientText | P6.S3 | ⏳ | `presentation/common/components/GradientText.kt` |
+| REQ-COMP-007 SegmentedTabs | P6.S3 | ⏳ | `presentation/common/components/SegmentedTabs.kt` |
+| REQ-COMP-008 SeverityBar | P6.S3 | ⏳ | `presentation/common/components/SeverityBar.kt` |
+| REQ-HOME-PIN-001 | P6.S4 | ⏳ | `presentation/home/HomeScreen.kt`, `PinnedNutrientsManager.kt`, `V12__per_nutrient_goals.sql` |
+| REQ-ONBOARD-SLIDER-001 | P6.S4 | ⏳ | `presentation/onboarding/OnboardingScreen.kt` |
+| REQ-WATER-REMOVE-001 | P6.S7 | ⏳ | `presentation/home/WaterTracker.kt` |
+| REQ-WATER-ALARM-HELPER-001 | P6.S7 | ⏳ | `presentation/home/WaterAlarmCard.kt` |
+| REQ-INTAKE-ADD-FLOW-001 | P6.S5/S7 | ⏳ | `presentation/lebensmittel/LebensmittelScreen.kt` nav-arg |
+| REQ-WORDING-LOCK-001 | P6.S5 | ⏳ | `presentation/plan/PlanAddSheet.kt`, `strings.xml` |
+| REQ-LIST-PRELOAD-001 | P6.S5 | ⏳ | `presentation/lebensmittel/IngredientScreen.kt`, `RecipeScreen.kt` |
+| REQ-LOG-EVENT-001..006 | P6.S6 | ⏳ | `presentation/log/LogScreen.kt`, `LogRepository.kt`, `V13__log_event_schema.sql` |
+| REQ-PROFILE-GOALS-001 | P6.S5 | ⏳ | `presentation/profile/ProfileScreen.kt`, `V12__per_nutrient_goals.sql` |
+
+**Superseded:** alte REQ-LOG-001..006 (Tagebuch-Modell) sind durch REQ-LOG-EVENT-001..006 ersetzt; im §6 oben als „⛔ superseded by REQ-LOG-EVENT-* (P6.S6)" zu markieren wenn Cleanup nötig.
+
+**End of §8.**

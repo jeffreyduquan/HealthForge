@@ -413,3 +413,21 @@ const adminTheme = createTheme({
 ---
 
 **Ende GUI v0.1 LOCKED.**
+
+---
+
+## 11. P6 Hm-Token Override (2026-05-26 ab P6.S2 aktiv)
+
+**Wichtig:** Die §§2–3 LOCKED Olive-Green-Palette + Material-3-Roboto-Typography sind ab P6.S2 **superseded** durch das Histamind-Design-System. Master-Quelle für alle Tokens, Components und Patterns: [HistamindDesignReference.md](HistamindDesignReference.md).
+
+**Zusammenfassung der Replacement-Decisions (LOCKED in SprintPlan §4b.0):**
+
+- Primary-Seed `#7CB342` Olive → **Violet→Cyan-Gradient** (`#7C5CFF` → `#4DD0E1`).
+- Background warmweiß/oliv → **Dark deep-blue** `#070A12` (Hero) + clean light `#F4F5F8` (sekundär).
+- Schrift Roboto/Material-Default → **Manrope** (Google Fonts, OFL).
+- Material-3-Standard-Components → eigene Compose-Component-Library (GlassCard, SectionPill, GradientFab, GradientButton, AmbientBackdrop, GradientText, SegmentedTabs, SeverityBar) — siehe HistamindDesignReference.md §5.
+- Light + Dark + System bleibt; Light-Mode ist reduzierte Clean-Variante ohne Glas-Effekte.
+
+GUI.md §§4–10 (Spacing, Typography-Skala, Component-Guidelines, A11y, Admin-UI-Mapping) bleiben in der Substanz gültig, werden aber von der Hm-Token-Spezifikation überschrieben wo Konflikt besteht.
+
+**Doc-Status:** GUI.md v0.1 = historisches Lock-Dokument; HistamindDesignReference.md v1.0 = aktive Designquelle.

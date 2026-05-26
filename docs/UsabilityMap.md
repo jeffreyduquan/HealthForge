@@ -569,3 +569,98 @@ Für noch nicht implementierte Tabs:
 ---
 
 *End of UsabilityMap.md v0.1 — LOCKED. Details zu Tokens/Farben/Components in `GUI.md`.*
+
+---
+
+## §X P6 Re-Spec — Screen-Patterns (eingefügt 2026-05-26, LOCKED via P6.S1)
+
+**Note:** Die §§1–9 oben sind das ursprüngliche v0.1-LOCKED-Konzept. Ab P6.S4 werden Screens nach Hm-Patterns rebuilt. Master-Quelle: [HistamindDesignReference.md §6](HistamindDesignReference.md).
+
+### X.1 Home (P6.S4, supersedes §3 Home)
+
+Stack-Layout (bottom→top):
+1. **AmbientBackdrop** (Layer-0, dark-only) — driftende Blobs in Violet/Cyan/Mint.
+2. **TopBar** — Greeting (GradientText `headlineLarge` „Hallo, $name") + Datum (`bodyMedium` fgSecondary). Rechts: Pin-Mgmt-Icon (öffnet PinnedNutrientsManager-Sheet).
+3. **SectionPill „HEUTE GEPLANT"** + GlassCard mit 3 Meal-Slot-Rows.
+4. **SectionPill „ERNÄHRUNG"** + GlassCard:
+   - 4 große Progress-Ringe (Pinned-Nutrients default kcal/Protein/Carbs/Fat) horizontal scrollbar.
+   - Δ-Tag pro Ring („im Ziel" `statusGood` / „über" `statusOverUl` / „unter" `statusRelax`).
+   - „Weitere anzeigen" Expand-Toggle → Linear-Mini-Progress pro weiterer Nährstoff.
+5. **SectionPill „WASSER"** + GlassCard mit Quick-Add-Chips (250/500/750ml), Counter, Today-History; Long-Press auf Chip = Undo-Snackbar.
+6. **SectionPill „LETZTE NOTIZEN"** + GlassCard mit Mini-Log-Liste (letzte 3 Events mit SeverityBar).
+7. **GradientFab** unten-rechts → Add-Flow (siehe Pre-Selection-Mode).
+
+### X.2 Onboarding (P6.S4, supersedes §2 Onboarding)
+
+14-Step-Wizard, forward-only, kein Skip.
+
+Layout pro Step:
+- Step-Indikator oben (14 Punkte horizontal, aktiver Punkt animiert auf accentGradient).
+- GradientText `headlineLarge` Titel.
+- `bodyLarge` Erklärung (1–2 Zeilen).
+- Input-Area:
+  - Slider für Alter/Größe/Gewicht/Aktivität (siehe REQ-ONBOARD-SLIDER-001).
+  - Chip-Multi-Select für Allergene/Intoleranzen/Diäten.
+  - SegmentedTabs für binary Choices (z.B. Geschlecht).
+- Bottom-Bar: Links „Zurück" (Outlined-Button, ab Step>0), rechts „Weiter" (GradientButton).
+- Step 14: Summary + „Los geht's" (GradientButton, ganz breit).
+
+### X.3 Plan (P6.S5, supersedes §4 Plan)
+
+- Day-Strip oben: 7 Glass-Chips (Mo–So), heute mit accentGradient-Pill-Background.
+- Pro Tag: 4 Mini-GlassCards (Frühstück/Mittag/Abend/Snack), jede mit:
+  - Slot-Titel (`labelLarge`).
+  - Liste der Items (Rezept- oder Lebensmittel-Refs).
+  - Add-Button → Plan-Add-Sheet.
+- **Plan-Add-Sheet:**
+  - Sheet-Titel: „Rezept oder Lebensmittel" (Wording-Lock F-008).
+  - SegmentedTabs „Rezepte" / „Lebensmittel".
+  - Liste vorgefüllt (50 Items alphabetisch).
+  - Bei Auswahl: Mengenangabe + „Hinzufügen" (GradientButton).
+
+### X.4 Essen / Lebensmittel (P6.S5, supersedes §5 Essen)
+
+- Search-Bar sticky oben.
+- Liste lazy-load 50 alphabetisch on-open (REQ-LIST-PRELOAD-001).
+- Pro Item: GlassCard mit Name, Marke, Nährstoff-Zusammenfassung (4 Pinned-Werte als Mini-Chips).
+- FAB → IngredientSuggest-Flow (bestehend, nur visuell adaptiert).
+- **Pre-Selection-Mode** (REQ-INTAKE-ADD-FLOW-001): wenn nav-arg `preselect=true` gesetzt, FAB wird zu „Auswählen" und Tap auf Item liefert Result-Callback.
+
+### X.5 Log (P6.S6, INVERSION — supersedes §6 Log)
+
+**Konzept-Inversion:** Tagebuch (Mood+Schlaf+Symptom) → **Event-Log** (Symptom-Event mit Severity).
+
+- SegmentedTabs „Einträge" / „Insights" oben.
+- **Tab Einträge:**
+  - Chronologische Liste (neueste zuerst).
+  - Pro Event-Row: SeverityBar (4dp links, Farbe nach Severity) + Symptom-Tag-Chips + Zeit (`labelMedium`) + Notiz-Preview (`bodySmall`, max 2 Zeilen).
+  - FAB → QuickEntrySheet.
+- **QuickEntrySheet:**
+  - Severity-Picker: 5 große Gradient-Chips „1 leicht" .. „5 stark".
+  - Symptom-Tag-Chips (multi-select, Default-Liste konfigurierbar in Profil).
+  - Notiz-Textfeld (multiline, optional).
+  - Time-Picker (default „jetzt").
+  - „Speichern" (GradientButton).
+- **Tab Insights:**
+  - 14-Tage-Bar-Chart (Severity-Summen pro Tag).
+  - Top-3-Symptome (Bar-List mit Häufigkeit).
+  - „Vollständiger Verlauf" Link → erweiterte Statistik (Future-Backlog).
+
+### X.6 Profil (P6.S5, supersedes §7 Profil)
+
+Scroll-Liste aus GlassCards:
+- **Konto** — E-Mail, „Abmelden" (Outlined-Button).
+- **Tagesziele** (REQ-PROFILE-GOALS-001) — per-Nutrient-Editor mit kcal/Protein/Carbs/Fat + „+ Nährstoff hinzufügen" für Mikronährstoffe.
+- **Pinned Nutrients** — zeigt aktuelle Pins als Chips; Tap → PinnedNutrientsManager-Sheet.
+- **Symptom-Tags** — Editor für Default-Tags im Log.
+- **Erinnerungen** — Wasser-Alarm-Toggle mit Helper-Text (REQ-WATER-ALARM-HELPER-001).
+- **Theme** — Light/Dark/System-Toggle.
+- **Daten** — Exportieren (PDF/JSON) + Account löschen.
+- **Info** — App-Version, Lizenzen.
+
+### X.7 Auth-Screens (P6.S4, light-touch)
+
+- Login/Register/EmailVerify/ForgotPassword: AmbientBackdrop + zentrale GlassCard mit Logo (GradientText „HealthForge") + Form + GradientButton.
+- Keine separate Layout-Änderung gegenüber v0.1, nur visuell auf Hm-Tokens umgestellt.
+
+**End of §X P6 Re-Spec UsabilityMap.**
