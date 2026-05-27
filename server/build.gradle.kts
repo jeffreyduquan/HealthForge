@@ -96,3 +96,46 @@ tasks.withType<Test> {
     useJUnitPlatform()
     // LOCKED Q10 reopen: Smoke tests enabled (only AuthIT). Use `gradle test` to run.
 }
+
+// ============================================================================
+// P7.S2 / REQ-DATA-SOURCE-001 — Build-Time Tool Tasks
+// ============================================================================
+// Diese Tasks führen Standalone-CLI-Tools aus `de.healthforge.tools.*` aus.
+// Sie sind KEIN Teil des Spring-Boot-Runtime; die Klassen liegen unter
+// `tools/` ohne @Component-Annotation und werden nur per JavaExec aufgerufen.
+//
+// .env-Loader: Liest server/.env (gitignored) und setzt FDC_API_KEY / DEEPL_API_KEY
+// als ENV-Var für den Subprozess. Damit muss der User den Key NICHT manuell
+// in die Shell exportieren.
+
+fun loadDotEnv(): Map<String, String> {
+    val envFile = file(".env")
+    if (!envFile.exists()) return emptyMap()
+    return envFile.readLines(Charsets.UTF_8)
+        .asSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.startsWith("#") }
+        .mapNotNull { line ->
+            val idx = line.indexOf('=')
+            if (idx <= 0) null else line.substring(0, idx).trim() to line.substring(idx + 1).trim()
+        }
+        .toMap()
+}
+
+tasks.register<JavaExec>("fetchFdcTopIds") {
+    group = "tools"
+    description = "P7.S2: Holt Top-FDC-IDs (Foundation + SR-Legacy + Top-Branded) von USDA FoodData Central API."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.tools.FetchFdcTopIds")
+    workingDir = project.projectDir
+    environment(loadDotEnv())
+}
+
+tasks.register<JavaExec>("buildUsdaSeed") {
+    group = "tools"
+    description = "P7.S2 Slice 2: Liest fdc_top_ids.csv, holt Nährwerte je ID (Batch=20) von FDC, schreibt seed/usda_fdc.csv."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.tools.BuildUsdaSeed")
+    workingDir = project.projectDir
+    environment(loadDotEnv())
+}
