@@ -15,8 +15,11 @@ import java.util.UUID
 /**
  * Common contract for all CSV importers. Implementations are stateless beans;
  * the orchestrator opens an [EtlRunEntity] before and closes it after the call.
+ *
+ * Hinweis (P7.S2): bewusst NICHT `sealed`, damit Source-spezifische Importer
+ * (z.B. `UsdaFdcImporter` im Sub-Package) registriert werden können.
  */
-sealed interface Importer {
+interface Importer {
     val source: EtlSource
     fun seedResourcePath(): String
 

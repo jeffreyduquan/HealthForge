@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.time.Instant
 import java.util.UUID
 
-enum class EtlSource { BLS, SIGHI, OFF }
+enum class EtlSource { BLS, SIGHI, OFF, USDA_FDC }
 
 enum class EtlStatus { RUNNING, SUCCESS, FAILED, SKIPPED_NO_FILE }
 

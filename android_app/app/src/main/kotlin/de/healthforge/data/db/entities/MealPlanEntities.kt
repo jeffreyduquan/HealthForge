@@ -25,6 +25,11 @@ data class MealPlanSlotEntity(
     val position: Int = 0,
     val consumed: Boolean = false,
     val consumedAt: Long? = null,
+    /**
+     * P7.S1 / REQ-PLAN-WATER-GOAL-001 — Tages-Wasserziel in ml, Override pro Tag.
+     * `null` = Profile-Default (UserProfileEntity.dailyNutrientGoalsJson["water"]) gilt.
+     */
+    val waterGoalMl: Int? = null,
 )
 
 /**

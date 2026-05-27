@@ -12,7 +12,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
-enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL }
+enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL, USDA_FDC }
 
 enum class IngredientStatus { PENDING, APPROVED, REJECTED }
 
@@ -72,6 +72,12 @@ class IngredientEntity(
 
     @Column(name = "fodmap_flags_json", nullable = false)
     var fodmapFlagsJson: String = "[]",
+
+    @Column(name = "micronutrients_json", nullable = false, columnDefinition = "jsonb")
+    var micronutrientsJson: String = "{}",
+
+    @Column(name = "fdc_id")
+    var fdcId: Long? = null,
 
     @Column(name = "locked", nullable = false)
     var locked: Boolean = true,
