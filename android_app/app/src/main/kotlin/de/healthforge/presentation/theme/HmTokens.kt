@@ -22,6 +22,10 @@ data class HmTokens(
     val glassFillBottom: Color,
     /** Glass border (1dp hairline). */
     val glassBorder: Color,
+    /** Track-Farbe für Progress/Power-Bars (deutlich gegen Card-Surface). */
+    val barTrack: Color,
+    /** Optionaler 1dp-Border um `NeoCard`/`GlassCard` (Light: sichtbar; Dark: transparent). */
+    val cardBorder: Color,
     /** Foreground text — primary (Manrope w700/w600 surfaces). */
     val fgPrimary: Color,
     /** Foreground text — secondary (Manrope w400/w500 surfaces). */
@@ -46,6 +50,8 @@ val DarkHmTokens = HmTokens(
     glassFillTop     = HmDarkGlassFillTop,
     glassFillBottom  = HmDarkGlassFillBot,
     glassBorder      = HmDarkGlassBorder,
+    barTrack         = HmDarkBarTrack,
+    cardBorder       = HmDarkCardBorder,
     fgPrimary        = HmDarkFgPrimary,
     fgSecondary      = HmDarkFgSecondary,
     fgTertiary       = HmDarkFgTertiary,
@@ -62,6 +68,8 @@ val LightHmTokens = HmTokens(
     glassFillTop     = Color(0x00FFFFFF),
     glassFillBottom  = Color(0x00FFFFFF),
     glassBorder      = HmLightGlassBorder,
+    barTrack         = HmLightBarTrack,
+    cardBorder       = HmLightCardBorder,
     fgPrimary        = HmLightFgPrimary,
     fgSecondary      = HmLightFgSecondary,
     fgTertiary       = HmLightFgTertiary,

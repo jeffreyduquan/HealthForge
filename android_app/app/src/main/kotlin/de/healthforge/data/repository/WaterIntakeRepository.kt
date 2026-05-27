@@ -29,4 +29,17 @@ class WaterIntakeRepository @Inject constructor(
     }
 
     suspend fun deleteById(id: Long) = dao.deleteById(id)
+
+    /**
+     * P7.S3a / REQ-HOME-WATER-BAR-001 — setzt die absolute Tagesmenge.
+     *
+     * Der Slider auf dem Home-Screen repräsentiert den absoluten Wert
+     * (nicht ein Delta zum Aufaddieren). Beim Setzen werden alle bisherigen
+     * Einträge des Tages durch genau einen Aggregat-Eintrag mit [totalMl]
+     * ersetzt. Bei [totalMl] == 0 verbleibt der Tag eintragslos.
+     */
+    suspend fun setDayTotal(day: LocalDate, totalMl: Int) {
+        require(totalMl in 0..5000) { "totalMl must be 0..5000" }
+        dao.replaceDayTotal(day.toString(), totalMl, System.currentTimeMillis())
+    }
 }

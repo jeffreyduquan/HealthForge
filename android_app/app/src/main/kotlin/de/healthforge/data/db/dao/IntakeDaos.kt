@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.WaterIntakeEntity
@@ -60,6 +61,29 @@ interface WaterIntakeDao {
 
     @Query("DELETE FROM water_intake WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM water_intake WHERE dayDateIso = :day")
+    suspend fun deleteForDay(day: String)
+
+    /**
+     * P7.S3a / REQ-HOME-WATER-BAR-001 — absolute Tagesmenge setzen.
+     * Ersetzt alle Einträge des Tages durch genau einen Aggregat-Eintrag mit
+     * [totalMl]. Wenn [totalMl] == 0, werden alle Einträge gelöscht und keiner
+     * neu angelegt.
+     */
+    @Transaction
+    suspend fun replaceDayTotal(day: String, totalMl: Int, loggedAt: Long) {
+        deleteForDay(day)
+        if (totalMl > 0) {
+            insert(
+                WaterIntakeEntity(
+                    loggedAt = loggedAt,
+                    dayDateIso = day,
+                    volumeMl = totalMl,
+                )
+            )
+        }
+    }
 
     @Query("SELECT * FROM water_intake ORDER BY loggedAt DESC")
     suspend fun listAll(): List<WaterIntakeEntity>

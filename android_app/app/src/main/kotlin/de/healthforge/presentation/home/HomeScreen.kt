@@ -19,42 +19,37 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.text.KeyboardOptions
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.domain.IsIntakeEditableUseCase
 import de.healthforge.presentation.home.components.DateNavigator
-import de.healthforge.presentation.home.components.MacroRingRow
+import de.healthforge.presentation.home.components.PinnedNutrientCard
+import de.healthforge.presentation.home.components.PinnedNutrientEntry
 import de.healthforge.presentation.home.components.QuickAddDialog
 import de.healthforge.presentation.home.components.SupplementChecklist
-import de.healthforge.presentation.home.components.WaterTracker
+import de.healthforge.presentation.home.components.WaterStageSlider
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.GradientText
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.SectionPill
+import de.healthforge.presentation.theme.NeoCard
+import de.healthforge.presentation.theme.NeoSectionLabel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -69,19 +64,6 @@ fun HomeScreen(
     val hm = LocalHmTokens.current
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN) }
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // P6.S7 F-005: nach jedem Wasser-Add eine Snackbar mit Undo zeigen (5s ~ SnackbarDuration.Short).
-    LaunchedEffect(s.waterUndoTriggerNonce) {
-        if (s.waterUndoTriggerNonce == 0L) return@LaunchedEffect
-        val ml = s.lastWaterVolumeMl ?: return@LaunchedEffect
-        val result = snackbarHostState.showSnackbar(
-            message = "+${ml} ml hinzugef\u00fcgt",
-            actionLabel = "R\u00fcckg\u00e4ngig",
-            withDismissAction = true,
-            duration = SnackbarDuration.Short,
-        )
-        if (result == SnackbarResult.ActionPerformed) vm.undoLastWater()
-    }
 
     Box(
         modifier = Modifier
@@ -127,35 +109,51 @@ fun HomeScreen(
 
             DateNavigator(date = s.date, onChange = vm::setDate)
 
-            // ERNÄHRUNG
-            SectionPill(label = "Ern\u00e4hrung")
-            GlassCard {
-                MacroRingRow(
-                    kcal = s.totals.kcal, kcalTarget = s.targets.kcal,
-                    proteinG = s.totals.proteinG, proteinTarget = s.targets.proteinG,
-                    carbsG = s.totals.carbsG, carbsTarget = s.targets.carbsG,
-                    fatG = s.totals.fatG, fatTarget = s.targets.fatG,
+            // P7.S3 / REQ-HOME-NUTRIENT-LIST-001 \u2014 Pinned Nutrients statt fester Macro-Bars.
+            // Standard-Pins: kcal / Eiwei\u00df / Kohlenhydrate / Fett (Wasser kommt als
+            // interaktive Slider-Zeile am Ende, siehe REQ-HOME-WATER-BAR-001 v2 /
+            // `WaterStageSlider`). P7.S5: User darf Pins anpassen.
+            NeoSectionLabel(text = "Ern\u00e4hrung")
+            NeoCard {
+                PinnedNutrientCard(
+                    entries = s.pinnedKeys.filter { it != "water" }.map { key ->
+                        when (key) {
+                            "kcal" -> PinnedNutrientEntry(key, s.totals.kcal.toDouble(), s.targets.kcal.toDouble())
+                            "protein" -> PinnedNutrientEntry(key, s.totals.proteinG, s.targets.proteinG.toDouble())
+                            "carbs" -> PinnedNutrientEntry(key, s.totals.carbsG, s.targets.carbsG.toDouble())
+                            "fat" -> PinnedNutrientEntry(key, s.totals.fatG, s.targets.fatG.toDouble())
+                            else -> {
+                                // P7.S3.b: Micronutrient-Totals folgen sobald Intake-Snapshots
+                                // micronutrients_json mitschreiben (REQ-INGR-MICRONUTRIENTS-001).
+                                val def = de.healthforge.domain.nutrition.NutrientCatalog
+                                    .byKeyOrNull(key)?.defaultPerDay ?: 1.0
+                                PinnedNutrientEntry(key, 0.0, def)
+                            }
+                        }
+                    },
+                    trailingSlot = if (s.pinnedKeys.contains("water")) {
+                        {
+                            // P7.S3a v2 / REQ-HOME-WATER-BAR-001 \u2014 Stufen-Slider als
+                            // letzte Pin-Zeile. Range 0..goal (0\u2013100\u00a0% der aktuellen
+                            // Stufe), 50-ml-Steps, eigene Farbe pro Stufe 0..9,
+                            // Drag-Through-Zero entlocked Stufe-1.
+                            WaterStageSlider(
+                                currentMl = s.waterMl,
+                                ghostMl = s.waterGhostMl,
+                                goalMl = s.targets.waterMl,
+                                reminderEnabled = s.waterReminderEnabled,
+                                onCommit = vm::setWaterMl,
+                                onToggleReminder = vm::setWaterReminderEnabled,
+                            )
+                        }
+                    } else null,
                 )
             }
 
-            // WASSER
-            SectionPill(label = "Wasser")
-            GlassCard(padding = PaddingValues(0.dp)) {
-                WaterTracker(
-                    currentMl = s.waterMl,
-                    goalMl = s.targets.waterMl,
-                    onAdd = vm::addWater,
-                    onCustom = vm::openWaterCustom,
-                    reminderEnabled = s.waterReminderEnabled,
-                    onReminderToggle = vm::setWaterReminderEnabled,
-                    onUndoLast = vm::undoLastWater,
-                    canUndo = s.lastWaterIntakeId != null,
-                )
-            }
 
             if (s.supplementChecklist.isNotEmpty()) {
-                SectionPill(label = "Supplemente")
-                GlassCard(padding = PaddingValues(0.dp)) {
+                NeoSectionLabel(text = "Supplemente")
+                NeoCard(contentPadding = PaddingValues(0.dp)) {
                     SupplementChecklist(
                         items = s.supplementChecklist,
                         onMarkTaken = vm::markSupplementTaken,
@@ -164,7 +162,7 @@ fun HomeScreen(
             }
 
             // HEUTIGE EINTRÄGE
-            SectionPill(label = "Heutige Eintr\u00e4ge")
+            NeoSectionLabel(text = "Heutige Eintr\u00e4ge")
             if (s.entries.isEmpty()) {
                 GlassCard {
                     Text(
@@ -226,30 +224,6 @@ fun HomeScreen(
             onPortionChange = vm::onQuickAddPortion,
             onConfirm = vm::confirmQuickAdd,
             onDismiss = vm::closeQuickAdd,
-        )
-    }
-
-    if (s.showWaterCustom) {
-        AlertDialog(
-            onDismissRequest = vm::closeWaterCustom,
-            title = { Text("Wasser hinzuf\u00fcgen") },
-            text = {
-                OutlinedTextField(
-                    value = s.waterCustomMl,
-                    onValueChange = vm::onWaterCustomChange,
-                    label = { Text("Menge (ml)") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = vm::confirmWaterCustom,
-                    enabled = s.waterCustomMl.toIntOrNull()?.let { it in 1..5000 } == true,
-                ) { Text("Hinzuf\u00fcgen") }
-            },
-            dismissButton = { TextButton(onClick = vm::closeWaterCustom) { Text("Abbrechen") } },
         )
     }
 }

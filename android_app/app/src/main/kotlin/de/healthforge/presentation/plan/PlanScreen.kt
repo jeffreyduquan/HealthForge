@@ -1,6 +1,7 @@
 package de.healthforge.presentation.plan
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -48,10 +50,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.presentation.theme.AmbientBackdrop
@@ -109,22 +113,29 @@ fun PlanScreen(
         AmbientBackdrop()
 
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            // Header: Title + AutoPlan + ShoppingList
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            // Header — Histamind §6.3: SectionPill+Glass-Tile-Row oben, GradientText darunter.
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SectionPill(label = "PLAN")
+                    Spacer(Modifier.weight(1f))
+                    GlassIconTile(
+                        onClick = { autoVm.open() },
+                        contentDescription = "Plan generieren",
+                    ) { Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
+                    Spacer(Modifier.width(8.dp))
+                    GlassIconTile(
+                        onClick = onOpenShoppingList,
+                        contentDescription = "Einkaufsliste",
+                    ) { Icon(Icons.Filled.ShoppingCart, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
+                }
+                Spacer(Modifier.height(6.dp))
                 GradientText(
                     text = "Wochenplan",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.W800,
+                        letterSpacing = (-0.5).sp,
+                    ),
                 )
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { autoVm.open() }) {
-                    Icon(Icons.Filled.AutoAwesome, contentDescription = "Plan generieren", tint = hm.fgPrimary)
-                }
-                IconButton(onClick = onOpenShoppingList) {
-                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Einkaufsliste", tint = hm.fgPrimary)
-                }
             }
 
             DayStrip(selected = state.selectedDay, onPick = vm::selectDay)
@@ -154,7 +165,10 @@ fun PlanScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     item {
-                        SectionPill(label = "MAHLZEITEN", modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp))
+                        DayHeader(date = state.selectedDay)
+                    }
+                    item {
+                        DaySummary(slots = state.slots)
                     }
                     items(state.slots, key = { it.slot.id }) { sw ->
                         SlotCard(
@@ -167,20 +181,19 @@ fun PlanScreen(
                             onDeleteItem = { id -> vm.deleteItem(id) },
                         )
                     }
-                    item {
-                        TextButton(
-                            onClick = { addSlotDialog = true },
-                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        ) {
-                            Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
-                            Spacer(Modifier.width(6.dp))
-                            Text("Weitere Mahlzeit", color = hm.ambientViolet)
-                        }
-                    }
-                    item { Spacer(Modifier.height(72.dp)) }
+                    item { Spacer(Modifier.height(96.dp)) }
                 }
             }
         }
+
+        // Bottom-right GradientFab — Histamind PlanFab idiom.
+        GradientFab(
+            onClick = { addSlotDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 20.dp, bottom = 20.dp),
+        ) { Icon(Icons.Filled.Add, contentDescription = "Mahlzeit hinzufügen", tint = Color.White) }
 
         SnackbarHost(
             hostState = snackbar,
@@ -239,7 +252,12 @@ fun PlanScreen(
 }
 
 /**
- * 7-Tage Day-Strip mit Gradient-Pill für „heute" + ausgewählten Tag.
+ * 7-Tage Day-Strip — Histamind §6.3.
+ *
+ * Visualisierung (Histamind-konform):
+ *  - Selected → accentGradient-Pill mit Violet-Glow-Shadow.
+ *  - Today (nicht selected) → kleiner 5dp Violet-Dot ÜBER der Glass-Pill.
+ *  - Sonst  → Glass-Pill (verticalGradient + 1dp glassBorder Hairline).
  */
 @Composable
 private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
@@ -252,32 +270,188 @@ private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(days) { day ->
+            val isToday = day == today
             val isSelected = day == selected
-            val pillShape = RoundedCornerShape(16.dp)
-            Column(
-                modifier = Modifier
+            val pillShape = RoundedCornerShape(20.dp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Today-Dot über der Pill — nur wenn heute UND nicht selected.
+                Box(Modifier.height(8.dp), contentAlignment = Alignment.Center) {
+                    if (isToday && !isSelected) {
+                        Box(
+                            Modifier
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(SolidColor(hm.ambientViolet)),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                val pillModifier = Modifier
                     .clip(pillShape)
-                    .then(
-                        if (isSelected) Modifier.background(hm.accentGradient)
-                        else Modifier.background(SolidColor(hm.glassFillTop))
-                    )
+                    .let {
+                        if (isSelected) {
+                            it.background(hm.accentGradient)
+                        } else {
+                            it
+                                .background(Brush.verticalGradient(listOf(hm.glassFillTop, hm.glassFillBottom)))
+                                .border(1.dp, hm.glassBorder, pillShape)
+                        }
+                    }
                     .clickable { onPick(day) }
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.GERMAN).uppercase(),
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (isSelected) Color.White else hm.fgSecondary,
-                )
-                Text(
-                    day.format(fmt),
-                    style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                    color = if (isSelected) Color.White else hm.fgPrimary,
-                )
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                Column(
+                    modifier = pillModifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    val topLabel = if (isToday) "Heute" else day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.GERMAN)
+                    Text(
+                        topLabel.uppercase(),
+                        style = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = if (isSelected || isToday) FontWeight.W700 else FontWeight.W500,
+                            letterSpacing = 0.4.sp,
+                        ),
+                        color = when {
+                            isSelected -> hm.fgPrimary
+                            else -> hm.fgTertiary
+                        },
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        day.format(fmt),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W700),
+                        color = hm.fgPrimary,
+                    )
+                }
             }
         }
     }
+}
+
+/**
+ * Glass-Tile-Icon-Button (40×40dp) — Histamind Plan-Header rechts.
+ * Transparent vertikal-Gradient + 1dp glassBorder + 12dp Radius.
+ */
+@Composable
+private fun GlassIconTile(
+    onClick: () -> Unit,
+    contentDescription: String,
+    content: @Composable () -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(hm.glassFillTop, hm.glassFillBottom)))
+            .border(1.dp, hm.glassBorder, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        // contentDescription propagiert über das innere Icon der Caller-Site.
+        @Suppress("UNUSED_EXPRESSION") contentDescription
+        content()
+    }
+}
+
+/**
+ * SlotLabelPill — Histamind §SlotLabelPill: 3×14dp Accent-Gradient-Stripe + 8dp Gap
+ * + UPPERCASE labelSmall w800 +1.4sp Letterspacing fgSecondary.
+ */
+@Composable
+private fun SlotLabelPill(text: String) {
+    val hm = LocalHmTokens.current
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier
+                .size(width = 3.dp, height = 14.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(hm.accentGradient),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = text.uppercase(),
+            style = androidx.compose.material3.MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.W800,
+                letterSpacing = 1.4.sp,
+            ),
+            color = hm.fgSecondary,
+        )
+    }
+}
+
+/**
+ * DayHeader — Histamind: UPPERCASE-Wochentag (mit Heute-Dot bei isToday)
+ * + ShaderMask GradientText "26. Mai" headlineSmall w700 -0.3sp.
+ */
+@Composable
+private fun DayHeader(date: LocalDate) {
+    val hm = LocalHmTokens.current
+    val today = LocalDate.now()
+    val isToday = date == today
+    val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.GERMAN)
+    val month = remember(date) { date.format(DateTimeFormatter.ofPattern("d. MMMM", Locale.GERMAN)) }
+    Column(modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                weekday.uppercase(),
+                style = androidx.compose.material3.MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.W700,
+                    letterSpacing = 1.4.sp,
+                ),
+                color = if (isToday) hm.ambientViolet else hm.fgTertiary,
+            )
+            if (isToday) {
+                Spacer(Modifier.width(6.dp))
+                Box(
+                    Modifier
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(SolidColor(hm.ambientViolet)),
+                )
+            }
+        }
+        Spacer(Modifier.height(2.dp))
+        GradientText(
+            text = month,
+            style = androidx.compose.material3.MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.W700,
+                letterSpacing = (-0.3).sp,
+            ),
+        )
+    }
+}
+
+/**
+ * DaySummary — Histamind: zählt gefüllte Slots pro Typ.
+ * Beispiel: "1 Frühstück · 1 Mittag · 1 Abend · 2 Snacks".
+ */
+@Composable
+private fun DaySummary(slots: List<SlotWithItems>) {
+    val hm = LocalHmTokens.current
+    var b = 0; var lu = 0; var di = 0; var sn = 0
+    slots.forEach { sw ->
+        if (sw.items.isEmpty()) return@forEach
+        when (sw.slot.slotType) {
+            "BREAKFAST" -> b++
+            "LUNCH" -> lu++
+            "DINNER" -> di++
+            "SNACK" -> sn++
+        }
+    }
+    val parts = buildList {
+        if (b > 0) add("$b Frühstück")
+        if (lu > 0) add("$lu Mittag")
+        if (di > 0) add("$di Abend")
+        if (sn > 0) add("$sn ${if (sn == 1) "Snack" else "Snacks"}")
+    }
+    val text = if (parts.isEmpty()) "Noch nichts gegessen heute" else parts.joinToString(" · ")
+    Text(
+        text = text,
+        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+        color = hm.fgSecondary,
+        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+    )
 }
 
 @Composable
@@ -292,21 +466,60 @@ private fun SlotCard(
 ) {
     val hm = LocalHmTokens.current
     val sem = LocalSemanticColors.current
+    val label = SLOT_LABEL[slotType] ?: slotType
+
+    // Histamind: leere Slots = kompakte Glass-Row mit "+"-Circle rechts (1 Tap → Picker).
+    if (items.isEmpty()) {
+        val shape = RoundedCornerShape(24.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(Brush.verticalGradient(listOf(hm.glassFillTop, hm.glassFillBottom)))
+                .border(1.dp, hm.glassBorder, shape)
+                .clickable(onClick = onAddItem)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SlotLabelPill(text = label)
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = onDeleteSlot, modifier = Modifier.size(28.dp)) {
+                Icon(Icons.Filled.Close, contentDescription = "Slot löschen", tint = hm.fgTertiary, modifier = Modifier.size(16.dp))
+            }
+            Spacer(Modifier.width(4.dp))
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                Color(0x337C5CFF),
+                                Color(0x334DD0E1),
+                            ),
+                        ),
+                    )
+                    .border(1.dp, hm.glassBorder, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(14.dp))
+            }
+        }
+        return
+    }
+
+    // Gefüllter Slot: GlassCard mit SlotLabelPill-Header + Items + Actions.
     GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(14.dp)) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    SLOT_LABEL[slotType] ?: slotType,
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = hm.fgPrimary,
-                )
+                SlotLabelPill(text = label)
                 if (consumed) {
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         Icons.Filled.Check,
                         contentDescription = "gegessen",
                         tint = sem.statusGood,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(16.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -314,31 +527,22 @@ private fun SlotCard(
                     Icon(Icons.Filled.Close, contentDescription = "Slot löschen", tint = hm.fgSecondary)
                 }
             }
-            if (items.isEmpty()) {
-                Text(
-                    "Noch nichts geplant",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                    modifier = Modifier.padding(vertical = 4.dp),
-                )
-            } else {
-                items.forEach { item ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(item.snapshotName, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = hm.fgPrimary)
-                            val unit = if (item.sourceType.name == "RECIPE") "Portion(en)" else "g"
-                            Text(
-                                "${"%g".format(item.amount)} $unit",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                                color = hm.fgSecondary,
-                            )
-                        }
-                        IconButton(onClick = { onDeleteItem(item.id) }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Item löschen", tint = hm.fgSecondary)
-                        }
+            items.forEach { item ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(item.snapshotName, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = hm.fgPrimary)
+                        val unit = if (item.sourceType.name == "RECIPE") "Portion(en)" else "g"
+                        Text(
+                            "${"%g".format(item.amount)} $unit",
+                            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                            color = hm.fgSecondary,
+                        )
+                    }
+                    IconButton(onClick = { onDeleteItem(item.id) }) {
+                        Icon(Icons.Filled.Close, contentDescription = "Item löschen", tint = hm.fgSecondary)
                     }
                 }
             }
@@ -349,7 +553,7 @@ private fun SlotCard(
                     Text("Hinzufügen", color = hm.ambientViolet)
                 }
                 Spacer(Modifier.weight(1f))
-                if (!consumed && items.isNotEmpty()) {
+                if (!consumed) {
                     GradientFab(
                         onClick = onMarkConsumed,
                         size = 44.dp,

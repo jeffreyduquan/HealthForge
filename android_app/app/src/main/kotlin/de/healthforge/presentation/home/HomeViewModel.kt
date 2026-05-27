@@ -18,6 +18,7 @@ import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.data.repository.WaterIntakeRepository
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
+import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.notification.WaterReminderPrefs
 import de.healthforge.notification.WaterReminderScheduler
 import kotlinx.coroutines.FlowPreview
@@ -53,6 +54,18 @@ data class HomeState(
     val totals: DayNutrientTotals = DayNutrientTotals.ZERO,
     val entries: List<IntakeEntryEntity> = emptyList(),
     val waterMl: Int = 0,
+    /**
+     * P7.S3 / REQ-HOME-WATER-BAR-001 — lineares Tages-Soll bis zur aktuellen
+     * Uhrzeit (= `targets.waterMl * (minutesSinceMidnight / 1440)`).
+     * Wird im UI als Ghost-Layer der Wasser-Bar gezeichnet.
+     */
+    val waterGhostMl: Int = 0,
+    /**
+     * P7.S3 / REQ-HOME-NUTRIENT-LIST-001 — in-memory Liste angepinnter
+     * Nutrient-Keys. Default = [NutrientCatalog.defaultPinnedKeys].
+     * Persistente Speicherung (UserProfile JSON) folgt in P7.S5.
+     */
+    val pinnedKeys: List<String> = NutrientCatalog.defaultPinnedKeys,
     val supplementChecklist: List<SupplementChecklistItem> = emptyList(),
     val showQuickAdd: Boolean = false,
     val quickAddQuery: String = "",
@@ -60,16 +73,8 @@ data class HomeState(
     val quickAddLoading: Boolean = false,
     val quickAddSelected: IngredientDto? = null,
     val quickAddPortion: String = "100",
-    val showWaterCustom: Boolean = false,
-    val waterCustomMl: String = "",
     val waterReminderEnabled: Boolean = false,
     val error: String? = null,
-    /** P6.S7 F-005: id of last water entry added in this session (for Long-Press Undo). */
-    val lastWaterIntakeId: Long? = null,
-    /** P6.S7 F-005: volume of last add, for snackbar message. */
-    val lastWaterVolumeMl: Int? = null,
-    /** P6.S7 F-005: monotonic nonce — triggers snackbar in UI via LaunchedEffect. */
-    val waterUndoTriggerNonce: Long = 0L,
 )
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -114,6 +119,7 @@ class HomeViewModel @Inject constructor(
                     entries = entries,
                     totals = totals,
                     waterMl = water,
+                    waterGhostMl = computeWaterGhostMl(_state.value.targets.waterMl, _state.value.date),
                 )
             }
             .launchIn(viewModelScope)
@@ -148,7 +154,12 @@ class HomeViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         targetsFlow
-            .onEach { t -> _state.value = _state.value.copy(targets = t) }
+            .onEach { t ->
+                _state.value = _state.value.copy(
+                    targets = t,
+                    waterGhostMl = computeWaterGhostMl(t.waterMl, _state.value.date),
+                )
+            }
             .launchIn(viewModelScope)
 
         queryFlow
@@ -209,42 +220,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addWater(volumeMl: Int) {
+    /**
+     * P7.S3a / REQ-HOME-WATER-BAR-001 — setzt die absolute Tages-Wassermenge.
+     *
+     * Wird vom Home-Slider gerufen, wenn der User den Thumb loslässt. Persistenz
+     * via [WaterIntakeRepository.setDayTotal] (Day-Aggregate: alle Einträge des
+     * Tages werden durch genau einen Aggregat-Eintrag mit [totalMl] ersetzt).
+     */
+    fun setWaterMl(totalMl: Int) {
         viewModelScope.launch {
-            runCatching { waterRepo.add(_state.value.date, volumeMl) }
-                .onSuccess { id ->
-                    _state.value = _state.value.copy(
-                        lastWaterIntakeId = id,
-                        lastWaterVolumeMl = volumeMl,
-                        waterUndoTriggerNonce = _state.value.waterUndoTriggerNonce + 1,
-                    )
-                }
+            runCatching { waterRepo.setDayTotal(_state.value.date, totalMl.coerceIn(0, 5000)) }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
-    }
-
-    /** P6.S7 F-005: Undo last water Quick-Add (Long-Press → Snackbar Action). */
-    fun undoLastWater() {
-        val id = _state.value.lastWaterIntakeId ?: return
-        viewModelScope.launch {
-            runCatching { waterRepo.deleteById(id) }
-                .onSuccess {
-                    _state.value = _state.value.copy(
-                        lastWaterIntakeId = null,
-                        lastWaterVolumeMl = null,
-                    )
-                }
-                .onFailure { _state.value = _state.value.copy(error = it.message) }
-        }
-    }
-    fun openWaterCustom() { _state.value = _state.value.copy(showWaterCustom = true, waterCustomMl = "") }
-    fun closeWaterCustom() { _state.value = _state.value.copy(showWaterCustom = false) }
-    fun onWaterCustomChange(v: String) { _state.value = _state.value.copy(waterCustomMl = v) }
-    fun confirmWaterCustom() {
-        val v = _state.value.waterCustomMl.toIntOrNull() ?: return
-        if (v <= 0 || v > 5000) return
-        addWater(v)
-        closeWaterCustom()
     }
 
     /** Toggle Wasser-Reminder (REQ-REMIND-001). */
@@ -293,6 +280,43 @@ class HomeViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             val res = ingredientRepo.search(q.trim(), limit = 20).getOrElse { emptyList() }
             _state.value = _state.value.copy(quickAddResults = res, quickAddLoading = false)
+        }
+    }
+
+    /**
+     * P7.S3 / REQ-HOME-NUTRIENT-LIST-001 \u2014 togglet einen Nutrient-Key in der
+     * Pin-Liste. Verhindert das L\u00f6schen aller Pins (mind. 1 Pin bleibt).
+     * Persistente Speicherung folgt in P7.S5 (UserProfile JSON).
+     */
+    fun togglePin(key: String) {
+        val cur = _state.value.pinnedKeys
+        val next = when {
+            key in cur && cur.size > 1 -> cur - key
+            key in cur -> cur
+            else -> cur + key
+        }
+        _state.value = _state.value.copy(pinnedKeys = next)
+    }
+
+    companion object {
+        /**
+         * P7.S3 / REQ-HOME-WATER-BAR-001 \u2014 Anteil des Tages, der bis "jetzt"
+         * vergangen ist, multipliziert mit dem Tagesziel. Bei Anzeige eines
+         * vergangenen Tages wird 100% verwendet (Ghost = Goal); bei k\u00fcnftigem
+         * Tag 0%.
+         */
+        internal fun computeWaterGhostMl(goalMl: Int, day: LocalDate): Int {
+            val today = LocalDate.now()
+            return when {
+                day.isBefore(today) -> goalMl
+                day.isAfter(today) -> 0
+                else -> {
+                    val now = java.time.LocalTime.now()
+                    val secondsOfDay = now.toSecondOfDay().toDouble()
+                    val frac = (secondsOfDay / 86_400.0).coerceIn(0.0, 1.0)
+                    (goalMl * frac).toInt()
+                }
+            }
         }
     }
 }
