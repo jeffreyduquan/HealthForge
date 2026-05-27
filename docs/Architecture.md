@@ -297,6 +297,7 @@ Die ursprüngliche Phasen-Numerierung (V1=P1, V2=P2, ...) wurde durch das natür
 - `V5__ingredient_trgm_indexes.sql` — pg_trgm-Indizes für Fuzzy-Search (P1.S5)
 - `V6__recipes.sql` — Rezepte + Likes + Reports + Community-Ratings (P2.S1, **next**)
 - Weitere Sprints: V7+ entsprechend (siehe SprintPlan).
+- **V12__nutrients_overhaul.sql** (P7.S1) — `ingredients.micronutrients_json JSONB` + `ingredients.fdc_id BIGINT UNIQUE` (REQ-INGR-MICRONUTRIENTS-001).
 - Nur **forward-only**, never editieren bestehende Files.
 - Repeatable: `R__seed_official_supplements.sql` für statische Refdaten.
 
@@ -317,7 +318,9 @@ Server resized auf 3 Größen (thumb 256px, medium 800px, full 1600px) via
 nur Key. URL-Konstruktion: `https://cdn.healthforge.de/<bucket>/<key>` (Caddy
 serviert `cdn.` → MinIO public-read direkt).
 
-### 4.5 OFF ETL Pipeline (LOCKED Q2: Initial Full + täglich inkrementell)
+### 4.5 OFF ETL Pipeline (DEPRECATED in P7 — siehe §4.5b USDA-FDC)
+
+> **P7-Decision (2026-05-27):** OFF wird als prim\u00e4re Quelle aufgegeben (Vitamin-/Mineralstoff-Coverage < 5 %). Die folgende Spezifikation bleibt zur historischen Referenz; die Importer-Skelette werden auf `@Deprecated` markiert und nicht weiter aktiv gepflegt.
 
 **Strategie:** Einmaliger Full-Import beim ersten Deploy (~3 GB Dump), danach täglich
 nur inkrementelle Deltas via OFF REST API.
@@ -342,6 +345,37 @@ nur inkrementelle Deltas via OFF REST API.
   **nicht** überschrieben.
 - **Idempotenz:** ETL kann beliebig oft laufen, neuere Daten gewinnen außer bei sticky-fields.
 - **Manual Trigger:** Admin-Endpoint `POST /admin/etl/off/run` (Admin-only, rate-limited).
+
+### 4.5b USDA-FDC ETL Pipeline (P7 — aktive Hauptquelle)
+
+**Source:** [USDA FoodData Central](https://api.nal.usda.gov/fdc/v1/) — Public-Domain, ~600 k Einträge, kostenloser API-Key (3600 req/h Limit).
+
+**Komponenten:**
+- `server/etl/UsdaFdcImporter.kt` — Bulk-Importer via `POST /v1/foods/list` mit FDC-ID-Batches (Foundation + SR-Legacy + Branded mit kompletten `foodNutrients`).
+- `server/etl/AllergenMapper.kt` — Keyword-Match aus FDC `ingredients`-Volltext-Feld nach EU-14 (ReqSpec §12 REQ-INGR-ALLERGEN-MAPPING-001) inkl. Negativ-Liste (`coconut`, `nutmeg`, `mustard-seed-oil`).
+- `server/scripts/translate_fdc_names.main.kts` — Standalone Kotlin-Script, batched DeepL-Free-API-Calls (500 k Zeichen/Monat Limit), Output als CSV zur Admin-Review.
+
+**Mapping:**
+- FDC `foodNutrients[].nutrient.id` → `NutrientCatalog.key` via statische Lookup-Tabelle (`1003=protein, 1004=fat, 1005=carbs, 1008=kcal, 1087=calcium, 1089=eisen, …`).
+- Werte landen in `ingredients.micronutrients_json` als Map<key, value_per_100g>.
+- `ingredients.fdc_id` speichert FDC-ID für idempotenten Re-Sync.
+
+**Pipeline (Bulk-Bootstrap):**
+1. Admin-Trigger `POST /admin/etl/fdc/bootstrap?list=foundation`.
+2. Importer holt FDC-IDs der gewünschten Liste, batched à 200 IDs.
+3. Pro Eintrag: Upsert in `ingredients` (`source='USDA_FDC'`, `name`=en, `name_de`=NULL bis Translate-Run).
+4. AllergenMapper läuft synchron pro Eintrag.
+5. Log in `etl_runs` (kind=`fdc_bootstrap`).
+
+**Re-Sync:** monatlich via Admin-Endpoint, identische Pipeline mit `lastImportedAt`-Filter.
+
+**Übersetzungs-Workflow:**
+1. `translate_fdc_names.main.kts` liest `ingredients WHERE source='USDA_FDC' AND name_de IS NULL` (Top-N nach Häufigkeit in `recipe_ingredients`).
+2. DeepL-Batch (50 Texte/Request).
+3. CSV `fdc_translations_<date>.csv` schreiben.
+4. Admin-UI-Seite `FdcTranslationsPage` → Review → Bulk-Apply (`UPDATE ingredients SET name_de = …`).
+
+**Sticky-Admin-Fields:** identisch zu OFF (Felder mit `last_admin_edit_at > last_etl_at` werden nicht überschrieben).
 
 ### 4.6 Image Pipeline
 
@@ -540,7 +574,7 @@ Alle Entscheidungen final für v1.0. Änderungen erfordern Doc-Versionsbump.
 | **Mahlzeit** | Konkreter Intake-Event mit Datum/Uhrzeit/Slot (Frühstück/Mittag/...) und N geplanten/konsumierten Items (Rezept- oder Lebensmittel-Refs). |
 | **Item** (Plan-Slot) | Ein Lebensmittel ODER Rezept im Plan-Slot. Schließt „Zutat" nicht ein. |
 | **Event** (Log) | Symptom-Event-Datensatz im Log (severity + tags + note + time). Ersetzt vorherigen „Log-Entry"-Begriff (Tagebuch-Modell). |
-| **Pinned Nutrient** | Vom User markierter Nährstoff, der auf Home als Progress-Ring sichtbar bleibt. Persistiert in `users.pinned_nutrients TEXT[]`. |
+| **Pinned Nutrient** | Vom User markierter N\u00e4hrstoff, der auf Home als Progress-Karte sichtbar bleibt. Persistiert **device-local** in `UserProfileEntity.pinnedNutrientsJson` (Room/SQLCipher, Privacy-Boundary REQ-PROFILE-001/002). Default seit P7: `[\"kcal\",\"protein\",\"carbs\",\"fat\",\"water\"]`. Verwaltung erfolgt im Home-Tab (REQ-HOME-NUTRIENT-LIST-001). |\n| **Nutrient Catalog** | Statische Liste der ~30 unterst\u00fctzten N\u00e4hrstoffe (8 Makros + 13 Vitamine + 11 Mineralstoffe + Pseudo-`water`). Definiert in `domain/nutrition/NutrientCatalog.kt` (Android) und `de.healthforge.domain.nutrition.NutrientCatalog.kt` (Server, gespiegelt). Pro Eintrag: `key`, `displayDe`, `unit`, `defaultPerDay(profile)`, `category`. Quelle: DGE-Referenzwerte (REQ-NUTRIENT-CATALOG-001). |\n| **Micronutrients-JSON** | Spalte `ingredients.micronutrients_json JSONB` (V12). Map<`NutrientCatalog.key`, mg-oder-\u00b5g-pro-100g>. Befuellt durch USDA-FDC-ETL. Rezept-Aggregation: live ueber `recipe_ingredients`. |\n| **Water Deficit Scheduler** | `notification/WaterDeficitScheduler.kt` (Android). Ueberwacht `consumed_ml < target_ml(now) - 100ml` und triggert Eskalations-Alarme 30\u219215\u219210\u21925 min mit 5-min Debounce nach Slider-Interaktion. Silent-Window 22\u201308. Ersetzt `WaterReminderScheduler` (REQ-HOME-WATER-ALARM-001). |\n| **Ghost-Target** | Virtuelle Soll-Linie im Wasser-Tracking, linear interpoliert ueber Aktiv-Fenster 08\u201322. Wird als zweite Progress-Schicht in `WaterBarWithGhost` gerendert (transparent hinter realem Progress). Snooze verschiebt sie virtuell +30 min. |
 
 **Wording-Regel:** In UI-Strings/Sheet-Titeln/Buttons: „Lebensmittel" und „Rezept" sind die einzigen erlaubten User-facing-Begriffe für DB-Items. „Zutat" erscheint NUR in der Rezept-Definition-UI (z.B. „Zutaten dieses Rezepts").
 

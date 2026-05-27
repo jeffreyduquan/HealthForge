@@ -370,3 +370,29 @@ Nach jeder erledigten Aufgabe wird:
 **Superseded:** alte REQ-LOG-001..006 (Tagebuch-Modell) sind durch REQ-LOG-EVENT-001..006 ersetzt; im §6 oben als „⛔ superseded by REQ-LOG-EVENT-* (P6.S6)" zu markieren wenn Cleanup nötig.
 
 **End of §8.**
+
+---
+
+## §12 P7 Big-Nutrition-Refactor (ReqSpec §12)
+
+| REQ-ID | Phase | Status | Implementation-File / Notiz |
+|---|---|---|---|
+| REQ-NUTRIENT-CATALOG-001 | P7.S1 | ✅ | `android_app/.../domain/nutrition/NutrientCatalog.kt` (33 Keys: 8 Macros + 13 Vitamins + 11 Minerals + Water) + `server/.../domain/nutrition/NutrientCatalog.kt` (Mirror, identisch). Parity unit test `server/src/test/kotlin/de/healthforge/domain/nutrition/NutrientCatalogParityTest.kt` ✅ grün (2026-05-27). |
+| REQ-DATA-SOURCE-001 | P7.S2 | 🟡 | Slice 1 ✅ + Slice 2 ✅ (2026-05-27/28): `server/.../tools/FetchFdcTopIds.kt` + `:fetchFdcTopIds` → Asset `seed/fdc_top_ids.csv` (8487 IDs); `server/.../tools/BuildUsdaSeed.kt` + `:buildUsdaSeed` → Asset `seed/usda_fdc.csv` (8354 Rows = 3 Demo + 8351 neue, 3.7 MB, Coverage 98.4%). FDC-Nutrient-ID → NutrientCatalog-Key Mapping (33 Keys, salt aus Na×2.5/1000, kcal aus 1008/2047/2048). Slice 3 (DeepL-Translation `name_de` + UsdaFdcImporter scharfschalten + AllergenMapper) noch ⏳. `EtlOrchestrator` updated; OFF + BLS importers `@Deprecated`. |
+| REQ-DATA-TRANSLATE-001 | P7.S2 | ⏳ | `server/scripts/translate_fdc_names.main.kts` (NEW), `admin-ui/src/pages/FdcTranslationsPage.tsx` (P7.S5). |
+| REQ-INGR-MICRONUTRIENTS-001 | P7.S1 | ⏳ | Flyway `V12__nutrients_overhaul.sql` (ALTER ingredients: micronutrients_json JSONB + fdc_id BIGINT UNIQUE + GIN-Index); `IngredientEntity` + `IngredientDto` extended. |
+| REQ-INGR-ALLERGEN-MAPPING-001 | P7.S2 | ⏳ | `server/.../etl/AllergenMapper.kt` (NEW); EU-14 keyword match + negative list. Unit-tested. |
+| REQ-HOME-NUTRIENT-LIST-001 | P7.S3 / P7.S3.b | 🟡 | `presentation/home/HomeScreen.kt` (Layout-Refactor), `PinnedNutrientCard.kt` (NEW, P7.S3.b: `PinnedNutrientRow` mit Stufen-Bar + Vorgänger-Track), `NutrientListSection.kt` (NEW), `NutrientRow.kt` (NEW), `PlannedMealRow.kt` (NEW). Default-Pins = `{kcal, protein, carbs, fat, water}`. |
+| REQ-HOME-WATER-BAR-001 | P7.S3a / P7.S3.b | ✅ | `presentation/home/components/WaterStageSlider.kt` (NEW, Stufen-Slider als Pin-Zeile; P7.S3.b: Track via `waterStageTrackColor`), `WaterStageColors.kt` (NEW, 10 Stufen-Farben; P7.S3.b: public + `waterStageTrackColor`), `PinnedNutrientCard.kt` (`trailingSlot` Parameter; P7.S3.b: alle Rows stufig), `data/repository/WaterIntakeRepository.setDayTotal` (Day-Aggregate), `data/db/dao/WaterIntakeDao.replaceDayTotal` (@Transaction). Old `WaterProgressSlider.kt`/`WaterBarWithGhost.kt`/`WaterSlider.kt`/`HydrationBarCard.kt`/`WaterTracker.kt` deleted. P7.S3.b zusätzlich gelöscht: `MacroRing.kt`, `MacroBarColumn.kt`, sowie `LeveledPowerBar`/`stageColor`/`StageBadge` in `NeoComponents.kt`. Reminder-Bell als trailing-Icon der Wasser-Zeile. |
+| REQ-HOME-WATER-ALARM-001 | P7.S4 | ⏳ | `notification/WaterDeficitScheduler.kt` (NEW, replaces `WaterReminderScheduler`), `WaterDeficitAlarmReceiver.kt` (NEW, channel `water_deficit`). Escalation 30→15→10→5 min, 5-min debounce, silent 22–08, snooze +30 min. |
+| REQ-PROFILE-LAYOUT-001 | P7.S4 | ⏳ | `presentation/profile/ProfileScreen.kt` (DROP Pinned-Section, EXPAND Goals-Section over full catalog), `NutrientGoalRow.kt` (NEW), Room v7→v8 for extended `dailyNutrientGoalsJson` keys. |
+| REQ-PLAN-WATER-GOAL-001 | P7.S4 | ⏳ | `presentation/plan/PlanScreen.kt` (per-day water-goal slider slot), `MealPlanSlotEntity.waterGoalMl` (Room v7→v8). |
+
+**Superseded by §12 (mark for cleanup):**
+- REQ-HOME-001..005, REQ-HOME-PIN-001 → ⛔ superseded by REQ-HOME-NUTRIENT-LIST-001.
+- REQ-WATER-001..004 (Quick-Add-Buttons) → ⛔ superseded by REQ-HOME-WATER-BAR-001 (Slider).
+- REQ-WATER-REMOVE-001 + REQ-WATER-ALARM-HELPER-001 → ⛔ obsolete (entire WaterTracker redesigned).
+- REQ-PROFILE-GOALS-001 (P6.S6 macros-only) → 🔁 extended by REQ-PROFILE-LAYOUT-001 (full catalog + reset-icon).
+- REQ-INGR-002 (BLS) + REQ-INGR-004 (OFF-Filter) → ⛔ superseded by REQ-DATA-SOURCE-001.
+
+**End of §12.**

@@ -596,3 +596,150 @@ Visuell wie Rezept-Wizard. Server-Endpoint bleibt `POST /api/ingredients/suggest
 | REQ-PROFILE-GOALS-001 | F-011 | P6.S5 | `presentation/profile/ProfileScreen.kt`, `V12__` |
 
 **End of §11 P6 Re-Spec.**
+
+---
+
+## §12 P7 Big-Nutrition-Refactor (User-Input 2026-05-27)
+
+**Scope-Änderung**: Walk-through Home-Screen mit User ergab grundlegenden Refactor des Nährstoff-Modells. Supersedes/erweitert: REQ-HOME-001..005, REQ-HOME-PIN-001, REQ-PROFILE-GOALS-001, REQ-WATER-001..004, REQ-WATER-REMOVE-001, REQ-WATER-ALARM-HELPER-001, REQ-REMIND-001 (Wasser-Teil), REQ-INGR-004 (OFF-Filter), REQ-INGR-002 (BLS).
+
+### REQ-NUTRIENT-CATALOG-001 — Vollständiger Nährstoff-Katalog
+Die App SHALL einen festen Katalog von ~30 Nährstoffen unterstützen (DGE-Vollset, deutsch):
+
+**Makros** (g pro 100g): `kcal`, `protein`, `carbs`, `sugar`, `fat`, `satfat`, `fiber`, `salt`.
+
+**Vitamine** (mg oder µg pro 100g, Einheit pro Nährstoff fix definiert):
+`vitamin_a`, `vitamin_d`, `vitamin_e`, `vitamin_k`, `vitamin_b1`, `vitamin_b2`, `vitamin_b3`, `vitamin_b5`, `vitamin_b6`, `vitamin_b7`, `vitamin_b9`, `vitamin_b12`, `vitamin_c`.
+
+**Mineralstoffe** (mg oder µg pro 100g): `calcium`, `eisen`, `magnesium`, `zink`, `kupfer`, `mangan`, `selen`, `jod`, `kalium`, `natrium`, `phosphor`.
+
+**Pseudo-Nährstoff Wasser** (`water`): ml pro Tag, **nicht** aus Mahlzeiten aggregiert (separate `water_intake`-Tabelle).
+
+Katalog-Definition zentral in `domain/nutrition/NutrientCatalog.kt` (key, anzeigeName_de, einheit, default_target_per_day, tdee_factor?). Maschinen-readable für UI + ETL.
+
+### REQ-DATA-SOURCE-001 — USDA-FDC als alleinige Lebensmittel-Quelle
+**Supersedes**: REQ-INGR-002 (BLS), REQ-INGR-004 (OFF-Filter).
+Lebensmittel-Stammdaten kommen ausschließlich aus **USDA FoodData Central** (`https://api.nal.usda.gov/fdc/v1/`, kostenloser API-Key). OFF + BLS aus Pipeline entfernt (Importer-Skelette werden deprecated, nicht aktiv gepflegt).
+
+**Korpus-Definition (P7.S2 Slice 1, 2026-05-27):** Kuratierter FDC-Korpus von **8.487 Einträgen** = Foundation (394) + SR-Legacy (7.793) + Branded Top-300 (default-sort, marketCountry-frei).
+
+**Pipeline-Schritte:**
+1. **Build-Time-Tool** `de.healthforge.tools.FetchFdcTopIds` (Gradle-Task `:fetchFdcTopIds`) ruft FDC `POST /v1/foods/search` ab und schreibt die kuratierte ID-Liste als gecommittetes Asset `server/src/main/resources/seed/fdc_top_ids.csv` (4 Spalten: `fdc_id;data_type;name_en;brand`). Idempotent (überschreibt CSV); ENV-Var `FDC_API_KEY` aus `server/.env` (gitignored).
+2. **Build-Time-Tool** `build_usda_seed` (P7.S2 Slice 2, TODO) liest `fdc_top_ids.csv`, ruft `POST /v1/foods/list` mit ID-Batches und erzeugt den finalen 14-Spalten-Seed `usda_fdc.csv` mit Mikronährstoffen.
+3. **Runtime-Importer** `UsdaFdcImporter` (existiert) liest `usda_fdc.csv` und upsertet in `ingredients` (Idempotenz via `fdc_id`).
+
+Re-Sync: monatlich via Admin-Endpoint (Tool 1 + 2 + Importer-Run nacheinander).
+
+### REQ-DATA-TRANSLATE-001 — Deutsche Übersetzung via DeepL-Batch
+Lebensmittelnamen aus FDC sind englisch. Die App SHALL deutsche Übersetzungen persistieren. Strategie: **DeepL-Free-Tier-API** (500.000 Zeichen/Monat gratis) in einem Batch-Übersetzungs-Skript (`server/scripts/translate_fdc_names.kts`), Output als CSV zur Review durch Admin, dann Bulk-Insert in `ingredients.name_de`.
+
+Nährstoff-Namen werden **nicht** übersetzt — Katalog ist fix deutsch hardcoded (REQ-NUTRIENT-CATALOG-001).
+
+### REQ-INGR-MICRONUTRIENTS-001 — Mikronährstoff-Speicherung (Server)
+Server-Flyway V12 erweitert `ingredients` (PostgreSQL):
+- `micronutrients_json JSONB DEFAULT '{}'` — Schlüssel = Katalog-Key (REQ-NUTRIENT-CATALOG-001), Wert = numerisch pro 100g.
+- `fdc_id BIGINT UNIQUE NULL` — USDA-FDC-ID für Re-Sync-Identifikation.
+
+Mikronährstoffe von Rezepten SHALL live aus `recipe_ingredients × ingredients.micronutrients_json` aggregiert werden (analog REQ-RECIPE-007 für Makros).
+
+### REQ-INGR-ALLERGEN-MAPPING-001 — Allergen-Mapping aus FDC
+USDA-FDC liefert `ingredients`-Volltext-String + `labelNutrients`. ETL SHALL daraus die EU-14er-Allergen-Liste per Keyword-Match befüllen (`allergens_json`):
+
+| EU-Allergen | Match-Keywords (case-insensitive) |
+|---|---|
+| GLUTEN | wheat, barley, rye, spelt, oats (sofern nicht „gluten-free") |
+| MILCH | milk, lactose, whey, casein, butter, cheese, cream |
+| EI | egg, albumin |
+| NUSS | almond, hazelnut, walnut, cashew, pistachio, macadamia, pecan, brazil nut |
+| ERDNUSS | peanut |
+| SOJA | soy, soya, soybean |
+| FISCH | fish, anchovy, tuna, salmon |
+| KRUSTENTIER | shrimp, prawn, crab, lobster |
+| WEICHTIERE | mollusk, oyster, mussel, squid, octopus |
+| SELLERIE | celery |
+| SENF | mustard |
+| SESAM | sesame |
+| SULFITE | sulfite, sulphite, E220-E228 |
+| LUPINE | lupin, lupine |
+
+False-Positives (z.B. „coconut" matched „nut") werden via Negativ-Liste (`coconut`, `nutmeg`) ausgeschlossen.
+
+### REQ-HOME-NUTRIENT-LIST-001 — Home-Layout (Pinned + Collapsed)
+**Supersedes**: REQ-HOME-001..005, REQ-HOME-PIN-001.
+
+Home-Tab MUSS folgendes Layout zeigen (top-down):
+1. **Header**: Datum-Navigation (gestern/heute/morgen).
+2. **Pinned-Nutrients-Sektion**: Eine Karte pro gepinntem Nährstoff (default `kcal,protein,carbs,fat,water`), mit **Stufen-Bar** (P7.S3.b: identische Mechanik wie Wasser-Slider), Wert/Ziel und Lv-Badge ab Stufe ≥ 1. Wasser-Karte siehe REQ-HOME-WATER-BAR-001.
+3. **„Alle Nährstoffe anzeigen"** Expand-Button → Section blendet kompakte Stufen-Bars für **alle** Katalog-Nährstoffe (REQ-NUTRIENT-CATALOG-001) ein. Pro Zeile: Pin-Icon (Toggle in `users.pinned_nutrients`), Name, Wert/Ziel, Mini-Bar.
+4. **Geplante Mahlzeiten heute**: Liste `meal_plan_items` für `today`, jede mit Checkbox „gegessen". Check → Eintrag in `intake_entries` mit Snapshot der Nährwerte. Uncheck innerhalb 60s reversibel (Undo-Snackbar).
+
+**Stufen-Mechanik für alle Pinned-Bars (P7.S3.b, User-Direktive "ALLE bars identisch, Wasser hat nur Zusatzregeln")**:
+- `stage = floor(current / goal)`, `frac = (current − stage × goal) / goal` (0..1).
+- Bar-Füllung: Gradient aus `waterStageGradient(stage)` (10-Stufen-Cycle, Stufen ≥ 9 endless).
+- Track: `waterStageTrackColor(stage)` = Akzent der **Vorgängerstufe** × 0.25 Alpha. Stufe 0 → `LocalHmTokens.barTrack`. (User-Direktive: "der hintergrund der progressbars soll immer die farbe der vorgängerstufe aber abgegraud oder verdunkelt sein".)
+- Ab Stufe ≥ 1: Lv-Badge (Pill mit Akzent-Farbe) rechts neben Wert/Ziel.
+- Prozent-Anzeige = Prozent **innerhalb der aktuellen Stufe** (0–100 %).
+- Wasser ist optisch identisch + erbt die Stufen-Mechanik; Zusatzregeln (Slider, Bell, Ghost, Defizit-Rot, Touch-Disconnect) siehe REQ-HOME-WATER-BAR-001.
+
+Gelöscht in P7.S3.b: `presentation/home/components/MacroRing.kt`, `MacroBarColumn.kt`, sowie `LeveledPowerBar`/`stageColor`/`StageBadge` in `presentation/theme/NeoComponents.kt` (alle ungenutzte Vorgänger-Komponenten).
+
+Pin-Verwaltung erfolgt **ausschließlich** im Home-Screen. Profil-Sektion „Pinned-Nutrients" wird entfernt (siehe REQ-PROFILE-LAYOUT-001).
+
+### REQ-HOME-WATER-BAR-001 — Wasser als Stufen-Slider in der Pinned-Nutrient-Card
+Wasser wird als **letzte Zeile innerhalb der `PinnedNutrientCard`** dargestellt — optisch identisch zu den anderen gepinnten Nährstoffen (Label, Wert/Ziel, Prozent, gefüllte Bar), aber die Bar IST gleichzeitig ein Slider:
+
+- **Range pro Anzeige**: `0..goal` (0–100 % des Tagesziels). Slider-Schritt: 50 ml.
+- **Stufen-Logik**: Eine *Stufe* entspricht `1×goal`. Aktuelle Stufe = `currentMl / goalMl` (Integer-Div). Stufe 0 deckt `0..goal` ab, Stufe N deckt `N×goal..(N+1)×goal` ab. Stufen sind **endlos**.
+- **Stufenwechsel oben (v2.1)**: Sobald der Slider in der aktuellen Stufe das obere Ende (100 %) erreicht, schaltet die Bar **bereits während des Drags** in die nächste Stufe (Bar zeigt 0 %, neue Farbe, Thumb springt an den linken Rand). Beim Loslassen genau an einer Stufengrenze rückt der lokale Anzeige-State zusätzlich um eine Stufe vor, sodass der nächste Drag direkt in der neuen Stufe beginnt.
+- **Per-Drag-Stufen-Lock (v2.2)**: Pro Drag-Session ist nur **ein** Stufenwechsel erlaubt. Verharrt der Finger am Slider-Anschlag, kaskadiert es nicht durch mehrere Stufen — der User muss kurz loslassen und neu drag, um die nächste Stufe zu betreten/verlassen. **Ersetzt durch v2.3**.
+- **Touch-Disconnect bei Stufenwechsel (v2.3, User-Direktive)**: Sobald während eines Drags ein Stage-Up oder Stage-Down ausgelöst wird, **bricht die App die aktive Geste ab** (Slider wird per Compose-`key`-Remount neu zusammengebaut). Der User MUSS den Finger heben und neu auf den Slider tippen, um eine weitere Stufe zu wechseln. So sind Cascade-Effekte konstruktionsbedingt unmöglich.
+- **Downgrade-Regel (Drag-Through-Zero, v2.1)**: Erreicht der Slider in einer Stufe > 0 das untere Ende (0 %) während des Drags, schaltet die Bar **sofort eine Stufe zurück** (Bar zeigt 100 %, Thumb springt an den rechten Rand). Per-Drag-Lock (v2.2) gilt analog. Beim Loslassen genau an einer Stufenuntergrenze (>0-Stufe) rückt der State ebenfalls eine Stufe zurück.
+- **Farben Stufe 0..9**: pro Stufe eigenes Gradient-Paar aus der Histamind-Palette (siehe [`WaterStageColors.kt`]). Ab **Stufe 10+** bleibt die Farbe identisch zu Stufe 9.
+- **Track-Farbe (P7.S3.b)**: Akzent der Vorgängerstufe × 0.25 Alpha (`waterStageTrackColor`). Stufe 0 → neutraler `LocalHmTokens.barTrack`. Identisch zu allen anderen Pinned-Bars.
+- **Stufen-Badge**: Ab Stufe ≥1 erscheint im Header neben "Wasser" ein kleines `×N`-Badge in der Akzent-Farbe der Stufe.
+- **Reminder-Bell**: Trailing-Icon der Wasser-Zeile (statt eigener Card-Header). Togglet die Defizit-Erinnerung.
+- **Persistenz**: Beim Loslassen wird die absolute Tagesmenge via `WaterIntakeRepository.setDayTotal(day, totalMl)` als **Day-Aggregate** persistiert (alle bisherigen `water_intake`-Rows des Tages werden in einer Room-Transaktion gelöscht und durch genau einen Aggregat-Eintrag mit `totalMl` ersetzt; bei `totalMl == 0` bleibt der Tag eintragslos).
+- **Kein** separates Wasser-Card-Block, **keine** ±-Buttons, **keine** Quick-Add-Pills, **kein** Custom-Dialog, **kein** Undo-Snackbar.
+- **Ghost-Soll-Marker (v2.1, reaktiviert)**: Auf der Bar wird eine feine **weiße vertikale Linie** (Alpha 0.85, Strichbreite 2 px) an der Position des linearen Tages-Solls bis jetzt (`HomeState.waterGhostMl`) gezeichnet — **sofern das Soll im sichtbaren Stufen-Bereich liegt** (`displayedStage*goal..(displayedStage+1)*goal`). Liegt das Soll außerhalb (z.B. User ist mehrere Stufen voraus oder zurück), wird der Marker in dieser Stufe nicht gerendert. Die Defizit-Alarm-Logik (REQ-HOME-WATER-ALARM-001) berechnet das Soll weiterhin intern und triggert die Bell-Eskalation.
+- **Defizit-Rotanteil (v2.2)**: Liegt das Soll **in der aktuell sichtbaren Stufe** UND ist current < Soll, wird der Bereich zwischen aktueller Füllung und Soll in `StatusOverUl` (Alpha 0.55) gerendert — als visuelles "du liegst zurück". Ist current ≥ Soll oder Soll außerhalb der Stufe, wird kein Rotanteil gezeichnet.
+
+### REQ-HOME-WATER-ALARM-001 — Defizit-Eskalation mit Debounce
+**Supersedes**: REQ-REMIND-001 (Wasser-Teil), REQ-WATER-ALARM-HELPER-001.
+
+Neuer Scheduler `WaterDeficitScheduler` (ersetzt `WaterReminderScheduler`):
+- **Trigger**: `consumed_ml < target_ml(now) − 100ml` (100ml Toleranz).
+- **Debounce**: nach jedem Slider-Drag und nach jedem Defizit-Übergang läuft ein 5-min Timer; erst wenn nach 5 min das Defizit immer noch besteht, feuert der erste Alarm. Dadurch löst Slider-„Spielen" (z.B. kurz auf 0 ziehen) keinen sofortigen Alarm aus.
+- **Eskalation** (nach erstem Alarm): 30 min → 15 min → 10 min → 5 min (minimum). Reset auf 30 min sobald Defizit < 0.
+- **Snooze**: Soll-Linie wird virtuell um +30 min verschoben (Ghost-Progress sinkt entsprechend). Maximal 2× hintereinander snoozbar, dann Eskalation wie gehabt.
+- **Aus**: Toggle in Home-Wasser-Karte; stoppt nur Defizit-Alarme (Soll-Linie wird weiter gerendert, Bar bleibt rot bei Defizit).
+- **Aktiv-Fenster**: 08:00–22:00 lokal. Außerhalb: **hartes Silent** — keine Notification, kein Sound, kein Vibration. Defizit-Tracking pausiert (Ghost friert auf 100 % ein).
+
+### REQ-PROFILE-LAYOUT-001 — Profil-Sektionen
+**Supersedes**: REQ-PROFILE-GOALS-001 (erweitert), entfernt Pinned-Nutrients-Sektion.
+
+Profil-Tab MUSS folgende Sektionen zeigen:
+1. **Stammdaten** (Name, Alter, Größe, Gewicht, Sex, Aktivitätslevel, Diet-Goal — bleibt unverändert).
+2. **Tagesziele**: Liste **aller** Katalog-Nährstoffe (REQ-NUTRIENT-CATALOG-001) + Wasser. Pro Zeile: berechneter Default-Wert (read-only, klein), User-Override-Input (NumberField), Reset-Icon. User-Override persistiert **device-local** in `UserProfileEntity.dailyNutrientGoalsJson` (Room, Privacy-Boundary REQ-PROFILE-001/002 — der Server kennt die Goals nicht). Room-Schema-Bump 7→8 erweitert das Feld semantisch (Format-Erweiterung um Mikro-Keys; bestehende kcal/protein/carbs/fat-Keys bleiben kompatibel; Reset löscht den Key). Home liest `effective_target = override ?? computed_default`.
+3. **Restliche Sektionen** (Allergien, Intoleranzen, Histamin, Wasser-Reminder-Toggle, Dark-Mode etc. — bleiben).
+
+Pinned-Nutrients-Sektion (P6.S6-Pre-Spec) wird **entfernt**.
+
+### REQ-PLAN-WATER-GOAL-001 — Wasser-Tagesziel im Plan
+Plan-Tab erhält pro Tag einen optionalen **Wasser-Tagesziel-Slot** (device-local in Room-Tabelle `meal_plan_slots.water_goal_ml NULL`, Room-Schema-Bump 7→8). Default = Profil-Wert. Home liest `effective_water_goal = plan_slot_value ?? profile_value`. Slider 500–5000 ml, Schritt 50 ml.
+
+### Traceability (Erweiterung)
+
+| REQ-ID | Sprint | Implementation-Anker |
+|---|---|---|
+| REQ-NUTRIENT-CATALOG-001 | P7.S1 | `domain/nutrition/NutrientCatalog.kt` |
+| REQ-DATA-SOURCE-001 | P7.S2 | `server/tools/FetchFdcTopIds.kt` (Slice 1, ✅ 2026-05-27, 8487 IDs), `server/etl/UsdaFdcImporter.kt`, `EtlOrchestrator` |
+| REQ-DATA-TRANSLATE-001 | P7.S2 | `server/scripts/translate_fdc_names.kts`, Admin-CSV-Review |
+| REQ-INGR-MICRONUTRIENTS-001 | P7.S1 | `V12__nutrients_overhaul.sql` (Server), `IngredientEntity`, `IngredientDto` |
+| REQ-INGR-ALLERGEN-MAPPING-001 | P7.S2 | `server/etl/AllergenMapper.kt` |
+| REQ-HOME-NUTRIENT-LIST-001 | P7.S3 / P7.S3.b | `presentation/home/HomeScreen.kt`, `NutrientListSection.kt`, `PinnedNutrientCard.kt` (Stufen-Bar in `PinnedNutrientRow`, nutzt `waterStageGradient`/`waterStageTrackColor`) |
+| REQ-HOME-WATER-BAR-001 | P7.S3a / P7.S3.b | `presentation/home/components/WaterStageSlider.kt` (Track via `waterStageTrackColor`), `WaterStageColors.kt` (public + `waterStageTrackColor`), `PinnedNutrientCard.kt` (trailingSlot), `data/repository/WaterIntakeRepository.setDayTotal`, `data/db/dao/WaterIntakeDao.replaceDayTotal` |
+| REQ-HOME-WATER-ALARM-001 | P7.S3 | `notification/WaterDeficitScheduler.kt`, `AlarmReceiver.kt` (ACTION_WATER_DEFICIT) |
+| REQ-PROFILE-LAYOUT-001 | P7.S4 | `presentation/profile/ProfileScreen.kt`, `NutrientGoalRow.kt`, Room v7→v8 |
+| REQ-PLAN-WATER-GOAL-001 | P7.S4 | `presentation/plan/PlanScreen.kt`, `MealPlanSlotEntity.waterGoalMl`, Room v7→v8 |
+
+**End of §12.**

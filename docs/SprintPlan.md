@@ -1634,6 +1634,174 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 
 ---
 
+## 4c. Phase P7 — Big-Nutrition-Refactor (User-Walkthrough 2026-05-27)
+
+**Trigger:** Screen-by-Screen-Walkthrough mit User auf P6-Build. Home zeigt nur 4 Makros, User möchte vollständigen Nährstoff-Katalog (Vitamine + Mineralstoffe). Wasser-UI hat zwei Bars statt einer überlagerten. Pin-Verwaltung fehlt im Home. Mahlzeiten-Plan ist auf Home nicht sichtbar. OFF-Datenquelle hat <5 % Mikro-Coverage → Pivot auf USDA-FDC.
+
+**Geltende Requirements:** ReqSpec.md §12 (REQ-NUTRIENT-CATALOG-001, REQ-DATA-SOURCE-001, REQ-DATA-TRANSLATE-001, REQ-INGR-MICRONUTRIENTS-001, REQ-INGR-ALLERGEN-MAPPING-001, REQ-HOME-NUTRIENT-LIST-001, REQ-HOME-WATER-BAR-001, REQ-HOME-WATER-ALARM-001, REQ-PROFILE-LAYOUT-001, REQ-PLAN-WATER-GOAL-001). Supersedes: REQ-HOME-001..005, REQ-HOME-PIN-001, REQ-WATER-001..004, REQ-WATER-REMOVE-001, REQ-WATER-ALARM-HELPER-001, REQ-INGR-002 (BLS), REQ-INGR-004 (OFF-Filter).
+
+**Phase-Reihenfolge:** Foundation (P7.S1) → Data (P7.S2) → Home-UI (P7.S3) → Profile+Plan (P7.S4) → Polish (P7.S5).
+
+### Sprint P7.S1 — Nutrient-Foundation
+**Status:** ✅ DONE (2026-05-27, verifiziert via `NutrientCatalogParityTest` BUILD SUCCESSFUL 12s)
+
+**Ergebnis:**
+- Android `android_app/.../domain/nutrition/NutrientCatalog.kt` + Server-Mirror `server/.../domain/nutrition/NutrientCatalog.kt` haben **identische 33 Keys** (8 Makros + 13 Vitamine + 11 Mineralstoffe + Wasser-Pseudo), identische Units, identische DGE-Defaults.
+- Parity-Test `server/src/test/kotlin/de/healthforge/domain/nutrition/NutrientCatalogParityTest.kt` läuft grün (liest Android-Quelldatei + vergleicht Key+Unit-Set).
+- Flyway `V12__nutrients_overhaul.sql` + Room v7→v8 + EnergyCalculator-Mikros wurden bereits in vorigen Sprints (P6.S6→P7-Prep) gelandet — kein neuer Migrations-Bedarf.
+
+**Deliverables (für Historie):**
+- NEW `domain/nutrition/NutrientCatalog.kt` (Android) — ersetzt P6.S6 `presentation/profile/NutrientCatalog.kt` (8 Macros) durch vollen Katalog (~30 Einträge: 8 Macros + 13 Vitamine + 11 Mineralstoffe + Wasser-Pseudo). Pro Eintrag: `key`, `displayDe`, `unit`, `defaultPerDay(profile)`, `category` (MACRO/VITAMIN/MINERAL/WATER).
+- NEW `server/src/main/kotlin/de/healthforge/domain/nutrition/NutrientCatalog.kt` — gespiegelter Server-Katalog (Hard-coded, kein DB-Lookup, kein Cross-Locale).
+- NEW Flyway `V12__nutrients_overhaul.sql`:
+  ```sql
+  ALTER TABLE ingredients ADD COLUMN micronutrients_json JSONB NOT NULL DEFAULT '{}';
+  ALTER TABLE ingredients ADD COLUMN fdc_id BIGINT UNIQUE;
+  CREATE INDEX idx_ingredients_fdc_id ON ingredients(fdc_id) WHERE fdc_id IS NOT NULL;
+  CREATE INDEX idx_ingredients_micronutrients_gin ON ingredients USING gin(micronutrients_json);
+  ```
+- MOD `data/db/AppDatabase.kt` v7→v8 (destructive fallback, Dev-State): `UserProfileEntity.dailyNutrientGoalsJson` Default-Wert erweitert auf alle ~30 Keys (Format-kompatibel zu v7-JSON, neue Keys werden vom Reader als `null` interpretiert → default-fallback).
+- MOD `data/db/entities/MealPlanEntities.kt`: `MealPlanSlotEntity` erhält `waterGoalMl: Int? = null`.
+- MOD `domain/profile/EnergyCalculator.kt`: default-target-Berechnung erweitert um Mikros (DGE-Referenzwerte je Alter/Sex/Diet-Goal).
+
+**Akzeptanz:**
+- Server-Migration läuft idempotent gegen leere + bestehende `ingredients`-Tabelle.
+- `:server:compileKotlin` und `:app:compileDebugKotlin` BUILD SUCCESSFUL.
+- Katalog Android ↔ Server haben identische Keys + Units (Unit-Test `NutrientCatalogParityTest`).
+
+**Risiken:**
+- Default-Targets für Mikros sind DGE-spezifisch (Geschlecht/Alter); Falsche Defaults sind nicht datenschädlich (nur Anzeige), aber User-verwirrend. → Quellen-Kommentar im Catalog mit DGE-Verweis.
+
+### Sprint P7.S2 — USDA-FDC-ETL
+**Status:** 🟡 IN PROGRESS (Slice 1 ✅ + Slice 2 ✅, 2026-05-27/28)
+
+**Slice 1 — FDC-Top-IDs-Fetcher (✅ DONE 2026-05-27):**
+- NEW `server/src/main/kotlin/de/healthforge/tools/FetchFdcTopIds.kt` — Build-Time-Tool (Standalone-JVM, kein `@Component`).
+- NEW Gradle-Task `:fetchFdcTopIds` in `server/build.gradle.kts` + `.env`-Loader für `FDC_API_KEY` aus `server/.env` (gitignored).
+- NEW Asset `server/src/main/resources/seed/fdc_top_ids.csv` (4 Spalten, 619 KB, 8487 Rows: 394 Foundation + 7793 SR-Legacy + 300 Branded).
+- Verifikation: `:fetchFdcTopIds` BUILD SUCCESSFUL 2m07s; CSV `fdc_top_ids.csv` 619 KB geschrieben.
+
+**Slice 2 — FDC-Detail-Fetch + Seed-Build (✅ DONE 2026-05-28):**
+- NEW `server/src/main/kotlin/de/healthforge/tools/BuildUsdaSeed.kt` — Build-Time-Tool. Liest `fdc_top_ids.csv`, holt Detail via `POST /v1/foods` (Batch=20), mappt FDC-Nutrient-IDs auf 33 NutrientCatalog-Keys, schreibt finale 14-Spalten-CSV. Resume-fähig, `--limit N`, `--rate-ms MS`, `--no-resume` Flags. HTTP-429-Retry (60s, 3x).
+- NEW Gradle-Task `:buildUsdaSeed` in `server/build.gradle.kts`.
+- MOD `server/src/main/resources/seed/usda_fdc.csv` — erweitert von 3 Demo-Rows auf **8354 Einträge** (3 Demo + 8351 neue, 3.7 MB). Demo-Rows mit hand-curated `name_de` blieben dank Resume-Logik erhalten; neue Rows haben `name_de` leer (Slice 3 / DeepL-Übersetzung).
+- FDC-Nutrient-ID Mapping (siehe `BuildUsdaSeed.MACRO_MAP` + `MICRO_MAP`): kcal=1008/2047/2048 (Atwater General+Specific für Foundation), protein=1003, carbs=1005, sugar=2000, fat=1004, satfat=1258, fiber=1079, salt=sodium×2.5/1000 (Na=1093). 14 Vitamine + 11 Mineralstoffe gemappt auf NutrientCatalog-Keys.
+- Verifikation: Smoke-Test 5 IDs OK (Pollock 78 kcal, Mandelbutter 602 kcal). Voller Lauf `:buildUsdaSeed --rate-ms 3700` BUILD SUCCESSFUL **55m 28s** (3.7s/req defensiv, 425 Batches, 0 HTTP-429). 8351 written / 133 skipped (no kcal, meist Branded Lifestyle-Drinks). Coverage 98.4% (8354/8487).
+
+**Slice 3 — Translation + Importer scharfschalten (⏳ TODO):**
+- MOD `server/tools/translate_fdc_names.main.kts` (existiert bereits) — Konvertieren zu regulärer Kotlin-Klasse `de.healthforge.tools.TranslateFdcNames` + Gradle-Task `:translateFdcNames` (analog Slice 2). ENV: `DEEPL_API_KEY` aus `server/.env`. Liest `usda_fdc.csv` Rows mit leerem `name_de`, ruft DeepL Free API in Batches à 50, schreibt CSV zurück. ~8351 Texte × ⌀5 Wörter = ~250k Zeichen → passt in 500k/Monat-Free-Limit.
+- MOD `EtlOrchestrator`: USDA-FDC als erster aktiver Job, BLS/OFF werden auf `@Deprecated` markiert + aus dem Scheduler entfernt.
+- MOD `IngredientController.search`: berücksichtigt `name_de IS NULL` → fallback auf `name` (en) damit unübersetzte Einträge nicht unsichtbar werden.
+- MOD `IngredientDto`: erweitert um `micronutrients: Map<String, Double>` + `fdcId: Long?`.
+- Run `POST /admin/v1/etl/USDA_FDC/run` und verifizieren: `ingredients`-Tabelle hat 8354 Rows, `fdc_id UNIQUE` Index aktiv, Stichproben-Spotcheck (Apfel/Mandeln/Joghurt).
+- NEW `server/src/main/kotlin/de/healthforge/etl/AllergenMapper.kt` — Keyword-Match nach EU-14 (REQ-INGR-ALLERGEN-MAPPING-001) gegen `ingredients_en`-Spalte.
+- NEW Admin-UI-Seite `admin-ui/src/pages/FdcTranslationsPage.tsx` (P7.S5 Polish).
+
+**Akzeptanz:**
+- Bulk-Import von 100 Test-FDC-IDs erzeugt 100 `ingredients`-Rows mit befüllten `micronutrients_json` (Stichprobe Brokkoli: vitamin_c > 80 mg/100g, calcium ≈ 47 mg/100g).
+- AllergenMapper-Unit-Test deckt EU-14 + Negativ-Liste ab (coconut, nutmeg, mustard-seed-oil etc.).
+- DeepL-Script-Dry-Run schreibt CSV ohne API-Call wenn `--dry-run` flag.
+
+**Risiken:**
+- DeepL-Free 500k Zeichen/Monat → bei avg 25 chars/Name = 20k Übersetzungen. Top-5000 FDC-Einträge passen locker.
+- FDC-Nutrient-IDs sind stabil aber unvollständig (manche Einträge haben nur Makros). Strategie: `micronutrients_json` enthält nur tatsächlich gemessene Werte, nicht `null`. UI rendert „—" bei fehlenden Werten.
+
+### Sprint P7.S3 — Home-UI-Refactor
+**Status:** ⏳ TODO
+
+**Deliverables:**
+- MOD `presentation/home/HomeScreen.kt`:
+  - Drop Macro-Ringe + Quick-Add-Chips + Wasser-Quick-Buttons (Legacy P6).
+  - NEW Layout: Header → `PinnedNutrientSection` (Karten pro Pin) → `WaterBarWithGhost` (Pin „water" rendert diese Spezial-Card) → Expand „Alle Nährstoffe anzeigen" → `NutrientListSection` (kompakte Liste aller Katalog-Einträge mit Pin-Icon-Toggle) → `PlannedMealsTodaySection` (Liste meal_plan_slots heute + Checkbox).
+- NEW `presentation/home/PinnedNutrientCard.kt` — Glass-Card, Linear-Progress, Δ-Wording.
+- NEW `presentation/home/NutrientRow.kt` — Mini-Linear-Bar + Pin-Icon-Toggle.
+- NEW `presentation/home/WaterBarWithGhost.kt` — Custom-Composable mit `Canvas`-Layer für Doppel-Progress (real blau + ghost transparent + Defizit-Bereich rot).
+- NEW `presentation/home/WaterSlider.kt` — `Slider` auf der Bar (50ml-Steps, drag→onValueChangeFinished persistiert Delta in `WaterIntakeRepository`).
+- NEW `presentation/home/PlannedMealRow.kt` — `meal_plan_slots`-Eintrag + Checkbox; Check → `intake_entries`-Insert mit Snapshot. Undo-Snackbar 60s.
+- MOD `presentation/home/HomeViewModel.kt`: lädt `effectiveTargets` aus Profile-JSON, `consumed` aus `intake_entries`+`water_intake`, `pinnedKeys` aus `UserProfileEntity.pinnedNutrientsJson`.
+- MOD `ProfileViewModel.togglePinnedNutrient(slug)` wird **von Home aus aufgerufen** (gleicher VM-State via Hilt-shared Repository).
+
+**Akzeptanz:**
+- 5 Default-Pins (`kcal, protein, carbs, fat, water`) sind nach Onboarding sichtbar.
+- Pin-Toggle in der Liste persistiert sofort (kein Save-Button).
+- Wasser-Slider drag→loslassen erzeugt `WaterIntakeEntity` mit korrektem Delta (positiv oder negativ).
+- Geplante Mahlzeit ☑ → erscheint in Intake-Log + Verlauf; ☐-Undo binnen 60s reversibel.
+
+**Risiken:**
+- `WaterBarWithGhost` als Custom-Composable erfordert sorgfältige `onSizeChanged`+Drag-Math. Mitigation: Reine `Canvas`-Lösung statt verschachtelte `LinearProgressIndicator`.
+
+### Sprint P7.S3.b — Einheitliche Stufen-Bars für alle Pinned-Nährstoffe
+**Status:** ✅ DONE (2026-05-30)
+
+**Scope:** User-Direktive "ALLE bars müssen identisch sein, nur Wasser hat Zusatzregeln" + "Track-Hintergrund = Vorgängerstufenfarbe, abgedunkelt". Konsolidiert die Stufen-Mechanik aus `WaterStageSlider` für alle Pinned-Bars.
+
+**Deliverables (✅):**
+- DEL `presentation/home/components/MacroRing.kt`, `MacroBarColumn.kt` (ungenutzte Vorgänger).
+- MOD `presentation/theme/NeoComponents.kt`: `LeveledPowerBar`, `stageColor`, `StageBadge` entfernt. `NeoSectionLabel`/`NeoCard` bleiben.
+- MOD `presentation/home/components/WaterStageColors.kt`: Helper public + neuer `waterStageTrackColor(stage)` (Vorgänger × 0.25).
+- MOD `presentation/home/components/PinnedNutrientCard.kt` `PinnedNutrientRow`: Stufen-Logik (`floor(current/target)`) + Lv-Badge (ab Stufe ≥ 1) + Stufen-Gradient + Vorgänger-Track.
+- MOD `presentation/home/components/WaterStageSlider.kt`: Track-Farbe konsumiert `waterStageTrackColor`.
+
+**Akzeptanz (✅):** BUILD SUCCESSFUL, App startet auf emulator-5554, Pinned-Bars zeigen Stufen-Roll-over + Lv-Badge + Vorgänger-Track; Wasser-Bar konsistent.
+
+**Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
+
+### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
+**Status:** ⏳ TODO
+
+**Deliverables:**
+- MOD `presentation/profile/ProfileScreen.kt`:
+  - DROP Sektion „ANGEHEFTETE NAEHRSTOFFE" (Pin-Mgmt zog nach Home, REQ-HOME-NUTRIENT-LIST-001).
+  - EXPAND Sektion „TAGESZIELE": pro Katalog-Eintrag eine Zeile mit Default-Anzeige + Override-Input + Reset-Icon. Water-Goal ist Teil davon.
+- MOD `presentation/plan/PlanScreen.kt`: pro Tages-Header ein optionales Wasser-Tagesziel-Slot-Slider (NULL = Profil-Default, Slider-Move = Override).
+- NEW `notification/WaterDeficitScheduler.kt` (ersetzt `WaterReminderScheduler`):
+  - `AlarmManager`-basierte Eskalation 30→15→10→5 min.
+  - Debounce 5 min nach Slider-Interaktion.
+  - Snooze +30 min (virtuelle Ghost-Verschiebung in Repo-Layer).
+  - Hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
+- NEW BroadcastReceiver `WaterDeficitAlarmReceiver` mit Notification-Channel `water_deficit` (separat von P6 `water_reminder`).
+- MOD `WaterIntakeRepository.add(delta)`: triggert nach Persist einen `evaluateDeficit()`-Call → re-schedule Alarm.
+
+**Akzeptanz:**
+- Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn.
+- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag.
+- Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm.
+- Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect.
+- 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu.
+
+**Risiken:**
+- AlarmManager-Doze-Mode kann Alarme verzögern. Mitigation: `setExactAndAllowWhileIdle` für kritischen Mindest-5min-Alarm.
+
+### Sprint P7.S5 — Polish + Admin-UI + Migration-Smoke
+**Status:** ⏳ TODO
+
+**Deliverables:**
+- NEW `admin-ui/src/pages/FdcTranslationsPage.tsx` — Tabelle mit en/de_machine/de_review-Spalten, Inline-Edit, Bulk-Apply.
+- MOD `admin-ui/src/pages/IngredientQueuePage.tsx`: zeigt `micronutrients_json` als Expandable-Tabelle.
+- Migration-Smoke (dev-DB): `V12__` apply + USDA-FDC Top-100 Import + DeepL Top-100 Translate + Admin-Review + Bulk-Apply + Android E2E auf Home zeigt deutsche Namen + Mikro-Werte.
+- BattleTestPlan-Update: neue Cases für Pin-Mgmt, Water-Ghost-Slider, Defizit-Alarm-Eskalation, Goal-Override, Plan-Water-Slot.
+
+**Akzeptanz:** kompletter Walk-Through Home→Plan→Essen→Profil mit USDA-FDC-Daten erfolgreich; alle REQ-§12-IDs in TraceabilityMatrix auf ✅.
+
+### P7 Doc-Drift-Eval (Phase-Level)
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — §12 NEW.
+- `docs/SprintPlan.md` — §4c NEW (dieser Block).
+- `docs/Architecture.md` — §4.5 USDA-FDC-Pipeline (ersetzt OFF-ETL), §4.3 V12-Eintrag, Glossar `Nutrient Catalog`, `Water Deficit Scheduler`.
+- `docs/UsabilityMap.md` — §3 Home-Refactor, §7 Profil-Tagesziele-Expand + Pin-Sektion-Drop.
+- `docs/GUI.md` — NEW Components `PinnedNutrientCard`, `WaterBarWithGhost`, `NutrientRow`, `PlannedMealRow`, `NutrientGoalRow`.
+- `docs/TraceabilityMatrix.md` — REQ-§12-IDs verlinkt.
+- `CHANGELOG.md` — Phase-P7-Header + erster Eintrag (Spec-Lock).
+
+**Untouched (begründet):**
+- `docs/Runbook.md` — kein Deploy-/Bootstrap-Change (USDA-FDC-Bulk-Import ist Admin-CLI, identisches Pattern zu OFF).
+- `docs/TestStrategy.md` — Methodik bleibt (REQ+Usability-Hybrid).
+- `docs/HistamindDesignReference.md` — Design-Tokens unverändert; neue Components nutzen bestehende Glass/Gradient-Idiome.
+- `docs/BattleTestPlan.md` — Update erst in P7.S5 (sinnvoll wenn Screens fertig sind).
+
+---
+
 ## 5. Inter-Phase-Wartungs-Tasks
 
 Diese Tasks laufen kontinuierlich, nicht in einem Sprint gebunden:

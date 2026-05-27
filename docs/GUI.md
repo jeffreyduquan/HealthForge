@@ -273,7 +273,7 @@ außer den unten gelisteten Wrapper-Components.
 
 | Component | Zweck |
 |---|---|
-| `MacroRing` | Ring-Diagramm für Kalorien/Protein/Carbs/Fett (Home) — 3 konzentrische Rings + Center-Number |
+| `MacroRing` | **DELETED P7.S3.b** — alter Ring-Ansatz, ersetzt durch `PinnedNutrientRow` (Stufen-Bar) in `PinnedNutrientCard`. |
 | `WaterTracker` | Horizontale Glas-Reihe mit getappten Füll-Glässern + Plus-Button |
 | `RatingPill` | 4-state-Pill (Recommend / NotRecommend / MoreOften / Intolerant) basierend auf Context |
 | `AllergenWarningBadge` | Roter Badge mit Allergen-Icon + Text bei Konflikt |
@@ -283,6 +283,12 @@ außer den unten gelisteten Wrapper-Components.
 | `OfflineBanner` | Snackbar-Variante oben, persistent, mit Retry-Button |
 | `PhasePlaceholder` | Vollscreen-Placeholder für Features die in späterer Phase kommen |
 | `DateNavigator` | Pfeil-Links / Datum-Pill / Pfeil-Rechts (Home, Plan, Log) |
+| `PinnedNutrientCard` (P7) | Glass-Card mit einer Zeile pro gepinntem Nährstoff. Jede Zeile = **Stufen-Bar** (P7.S3.b: einheitliche Mechanik mit Wasser). Layout: Name + Wert/Ziel + Lv-Badge (ab Stufe ≥ 1) + Prozent + gefüllte Bar darunter. Bar-Farbe = `waterStageGradient(stage)`, Track = `waterStageTrackColor(stage)` (Vorgängerstufe × 0.25). Tap → Detail-Sheet. Pin-Toggle als Icon rechts oben. `trailingSlot` rendert WaterStageSlider als letzte Zeile. |
+| `WaterBarWithGhost` (P7) | Single Linear-Bar mit ZWEI ueberlagerten Progress-Layern (real blau + ghost transparent + Defizit-Bereich rot). Canvas-basiert, beidseitig draggable Slider on top. Schritt 50 ml. |
+| `WaterSlider` (P7) | Slider auf `WaterBarWithGhost`. onValueChangeFinished → `WaterIntakeRepository.add(delta)`. Triggert 5-min Debounce in `WaterDeficitScheduler`. |
+| `NutrientRow` (P7) | Kompakte Zeile fuer Expand-Liste „Alle Naehrstoffe": Pin-Icon (Toggle) + Name + Wert/Ziel + Mini-LinearBar. Reagiert sofort auf Pin-Tap. |
+| `PlannedMealRow` (P7) | Zeile im Home-Section „Geplante Mahlzeiten heute": Checkbox + Zeit + Mahlzeit-Name. Check → `intake_entries`-Insert mit Snapshot; Uncheck-Undo binnen 60 s per Snackbar. |
+| `NutrientGoalRow` (P7) | Zeile im Profil-Tagesziele-Section: Naehrstoff-Name + Default-Value (klein, read-only) + Override-NumberField + Reset-Icon. Override schreibt in `UserProfileEntity.dailyNutrientGoalsJson`. |
 
 ### 8.3 Phase-Verfügbarkeit
 
@@ -298,6 +304,12 @@ außer den unten gelisteten Wrapper-Components.
 | `OfflineBanner` | ✅ | | | |
 | `PhasePlaceholder` | ✅ | ✅ | ✅ | — |
 | `DateNavigator` | ✅ | | | |
+| `PinnedNutrientCard` | | | | P7 |
+| `WaterBarWithGhost` | | | | P7 |
+| `WaterSlider` | | | | P7 |
+| `NutrientRow` | | | | P7 |
+| `PlannedMealRow` | | | | P7 |
+| `NutrientGoalRow` | | | | P7 |
 
 ---
 

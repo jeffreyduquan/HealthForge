@@ -76,7 +76,7 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ---
 
-## 3. Home-Tab
+## 3. Home-Tab (P7-Refactor)
 
 ### 3.1 Layout (vertikal, scrollbar)
 
@@ -84,35 +84,47 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 ┌─────────────────────────────────┐
 │ ← Mo, 25.05.2026 →              │ Datum-Nav
 ├─────────────────────────────────┤
-│  ⭕ kcal  ⭕ P  ⭕ F  ⭕ C        │ Makro-Ringe
+│ ANGEHEFTETE NÄHRSTOFFE           │ SectionPill
+│ ┌──────────────────────────────┐ │ PinnedNutrientCard
+│ │ kcal      1450 / 2100  -650 │ │  (groesser, Linear-Bar + Delta)
+│ │ █████████████░░░░░░░░ 70 % │ │
+│ └──────────────────────────────┘ │
+│  … weitere Pins (Protein/Carbs/Fett) …
+│ ┌────────────────────────────┐ │ WaterStageSlider (letzte Pin-Zeile)
+│ │ Wasser  ×2   700 / 2000 ml  35 %  ὑ4│ │  Label · Stufen-Badge · Wert/Ziel ·
+│ │ ███████████▌▒▒▒▒▒▒▒▒▒▒▒▒▒●│ │  Prozent · Reminder-Bell
+│ └────────────────────────────┘ │  Bar = Slider, Thumb = Position in Stufe
 ├─────────────────────────────────┤
-│ 💧 Wasser: 1.2 / 2.0 L          │
-│  [+250 ml] [+500 ml] [Custom]   │
+│ [▾ Alle Nährstoffe anzeigen]    │ Expander
+│  ◍ Vitamin C   65 / 110 mg    │ NutrientRow (Mini-Bar + Pin-Icon)
+│  ◍ Eisen        8 / 15  mg    │   Pin-Tap toggelt sofort
+│  …                                │
 ├─────────────────────────────────┤
-│ 💊 Supplements heute            │
-│  ☐ Vitamin D  ☑ Magnesium       │
-├─────────────────────────────────┤
-│ Heute gegessen (3)              │
-│  • Müsli 80 g — 350 kcal        │
-│  • ...                          │
-│  [Alle anzeigen → Verlauf]      │
-├─────────────────────────────────┤
-│ Schnell hinzufügen              │
-│  [Apfel] [Quark] [Linsensuppe]  │ Letzte 6 Refs
+│ GEPLANTE MAHLZEITEN HEUTE       │ SectionPill
+│  ☐ 12:00 Linsensuppe (Plan)    │ PlannedMealRow
+│  ☑ 08:00 Müsli (gegessen)      │ Undo-Snackbar 60s
+│  …                                │
 ├─────────────────────────────────┤
 │         [+ Eintrag]              │ Großer Button
 └─────────────────────────────────┘
 ```
 
 ### 3.2 Aktionen
-- **Datum-Nav:** Pfeile + Tap auf Datum → Date-Picker
-- **Ring tippen:** Detail-Sheet (geplant vs. tatsächlich, Restmenge)
-- **Wasser +:** sofortiges Speichern, Snackbar mit Undo
-- **Supplement-Checkbox:** Eintrag mit `now()` ins Intake-Log
-- **Eintrag in Heute-Liste lang-tap:** Edit/Delete
-- **Quick-Add-Chip:** öffnet Mengen-Dialog → Speichern
-- **+ Eintrag (FAB-Ersatz):** öffnet Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement/Wasser)
-- **Verlauf-Link:** öffnet Intake-History-Screen (eigener Screen, voller chronologischer Verlauf mit Date-Picker, Aggregat-Header, Edit/Delete)
+- **Datum-Nav:** Pfeile + Tap auf Datum → Date-Picker.
+- **PinnedNutrientCard Tap:** Detail-Sheet (geplant vs. tatsächlich, Restmenge, Quellen-Aufschlüsselung pro Mahlzeit).
+- **Pinned-Bars Stufen-Anzeige (P7.S3.b, einheitlich mit Wasser):** Alle Pin-Bars (kcal/Protein/Carbs/Fett/Wasser) zeigen den Konsum als Stufen-Bar. Stufe N = `N×goal..(N+1)×goal`. Bar-Füllung = Prozent **innerhalb der aktuellen Stufe** (0–100 %). Farbe = `waterStageGradient(stage)` (10-Stufen-Cycle, ab Stufe 9 endless). Track = Akzent der **Vorgängerstufe × 0.25 Alpha** (Stufe 0 → neutraler `barTrack`). Ab Stufe ≥ 1 erscheint rechts ein Lv-Badge. Überkonsum (> 100 % Tagesziel) führt zu Stufen-Roll-over mit neuer Farbe — analog Wasser.
+- **WaterStageSlider drag (Stufen-Logik, v2.3):** Wasser ist die letzte Zeile in der `PinnedNutrientCard`, optisch identisch zu den anderen Pin-Bars. Range = 0..goal (0–100 % der aktuellen Stufe). 50-ml-Steps. Stufe N umfasst `N×goal..(N+1)×goal`. **In-Drag Stage-Up**: erreicht der Slider 100 %, schaltet die Bar in die nächste Stufe (Bar 0 %, neue Farbe, Thumb am linken Rand). **In-Drag Stage-Down (Drag-Through-Zero)**: erreicht der Slider in einer Stufe > 0 das untere Ende, schaltet die Bar eine Stufe zurück (Bar 100 %, Thumb am rechten Rand). **Touch-Disconnect bei Stufenwechsel**: Sobald während eines Drags ein Stage-Up/Down ausgelöst wird, wird die aktive Geste per `key`-Remount des Sliders abgebrochen. Für weitere Stufenwechsel muss der User loslassen und neu tippen. Cascade-Effekt konstruktionsbedingt unmöglich. Beim Loslassen genau an einer Stufengrenze rückt der State zusätzlich noch eine Stufe weiter (oben) bzw. zurück (unten). Stufen 0..9 haben je eine eigene Farbe aus der Histamind-Palette; ab Stufe 10+ bleibt die Farbe gleich. Stufen sind endlos. **Ghost-Soll-Marker**: feine weiße vertikale Linie an der Soll-Position innerhalb der gerade angezeigten Stufe. **Defizit-Rotanteil**: Bereich zwischen aktueller Füllung und Soll wird rot (StatusOverUl) gefärbt, wenn current < Soll und beide in derselben Stufe. Persistenz via `WaterIntakeRepository.setDayTotal` (Day-Aggregate).
+- **Reminder-Bell-Toggle:** Trailing-Icon der Wasser-Zeile (statt eigener Card-Header). Stoppt nur Defizit-Notifications. Persistiert in `WaterReminderPrefs`.
+- **Expand „Alle Nährstoffe anzeigen“:** zeigt komplette Katalog-Liste (~30 Einträge) mit Pin-Toggle pro Zeile. Pin-Tap persistiert sofort in `UserProfileEntity.pinnedNutrientsJson` (kein Save-Button).
+- **Geplante-Mahlzeiten-Checkbox:** ☑ → `intake_entries`-Insert mit Snapshot der Nutrient-Werte; ☐-Undo binnen 60 s per Snackbar.
+- **+ Eintrag:** Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement — Wasser ist nicht mehr hier, weil im Home-Card direkt steuerbar).
+
+### 3.3 Pin-Verwaltung
+- **Default-Pins** (nach Onboarding): `kcal, protein, carbs, fat, water` (5 Stück).
+- **Hinzufügen:** Expand „Alle Nährstoffe anzeigen“ → Pin-Icon-Tap auf Zeile.
+- **Entfernen:** Pin-Icon-Tap auf Karte oder Zeile.
+- **Mindest-Pin:** keine (auch 0 Pins erlaubt; Liste läuft über Expand).
+- **Reihenfolge:** Insert-Reihenfolge in JSON-Array, kein Drag-Sort in P7 (Polish-Backlog).
 
 ---
 
@@ -400,7 +412,9 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 **Allergien & Unverträglichkeiten:** Multi-Select EU-14 + custom, FODMAP-Toggles, Histamin-Slider, Strict-Mode-Toggle (global).
 
-**Nährwert-Ziele:** Berechnete Defaults (kcal/P/F/C) anzeigen, jeweils Override-Input. Reset-Button.
+**Nährwert-Ziele (Tagesziele — P7-Expand):** Liste **aller** Katalog-Nährstoffe (~30 Einträge: Makros + Vitamine + Mineralstoffe + Wasser). Pro Zeile: Default-Wert (read-only), Override-Input (NumberField), Reset-Icon. Override persistiert device-local in `UserProfileEntity.dailyNutrientGoalsJson` (Privacy-Boundary REQ-PROFILE-001/002). Reset löscht den Key. Wasser-Goal ist hier (nicht mehr in eigener Reminder-Section).
+
+*Pin-Verwaltung* erfolgt im **Home-Tab** (P7, REQ-HOME-NUTRIENT-LIST-001) — Profil-Sektion „Angeheftete Nährstoffe“ (P6) ist entfernt.
 
 **Supplements:** Liste eigener Supplements (Link zum Essen → Supplements-Tab).
 
