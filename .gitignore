@@ -74,6 +74,13 @@ firebase-adminsdk-*.json
 # ============ Build logs / local test artifacts ============
 android-build*.txt
 emu-*.png
+build-log.txt
+boot-log.txt
+compile-log.txt
+install-log.txt
+build-fdc*.log
+build-usda-seed.log
+fetch-fdc.log
 
 # ============ TypeScript build artifacts ============
 tsconfig.tsbuildinfo
