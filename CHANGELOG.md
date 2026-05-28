@@ -5,6 +5,51 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S4 Slice 4a — Profile-Refactor (BigCatalog-Goals + Pin-Section drop) — 2026-05-28
+
+**Scope:** REQ-PROFILE-LAYOUT-001 — Profil-Tab umgebaut auf neuen Layout-Standard.
+
+**Code-Änderungen:**
+- NEW `android_app/.../presentation/profile/components/NutrientGoalRow.kt` (~110 Zeilen): Zeile mit Naehrstoff-Label + Default (read-only) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (Material `RestartAlt`). Override-Range klemmt automatisch in `nutrient.min..nutrient.max`.
+- MOD `presentation/profile/ProfileScreen.kt`:
+  - DROP Section `WASSERZIEL` (Slider mit hartem `waterGoalMl`); Wasser ist jetzt eine Zeile in „TAGESZIELE".
+  - DROP Section `ANGEHEFTETE NÄHRSTOFFE` (Chip-Grid). Pin-Verwaltung erfolgt im Home-Tab seit P7.S3.
+  - EXPAND `TAGESZIELE`: Iteration über `domain.nutrition.NutrientCatalog.all` (33 Einträge), Kategorie-Header (Makros / Vitamine / Mineralstoffe / Wasser), `NutrientGoalRow` pro Eintrag.
+  - Default-Wert kommt aus `vm.computedDefaults: StateFlow<DailyTargets>` (Makros + Wasser profilabhängig via `ComputeNutrientTargetsUseCase`); Mikros nutzen statische DGE-Werte aus `NutrientCatalog`.
+- MOD `presentation/profile/ProfileViewModel.kt`:
+  - INJECT `ComputeNutrientTargetsUseCase`.
+  - NEW `computedDefaults: StateFlow<DailyTargets>` mapped vom Profile-Flow.
+  - NEW `clearNutrientGoal(slug)` — entfernt Key aus `dailyNutrientGoalsJson`; Sonderfall `slug=="water"` → `resetWaterGoalMl()` (= setWaterGoalMl(2000), Catalog-Default).
+  - NEW `resetWaterGoalMl()`.
+  - MOD `setNutrientGoal(slug, value)` — Sonderfall `slug=="water"` → routet auf `setWaterGoalMl(value.toInt())` (Single-Source-of-Truth bleibt die `waterGoalMl`-Spalte, weil sie kanonisch in `DailyTargets` einfließt).
+- DEL `presentation/profile/NutrientCatalog.kt` (P6.S6-Legacy, 8 Einträge); Slug-Strings für `pinnedNutrientsJson`/`dailyNutrientGoalsJson` deckt jetzt der Big-Catalog ab. Kein anderer Caller (grep-verifiziert).
+
+**Verifikation:**
+- `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors, 0 neue Warnings.
+- Statische Checks (vscode `get_errors`): keine offenen Errors auf ProfileScreen/ProfileViewModel/NutrientGoalRow.
+- `togglePinnedNutrient` in ViewModel bleibt unangetastet (keine externen Caller, kein Refactor-Scope).
+
+**Touched Docs:**
+- `CHANGELOG.md` (dieser Eintrag).
+- `docs/SprintPlan.md` — P7.S4 Slice 4a auf ✅ DONE 2026-05-28, Sub-Slice-Struktur (4a/4b/4c) ergänzt.
+- `docs/TraceabilityMatrix.md` — `REQ-PROFILE-LAYOUT-001` von ⏳ → ✅.
+
+**Untouched (begründet):**
+- `docs/ReqSpec.md` — Anforderung war seit P7-Spec-Lock klar, kein Drift.
+- `docs/UsabilityMap.md` — §7 Profil-Tab beschreibt bereits den neuen Zustand exakt.
+- `docs/GUI.md` — `NutrientGoalRow`-Spec existiert seit P7-Spec-Lock.
+- `docs/Architecture.md` — kein Schichten-/Persistenz-Change (Room v8 unverändert, DTOs unverändert).
+- `docs/Runbook.md` / `docs/TestStrategy.md` / `docs/HistamindDesignReference.md` / `docs/BattleTestPlan.md` — kein Scope-Berührungspunkt.
+
+**Risiken / Folgearbeiten:**
+- Slice 4b (Plan-Water-Goal-Slider pro Tag) und Slice 4c (WaterDeficitScheduler) stehen aus.
+- `presentation.profile.ProfileViewModel.togglePinnedNutrient` ist nach Drop der Profil-Chips ohne UI-Caller; Home nutzt eigene Path. Bleibt als no-op-Public-Method (kein Refactor in 4a-Scope).
+- Migration für User mit aktivem `pinnedNutrientsJson` aus P6: bleibt funktional (Home-Tab liest die JSON weiter).
+
+---
+
+
+
 ## P7.S2 Slice 3c FINAL — USDA-FDC Importer-Run grün — 2026-05-28
 
 **Scope:** REQ-DATA-SOURCE-001 + REQ-INGR-ALLERGEN-MAPPING-001 abschließen — End-to-End-Run des `UsdaFdcImporter` gegen Dev-DB.

@@ -6,9 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.prefs.SettingsDataStore
 import de.healthforge.data.repository.FullProfile
 import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.domain.ComputeNutrientTargetsUseCase
+import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.ThemePreference
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,10 +20,20 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val repo: ProfileRepository,
     private val settings: SettingsDataStore,
+    private val computeTargets: ComputeNutrientTargetsUseCase,
 ) : ViewModel() {
 
     val profile: StateFlow<FullProfile?> =
         repo.observe().stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * P7.S4 / REQ-PROFILE-LAYOUT-001 — Profil-abgeleitete Makro-Defaults (kcal/protein/carbs/fat/water).
+     * Mikros nutzen den statischen DGE-Default aus [de.healthforge.domain.nutrition.NutrientCatalog].
+     */
+    val computedDefaults: StateFlow<DailyTargets> =
+        repo.observe()
+            .map { computeTargets(it?.profile) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, DailyTargets.FALLBACK)
 
     val theme: StateFlow<ThemePreference> =
         settings.themePreference.stateIn(viewModelScope, SharingStarted.Eagerly, ThemePreference.SYSTEM)
@@ -38,16 +51,40 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** P7.S4 / REQ-PROFILE-LAYOUT-001 — reset water goal to Catalog-Default. */
+    fun resetWaterGoalMl() = setWaterGoalMl(2000)
+
     /**
-     * REQ-PROFILE-GOALS-001 (P6.S6 Slice B): persist per-nutrient daily goal.
-     * Stored as JSON in `dailyNutrientGoalsJson` (key = nutrient slug like "kcal"/"protein"/"carbs"/"fat",
-     * value = Double in grams or kcal).
+     * REQ-PROFILE-GOALS-001 (P6.S6 Slice B) + P7.S4 (REQ-PROFILE-LAYOUT-001): persist per-nutrient daily goal.
+     * Stored as JSON in `dailyNutrientGoalsJson` (key = nutrient slug from
+     * [de.healthforge.domain.nutrition.NutrientCatalog], value = Double in [Nutrient.unit]).
+     *
+     * Special-case `slug == "water"` routes to [setWaterGoalMl] to keep single-source-of-truth
+     * (the `waterGoalMl` column ist die kanonische Quelle für [DailyTargets]).
      */
     fun setNutrientGoal(slug: String, value: Double) {
+        if (slug == "water") {
+            setWaterGoalMl(value.toInt())
+            return
+        }
         viewModelScope.launch {
             val current = profile.value?.profile ?: return@launch
             val obj = runCatching { org.json.JSONObject(current.dailyNutrientGoalsJson) }.getOrElse { org.json.JSONObject() }
             obj.put(slug, value)
+            repo.upsertProfile(current.copy(dailyNutrientGoalsJson = obj.toString(), updatedAt = System.currentTimeMillis()))
+        }
+    }
+
+    /** P7.S4 / REQ-PROFILE-LAYOUT-001 — Reset entfernt den Override-Key; Default wird verwendet. */
+    fun clearNutrientGoal(slug: String) {
+        if (slug == "water") {
+            resetWaterGoalMl()
+            return
+        }
+        viewModelScope.launch {
+            val current = profile.value?.profile ?: return@launch
+            val obj = runCatching { org.json.JSONObject(current.dailyNutrientGoalsJson) }.getOrElse { org.json.JSONObject() }
+            obj.remove(slug)
             repo.upsertProfile(current.copy(dailyNutrientGoalsJson = obj.toString(), updatedAt = System.currentTimeMillis()))
         }
     }

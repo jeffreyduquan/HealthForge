@@ -18,7 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientText
@@ -37,9 +37,10 @@ import de.healthforge.presentation.theme.ThemePreference
 
 /**
  * Profil-Tab. P6.S5: Histamind-Glass-Visual (AmbientBackdrop + GlassCard sections +
- * SectionPill headers + GradientText title). Inhaltliche Goals-Editor-Erweiterung
- * ist nach P6.S6 verschoben (REQ-PROFILE-GOALS-001) — gleicher Defer-Pfad wie
- * PinnedNutrientsManager in P6.S4.
+ * SectionPill headers + GradientText title). P7.S4 (REQ-PROFILE-LAYOUT-001):
+ * Tagesziele expandiert auf vollen NutrientCatalog (~30 Einträge, gruppiert nach Kategorie),
+ * Wasser ist hier integriert (vorher eigene WASSERZIEL-Section), und das
+ * P6.S6-Pin-Mgmt-Chip-Grid ist entfernt (Pin-Verwaltung erfolgt jetzt im Home-Tab).
  */
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
@@ -119,81 +120,39 @@ fun ProfileScreen(
                 }
             }
 
-            SectionPill(label = "WASSERZIEL")
-            GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                val waterMl = p?.waterGoalMl ?: 2000
-                Column {
-                    Text("$waterMl ml pro Tag", color = hm.fgPrimary, fontWeight = FontWeight.SemiBold)
-                    Slider(
-                        value = waterMl.toFloat(),
-                        onValueChange = { vm.setWaterGoalMl(it.toInt()) },
-                        valueRange = 500f..5000f,
-                        steps = 8,
-                    )
-                }
-            }
-
             SectionPill(label = "TAGESZIELE")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+                val defaults by vm.computedDefaults.collectAsStateWithLifecycle()
                 val goalsJson = p?.dailyNutrientGoalsJson ?: "{}"
-                val pinnedJson = p?.pinnedNutrientsJson ?: "[]"
                 val goals = remember(goalsJson) {
                     runCatching { org.json.JSONObject(goalsJson) }.getOrElse { org.json.JSONObject() }
                 }
-                val pinned: List<String> = remember(pinnedJson) {
-                    runCatching {
-                        val a = org.json.JSONArray(pinnedJson)
-                        (0 until a.length()).map { a.getString(it) }
-                    }.getOrElse { emptyList() }
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (pinned.isEmpty()) {
+                val waterMl = p?.waterGoalMl ?: 2000
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    de.healthforge.domain.nutrition.NutrientCatalog.Category.entries.forEach { cat ->
+                        val rows = de.healthforge.domain.nutrition.NutrientCatalog.ofCategory(cat)
+                        if (rows.isEmpty()) return@forEach
                         Text(
-                            "Keine Nährstoffe angeheftet. Wähle unten welche aus.",
+                            categoryLabel(cat),
                             color = hm.fgSecondary,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
                         )
-                    } else {
-                        pinned.forEach { slug ->
-                            val cfg = NutrientCatalog.byOrNull(slug) ?: NutrientCatalog.fallback(slug)
-                            val current = goals.optDouble(slug, cfg.default).toFloat()
-                            Column {
-                                Text(
-                                    "${cfg.label}: ${current.toInt()} ${cfg.unit}",
-                                    color = hm.fgPrimary,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                                Slider(
-                                    value = current,
-                                    onValueChange = { vm.setNutrientGoal(slug, it.toDouble()) },
-                                    valueRange = cfg.min..cfg.max,
-                                    steps = cfg.steps,
-                                )
+                        rows.forEach { nut ->
+                            val computedDefault = effectiveDefault(nut, defaults, nut.defaultPerDay)
+                            val override: Double? = when (nut.key) {
+                                "water" -> waterMl.toDouble().takeIf { it != 2000.0 }
+                                else -> if (goals.has(nut.key)) goals.optDouble(nut.key) else null
                             }
+                            de.healthforge.presentation.profile.components.NutrientGoalRow(
+                                nutrient = nut,
+                                effectiveDefault = computedDefault,
+                                override = override,
+                                onChange = { vm.setNutrientGoal(nut.key, it) },
+                                onReset = { vm.clearNutrientGoal(nut.key) },
+                            )
                         }
-                    }
-                }
-            }
-
-            SectionPill(label = "ANGEHEFTETE NÄHRSTOFFE")
-            GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                val pinnedJson = p?.pinnedNutrientsJson ?: "[]"
-                val pinnedSet: Set<String> = remember(pinnedJson) {
-                    runCatching {
-                        val a = org.json.JSONArray(pinnedJson)
-                        (0 until a.length()).map { a.getString(it) }.toSet()
-                    }.getOrElse { emptySet() }
-                }
-                androidx.compose.foundation.layout.FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    NutrientCatalog.all.forEach { cfg ->
-                        FilterChip(
-                            selected = cfg.slug in pinnedSet,
-                            onClick = { vm.togglePinnedNutrient(cfg.slug) },
-                            label = { Text(cfg.label) },
-                        )
                     }
                 }
             }
@@ -225,4 +184,29 @@ fun ProfileScreen(
             Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+/**
+ * P7.S4 / REQ-PROFILE-LAYOUT-001 — Effektiver Default-Wert pro Nährstoff:
+ * Makros + Wasser kommen aus [ComputeNutrientTargetsUseCase] (profilabhängig),
+ * Mikros aus der statischen DGE-Empfehlung im [NutrientCatalog].
+ */
+private fun effectiveDefault(
+    nut: de.healthforge.domain.nutrition.NutrientCatalog.Nutrient,
+    computed: DailyTargets,
+    catalogDefault: Double,
+): Double = when (nut.key) {
+    "kcal" -> computed.kcal.toDouble()
+    "protein" -> computed.proteinG.toDouble()
+    "carbs" -> computed.carbsG.toDouble()
+    "fat" -> computed.fatG.toDouble()
+    "water" -> computed.waterMl.toDouble()
+    else -> catalogDefault
+}
+
+private fun categoryLabel(c: de.healthforge.domain.nutrition.NutrientCatalog.Category): String = when (c) {
+    de.healthforge.domain.nutrition.NutrientCatalog.Category.MACRO -> "Makros"
+    de.healthforge.domain.nutrition.NutrientCatalog.Category.VITAMIN -> "Vitamine"
+    de.healthforge.domain.nutrition.NutrientCatalog.Category.MINERAL -> "Mineralstoffe"
+    de.healthforge.domain.nutrition.NutrientCatalog.Category.WATER -> "Wasser"
 }

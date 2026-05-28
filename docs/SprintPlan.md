@@ -1761,27 +1761,32 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
 
 ### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
-**Status:** ⏳ TODO
+**Status:** 🟡 IN PROGRESS (Slice 4a ✅ 2026-05-28; Slice 4b + 4c offen)
 
-**Deliverables:**
-- MOD `presentation/profile/ProfileScreen.kt`:
-  - DROP Sektion „ANGEHEFTETE NAEHRSTOFFE" (Pin-Mgmt zog nach Home, REQ-HOME-NUTRIENT-LIST-001).
-  - EXPAND Sektion „TAGESZIELE": pro Katalog-Eintrag eine Zeile mit Default-Anzeige + Override-Input + Reset-Icon. Water-Goal ist Teil davon.
-- MOD `presentation/plan/PlanScreen.kt`: pro Tages-Header ein optionales Wasser-Tagesziel-Slot-Slider (NULL = Profil-Default, Slider-Move = Override).
-- NEW `notification/WaterDeficitScheduler.kt` (ersetzt `WaterReminderScheduler`):
-  - `AlarmManager`-basierte Eskalation 30→15→10→5 min.
-  - Debounce 5 min nach Slider-Interaktion.
-  - Snooze +30 min (virtuelle Ghost-Verschiebung in Repo-Layer).
-  - Hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
-- NEW BroadcastReceiver `WaterDeficitAlarmReceiver` mit Notification-Channel `water_deficit` (separat von P6 `water_reminder`).
-- MOD `WaterIntakeRepository.add(delta)`: triggert nach Persist einen `evaluateDeficit()`-Call → re-schedule Alarm.
+**Slice 4a — Profile-Refactor (✅ DONE 2026-05-28):**
+- NEW `presentation/profile/components/NutrientGoalRow.kt` — Zeile: Label + Default (read-only, klein) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (`Icons.Outlined.RestartAlt`). Override-Range clamped in `nutrient.min..nutrient.max`.
+- MOD `presentation/profile/ProfileScreen.kt`: DROP `WASSERZIEL`-Section (eigener Slider); DROP `ANGEHEFTETE NÄHRSTOFFE`-Chip-Grid (Pin-Mgmt läuft im Home-Tab seit P7.S3). EXPAND `TAGESZIELE` auf `domain.nutrition.NutrientCatalog.all` (33 Einträge), Kategorie-Header (Makros / Vitamine / Mineralstoffe / Wasser).
+- MOD `presentation/profile/ProfileViewModel.kt`: INJECT `ComputeNutrientTargetsUseCase`; NEW `computedDefaults: StateFlow<DailyTargets>`; NEW `clearNutrientGoal(slug)` + `resetWaterGoalMl()`. `setNutrientGoal("water", v)` routet auf `setWaterGoalMl(v.toInt())` (Single-Source-of-Truth = `waterGoalMl`-Spalte, fließt kanonisch in `DailyTargets`).
+- DEL `presentation/profile/NutrientCatalog.kt` (P6.S6-Legacy mit 8 Einträgen, ersetzt durch domain-NutrientCatalog mit 33).
+- **Hinweis Room:** kein Schema-Bump nötig — DB ist seit P7.S1 auf v8, `waterGoalMl` + `dailyNutrientGoalsJson` + `meal_plan_slot.waterGoalMl` existieren bereits. P7-Spec sagte „v7→v8" — das ist hier prospektiv eingerechnet.
+- **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors.
 
-**Akzeptanz:**
-- Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn.
-- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag.
-- Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm.
-- Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect.
-- 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu.
+**Slice 4b — Plan-Water-Goal-Slider pro Tag (⏳ TODO):**
+- MOD `presentation/plan/PlanScreen.kt`: pro Tages-Header optionaler Slider 500–5000 ml in 50-ml-Schritten, NULL = Profil-Default.
+- DB bereits da (`MealPlanSlotEntity.waterGoalMl: Int?`, P7.S1).
+- Home: `HomeViewModel` liest `effective_water_goal = plan_slot_value ?? profile_value` für Heute.
+
+**Slice 4c — WaterDeficitScheduler (⏳ TODO, größter Slice):**
+- NEW `notification/WaterDeficitScheduler.kt` — ersetzt `WaterReminderScheduler`. AlarmManager-Eskalation 30→15→10→5 min, 5-min Debounce nach Slider-Drag, Snooze +30 min (max 2×), hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
+- NEW BroadcastReceiver `WaterDeficitAlarmReceiver` + Notification-Channel `water_deficit` (separat von P6 `water_reminder`).
+- MOD `WaterIntakeRepository.add(delta)` → triggert `evaluateDeficit()` Re-Schedule.
+
+**Akzeptanz (gesamtsprintweit):**
+- Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn. (Slice 4a ✅)
+- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag. (Slice 4b)
+- Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm. (Slice 4c)
+- Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect. (Slice 4c)
+- 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu. (Slice 4c)
 
 **Risiken:**
 - AlarmManager-Doze-Mode kann Alarme verzögern. Mitigation: `setExactAndAllowWhileIdle` für kritischen Mindest-5min-Alarm.
