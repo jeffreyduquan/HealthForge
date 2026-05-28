@@ -13,7 +13,6 @@ import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.repository.DayNutrientTotals
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.IntakeRepository
-import de.healthforge.data.repository.MealPlanRepository
 import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.data.repository.WaterIntakeRepository
@@ -87,7 +86,6 @@ class HomeViewModel @Inject constructor(
     private val supplementRepo: SupplementRepository,
     private val waterReminderPrefs: WaterReminderPrefs,
     private val waterReminderScheduler: WaterReminderScheduler,
-    private val planRepo: MealPlanRepository,
     profileRepo: ProfileRepository,
     targetsUseCase: ComputeNutrientTargetsUseCase,
 ) : ViewModel() {
@@ -101,14 +99,6 @@ class HomeViewModel @Inject constructor(
 
     val targetsFlow: StateFlow<DailyTargets> = profileRepo.observe()
         .map { targetsUseCase(it.profile) }
-        .combine(
-            dateFlow.flatMapLatest { day ->
-                // P7.S4 / REQ-PLAN-WATER-GOAL-001 — plan-slot-Override für den gewählten Tag.
-                planRepo.observeSlotsForDay(day).map { slots -> slots.firstOrNull()?.waterGoalMl }
-            },
-        ) { base, planOverride ->
-            if (planOverride != null) base.copy(waterMl = planOverride) else base
-        }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DailyTargets.FALLBACK)
 
     init {

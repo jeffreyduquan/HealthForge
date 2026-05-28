@@ -10,9 +10,7 @@ import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.MealPlanRepository
-import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.data.repository.RecipeRepository
-import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,17 +39,6 @@ data class PlanUiState(
     val selectedDay: LocalDate = LocalDate.now(),
     val slots: List<SlotWithItems> = emptyList(),
     val message: String? = null,
-    /**
-     * P7.S4 / REQ-PLAN-WATER-GOAL-001 — Effektives Tages-Wasserziel in ml.
-     * = `slots.firstOrNull()?.waterGoalMl ?? profileWaterDefaultMl`.
-     * Wird im DayHeader-Slider angezeigt; der Slider unterscheidet visuell
-     * Override (Slot-Wert ≠ Profil-Default) von Default.
-     */
-    val effectiveWaterGoalMl: Int = 2000,
-    /** Profil-Default (für Reset-Verhalten + Slider-Default-Markierung). */
-    val profileWaterDefaultMl: Int = 2000,
-    /** `true` = mindestens ein Slot trägt eigenen waterGoalMl. */
-    val hasWaterGoalOverride: Boolean = false,
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -60,16 +47,10 @@ class PlanViewModel @Inject constructor(
     private val planRepo: MealPlanRepository,
     private val recipeRepo: RecipeRepository,
     private val ingredientRepo: IngredientRepository,
-    profileRepo: ProfileRepository,
-    targetsUseCase: ComputeNutrientTargetsUseCase,
 ) : ViewModel() {
 
     private val _day = MutableStateFlow(LocalDate.now())
     private val _message = MutableStateFlow<String?>(null)
-
-    private val profileWaterFlow: StateFlow<Int> = profileRepo.observe()
-        .map { targetsUseCase(it.profile).waterMl }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 2000)
 
     val state: StateFlow<PlanUiState> = combine(
         _day.flatMapLatest { d ->
@@ -82,18 +63,7 @@ class PlanViewModel @Inject constructor(
         },
         _day,
         _message,
-        profileWaterFlow,
-    ) { slots, day, msg, profileWater ->
-        val override = slots.firstOrNull()?.slot?.waterGoalMl
-        PlanUiState(
-            selectedDay = day,
-            slots = slots,
-            message = msg,
-            effectiveWaterGoalMl = override ?: profileWater,
-            profileWaterDefaultMl = profileWater,
-            hasWaterGoalOverride = override != null,
-        )
-    }
+    ) { slots, day, msg -> PlanUiState(selectedDay = day, slots = slots, message = msg) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanUiState())
 
     fun selectDay(day: LocalDate) { _day.value = day }
@@ -140,20 +110,6 @@ class PlanViewModel @Inject constructor(
     }
 
     fun clearMessage() { _message.value = null }
-
-    /**
-     * P7.S4 / REQ-PLAN-WATER-GOAL-001 — Tages-Wasserziel-Override setzen.
-     * `value=null` löscht den Override (Profil-Default greift wieder).
-     * No-op wenn keine Slots existieren (UI zeigt Slider nur dann).
-     */
-    fun setWaterGoalForDay(value: Int?) = viewModelScope.launch {
-        val n = planRepo.setWaterGoalForDay(_day.value, value)
-        if (n == 0 && value != null) {
-            _message.value = "Erst eine Mahlzeit hinzufügen"
-        }
-    }
-
-    fun resetWaterGoalForDay() = setWaterGoalForDay(null)
 
     // ----- Picker queries (one-shot) -----
     private val _picker = MutableStateFlow(PickerSuggestions())

@@ -5,51 +5,6 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## P7.S4 Slice 4b — Plan-Water-Goal-Slider pro Tag — 2026-05-28
-
-**Scope:** REQ-PLAN-WATER-GOAL-001 — tagesspezifisches Wasserziel-Override im Plan-Tab, das im Home-Tab kanonisch als effective water goal greift.
-
-**Code-Änderungen:**
-- MOD `data/db/dao/MealPlanDao.kt`: NEW `updateWaterGoalForDay(day: String, v: Int?): Int` — `UPDATE meal_plan_slot SET waterGoalMl = :v WHERE dayDateIso = :day` (Single-Source-of-Truth-Konvention: jeder Slot eines Tages trägt denselben Override-Wert).
-- MOD `data/repository/MealPlanRepository.kt`: NEW `setWaterGoalForDay(day: LocalDate, value: Int?): Int`. No-op-Semantik wenn 0 Slots existieren (UI zeigt Slider nur in nicht-leerem Plan).
-- MOD `presentation/plan/PlanViewModel.kt`: INJECT `ProfileRepository` + `ComputeNutrientTargetsUseCase`; NEW `profileWaterFlow: StateFlow<Int>` (Profil-Default-Wasserziel). `PlanUiState` erweitert um `effectiveWaterGoalMl` / `profileWaterDefaultMl` / `hasWaterGoalOverride`. `state`-Combine jetzt 4-arg (zusätzlich `profileWaterFlow`). NEW `setWaterGoalForDay(value: Int?)` mit Snackbar-Hinweis "Erst eine Mahlzeit hinzufügen" wenn 0 Rows updated, NEW `resetWaterGoalForDay()`.
-- MOD `presentation/plan/PlanScreen.kt`: NEW `DayWaterGoalSlider`-Composable: `GlassCard` mit `SlotLabelPill("Wasserziel heute")` + großer Wert-Anzeige + Reset-Icon (`Icons.Outlined.RestartAlt`, nur bei Override) + Material3 `Slider` (Range 500..5000, ~89 Steps für 50-ml-Raster, lokaler Drag-State für flüssige Bewegung, Commit nur `onValueChangeFinished`). Beschriftungs-Switch: "Profil-Default — Slider verschieben für tagesspezifisches Ziel" vs. "Override für diesen Tag (Profil-Default: X ml)". Eingefügt im LazyColumn zwischen `DayHeader` und `DaySummary`.
-- MOD `presentation/home/HomeViewModel.kt`: INJECT `MealPlanRepository`. `targetsFlow` ist jetzt `profileTargets.combine(planSlotOverride)` — wenn `slots.firstOrNull()?.waterGoalMl != null` wird `targets.waterMl` mit dem Override ersetzt. Damit greift der Plan-Override automatisch in allen Home-Konsumenten (Wasser-Bar, Pinned-Cards, Ghost-Berechnung).
-
-**Verifikation:**
-- `:app:compileDebugKotlin` BUILD SUCCESSFUL 14s, 0 Errors.
-- `:app:installDebug` → Emulator Pixel_7_API_35.
-- End-to-End-Smoke (Profil-Default = 2000 ml):
-  1. Plan-Tab leer → Slider nicht sichtbar (by design, kein anchor-Slot).
-  2. Frühstück-Slot hinzufügen → Slider erscheint mit "WASSERZIEL HEUTE / 2000 ml / Profil-Default — Slider verschieben für tagesspezifisches Ziel".
-  3. Slider auf 2950 ml ziehen → Wert-Anzeige aktualisiert sich, Label wechselt zu "Override für diesen Tag (Profil-Default: 2000 ml)", Reset-Icon erscheint.
-  4. Home-Tab → "Wasser 600 / 2950 ml" → Plan-Override fließt kanonisch.
-  5. Plan-Tab → Reset-Icon tappen → "2000 ml / Profil-Default — …", Icon verschwindet.
-
-**Touched docs:**
-- CHANGELOG.md (dieser Eintrag).
-- docs/SprintPlan.md — P7.S4 Slice 4b ⏳ → ✅ mit vollständiger Code-Beschreibung; Status-Header auf "Slice 4a ✅ + Slice 4b ✅"; Akzeptanz-Punkt 4b auf ✅.
-- docs/TraceabilityMatrix.md — REQ-PLAN-WATER-GOAL-001 ⏳ → ✅ mit Implementation-Beschreibung + Verifikation.
-
-**Untouched docs + Begründung:**
-- ReqSpec.md — REQ-PLAN-WATER-GOAL-001 ist seit P7.S1 spezifiziert; Slice 4b ist die Implementierung, keine Vertragsänderung.
-- UsabilityMap.md — Plan-Slider sitzt in bestehendem Plan-Tab (Bottom-Nav), keine neue Navigation.
-- GUI.md — DayWaterGoalSlider folgt Histamind-Idiom (GlassCard + SlotLabelPill + Material3-Slider), keine neuen Tokens.
-- Architecture.md — Datenfluss bleibt Profile → ComputeNutrientTargetsUseCase → DailyTargets; Plan-Override ist ein lokaler combine in HomeViewModel, kein neuer Layer.
-- 07 Coding Conventions — Standard-Compose + Hilt + Flow, nichts Neues.
-- 08 Test Strategy — Visual-Smoke statt Unit-Test gewählt (siehe BattleTestPlan-Konvention für UI-Slider).
-- 09 Bootstrap — kein Setup-Impact.
-
-**Hinweis Room:**
-- Kein Schema-Bump nötig. `MealPlanSlotEntity.waterGoalMl: Int?` existiert seit P7.S1 (DB v8); die neue Query nutzt die bestehende Spalte.
-
-**Risiken / Trade-offs:**
-- Single-Source-pro-Tag-Konvention (Update aller Slots auf gleichen Wert) ist pragmatisch, hat aber den Nachteil dass ein zukünftiger "per-slot waterGoal" (z.B. Frühstücks-spezifisch) nicht ohne weiteres machbar wäre. Bewusste Entscheidung weil die Spec klar "per-Tag-Override" sagt.
-- Slider wird nur sichtbar wenn ≥ 1 Slot existiert. Alternative wäre eine virtuelle DAY_META-Slot-Erzeugung — verworfen weil DB-Pollution.
-- HomeViewModel.targetsFlow ist jetzt 2-Arity-Combine; bei zukünftigem Plan-Override für weitere Nutrients muss das auf N-Arity erweitert werden (kein blocker).
-
----
-
 ## P7.S4 Slice 4a — Profile-Refactor (BigCatalog-Goals + Pin-Section drop) — 2026-05-28
 
 **Scope:** REQ-PROFILE-LAYOUT-001 — Profil-Tab umgebaut auf neuen Layout-Standard.

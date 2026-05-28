@@ -39,15 +39,6 @@ class MealPlanRepository @Inject constructor(
 
     suspend fun deleteItem(id: Long) = dao.deleteItemById(id)
 
-    /**
-     * P7.S4 / REQ-PLAN-WATER-GOAL-001 — setzt das tagesübergreifende
-     * Wasserziel-Override für alle Slots eines Tages. `null` = Override zurücksetzen
-     * (Profil-Default greift). Wenn keine Slots existieren → no-op (0 rows updated);
-     * UI zeigt den Slider nur, wenn es bereits Slots gibt.
-     */
-    suspend fun setWaterGoalForDay(day: LocalDate, value: Int?): Int =
-        dao.updateWaterGoalForDay(day.toString(), value)
-
     /** REQ-PLAN-004: "Habe gegessen" → copy alle Items als IntakeEntry, slot.consumed=true. */
     suspend fun markConsumed(slotId: Long): Int {
         val slot = dao.slotById(slotId) ?: return 0
