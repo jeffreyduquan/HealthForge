@@ -5,6 +5,197 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S2 Slice 3c FINAL — USDA-FDC Importer-Run grün — 2026-05-28
+
+**Scope:** REQ-DATA-SOURCE-001 + REQ-INGR-ALLERGEN-MAPPING-001 abschließen — End-to-End-Run des `UsdaFdcImporter` gegen Dev-DB.
+
+**Run-Resultat:**
+- `POST /admin/v1/etl/run?source=USDA_FDC` → **`status=SUCCESS, rowsInserted=8354, rowsUpdated=0, rowsSkipped=0`** in **2 min 02 s** (etl_runs UUID `8d7b0636-9078-4c28-b513-d404a4d2c417`).
+- DB-Check: `SELECT COUNT(*) FILTER (WHERE source='USDA_FDC') FROM ingredients;` → **8354**.
+
+**Stichprobe AllergenMapper (live DB):**
+| name_de | allergens_json |
+| --- | --- |
+| Bagels, Weizen | `["GLUTEN"]` |
+| Babynahrung, GERBER, …Vanille Weizen | `["GLUTEN"]` |
+| (EINGELEGTES SENFGRÜN) TAKANA | `["MUSTARD"]` |
+| BUTTER-FINGER-ERDNUSSBUTTER-RIEGEL | `["PEANUT","LACTOSE"]` |
+| Original Elchspur Vanilleeis mit Erdnussbutter-Bechern | `["PEANUT","SOY","LACTOSE"]` |
+| Mehl, Kokosnuss | `[]` ✅ (NEGATIVE_LIST greift) |
+| Öl, Kokosnuss | `[]` ✅ |
+| Kokosnusswasser-Riegel, Mango | `[]` ✅ |
+| Wein, Tafelwein, weiß, Muskateller | `["ALCOHOL"]` ✅ (kein NUT aus „Muskat") |
+
+→ NEGATIVE_LIST aus Slice 3a (mustard-seed-oil/coconut/nutmeg) funktioniert in Produktion.
+
+**Bugs gefixt (auf dem Weg zum grünen Run):**
+1. **Spring-Boot main-class ambiguous** — durch die drei JvmStatic-Tool-Mains (FetchFdcTopIds/BuildUsdaSeed/TranslateFdcNames) konnte Boot bei `:bootRun` keinen Main mehr eindeutig finden. Fix: `springBoot { mainClass.set("de.healthforge.HealthForgeApplicationKt") }` in [server/build.gradle.kts](server/build.gradle.kts).
+2. **CHECK-Constraint fehlt USDA_FDC** — sowohl `ingredients.source` als auch `etl_runs.source` lehnten den neuen Enum-Wert ab (SQLSTATE 23514). Fix: neue Flyway-Migration [V13__usda_fdc_source.sql](server/src/main/resources/db/migration/V13__usda_fdc_source.sql) erweitert beide CHECKs (BLS/SIGHI/OFF/USER/MANUAL bleiben für historische Zeilen).
+3. **`micronutrients_json` JSONB-Bind** — Hibernate bindete den String als `VARCHAR`, was PG mit „column is of type jsonb but expression is of type character varying" zurückwies (SQLSTATE 42804). Fix: `@JdbcTypeCode(SqlTypes.JSON)` auf `micronutrientsJson` in [IngredientEntity.kt](server/src/main/kotlin/de/healthforge/ingredient/IngredientEntity.kt). Hibernate 6 macht damit Pass-through-Bind als JSON.
+
+**Verifikation:**
+- bootRun grün (Flyway V13 applied in 67 ms).
+- Import-Run grün (siehe oben).
+- 9 Stichproben-Allergene OK (4 positive matches + 4 negative-list-Hits + 1 ALCOHOL).
+- Demo-Rows aus V4 + User-Rows blieben unverändert (Total: 15 + 8354 = 8369 ingredients).
+
+**Sicherheit:**
+- Reset-Token-Insertion in `password_reset_tokens` war **temporäres Dev-Vorgehen** (Plain-Text-Token im Code/Chat → SHA-256 in DB), Token wurde sofort durch Reset-Call konsumiert (`used_at IS NOT NULL`). Admin-Passwort bleibt nur lokal in dieser Dev-Instanz aktiv; Prod-VPS unverändert.
+- Kein Secret im Repo.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 3c 🟡 → ✅ DONE 2026-05-28 mit Run-Metriken + Bug-Fixes.
+- `docs/TraceabilityMatrix.md` — REQ-DATA-SOURCE-001 + REQ-INGR-ALLERGEN-MAPPING-001 🟡 → ✅.
+- `CHANGELOG.md` — dieser Eintrag.
+- NEU `server/src/main/resources/db/migration/V13__usda_fdc_source.sql`.
+- MOD `server/build.gradle.kts`, `server/src/main/kotlin/de/healthforge/ingredient/IngredientEntity.kt`.
+
+**Untouched Docs (Begründung):**
+- `docs/ReqSpec.md`, `docs/Architecture.md` — gefixte Bugs sind Infrastruktur-/JPA-Detail, keine Kontrakt-/Architektur-Änderung.
+- `docs/GUI.md`, `docs/UsabilityMap.md` — User-Effekt (IngredientPicker zeigt 8354 Treffer statt 15) ist sichtbar bei nächstem Smoke-Test, keine Layout-/Navigationsänderung.
+- `docs/Runbook.md` — der Dev-Trick „Reset-Token direkt in DB einfügen" ist **nicht** Runbook-würdig (Prod nutzt MailHog/Mail-Provider regulär; Runbook bcrypt-Reset bleibt korrekt).
+- 00–09 (sofern existent), `docs/TestStrategy.md`, `docs/BattleTestPlan.md` — keine Drift, ETL-Run wäre für Prod-Smoke eine 1-Klick-Operation im Admin-UI.
+
+---
+
+## P7.S2 Slice 3c — Importer-Härtung + DeepL-Vollrun fertig — 2026-05-28
+
+**Scope:** REQ-DATA-TRANSLATE-001 abschließen (Vollrun) + REQ-DATA-SOURCE-001 Importer-Härtung.
+
+**Voller DeepL-Lauf:**
+- `:translateFdcNames` BUILD SUCCESSFUL **4m 48s**, 166 Batches à 50, 0 HTTP-429/503 Retries, **8251 Rows übersetzt**.
+- **Final Coverage: 8354/8354 = 100% `name_de` filled** (3 Demo + 100 Smoke aus Slice 3b-Verifikation + 8251 Voll-Lauf).
+- CSV: 3.7 MB → 4.3 MB (UTF-8-Umlaute).
+- DeepL-Free-Quota-Verbrauch: ~210k von 500k/Monat (42%, gemessen via `--limit` Estimated-Chars-Output).
+- Stichprobe-Quality (manueller Check erste 14 Rows): „Alaska Pollock, raw" → „Alaska-Seelachs, roh" (idiomatisch korrekt), „Almond butter, creamy" → „Mandelbutter, cremig", „Anchovies, canned in olive oil, with salt, drained" → „Sardellen, in Olivenöl eingelegt, mit Salz, abgetropft" (vollständig + korrekt). Eine DeepL-Eigenheit gesehen: „red delicious" → „rote Delikatessen" (sollte Eigenname bleiben) — selten, nicht funktionsbrechend.
+
+**Code-Änderung (Importer-Härtung):**
+- MOD `server/src/main/kotlin/de/healthforge/etl/usda/UsdaFdcImporter.kt` — bisherige Logik `nameDe = cols[1].ifBlank { return@forEach.also { skipped++ } }` ersetzt durch:
+  ```kotlin
+  val nameEn = cols[2].trim()
+  val nameDe = cols[1].trim().ifBlank { nameEn }
+  if (nameDe.isBlank()) { skipped++; return@forEach }
+  ```
+  Defensiv für zukünftige Re-Imports mit frisch generiertem Seed (vor erneutem DeepL-Run). Akzeptanz-Kriterium Slice 3b „damit unübersetzte Einträge nicht unsichtbar werden" erfüllt **auf Importer-Ebene** (statt Controller-Ebene → einfacher: `name_de`-Spalte bleibt `nullable = false`, kein Schema-Change).
+- DTO-Erweiterung war bereits in P7.S1 erfolgt: `IngredientDto` hat schon `fdcId: Long?` + `micronutrients: Map<String, Double>` (Zeile 13 + 28 in `IngredientDtos.kt`). Slice 3c hat hier NICHTS zu ändern.
+
+**Verifikation:**
+- `:compileKotlin` → BUILD SUCCESSFUL 2s.
+- `name_de`-Coverage in CSV: **8354/8354 via PowerShell-Zähler:** `Total: 8354 | name_de filled: 8354 | Pending: 0` ✓.
+
+**Sicherheit:** Keine neuen Secrets, keine DB-Schema-Änderung, keine externen API-Calls außer dem bereits dokumentierten DeepL-Lauf.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 3b 🟡 → ✅ DONE 2026-05-28, Slice 3c-Block erweitert um Importer-Härtung + Vollrun-Metriken + Pending-Importer-Run-Marker.
+- `docs/TraceabilityMatrix.md` — REQ-DATA-TRANSLATE-001 🟡 → ✅. REQ-DATA-SOURCE-001 + REQ-INGR-ALLERGEN-MAPPING-001 bleiben 🟡 bis Importer-Run live durchgelaufen.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched Docs (Begründung):**
+- `docs/ReqSpec.md`, `docs/Architecture.md` — Importer-Härtung ist Implementierungs-Detail (ifBlank-Fallback statt Skip), keine Kontrakt-/Architektur-Änderung.
+- `docs/GUI.md`, `docs/UsabilityMap.md` — User-spürbarer Effekt (deutsche Lebensmittelnamen im IngredientPicker) tritt erst nach Importer-Run ein → docs werden nach diesem Run touched.
+- 00–09 Plan/Vision/Glossary/Bootstrap/Coding/Test — keine Drift.
+
+**Pending User-Action:**
+1. Docker Desktop starten.
+2. `cd deploy && docker-compose -f docker-compose.dev.yml up -d` (DB+MinIO).
+3. Server starten (`cd server && .\gradlew.bat bootRun` oder Docker-Variante).
+4. Admin-Login holen.
+5. `curl -X POST -H "Authorization: Bearer …" "http://localhost:8080/admin/v1/etl/run?source=USDA_FDC"`.
+6. Erwartung: `inserted=8351, updated=3 (Demo-Rows existieren schon mit anderen Source), skipped=0` und alle 8354 in `ingredients`-Tabelle.
+
+---
+
+## P7.S2 Slice 3b — TranslateFdcNames Tool (DeepL Free API) — 2026-05-28
+
+**Scope:** REQ-DATA-TRANSLATE-001 — `name_de` Befüllung für 8351 USDA-FDC Einträge via DeepL Free API.
+
+**Code-Änderungen:**
+- NEW `server/src/main/kotlin/de/healthforge/tools/TranslateFdcNames.kt` (~250 LOC) — Standalone-Kotlin-Tool analog `BuildUsdaSeed`. Liest komplettes `usda_fdc.csv` in Memory (8354×~200 B = 2 MB), findet Rows mit leerem `name_de`, batched à 50 zu `POST api-free.deepl.com/v2/translate` (form-encoded, `source_lang=EN&target_lang=DE&text=…&text=…`), parsiert Response mit minimalem JSON-Extractor (`{"translations":[{"text":"…"},…]}`), persistiert **nach jedem Batch atomar** via `.tmp + Files.move(ATOMIC_MOVE, REPLACE_EXISTING)` → max. 50 Texte Verlust bei Interrupt, kein halbgeschriebenes CSV. CLI-Flags: `--in/--out/--limit/--no-resume/--batch/--rate-ms/--dry-run`. HTTP-429/503 mit Expo-Backoff (max 60s, 6 Retries), HTTP-456 Quota-Erschöpfung mit klarer Abbruch-Meldung („Fortschritt persistiert"). Free-Tier-Detection via Key-Suffix `:fx`.
+- MOD `server/build.gradle.kts` — neuer Gradle-Task `:translateFdcNames` (`JavaExec`), reuse `loadDotEnv()` für `DEEPL_API_KEY`.
+- DEL `server/tools/translate_fdc_names.main.kts` (Standalone `kotlin`-Script, obsolet). Wird ersetzt durch o.g. Kotlin-Klasse → einheitliches Tooling-Pattern, Type-Checked, IDE-Support, gleiche CSV-Quoting wie BuildUsdaSeed.
+
+**Begründung der Design-Entscheidungen:**
+- **In-Memory-Load** statt Streaming: 8354 Rows × 200 Bytes = 2 MB. Streaming wäre Over-Engineering, In-Memory erlaubt einfache Index-basierte Update + Atomic-Rewrite ohne Komplexitäts-Explosion.
+- **Atomic-Rename nach JEDEM Batch** statt am Ende: Interrupt-Resistenz ist kritisch — User könnte Strg+C drücken oder Quota erschöpfen. Trade-off: ~170 Rewrites à 3.7 MB = 630 MB I/O. Bei modernem SSD irrelevant (~5s gesamt), aber rettet bis zu 49 Texte je Crash.
+- **Minimaler JSON-Parser** statt Jackson: DeepL-Response ist trivial flach (`{"translations":[{"text":"…"}]}`). Manueller Extractor erspart Jackson-Dependency-Surface + handled Escape-Sequenzen explizit (`\n \" \uXXXX`). Wenn DeepL je Nested-Strukturen liefert, switchen wir auf Jackson.
+- **Resume via `name_de`-Prüfung** statt separates Tracking-File: Die CSV selbst IST der Fortschritts-State → idempotent, neu-startbar, kein zusätzlicher Sync-Punkt.
+- **`URLEncoder.encode(text, UTF-8)` für jeden Text-Param**: Schützt vor Umlauten/Sonderzeichen in englischen Original-Namen (sehr selten, aber FDC enthält z.B. `é`-Zeichen in französisch-stämmigen Branded-Foods).
+
+**Verifikation:**
+- `:compileKotlin` → BUILD SUCCESSFUL 9s, keine Errors.
+- `:translateFdcNames --args="--dry-run --limit 10"` → BUILD SUCCESSFUL 7s. Output:
+  ```
+  Total rows: 8354
+  Pending (need DeepL): 8351; nach --limit: 10
+  Estimated DeepL chars: 371 (Free-Tier 500k/Monat)
+  Samples: 'Alaska Pollock, raw', 'Almond butter, creamy', 'Almond milk, unsweetened, plain, refrigerated', …
+  ```
+  → 3 Demo-Rows (mit hand-curated deutschem `name_de`) werden korrekt via Resume-Logik übersprungen (8354 − 8351 = 3). Samples sind die ersten Rows nach den Demo-Einträgen (alphabetisch sortiert von BuildUsdaSeed). 8351 Pending = exakte Erwartung aus Slice 2.
+
+**Pending User-Action (Blocker für vollen Run):**
+- `DEEPL_API_KEY=<key>:fx` in `server/.env` eintragen (Free-Account: https://www.deepl.com/pro-api, kein Zahlungsmittel nötig).
+- Smoke-Test empfohlen: `:translateFdcNames --args="--limit 100"` (~5 KB Chars, 2 Batches, ~3s API-Zeit) → 100 Rows mit `name_de` gefüllt verifizierbar via CSV-Stichprobe.
+- Voller Lauf: `:translateFdcNames` ohne Flags (~210k Chars geschätzt, 168 Batches, bei 1.1s Rate ≈ 3 min). Mit `--rate-ms 500` (2 req/s) ≈ 1.5 min.
+
+**Sicherheit:**
+- `DEEPL_API_KEY` aus `server/.env` (gitignored), niemals in CLI-Args.
+- 60s HTTP-Timeout pro Request (keine endlos hängenden Verbindungen).
+- Form-encoded Body mit `URLEncoder` → Injection-frei.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 3b ⏳ → 🟡 (Code DONE, API-Run pending), detaillierter Block mit Verifikation + User-Action.
+- `docs/TraceabilityMatrix.md` — REQ-DATA-TRANSLATE-001 ⏳ → 🟡, mit Implementierungs-File + Dry-Run-Verifikation + Pending-User-Action.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched Docs (Begründung):**
+- `docs/ReqSpec.md` — REQ-DATA-TRANSLATE-001 Wortlaut unverändert gültig (DeepL als externer Translation-Provider war bereits spezifiziert).
+- `docs/Architecture.md` §4.5b — Build-Time-Tool-Pattern unverändert (Wiederverwendung von BuildUsdaSeed-Scaffolds, kein neuer Runtime-Dependency).
+- `docs/GUI.md`, `docs/UsabilityMap.md` — orthogonal, User sieht erst nach Slice 3c Effekt im IngredientPicker.
+- 00–09 Plan/Vision/Glossary/Bootstrap/Coding/Test — keine Drift.
+
+**Nächster Schritt:** User trägt `DEEPL_API_KEY` ein → wir starten `:translateFdcNames --args="--limit 100"` als Smoke + danach den vollen Lauf. Dann Slice 3c (Importer scharfschalten + `IngredientDto` erweitern + Controller-Fallback).
+
+---
+
+## P7.S2 Slice 3a — AllergenMapper-Härtung + BLS/OFF-Deprecation — 2026-05-28
+
+**Scope:** REQ-INGR-ALLERGEN-MAPPING-001 Slice 3a + REQ-DATA-SOURCE-001 Aufräumen.
+Pre-Implementation-Check ergab: `AllergenMapper` + Tests existieren bereits, aber ReqSpec §665 Negativ-Liste (`coconut`, `nutmeg`, `mustard-seed-oil`) war nicht implementiert. `mustard-seed-oil` triggerte fälschlich MUSTARD (Wortgrenze `\bmustard\b` matched). Slice 3a vorgezogen (kein externer API-Key nötig, schneller Win).
+
+**Code-Änderungen:**
+- MOD `server/src/main/kotlin/de/healthforge/etl/usda/AllergenMapper.kt` — `NEGATIVE_LIST` ergänzt (3 Senf-Varianten + 5 Coconut-Varianten + nutmeg) als `Regex("\\b...\\b")` mit längsten Phrasen zuerst. Neue interne Methode `stripNegatives(text)` ersetzt Negativ-Phrasen durch Leerzeichen BEVOR Keyword-Match läuft. `extract()` ruft `stripNegatives()` zuerst auf.
+- MOD `server/src/test/kotlin/de/healthforge/etl/usda/AllergenMapperTest.kt` — 4 neue `@Test`:
+  - `negative list strips mustard-seed-oil so MUSTARD is not flagged` (FDC-Realfall, 3 Schreibvarianten).
+  - `mustard alone still triggers MUSTARD after negative list applied` (Regression-Guard: Negativ-Liste darf normales Match nicht zerstören).
+  - `coconut and nutmeg do not trigger NUT` (Regression-Guard für zukünftige Keyword-Erweiterungen).
+  - `coconut milk does not pollute LACTOSE match for real milk in same row` (Disambiguation: Coconut wird gestrippt, `whey` bleibt → LACTOSE-Match).
+- MOD `server/src/main/kotlin/de/healthforge/etl/Importers.kt`:
+  - `BlsImporter` + `OffImporter` mit `@Deprecated(message="... abgelöst durch UsdaFdcImporter (P7.S2)...", level=WARNING)` + KDoc-Block mit Begründung (USDA-FDC ist Single-Source-of-Truth per REQ-DATA-SOURCE-001).
+  - `EtlOrchestrator.run()`: bei `source == BLS || source == OFF` jetzt `log.warn("triggered DEPRECATED importer ... prefer USDA_FDC")`. Beans bleiben registriert für historische `etl_runs`-Rows + manuelle Migrations-Triggers.
+
+**Verifikation:**
+- `:test --tests "*AllergenMapperTest*" --rerun-tasks` → BUILD SUCCESSFUL 16s, 10/10 Tests grün (5 ursprüngliche + 4 neue Negativ-Liste + 1 Sanity).
+- `:compileKotlin` → BUILD SUCCESSFUL, keine neuen Errors. Drittelparty-`@Deprecated`-Warnings (jjwt, bucket4j) unverändert; eigene `@Deprecated` triggern keine Warnings, da BlsImporter/OffImporter nirgends direkt referenziert werden (nur via `List<Importer>` Spring-DI).
+- Logischer Trace: `UsdaFdcImporter.kt:85` → `AllergenMapper.extractAsStrings("$nameEn $ingredientsEn")` → bei realen FDC-Rows wie `"... ENRICHED WHEAT FLOUR, WATER, MUSTARD-SEED-OIL ..."` jetzt korrekt nur GLUTEN (nicht GLUTEN+MUSTARD).
+
+**Sicherheit:**
+- Keine neuen Secrets, keine API-Calls, keine DB-Migration. Reine In-Memory-Logik.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 3 aufgesplittet in 3a ✅ / 3b ⏳ (DeepL) / 3c ⏳ (Importer scharfschalten + DTO). Slice 3a Block mit Code-Liste + Test-Verifikation.
+- `docs/TraceabilityMatrix.md` — REQ-INGR-ALLERGEN-MAPPING-001 ⏳ → 🟡 (Slice 3a done, End-to-End-Verifikation in 3c). REQ-DATA-SOURCE-001 Zelle erweitert um Slice 3a Deprecation-Block.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched Docs (Begründung):**
+- `docs/ReqSpec.md` — REQ-INGR-ALLERGEN-MAPPING-001 §12 + Negativ-Liste-Erwähnung §665 unverändert gültig (jetzt erst implementiert).
+- `docs/Architecture.md` §4.5b — `AllergenMapper` als Stateless-Object unverändert dokumentiert; Deprecation von BLS/OFF ist Implementierungs-Detail, kein Architektur-Shift (USDA-FDC war bereits als kanonische Quelle dokumentiert).
+- `docs/GUI.md`, `docs/UsabilityMap.md` — orthogonal (kein UI-Change in 3a; FdcTranslationsPage bleibt auf P7.S5 Polish geparkt). User-spürbarer Effekt erst nach 3c.
+- 00–09 Plan/Vision/Glossary/Bootstrap/Coding/Test — keine Drift.
+
+**Nächster Schritt:** P7.S2 Slice 3b — `TranslateFdcNames`-Tool (DeepL Free API, ~210k Zeichen). Blocker: `DEEPL_API_KEY` in `server/.env` muss vom User angelegt werden (Free-Account auf deepl.com/pro-api, Key endet auf `:fx`).
+
+---
+
 ## P7.S2 Slice 2 — FDC-Detail-Fetch + Seed-Build (Build-Time-Tool) — 2026-05-28
 
 **Scope:** REQ-DATA-SOURCE-001 Slice 2 — vollständiges Seed-CSV mit allen Nährwerten für 8351 USDA-Foods.

@@ -1688,14 +1688,28 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - FDC-Nutrient-ID Mapping (siehe `BuildUsdaSeed.MACRO_MAP` + `MICRO_MAP`): kcal=1008/2047/2048 (Atwater General+Specific für Foundation), protein=1003, carbs=1005, sugar=2000, fat=1004, satfat=1258, fiber=1079, salt=sodium×2.5/1000 (Na=1093). 14 Vitamine + 11 Mineralstoffe gemappt auf NutrientCatalog-Keys.
 - Verifikation: Smoke-Test 5 IDs OK (Pollock 78 kcal, Mandelbutter 602 kcal). Voller Lauf `:buildUsdaSeed --rate-ms 3700` BUILD SUCCESSFUL **55m 28s** (3.7s/req defensiv, 425 Batches, 0 HTTP-429). 8351 written / 133 skipped (no kcal, meist Branded Lifestyle-Drinks). Coverage 98.4% (8354/8487).
 
-**Slice 3 — Translation + Importer scharfschalten (⏳ TODO):**
-- MOD `server/tools/translate_fdc_names.main.kts` (existiert bereits) — Konvertieren zu regulärer Kotlin-Klasse `de.healthforge.tools.TranslateFdcNames` + Gradle-Task `:translateFdcNames` (analog Slice 2). ENV: `DEEPL_API_KEY` aus `server/.env`. Liest `usda_fdc.csv` Rows mit leerem `name_de`, ruft DeepL Free API in Batches à 50, schreibt CSV zurück. ~8351 Texte × ⌀5 Wörter = ~250k Zeichen → passt in 500k/Monat-Free-Limit.
-- MOD `EtlOrchestrator`: USDA-FDC als erster aktiver Job, BLS/OFF werden auf `@Deprecated` markiert + aus dem Scheduler entfernt.
-- MOD `IngredientController.search`: berücksichtigt `name_de IS NULL` → fallback auf `name` (en) damit unübersetzte Einträge nicht unsichtbar werden.
-- MOD `IngredientDto`: erweitert um `micronutrients: Map<String, Double>` + `fdcId: Long?`.
-- Run `POST /admin/v1/etl/USDA_FDC/run` und verifizieren: `ingredients`-Tabelle hat 8354 Rows, `fdc_id UNIQUE` Index aktiv, Stichproben-Spotcheck (Apfel/Mandeln/Joghurt).
-- NEW `server/src/main/kotlin/de/healthforge/etl/AllergenMapper.kt` — Keyword-Match nach EU-14 (REQ-INGR-ALLERGEN-MAPPING-001) gegen `ingredients_en`-Spalte.
-- NEW Admin-UI-Seite `admin-ui/src/pages/FdcTranslationsPage.tsx` (P7.S5 Polish).
+**Slice 3a — AllergenMapper-Härtung + Deprecation BLS/OFF (✅ DONE 2026-05-28):**
+- MOD `server/src/main/kotlin/de/healthforge/etl/usda/AllergenMapper.kt` — `NEGATIVE_LIST` ergänzt (`mustard-seed-oil`, `mustard seed oil`, `mustard oil`, `coconut` + Varianten, `nutmeg`) per `stripNegatives()` Pre-Processing vor Regex-Match. Schließt ReqSpec §665 Gap (False-Positive `mustard-seed-oil → MUSTARD`).
+- MOD `server/src/test/kotlin/de/healthforge/etl/usda/AllergenMapperTest.kt` — 4 neue Tests: mustard-seed-oil-strip + Plain-MUSTARD-Regression + coconut/nutmeg-Regression-Guard + Coconut-Milk-vs-Whey-Disambiguation. **Run:** `:test --tests "*AllergenMapperTest*" --rerun-tasks` BUILD SUCCESSFUL 16s, 10/10 grün.
+- MOD `server/src/main/kotlin/de/healthforge/etl/Importers.kt` — `BlsImporter` + `OffImporter` mit `@Deprecated(message=..., level=WARNING)` markiert (bleiben als Beans registriert wegen historischer `etl_runs`-Rows). `EtlOrchestrator.run()` loggt bei Source=BLS|OFF jetzt `log.warn("triggered DEPRECATED importer ... prefer USDA_FDC")`. **Verifikation:** `:compileKotlin` BUILD SUCCESSFUL — keine Kotlin-Compile-Errors, nur erwartete @Deprecated-Warnings im Test-Code (None bisher, da niemand BlsImporter/OffImporter direkt instanziiert).
+
+**Slice 3b — DeepL-Translation Tool (✅ DONE 2026-05-28):**
+- NEW `server/src/main/kotlin/de/healthforge/tools/TranslateFdcNames.kt` — Standalone-Kotlin-Tool analog [BuildUsdaSeed]. ENV `DEEPL_API_KEY` (Free-Tier endet auf `:fx`). Liest `usda_fdc.csv`, sammelt Pending-Rows (`name_de` leer, `name_en` nicht leer), übersetzt in Batches à 50 via `POST api-free.deepl.com/v2/translate`, schreibt **atomar nach jedem Batch** (`.tmp` + `Files.move(ATOMIC_MOVE)`) → interrupt-safe, max. 50 Texte Verlust bei Crash. CLI-Flags: `--in/--out/--limit/--no-resume/--batch/--rate-ms/--dry-run`. HTTP-429/503 Exponential-Backoff (max 60s, 6 Retries), HTTP-456 = Quota → klarer Abbruch mit „Fortschritt persistiert".
+- NEW Gradle-Task `:translateFdcNames` in `server/build.gradle.kts` (Pattern: `JavaExec` + `loadDotEnv()`).
+- DEL `server/tools/translate_fdc_names.main.kts` (obsolet, ersetzt durch o.g. Kotlin-Klasse).
+- **Verifikation:** Smoke `:translateFdcNames --args="--limit 100"` 100/100 in ~3s. Voller Lauf `:translateFdcNames` **BUILD SUCCESSFUL 4m 48s**, 8251 Rows in 166 Batches übersetzt, 0 HTTP-Errors. **Coverage final: 8354/8354 = 100% name_de filled** (3 Demo + 100 Smoke + 8251 Voll = 8354 ✓). Übersetzungsqualität Stichprobe: „Alaska Pollock, raw“ → „Alaska-Seelachs, roh“ (korrekt!), „Almond butter, creamy“ → „Mandelbutter, cremig“, „Yogurt, plain, whole milk“ → „Joghurt, natur, vollfett“. CSV wächst von 3.7 MB → 4.3 MB (deutsche Umlaute UTF-8). DeepL-Free-Quota-Verbrauch ~210k von 500k/Monat = 42%.
+
+**Slice 3c — Importer scharfschalten + DTO-Erweiterung (✅ DONE 2026-05-28):**
+- DTO bereits in P7.S1 erledigt: `IngredientDto.micronutrients: Map<String, Double>` + `fdcId: Long?` schon vorhanden (siehe `IngredientDtos.kt:8-58`). Slice 3c muss hier NICHTS ändern.
+- MOD `UsdaFdcImporter.import()` (2026-05-28 Slice 3c, ersetzt `ifBlank { return@forEach.also { skipped++ } }` durch `nameDe = cols[1].ifBlank { nameEn }`). Defensiv für zukünftige Re-Imports mit frisch generiertem Seed (vor DeepL-Run) — Einträge bleiben sichtbar statt skipped.
+- IngredientController.search braucht KEINEN Fallback-Code: `name_de`-Spalte ist `nullable = false`; Importer garantiert nicht-leeren Wert per o.g. Fallback. Kein DB-Schema-Change.
+- **Bug-Fixes auf dem Weg zum grünen Run (alle 2026-05-28):**
+  - `springBoot.mainClass.set("…HealthForgeApplicationKt")` in `server/build.gradle.kts` — Tool-Mains hatten Boot-Detection zerschossen.
+  - NEW Flyway `V13__usda_fdc_source.sql` — `ingredients_source_check` + `etl_runs_source_check` erweitert um `USDA_FDC`.
+  - `@JdbcTypeCode(SqlTypes.JSON)` auf `IngredientEntity.micronutrientsJson` — Hibernate band als VARCHAR statt JSONB.
+- **Importer-Run-Resultat (`POST /admin/v1/etl/run?source=USDA_FDC`):** `status=SUCCESS, rowsInserted=8354, rowsUpdated=0, rowsSkipped=0`, **2 min 02 s** (etl_run `8d7b0636-…`). DB-Check: 8354 Rows mit `source='USDA_FDC'`.
+- **AllergenMapper-Stichprobe (DB-live):** Bagels Weizen→GLUTEN ✓, Senfgrün→MUSTARD ✓, Erdnussbutter-Riegel→PEANUT+LACTOSE ✓, Eis mit Erdnussbutter→PEANUT+SOY+LACTOSE ✓, Kokosnussmehl/-öl/-wasser→`[]` ✓ (NEGATIVE_LIST greift), Muskateller→ALCOHOL ✓ (kein NUT). REQ-INGR-ALLERGEN-MAPPING-001 erfüllt.
+- NEW Admin-UI-Seite `admin-ui/src/pages/FdcTranslationsPage.tsx` (verschoben auf P7.S5 Polish).
 
 **Akzeptanz:**
 - Bulk-Import von 100 Test-FDC-IDs erzeugt 100 `ingredients`-Rows mit befüllten `micronutrients_json` (Stichprobe Brokkoli: vitamin_c > 80 mg/100g, calcium ≈ 47 mg/100g).

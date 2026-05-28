@@ -74,6 +74,7 @@ class IngredientEntity(
     var fodmapFlagsJson: String = "[]",
 
     @Column(name = "micronutrients_json", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     var micronutrientsJson: String = "{}",
 
     @Column(name = "fdc_id")

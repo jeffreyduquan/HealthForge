@@ -76,6 +76,7 @@ android-build*.txt
 emu-*.png
 build-log.txt
 boot-log.txt
+boot-log-*.txt
 compile-log.txt
 install-log.txt
 build-fdc*.log
@@ -91,6 +92,7 @@ admin-ui/tsconfig.tsbuildinfo
 
 # ============ P6 debug artefacts ============
 android_app/.kotlin/sessions/
+server/.kotlin/
 screenshot-*.png
 ui-*.xml
 screenshots/

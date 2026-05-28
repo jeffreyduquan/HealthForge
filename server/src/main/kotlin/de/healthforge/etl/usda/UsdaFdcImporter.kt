@@ -74,8 +74,13 @@ class UsdaFdcImporter(
 
                 val fdcId = cols[0].trim().toLongOrNull()
                     ?: run { skipped++; return@forEach }
-                val nameDe = cols[1].trim().ifBlank { return@forEach.also { skipped++ } }
+                // Slice 3c (2026-05-28): name_de fällt auf name_en zurück, falls leer.
+                // Voll-Lauf von TranslateFdcNames hat alle 8354 Rows befüllt, aber bei
+                // zukünftigen Importen mit frisch generiertem Seed (vor DeepL-Run) sollen
+                // Einträge sichtbar bleiben statt skipped — Slice 3b SprintPlan-Akzeptanz.
                 val nameEn = cols[2].trim()
+                val nameDe = cols[1].trim().ifBlank { nameEn }
+                if (nameDe.isBlank()) { skipped++; return@forEach } // beide leer → wirklich nichts
                 val brand = cols[3].trim().ifBlank { null }
                 val ingredientsEn = cols[4].trim()
 

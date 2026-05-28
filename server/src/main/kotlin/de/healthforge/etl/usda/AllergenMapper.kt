@@ -88,13 +88,35 @@ object AllergenMapper {
     }
 
     /**
+     * Negativ-Liste (REQ-INGR-ALLERGEN-MAPPING-001 / ReqSpec §12) — Phrasen, die
+     * aus dem Text entfernt werden BEVOR Keyword-Matching läuft. Verhindert
+     * False-Positives wie:
+     *  - `mustard-seed-oil` (hochraffiniert, kein EU-Allergen) → MUSTARD-Trigger.
+     *  - `coconut` / `coconut oil` (botanisch keine Baumnuss; FDA listet, EU nicht).
+     *  - `nutmeg` (Gewürz, keine Nuss).
+     *
+     * Reihenfolge: längere Phrasen zuerst, damit `mustard-seed-oil` vor `mustard`
+     * matched wird (sonst würde nur `mustard` ersetzt und `-seed-oil` bliebe stehen).
+     */
+    private val NEGATIVE_LIST: List<Regex> = listOf(
+        "mustard seed oil", "mustard-seed-oil", "mustard oil",
+        "coconut oil", "coconut milk", "coconut water", "coconut cream", "coconut",
+        "nutmeg",
+    ).map { Regex("\\b" + Regex.escape(it) + "\\b", RegexOption.IGNORE_CASE) }
+
+    /** Entfernt Negativ-Liste-Phrasen aus dem Text (case-insensitive, Wortgrenzen-stabil). */
+    internal fun stripNegatives(text: String): String =
+        NEGATIVE_LIST.fold(text) { acc, regex -> regex.replace(acc, " ") }
+
+    /**
      * Extrahiert alle Allergen-Codes aus dem gegebenen Freitext.
      * Reihenfolge entspricht der [Code]-Enum-Reihenfolge (deterministisch).
      */
     fun extract(text: String?): List<Code> {
         if (text.isNullOrBlank()) return emptyList()
+        val cleaned = stripNegatives(text)
         return COMPILED.mapNotNull { (code, regexes) ->
-            if (regexes.any { it.containsMatchIn(text) }) code else null
+            if (regexes.any { it.containsMatchIn(cleaned) }) code else null
         }
     }
 

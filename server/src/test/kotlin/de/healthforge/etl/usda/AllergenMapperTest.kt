@@ -41,4 +41,41 @@ class AllergenMapperTest {
         val names = codes.map { it.name }
         assertTrue("LACTOSE" in names && "HISTAMINE" in names)
     }
+
+    // --- Negativ-Liste (ReqSpec §12 REQ-INGR-ALLERGEN-MAPPING-001) ---
+
+    @Test
+    fun `negative list strips mustard-seed-oil so MUSTARD is not flagged`() {
+        // FDC-Realfall: hochraffiniertes Senfsaatöl ist kein EU-Allergen.
+        val codes = AllergenMapper.extract("WATER, MUSTARD-SEED-OIL, SALT.").map { it.name }
+        assertTrue("MUSTARD" !in codes) { "MUSTARD-SEED-OIL should not trigger MUSTARD, got $codes" }
+
+        // Variante mit Leerzeichen + Bindestrich-Mix.
+        assertTrue("MUSTARD" !in AllergenMapper.extract("mustard seed oil emulsion").map { it.name })
+        assertTrue("MUSTARD" !in AllergenMapper.extract("contains mustard oil").map { it.name })
+    }
+
+    @Test
+    fun `mustard alone still triggers MUSTARD after negative list applied`() {
+        // Sanity: Negativ-Liste darf das normale Match nicht zerstören.
+        val codes = AllergenMapper.extract("WATER, MUSTARD, VINEGAR.").map { it.name }
+        assertTrue("MUSTARD" in codes) { "Plain MUSTARD should still flag, got $codes" }
+    }
+
+    @Test
+    fun `coconut and nutmeg do not trigger NUT (already safe, regression guard)`() {
+        // Beide standen historisch auf der Negativ-Liste in ReqSpec §665; aktuelle
+        // NUT-Keywords matchen sie zwar ohnehin nicht, aber Test sichert ab gegen
+        // zukünftige Keyword-Erweiterungen (z.B. wenn jemand "nut" naiv ergänzt).
+        assertTrue("NUT" !in AllergenMapper.extract("coconut flakes").map { it.name })
+        assertTrue("NUT" !in AllergenMapper.extract("coconut oil base").map { it.name })
+        assertTrue("NUT" !in AllergenMapper.extract("nutmeg spice").map { it.name })
+    }
+
+    @Test
+    fun `coconut milk does not pollute LACTOSE match for real milk in same row`() {
+        // Realfall: "Coconut milk, whey powder" — Coconut wird gestrippt, whey bleibt.
+        val codes = AllergenMapper.extract("COCONUT MILK, WHEY POWDER.").map { it.name }
+        assertTrue("LACTOSE" in codes) { "WHEY should still trigger LACTOSE, got $codes" }
+    }
 }

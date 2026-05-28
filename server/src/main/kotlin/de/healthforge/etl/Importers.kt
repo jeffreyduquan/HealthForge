@@ -54,7 +54,16 @@ private fun classpathReader(path: String): BufferedReader? = try {
  *
  * Until a licensed seed file is placed at `resources/seed/bls.csv`, this importer
  * returns [Counts.skipped]. The licensing constraints are documented in P1.S4 backlog.
+ *
+ * @deprecated P7.S2 Slice 3a (2026-05-28) — Superseded by [de.healthforge.etl.usda.UsdaFdcImporter]
+ *   als kanonischem Lebensmittel-Korpus (REQ-DATA-SOURCE-001). BLS bleibt aus
+ *   Lizenzgründen ungenutzt; Bean bleibt registriert für historische `etl_runs`-Rows.
+ *   Manuelle `POST /admin/v1/etl/run?source=BLS` Triggers loggen eine Warnung im Orchestrator.
  */
+@Deprecated(
+    message = "BLS-Importer wird durch UsdaFdcImporter abgelöst (P7.S2). Nicht für neuen Code verwenden.",
+    level = DeprecationLevel.WARNING,
+)
 @Component
 class BlsImporter(private val ingredients: IngredientRepository) : Importer {
     override val source = EtlSource.BLS
@@ -138,7 +147,15 @@ class SighiImporter(private val ingredients: IngredientRepository) : Importer {
  *
  * Expected CSV columns:
  *   code;product_name;brands;energy_kcal_100g;proteins_100g;carbohydrates_100g;sugars_100g;fat_100g;saturated_fat_100g;fiber_100g;salt_100g
+ *
+ * @deprecated P7.S2 Slice 3a (2026-05-28) — Superseded by [de.healthforge.etl.usda.UsdaFdcImporter].
+ *   OFF-Datenqualität ist heterogen (Crowdsourced, fehlende Mikros); USDA-FDC ist die kuratierte
+ *   Single-Source-of-Truth (REQ-DATA-SOURCE-001). Bean bleibt registriert für historische `etl_runs`.
  */
+@Deprecated(
+    message = "OFF-Importer wird durch UsdaFdcImporter abgelöst (P7.S2). Nicht für neuen Code verwenden.",
+    level = DeprecationLevel.WARNING,
+)
 @Component
 class OffImporter(private val ingredients: IngredientRepository) : Importer {
     override val source = EtlSource.OFF
@@ -197,6 +214,11 @@ class EtlOrchestrator(
 
     fun run(source: EtlSource, triggeredBy: UUID? = null): EtlRunEntity {
         val importer = byName[source] ?: error("No importer registered for $source")
+        if (source == EtlSource.BLS || source == EtlSource.OFF) {
+            // P7.S2 Slice 3a: BLS+OFF sind @Deprecated zugunsten USDA_FDC. Trigger werden
+            // zugelassen (für Migrations-/Audit-Zwecke) aber im Log markiert.
+            log.warn("ETL: triggered DEPRECATED importer source={} — prefer USDA_FDC (REQ-DATA-SOURCE-001)", source)
+        }
         val run = runs.save(EtlRunEntity(source = source, triggeredBy = triggeredBy))
         try {
             val counts = importer.import()

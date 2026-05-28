@@ -92,6 +92,12 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+// Pin main class for Spring Boot. P7.S2 added several JvmStatic `main` tool entrypoints
+// (FetchFdcTopIds, BuildUsdaSeed, TranslateFdcNames) that confuse Boot's auto-detection.
+springBoot {
+    mainClass.set("de.healthforge.HealthForgeApplicationKt")
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     // LOCKED Q10 reopen: Smoke tests enabled (only AuthIT). Use `gradle test` to run.
@@ -136,6 +142,15 @@ tasks.register<JavaExec>("buildUsdaSeed") {
     description = "P7.S2 Slice 2: Liest fdc_top_ids.csv, holt Nährwerte je ID (Batch=20) von FDC, schreibt seed/usda_fdc.csv."
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("de.healthforge.tools.BuildUsdaSeed")
+    workingDir = project.projectDir
+    environment(loadDotEnv())
+}
+
+tasks.register<JavaExec>("translateFdcNames") {
+    group = "tools"
+    description = "P7.S2 Slice 3b: Übersetzt name_en → name_de via DeepL Free API (in-place, atomic-rename). ENV: DEEPL_API_KEY."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.tools.TranslateFdcNames")
     workingDir = project.projectDir
     environment(loadDotEnv())
 }
