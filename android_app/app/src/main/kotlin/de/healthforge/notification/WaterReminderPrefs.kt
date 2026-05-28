@@ -47,12 +47,24 @@ class WaterReminderPrefs @Inject constructor(
             prefs.edit().putInt(KEY_DEFICIT_THRESHOLD_ML, value.coerceIn(50, 1000)).apply()
         }
 
+    /**
+     * P7.S4 Slice 4c.1 — aktueller Eskalations-Level (0..3).
+     * 0 = Basis-Tick (`checkIntervalMin`); 1..3 = beschleunigte Ticks (15/10/5 min).
+     * Wird nach jedem Notify-Tick hochgezählt und beim ersten Tick ohne Defizit auf 0 zurückgesetzt.
+     */
+    var escalationLevel: Int
+        get() = prefs.getInt(KEY_ESCALATION_LEVEL, 0)
+        set(value) {
+            prefs.edit().putInt(KEY_ESCALATION_LEVEL, value.coerceIn(0, ESCALATION_INTERVALS_MIN.size)).apply()
+        }
+
     companion object {
         private const val PREFS_NAME = "hf_water_reminder"
         private const val KEY_ENABLED = "enabled"
         private const val KEY_INTERVAL_HOURS = "interval_hours"
         private const val KEY_CHECK_INTERVAL_MIN = "check_interval_min"
         private const val KEY_DEFICIT_THRESHOLD_ML = "deficit_threshold_ml"
+        private const val KEY_ESCALATION_LEVEL = "escalation_level"
         const val DEFAULT_INTERVAL_HOURS = 2
         const val MIN_INTERVAL_HOURS = 1
         const val MAX_INTERVAL_HOURS = 6
@@ -60,6 +72,8 @@ class WaterReminderPrefs @Inject constructor(
         const val MIN_CHECK_INTERVAL_MIN = 15
         const val MAX_CHECK_INTERVAL_MIN = 120
         const val DEFAULT_DEFICIT_THRESHOLD_ML = 200
+        /** P7.S4 Slice 4c.1 — Eskalationsstufen in Minuten (Level 1..N). Level 0 nutzt `checkIntervalMin`. */
+        val ESCALATION_INTERVALS_MIN: IntArray = intArrayOf(15, 10, 5)
         /** Aktives Reminder-Fenster: 08:00–22:00 lokal. */
         const val ACTIVE_HOUR_START = 8
         const val ACTIVE_HOUR_END = 22

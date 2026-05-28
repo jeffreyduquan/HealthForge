@@ -37,7 +37,8 @@ class WaterReminderScheduler @Inject constructor(
     fun nextTriggerAt(now: LocalDateTime = LocalDateTime.now()): Long? {
         if (!prefs.enabled) return null
         val zone = ZoneId.systemDefault()
-        var candidate = now.plusMinutes(prefs.checkIntervalMin.toLong()).withSecond(0).withNano(0)
+        val intervalMin = currentIntervalMin()
+        var candidate = now.plusMinutes(intervalMin.toLong()).withSecond(0).withNano(0)
         // Außerhalb des aktiven Fensters → auf nächstes 08:00 verschieben.
         if (candidate.hour >= WaterReminderPrefs.ACTIVE_HOUR_END) {
             candidate = candidate.plusDays(1)
@@ -64,6 +65,20 @@ class WaterReminderScheduler @Inject constructor(
 
     fun cancel() {
         am?.cancel(pendingIntent())
+    }
+
+    /**
+     * P7.S4 Slice 4c.1 — aktuelles Intervall in Minuten basierend auf Eskalations-Level.
+     * Level 0 → `prefs.checkIntervalMin` (Basis). Level 1..N → `ESCALATION_INTERVALS_MIN[level-1]`.
+     */
+    internal fun currentIntervalMin(): Int {
+        val level = prefs.escalationLevel
+        return if (level <= 0) {
+            prefs.checkIntervalMin
+        } else {
+            val idx = (level - 1).coerceAtMost(WaterReminderPrefs.ESCALATION_INTERVALS_MIN.lastIndex)
+            WaterReminderPrefs.ESCALATION_INTERVALS_MIN[idx]
+        }
     }
 
     private fun pendingIntent(): PendingIntent {

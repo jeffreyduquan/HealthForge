@@ -175,6 +175,12 @@ class AlarmReceiver : BroadcastReceiver() {
                 val deficitMl = (expectedMl - actualMl).coerceAtLeast(0)
                 if (deficitMl >= waterPrefs.deficitThresholdMl) {
                     postWaterNotification(context, deficitMl, goalMl)
+                    // Slice 4c.1: Eskalation hochzählen (cap N).
+                    waterPrefs.escalationLevel = (waterPrefs.escalationLevel + 1)
+                        .coerceAtMost(WaterReminderPrefs.ESCALATION_INTERVALS_MIN.size)
+                } else {
+                    // Kein Defizit → Eskalation zurücksetzen, Basis-Intervall.
+                    waterPrefs.escalationLevel = 0
                 }
                 // Chain: nächsten Tick einplanen.
                 waterScheduler.schedule()

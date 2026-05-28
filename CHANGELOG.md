@@ -9,6 +9,12 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 **Scope:** Ersetzt den festen 2h-Tick-Reminder durch einen Defizit-Check (REQ-WATER-005 / REQ-HOME-WATER-ALARM-001). Nutzer-Quote: *"wir brauchen nur ein alarmsystem"* + *"Profil Werte sind ground trough. Alle funktionen lesen den wert von hier ab"*.
 
+**Slice 4c.1-Ergänzung (gleicher Commit-Zyklus):** Eskalation 30→15→10→5 min.
+- MOD `WaterReminderPrefs.kt`: NEUES Feld `escalationLevel` (0..3) + `ESCALATION_INTERVALS_MIN = [15,10,5]`.
+- MOD `WaterReminderScheduler.kt`: NEUE `currentIntervalMin()` — Level 0 → `checkIntervalMin`; Level 1..3 → 15/10/5 min.
+- MOD `AlarmReceiver.handleWaterFire`: Nach Defizit-Eval Level++ (cap 3) bei Notify; Level=0 bei kein-Defizit. Reset passiert automatisch beim ersten "Catch-up"-Tick.
+
+
 **Architektur:**
 - WaterReminderScheduler tickt jetzt alle `prefs.checkIntervalMin` Minuten (default 30, range 15..120) statt fester Stunden.
 - AlarmReceiver.handleWaterFire berechnet bei jedem Tick:
