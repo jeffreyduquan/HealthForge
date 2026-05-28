@@ -1761,7 +1761,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
 
 ### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
-**Status:** 🟡 IN PROGRESS (Slice 4a ✅ 2026-05-28; Slice 4b + 4c offen)
+**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4b ✅ — beide 2026-05-28; Slice 4c offen)
 
 **Slice 4a — Profile-Refactor (✅ DONE 2026-05-28):**
 - NEW `presentation/profile/components/NutrientGoalRow.kt` — Zeile: Label + Default (read-only, klein) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (`Icons.Outlined.RestartAlt`). Override-Range clamped in `nutrient.min..nutrient.max`.
@@ -1771,10 +1771,13 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - **Hinweis Room:** kein Schema-Bump nötig — DB ist seit P7.S1 auf v8, `waterGoalMl` + `dailyNutrientGoalsJson` + `meal_plan_slot.waterGoalMl` existieren bereits. P7-Spec sagte „v7→v8" — das ist hier prospektiv eingerechnet.
 - **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors.
 
-**Slice 4b — Plan-Water-Goal-Slider pro Tag (⏳ TODO):**
-- MOD `presentation/plan/PlanScreen.kt`: pro Tages-Header optionaler Slider 500–5000 ml in 50-ml-Schritten, NULL = Profil-Default.
-- DB bereits da (`MealPlanSlotEntity.waterGoalMl: Int?`, P7.S1).
-- Home: `HomeViewModel` liest `effective_water_goal = plan_slot_value ?? profile_value` für Heute.
+**Slice 4b — Plan-Water-Goal-Slider pro Tag (✅ DONE 2026-05-28):**
+- MOD `data/db/dao/MealPlanDao.kt`: NEW `updateWaterGoalForDay(day, v): Int` — setzt waterGoalMl für alle Slots des Tages auf denselben Wert (Single-Source-of-Truth-Konvention pro Tag).
+- MOD `data/repository/MealPlanRepository.kt`: NEW `setWaterGoalForDay(day, value): Int` (no-op wenn 0 Slots).
+- MOD `presentation/plan/PlanViewModel.kt`: INJECT `ProfileRepository` + `ComputeNutrientTargetsUseCase`. NEW `profileWaterFlow`. EXPAND `PlanUiState` um `effectiveWaterGoalMl`/`profileWaterDefaultMl`/`hasWaterGoalOverride`. NEW `setWaterGoalForDay(value)` + `resetWaterGoalForDay()`.
+- MOD `presentation/plan/PlanScreen.kt`: NEW `DayWaterGoalSlider` (Material3-Slider 500–5000 ml, 50-ml-Snap-Grid, Commit nur auf Release via `onValueChangeFinished`), eingefügt im LazyColumn zwischen `DayHeader` und `DaySummary`. Reset-Icon (RestartAlt) bei aktivem Override. Beschriftung wechselt zwischen "Profil-Default — …" und "Override für diesen Tag (Profil-Default: X ml)".
+- MOD `presentation/home/HomeViewModel.kt`: INJECT `MealPlanRepository`. `targetsFlow` jetzt `combine(profileTargets, planSlotOverride)` — `slots.firstOrNull()?.waterGoalMl ?? profileTargets.waterMl` fließt kanonisch in `targets.waterMl`.
+- **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 14s; End-to-End-Smoke auf Pixel_7_API_35: 2000 ml Default → Drag → 2950 ml + Override-Label → Home zeigt "600 / 2950 ml" → Reset-Icon → zurück auf 2000 ml + Default-Label. ✅
 
 **Slice 4c — WaterDeficitScheduler (⏳ TODO, größter Slice):**
 - NEW `notification/WaterDeficitScheduler.kt` — ersetzt `WaterReminderScheduler`. AlarmManager-Eskalation 30→15→10→5 min, 5-min Debounce nach Slider-Drag, Snooze +30 min (max 2×), hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
@@ -1783,7 +1786,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 
 **Akzeptanz (gesamtsprintweit):**
 - Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn. (Slice 4a ✅)
-- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag. (Slice 4b)
+- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag. (Slice 4b ✅)
 - Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm. (Slice 4c)
 - Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect. (Slice 4c)
 - 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu. (Slice 4c)

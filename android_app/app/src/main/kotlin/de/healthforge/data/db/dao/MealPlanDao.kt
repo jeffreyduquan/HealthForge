@@ -38,6 +38,14 @@ interface MealPlanDao {
     @Update
     suspend fun updateSlot(slot: MealPlanSlotEntity)
 
+    /**
+     * P7.S4 / REQ-PLAN-WATER-GOAL-001 — setzt `waterGoalMl` für ALLE Slots des Tages.
+     * Konvention: jeder Slot des Tages trägt denselben Override-Wert (Single-Source-of-Truth
+     * pro Tag). `null` löscht den Override (Profil-Default greift wieder).
+     */
+    @Query("UPDATE meal_plan_slot SET waterGoalMl = :v WHERE dayDateIso = :day")
+    suspend fun updateWaterGoalForDay(day: String, v: Int?): Int
+
     @Query("DELETE FROM meal_plan_slot WHERE id = :id")
     suspend fun deleteSlotById(id: Long)
 

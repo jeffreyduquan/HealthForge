@@ -28,12 +28,14 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -166,6 +168,15 @@ fun PlanScreen(
                 ) {
                     item {
                         DayHeader(date = state.selectedDay)
+                    }
+                    item {
+                        DayWaterGoalSlider(
+                            effectiveMl = state.effectiveWaterGoalMl,
+                            profileDefaultMl = state.profileWaterDefaultMl,
+                            isOverride = state.hasWaterGoalOverride,
+                            onCommit = { v -> vm.setWaterGoalForDay(v) },
+                            onReset = { vm.resetWaterGoalForDay() },
+                        )
                     }
                     item {
                         DaySummary(slots = state.slots)
@@ -452,6 +463,76 @@ private fun DaySummary(slots: List<SlotWithItems>) {
         color = hm.fgSecondary,
         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
     )
+}
+
+/**
+ * P7.S4 / REQ-PLAN-WATER-GOAL-001 — Tages-Wasserziel-Slider im PlanScreen.
+ *
+ * - Range: 500…5000 ml, Step: 50 ml.
+ * - `effectiveMl` = aktueller Wert (Override falls vorhanden, sonst Profil-Default).
+ * - `isOverride=true` zeigt ein Reset-Icon, das den Override löscht.
+ * - Commit erst auf Slider-Release (`onValueChangeFinished`), nicht bei jedem Drag-Step.
+ * - Beschriftung kommuniziert klar Default vs. Override.
+ */
+@Composable
+private fun DayWaterGoalSlider(
+    effectiveMl: Int,
+    profileDefaultMl: Int,
+    isOverride: Boolean,
+    onCommit: (Int) -> Unit,
+    onReset: () -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val range = 500f..5000f
+    val steps = ((5000 - 500) / 50) - 1 // 89 steps
+    // Lokaler Drag-State, damit Slider während Drag flüssig ist und nur Release committed wird.
+    var sliderPos by remember(effectiveMl) { mutableStateOf(effectiveMl.toFloat()) }
+
+    GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(14.dp)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SlotLabelPill(text = "Wasserziel heute")
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "${sliderPos.toInt()} ml",
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W700),
+                    color = hm.fgPrimary,
+                )
+                if (isOverride) {
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(onClick = onReset, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            Icons.Outlined.RestartAlt,
+                            contentDescription = "Auf Profil-Default zurücksetzen",
+                            tint = hm.fgSecondary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = if (isOverride) {
+                    "Override für diesen Tag (Profil-Default: $profileDefaultMl ml)"
+                } else {
+                    "Profil-Default — Slider verschieben für tagesspezifisches Ziel"
+                },
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = hm.fgTertiary,
+            )
+            Slider(
+                value = sliderPos,
+                onValueChange = { v ->
+                    // auf 50-ml-Raster snappen
+                    sliderPos = (kotlin.math.round(v / 50f) * 50f).coerceIn(range)
+                },
+                onValueChangeFinished = { onCommit(sliderPos.toInt()) },
+                valueRange = range,
+                steps = steps,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }
 
 @Composable
