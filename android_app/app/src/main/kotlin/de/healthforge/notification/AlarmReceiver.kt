@@ -56,6 +56,10 @@ class AlarmReceiver : BroadcastReceiver() {
             handleWaterFire(context)
             return
         }
+        if (intent.action == ACTION_WATER_SNOOZE) {
+            handleWaterSnooze(context)
+            return
+        }
 
         val reminderId = intent.getLongExtra(EXTRA_REMINDER_ID, -1L)
         val name = intent.getStringExtra(EXTRA_SUPPLEMENT_NAME).orEmpty()
@@ -199,25 +203,71 @@ class AlarmReceiver : BroadcastReceiver() {
             context, WATER_NOTIF_ID, launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        val snoozeIntent = Intent(context, AlarmReceiver::class.java).apply {
+            action = ACTION_WATER_SNOOZE
+        }
+        val snoozePi = PendingIntent.getBroadcast(
+            context, WATER_SNOOZE_REQUEST, snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
         val notif = NotificationCompat.Builder(context, NotificationChannels.WATER)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Wasser trinken")
             .setContentText("Rückstand: $deficitMl ml von $goalMl ml. Zeit für ein Glas Wasser.")
             .setAutoCancel(true)
             .setContentIntent(contentPi)
+            .addAction(0, "+30 min", snoozePi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
         mgr.notify(WATER_NOTIF_ID, notif)
+    }
+
+    /**
+     * P7.S4 Slice 4c.2 — User tippt "+30 min" auf der Wasser-Notification.
+     * - Cancelt sichtbare Notification.
+     * - Resettet Eskalations-Level auf 0 (kein aggressives Re-Ping).
+     * - Plant manuell einen Tick in 30 min (auch wenn `checkIntervalMin` != 30).
+     */
+    private fun handleWaterSnooze(context: Context) {
+        NotificationManagerCompat.from(context).cancel(WATER_NOTIF_ID)
+        waterPrefs.escalationLevel = 0
+        if (!waterPrefs.enabled) return
+        val now = java.time.LocalDateTime.now()
+        var snoozeAt = now.plusMinutes(SNOOZE_MIN).withSecond(0).withNano(0)
+        // Falls Snooze in inaktives Fenster fällt → auf nächstes 08:00 verschieben.
+        if (snoozeAt.hour >= WaterReminderPrefs.ACTIVE_HOUR_END) {
+            snoozeAt = snoozeAt.plusDays(1)
+                .withHour(WaterReminderPrefs.ACTIVE_HOUR_START).withMinute(0)
+        } else if (snoozeAt.hour < WaterReminderPrefs.ACTIVE_HOUR_START) {
+            snoozeAt = snoozeAt
+                .withHour(WaterReminderPrefs.ACTIVE_HOUR_START).withMinute(0)
+        }
+        val triggerAt = snoozeAt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val am = context.getSystemService<android.app.AlarmManager>() ?: return
+        val pi = PendingIntent.getBroadcast(
+            context,
+            WATER_FIRE_REQUEST,
+            Intent(context, AlarmReceiver::class.java).apply { action = ACTION_WATER_FIRE },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        try {
+            am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerAt, pi)
+        } catch (_: SecurityException) { /* low-priority */ }
     }
 
     companion object {
         const val ACTION_FIRE = "de.healthforge.action.REMINDER_FIRE"
         const val ACTION_TAKEN = "de.healthforge.action.REMINDER_TAKEN"
         const val ACTION_WATER_FIRE = "de.healthforge.action.WATER_REMINDER_FIRE"
+        const val ACTION_WATER_SNOOZE = "de.healthforge.action.WATER_REMINDER_SNOOZE"
         const val EXTRA_REMINDER_ID = "reminder_id"
         const val EXTRA_SUPPLEMENT_NAME = "supplement_name"
         private const val ACTION_TAKEN_REQUEST_OFFSET = 1_000_000
         private const val WATER_NOTIF_ID = 0x57415452 // "WATR"
+        // Muss identisch zu WaterReminderScheduler.REQUEST_CODE sein → gleiche PI ersetzen.
+        private const val WATER_FIRE_REQUEST = 0x57415452
+        private const val WATER_SNOOZE_REQUEST = 0x57415453 // "WATS"
+        private const val SNOOZE_MIN = 30L
 
         /**
          * Linearer Soll-Verlauf zwischen 08:00 und 22:00 Uhr (REQ-HOME-WATER-ALARM-001).

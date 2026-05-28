@@ -14,6 +14,11 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 - MOD `WaterReminderScheduler.kt`: NEUE `currentIntervalMin()` — Level 0 → `checkIntervalMin`; Level 1..3 → 15/10/5 min.
 - MOD `AlarmReceiver.handleWaterFire`: Nach Defizit-Eval Level++ (cap 3) bei Notify; Level=0 bei kein-Defizit. Reset passiert automatisch beim ersten "Catch-up"-Tick.
 
+**Slice 4c.2-Ergänzung — Snooze-Action.**
+- MOD `AlarmReceiver`: NEUE `ACTION_WATER_SNOOZE` + `handleWaterSnooze(context)`. Cancelt Notification, setzt `escalationLevel = 0`, plant manuell Tick in 30 min (mit Active-Window-Clamp 08–22).
+- MOD `postWaterNotification`: NEUER `addAction(0, "+30 min", snoozePi)` Button.
+- Audit: kein Manifest-Update nötig (explizite Intents). `WATER_FIRE_REQUEST` Konstante muss identisch zu `WaterReminderScheduler.REQUEST_CODE` sein (beides `0x57415452`), damit Snooze die geplante PendingIntent ersetzt.
+
 
 **Architektur:**
 - WaterReminderScheduler tickt jetzt alle `prefs.checkIntervalMin` Minuten (default 30, range 15..120) statt fester Stunden.

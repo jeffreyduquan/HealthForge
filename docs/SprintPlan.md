@@ -1787,7 +1787,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
   - Defizit = max(0, expected − actual). Nur bei `deficit ≥ deficitThresholdMl` Notification mit Text "Rückstand: X ml von Y ml".
   - Chain-Schedule unabhängig vom Notify-Branch.
 - NEW snapshot-DAO `WaterIntakeDao.sumForDay(day): Int` + Repo-Wrapper.
-- **Snooze / Eskalation 30→15→10→5 min** aus dem ursprünglichen Slice-4c-Plan: ✅ Slice 4c.1 ergänzt — `WaterReminderPrefs.escalationLevel` persistiert, `WaterReminderScheduler.currentIntervalMin()` mappt Level→Minuten, AlarmReceiver erhöht Level bei Notify (cap 3), resettet auf 0 bei No-Defizit-Tick. Snooze-Action im Notification-UI nicht implementiert (User kann via Trinken-Aktion natürlich snoozen → nächster Tick erkennt kein Defizit).
+- **Snooze / Eskalation 30→15→10→5 min** aus dem ursprünglichen Slice-4c-Plan: ✅ Slice 4c.1 ergänzt — `WaterReminderPrefs.escalationLevel` persistiert, `WaterReminderScheduler.currentIntervalMin()` mappt Level→Minuten, AlarmReceiver erhöht Level bei Notify (cap 3), resettet auf 0 bei No-Defizit-Tick. ✅ Slice 4c.2 ergänzt — Snooze-Action `"+30 min"` als Notification-Button (`ACTION_WATER_SNOOZE`, cancelt Notification + resettet `escalationLevel` + plant Tick in 30 min mit Window-Clamp).
 - **22–08 Silent-Window:** durch Active-Window-Clamp im Scheduler (Ticks werden auf nächstes 08:00 verschoben) erreicht — kein expliziter "no-post"-Check im Receiver nötig, da gar kein Tick anliegt.
 - **Verifikation:** `:app:installDebug` BUILD SUCCESSFUL 24s, 0 Errors. Manueller Logik-Smoke (`adb shell am broadcast`) optional.
 
