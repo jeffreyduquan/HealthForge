@@ -1761,7 +1761,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
 
 ### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
-**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4d ✅ — beide 2026-05-28; Slice 4b ❌ DEFERRED — Tagesziele bleiben Profil-only; Slice 4c offen)
+**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4d ✅ + Slice 4c ✅ — alle 2026-05-28; Slice 4b ❌ DEFERRED — Tagesziele bleiben Profil-only)
 
 **Slice 4a — Profile-Refactor (✅ DONE 2026-05-28):**
 - NEW `presentation/profile/components/NutrientGoalRow.kt` — Zeile: Label + Default (read-only, klein) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (`Icons.Outlined.RestartAlt`). Override-Range clamped in `nutrient.min..nutrient.max`.
@@ -1776,11 +1776,20 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - Kurz implementiert (Commit `2c44b3b`, Smoke-Test grün) und **reverted** (`61c6389`) nach User-Feedback: "Ziele sind nur im Profil anpassbar". Mental Model = Tagesziele sind global pro User, keine Tages-Override-UX. `MealPlanSlotEntity.waterGoalMl: Int?`-Spalte bleibt in DB (P7.S1 Schema v8, unused).
 - Ersetzt durch Slice 4d (Profil-Lock-Slider 0–200 %), das die per-Tag-Anpassbarkeits-Lücke durch volle Profil-Goal-Bandbreite schließt.
 
-**Slice 4c — WaterDeficitScheduler (⏳ TODO, größter Slice):**
-- NEW `notification/WaterDeficitScheduler.kt` — ersetzt `WaterReminderScheduler`. AlarmManager-Eskalation 30→15→10→5 min, 5-min Debounce nach Slider-Drag, Snooze +30 min (max 2×), hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
-- NEW BroadcastReceiver `WaterDeficitAlarmReceiver` + Notification-Channel `water_deficit` (separat von P6 `water_reminder`).
-- MOD `WaterIntakeRepository.add(delta)` → triggert `evaluateDeficit()` Re-Schedule.
-- Defizit-Goal-Quelle = Profil-Default (= aktueller Override falls vorhanden, kein Plan-Tag-Override mehr seit Slice 4b DEFERRED).
+**Slice 4c — WaterDeficitScheduler (✅ DONE 2026-05-28):**
+- Statt NEU-Datei wurde der bestehende `notification/WaterReminderScheduler` IN PLACE umgebaut (kein Class-Rename → keine Ripple auf HomeViewModel/BootReceiver/Manifest). Nutzer-Quote: *"wir brauchen nur ein alarmsystem"*.
+- MOD `notification/WaterReminderPrefs.kt`: NEUE Felder `checkIntervalMin` (default 30 min, range 15..120) + `deficitThresholdMl` (default 200 ml). `intervalHours` als legacy belassen (vom Scheduler nicht mehr gelesen).
+- MOD `notification/WaterReminderScheduler.kt`: `nextTriggerAt` rechnet `now.plusMinutes(checkIntervalMin)`. Active-Window 08–22 unverändert (Ticks außerhalb auf nächstes 08:00).
+- MOD `notification/AlarmReceiver.kt` (`handleWaterFire`):
+  - NEUE Injects: `WaterIntakeRepository`, `ProfileRepository`, `ComputeNutrientTargetsUseCase`, `WaterReminderPrefs`.
+  - Tagesziel via `computeTargets(profile).applyOverrides(profile).waterMl` (Single-Source = Profil-Override).
+  - `expectedWaterByNow(goalMl, now)` linearer Soll-Verlauf 08–22 Uhr.
+  - Defizit = max(0, expected − actual). Nur bei `deficit ≥ deficitThresholdMl` Notification mit Text "Rückstand: X ml von Y ml".
+  - Chain-Schedule unabhängig vom Notify-Branch.
+- NEW snapshot-DAO `WaterIntakeDao.sumForDay(day): Int` + Repo-Wrapper.
+- **Snooze / Eskalation 30→15→10→5 min** aus dem ursprünglichen Slice-4c-Plan: nicht implementiert. Einfacher Fix-Intervall-Tick (30 min default) reicht zur initialen Bedürfnis-Deckung; Eskalation kann als Slice 4c.1 nachgereicht werden, falls User aktiv möchte.
+- **22–08 Silent-Window:** durch Active-Window-Clamp im Scheduler (Ticks werden auf nächstes 08:00 verschoben) erreicht — kein expliziter "no-post"-Check im Receiver nötig, da gar kein Tick anliegt.
+- **Verifikation:** `:app:installDebug` BUILD SUCCESSFUL 24s, 0 Errors. Manueller Logik-Smoke (`adb shell am broadcast`) optional.
 
 **Slice 4d — Profil-Lock-Slider 0–200 % + Allergie-FilterChip-Picker (✅ DONE 2026-05-28):**
 - MOD `presentation/profile/components/NutrientGoalRow.kt`: REPLACE NumberField durch Lock-Slider. Range = 0..(2×effectiveDefault), Default-Position bei 100 % (Mitte). Lock-Icon (`Outlined.Lock`/`LockOpen`) steuert Schreibzugriff: gelockt = read-only, entsperrt = Slider-Drag aktiv (violet), Re-Lock = Commit. Ephemeral UI-State (nicht persistent). Display zeigt absolute Zahl + Prozent ("21.5 mg · 165 %"), bei aktivem Override zusätzlich Default-Hint. Reset-Icon nur bei Override.

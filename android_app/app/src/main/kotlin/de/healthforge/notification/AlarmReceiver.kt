@@ -15,12 +15,18 @@ import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.ReminderFrequency
 import de.healthforge.data.repository.IntakeRepository
+import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.data.repository.SupplementRepository
+import de.healthforge.data.repository.WaterIntakeRepository
+import de.healthforge.domain.ComputeNutrientTargetsUseCase
+import de.healthforge.domain.applyOverrides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 /**
@@ -39,6 +45,10 @@ class AlarmReceiver : BroadcastReceiver() {
     @Inject lateinit var scheduler: AlarmScheduler
     @Inject lateinit var intakeRepo: IntakeRepository
     @Inject lateinit var waterScheduler: WaterReminderScheduler
+    @Inject lateinit var waterPrefs: WaterReminderPrefs
+    @Inject lateinit var waterIntakeRepo: WaterIntakeRepository
+    @Inject lateinit var profileRepo: ProfileRepository
+    @Inject lateinit var computeTargets: ComputeNutrientTargetsUseCase
 
     override fun onReceive(context: Context, intent: Intent) {
         // Wasser-Reminder hat keine `reminderId` — separat behandeln.
@@ -143,11 +153,39 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     /**
-     * Postet Wasser-Reminder-Notification auf [NotificationChannels.WATER] und
-     * plant den nächsten Tick (Chain-Pattern, REQ-REMIND-001).
+     * P7.S4 Slice 4c — Wasser-Defizit-Check (REQ-WATER-005 / REQ-HOME-WATER-ALARM-001).
+     *
+     * Bei jedem Tick: aktuelles Wasser-Defizit gegen das Tagesziel bei linearem
+     * Soll-Verlauf (08–22 Uhr). Wenn Defizit ≥ [WaterReminderPrefs.deficitThresholdMl]
+     * → Notification. Sonst still chained zum nächsten Tick.
+     *
+     * Tagesziel = `applyOverrides(computeTargets(profile)).waterMl` — Single-Source.
      */
     private fun handleWaterFire(context: Context) {
-        val mgr = context.getSystemService<NotificationManager>()
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                if (!waterPrefs.enabled) return@launch
+                val today = LocalDate.now()
+                val full = profileRepo.observe().first()
+                val targets = computeTargets(full.profile).applyOverrides(full.profile)
+                val goalMl = targets.waterMl
+                val actualMl = waterIntakeRepo.sumForDay(today)
+                val expectedMl = expectedWaterByNow(goalMl, LocalTime.now())
+                val deficitMl = (expectedMl - actualMl).coerceAtLeast(0)
+                if (deficitMl >= waterPrefs.deficitThresholdMl) {
+                    postWaterNotification(context, deficitMl, goalMl)
+                }
+                // Chain: nächsten Tick einplanen.
+                waterScheduler.schedule()
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    private fun postWaterNotification(context: Context, deficitMl: Int, goalMl: Int) {
+        val mgr = context.getSystemService<NotificationManager>() ?: return
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -158,14 +196,12 @@ class AlarmReceiver : BroadcastReceiver() {
         val notif = NotificationCompat.Builder(context, NotificationChannels.WATER)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Wasser trinken")
-            .setContentText("Zeit für ein Glas Wasser.")
+            .setContentText("Rückstand: $deficitMl ml von $goalMl ml. Zeit für ein Glas Wasser.")
             .setAutoCancel(true)
             .setContentIntent(contentPi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-        mgr?.notify(WATER_NOTIF_ID, notif)
-        // Chain: nächsten Tick einplanen.
-        waterScheduler.schedule()
+        mgr.notify(WATER_NOTIF_ID, notif)
     }
 
     companion object {
@@ -176,5 +212,19 @@ class AlarmReceiver : BroadcastReceiver() {
         const val EXTRA_SUPPLEMENT_NAME = "supplement_name"
         private const val ACTION_TAKEN_REQUEST_OFFSET = 1_000_000
         private const val WATER_NOTIF_ID = 0x57415452 // "WATR"
+
+        /**
+         * Linearer Soll-Verlauf zwischen 08:00 und 22:00 Uhr (REQ-HOME-WATER-ALARM-001).
+         * Vor 08:00 → 0 (kein Defizit erwartet). Nach 22:00 → volles Ziel.
+         */
+        internal fun expectedWaterByNow(goalMl: Int, now: LocalTime): Int {
+            val start = LocalTime.of(WaterReminderPrefs.ACTIVE_HOUR_START, 0)
+            val end = LocalTime.of(WaterReminderPrefs.ACTIVE_HOUR_END, 0)
+            if (now < start) return 0
+            if (now >= end) return goalMl
+            val windowMin = java.time.Duration.between(start, end).toMinutes().toDouble()
+            val elapsedMin = java.time.Duration.between(start, now).toMinutes().toDouble()
+            return (goalMl * (elapsedMin / windowMin)).toInt().coerceIn(0, goalMl)
+        }
     }
 }

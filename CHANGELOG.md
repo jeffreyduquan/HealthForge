@@ -5,6 +5,48 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S4 Slice 4c — WaterDeficitScheduler (Defizit-basierte Wasser-Reminder) — 2026-05-28
+
+**Scope:** Ersetzt den festen 2h-Tick-Reminder durch einen Defizit-Check (REQ-WATER-005 / REQ-HOME-WATER-ALARM-001). Nutzer-Quote: *"wir brauchen nur ein alarmsystem"* + *"Profil Werte sind ground trough. Alle funktionen lesen den wert von hier ab"*.
+
+**Architektur:**
+- WaterReminderScheduler tickt jetzt alle `prefs.checkIntervalMin` Minuten (default 30, range 15..120) statt fester Stunden.
+- AlarmReceiver.handleWaterFire berechnet bei jedem Tick:
+  1. Tagesziel = `computeTargets(profile).applyOverrides(profile).waterMl` (Single-Source, **liest Override**).
+  2. Aktueller Stand = `waterIntakeRepo.sumForDay(today)`.
+  3. Soll-Verlauf linear zwischen 08–22 Uhr → `expectedWaterByNow(goalMl, now)`.
+  4. Defizit = expected − actual.
+  5. Wenn `deficit ≥ prefs.deficitThresholdMl` (default 200 ml) → Notification mit dynamischem Text "Rückstand: X ml von Y ml".
+  6. Chain-Schedule unabhängig vom Notify-Branch.
+- Class-Namen `WaterReminderScheduler` / `WaterReminderPrefs` bleiben → keine Ripple auf HomeViewModel / BootReceiver / Manifest.
+
+**Code-Änderungen:**
+- MOD `data/db/dao/IntakeDaos.kt`: NEUE `suspend fun WaterIntakeDao.sumForDay(day: String): Int` (snapshot-Read).
+- MOD `data/repository/WaterIntakeRepository.kt`: NEUE `suspend fun sumForDay(day: LocalDate): Int`.
+- MOD `notification/WaterReminderPrefs.kt`: NEUE Felder `checkIntervalMin` (30 min default) + `deficitThresholdMl` (200 ml default). `intervalHours` als legacy beibehalten (nicht mehr gelesen vom Scheduler).
+- MOD `notification/WaterReminderScheduler.kt`: `nextTriggerAt` rechnet jetzt `plusMinutes(checkIntervalMin)`. Active-Window-Clamp 08–22 unverändert.
+- MOD `notification/AlarmReceiver.kt`:
+  - NEUE Injects: `WaterIntakeRepository`, `ProfileRepository`, `ComputeNutrientTargetsUseCase`, `WaterReminderPrefs`.
+  - `handleWaterFire`: `goAsync()` + Coroutine, Defizit-Berechnung, conditional notify, immer chained.
+  - NEUE companion-Helper `expectedWaterByNow(goalMl, now)` — linearer Soll-Verlauf 08–22 Uhr.
+
+**Touched Docs:**
+- CHANGELOG.md ✅ (dieser Eintrag).
+- docs/SprintPlan.md ✅ Slice 4c als ✅ markiert.
+- docs/TraceabilityMatrix.md ✅ REQ-HOME-WATER-ALARM-001 → ✅, REQ-WATER-005 ergänzt.
+
+**Untouched-Begründung:**
+- docs/Architecture.md: Pattern (AlarmManager-Chain + Single-Source via applyOverrides) bereits dokumentiert in Slice 4d v2-Entry; keine neue Subsystem-Grenze.
+- docs/ReqSpec.md: REQ-HOME-WATER-ALARM-001 + REQ-WATER-005 inhaltlich unverändert (Default-Werte sind Implementation-Detail).
+- docs/UsabilityMap.md / docs/GUI.md: keine neue UI (Settings-Slider für Threshold/Interval folgt optional). Toggle/Pref-Slider sind bereits in ProfileScreen-Section "Wasser-Reminder" sichtbar; tatsächliche Threshold/Interval-Sliders TODO Slice 4c.1 falls gewünscht.
+- docs/TestStrategy.md: Unit-Tests für `expectedWaterByNow` + `nextTriggerAt` möglich, aber kein Strategie-Drift.
+
+**Verifikation:**
+- `./gradlew :app:installDebug` ✅ BUILD SUCCESSFUL (24s).
+- Logik-Smoke-Test: TODO (manuell mit `adb shell am broadcast -a de.healthforge.action.WATER_REMINDER_FIRE -n de.healthforge.debug/de.healthforge.notification.AlarmReceiver`).
+
+---
+
 ## P7.S4 Slice 4d v2 — Slider-Range stabil + Baseline/Effective-Targets-Split — 2026-05-28
 
 **Scope:** Bugfix-Folge auf Slice 4d. Drei zusammenhängende Designfehler entdeckt + sauber aufgelöst.

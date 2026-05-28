@@ -53,6 +53,10 @@ interface WaterIntakeDao {
     @Query("SELECT COALESCE(SUM(volumeMl), 0) FROM water_intake WHERE dayDateIso = :day")
     fun observeSumForDay(day: String): Flow<Int>
 
+    /** P7.S4 Slice 4c — suspendierter Read für den WaterDeficitScheduler (AlarmReceiver-Pfad). */
+    @Query("SELECT COALESCE(SUM(volumeMl), 0) FROM water_intake WHERE dayDateIso = :day")
+    suspend fun sumForDay(day: String): Int
+
     @Query("SELECT * FROM water_intake WHERE dayDateIso = :day ORDER BY loggedAt DESC")
     fun observeForDay(day: String): Flow<List<WaterIntakeEntity>>
 

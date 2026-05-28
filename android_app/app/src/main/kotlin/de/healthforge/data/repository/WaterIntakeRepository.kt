@@ -14,6 +14,9 @@ class WaterIntakeRepository @Inject constructor(
 
     fun observeSumForDay(day: LocalDate): Flow<Int> = dao.observeSumForDay(day.toString())
 
+    /** P7.S4 Slice 4c — Snapshot-Read für WaterDeficitScheduler (AlarmReceiver-Pfad). */
+    suspend fun sumForDay(day: LocalDate): Int = dao.sumForDay(day.toString())
+
     fun observeForDay(day: LocalDate): Flow<List<WaterIntakeEntity>> = dao.observeForDay(day.toString())
 
     /** Returns the inserted row id (REQ-WATER-001/002, P6.S7 F-005 Undo-Support). */

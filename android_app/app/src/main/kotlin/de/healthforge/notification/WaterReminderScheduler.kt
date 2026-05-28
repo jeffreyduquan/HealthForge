@@ -12,13 +12,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Wasser-Reminder Scheduler (REQ-REMIND-001 / REQ-REMIND-002).
+ * Wasser-Defizit-Scheduler (P7.S4 Slice 4c — REQ-WATER-005 / REQ-HOME-WATER-ALARM-001).
  *
- * - Inexact `setAndAllowWhileIdle` (Channel-Priorität LOW; keine `SCHEDULE_EXACT_ALARM`-Berechtigung nötig).
- * - Fenster: ACTIVE_HOUR_START..ACTIVE_HOUR_END (08–22 lokal). Trigger außerhalb des Fensters
- *   werden auf das nächste 08:00 verschoben.
- * - Chaining: AlarmReceiver ruft nach jedem Post erneut [schedule] → kein `setRepeating`-Drift,
- *   identisches Pattern wie [AlarmScheduler] für Supplements.
+ * Ersetzt den alten festen 2h-Intervall-Reminder. Plant einen periodischen "Check-Tick"
+ * (Default 30 min, konfigurierbar via [WaterReminderPrefs.checkIntervalMin]). Bei jedem
+ * Tick prüft [AlarmReceiver.handleWaterFire] das Wasser-Defizit gegen das Tagesziel und
+ * feuert nur eine Notification, wenn der Rückstand [WaterReminderPrefs.deficitThresholdMl]
+ * überschreitet. So bekommt der User keine sinnlosen "Trink-Wasser"-Pings, wenn er bereits
+ * im Plan ist.
+ *
+ * - Inexact `setAndAllowWhileIdle` (LOW-Channel; keine `SCHEDULE_EXACT_ALARM`-Berechtigung nötig).
+ * - Aktiv-Fenster: 08–22 lokal. Ticks außerhalb auf nächstes 08:00 verschoben.
+ * - Chaining: AlarmReceiver ruft nach jedem Tick erneut [schedule] → kein Drift.
  */
 @Singleton
 class WaterReminderScheduler @Inject constructor(
@@ -28,11 +33,11 @@ class WaterReminderScheduler @Inject constructor(
 
     private val am: AlarmManager? get() = context.getSystemService<AlarmManager>()
 
-    /** Berechnet nächsten Trigger-Zeitpunkt in epoch-ms. */
+    /** Berechnet nächsten Tick-Zeitpunkt in epoch-ms (oder null wenn disabled). */
     fun nextTriggerAt(now: LocalDateTime = LocalDateTime.now()): Long? {
         if (!prefs.enabled) return null
         val zone = ZoneId.systemDefault()
-        var candidate = now.plusHours(prefs.intervalHours.toLong()).withSecond(0).withNano(0)
+        var candidate = now.plusMinutes(prefs.checkIntervalMin.toLong()).withSecond(0).withNano(0)
         // Außerhalb des aktiven Fensters → auf nächstes 08:00 verschieben.
         if (candidate.hour >= WaterReminderPrefs.ACTIVE_HOUR_END) {
             candidate = candidate.plusDays(1)
@@ -46,14 +51,14 @@ class WaterReminderScheduler @Inject constructor(
         return candidate.atZone(zone).toInstant().toEpochMilli()
     }
 
-    /** Plant nächsten Wasser-Reminder; ist No-op wenn `prefs.enabled == false`. */
+    /** Plant nächsten Check-Tick; No-op wenn `prefs.enabled == false`. */
     fun schedule() {
         val mgr = am ?: return
         val triggerAt = nextTriggerAt() ?: return
         try {
             mgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent())
         } catch (_: SecurityException) {
-            // No-op: Wasser-Reminder ist LOW-Priority, Security-Verlust akzeptabel.
+            // No-op: Wasser-Check ist LOW-Priority, Security-Verlust akzeptabel.
         }
     }
 
