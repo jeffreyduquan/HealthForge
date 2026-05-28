@@ -96,8 +96,71 @@ fun ProfileScreen(
                     }
                     val allergies = full?.allergies?.joinToString { it.germanLabel } ?: ""
                     val intol = full?.intolerances?.joinToString { it.germanLabel } ?: ""
-                    Text("Allergien: ${allergies.ifBlank { "keine" }}", color = hm.fgSecondary)
-                    Text("Intoleranzen: ${intol.ifBlank { "keine" }}", color = hm.fgSecondary)
+                    Text(
+                        "Allergien: ${allergies.ifBlank { "keine" }}",
+                        color = hm.fgTertiary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "Intoleranzen: ${intol.ifBlank { "keine" }}",
+                        color = hm.fgTertiary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+
+            SectionPill(label = "ALLERGIEN & INTOLERANZEN")
+            GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+                val selectedAllergies = full?.allergies ?: emptySet()
+                val selectedIntol = full?.intolerances ?: emptySet()
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Allergien (EU-14)",
+                        color = hm.fgSecondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    androidx.compose.foundation.layout.FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        de.healthforge.data.db.entities.AllergenType.entries.forEach { a ->
+                            val isOn = a in selectedAllergies
+                            FilterChip(
+                                selected = isOn,
+                                onClick = {
+                                    val next = selectedAllergies.toMutableSet()
+                                    if (isOn) next.remove(a) else next.add(a)
+                                    vm.setAllergies(next)
+                                },
+                                label = { Text(a.germanLabel, style = MaterialTheme.typography.bodySmall) },
+                            )
+                        }
+                    }
+                    Text(
+                        "FODMAP-Intoleranzen",
+                        color = hm.fgSecondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                    androidx.compose.foundation.layout.FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        de.healthforge.data.db.entities.FodmapType.entries.forEach { f ->
+                            val isOn = f in selectedIntol
+                            FilterChip(
+                                selected = isOn,
+                                onClick = {
+                                    val next = selectedIntol.toMutableSet()
+                                    if (isOn) next.remove(f) else next.add(f)
+                                    vm.setIntolerances(next)
+                                },
+                                label = { Text(f.germanLabel, style = MaterialTheme.typography.bodySmall) },
+                            )
+                        }
+                    }
                 }
             }
 

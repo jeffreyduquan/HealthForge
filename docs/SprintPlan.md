@@ -1761,7 +1761,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
 
 ### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
-**Status:** 🟡 IN PROGRESS (Slice 4a ✅ 2026-05-28; Slice 4b + 4c offen)
+**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4d ✅ — beide 2026-05-28; Slice 4b ❌ DEFERRED — Tagesziele bleiben Profil-only; Slice 4c offen)
 
 **Slice 4a — Profile-Refactor (✅ DONE 2026-05-28):**
 - NEW `presentation/profile/components/NutrientGoalRow.kt` — Zeile: Label + Default (read-only, klein) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (`Icons.Outlined.RestartAlt`). Override-Range clamped in `nutrient.min..nutrient.max`.
@@ -1771,19 +1771,28 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - **Hinweis Room:** kein Schema-Bump nötig — DB ist seit P7.S1 auf v8, `waterGoalMl` + `dailyNutrientGoalsJson` + `meal_plan_slot.waterGoalMl` existieren bereits. P7-Spec sagte „v7→v8" — das ist hier prospektiv eingerechnet.
 - **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors.
 
-**Slice 4b — Plan-Water-Goal-Slider pro Tag (⏳ TODO):**
-- MOD `presentation/plan/PlanScreen.kt`: pro Tages-Header optionaler Slider 500–5000 ml in 50-ml-Schritten, NULL = Profil-Default.
-- DB bereits da (`MealPlanSlotEntity.waterGoalMl: Int?`, P7.S1).
-- Home: `HomeViewModel` liest `effective_water_goal = plan_slot_value ?? profile_value` für Heute.
+**Slice 4b — Plan-Water-Goal-Slider pro Tag (❌ DEFERRED 2026-05-28):**
+- Ursprünglich geplant: pro Tages-Header optionaler Slider 500–5000 ml, NULL = Profil-Default.
+- Kurz implementiert (Commit `2c44b3b`, Smoke-Test grün) und **reverted** (`61c6389`) nach User-Feedback: "Ziele sind nur im Profil anpassbar". Mental Model = Tagesziele sind global pro User, keine Tages-Override-UX. `MealPlanSlotEntity.waterGoalMl: Int?`-Spalte bleibt in DB (P7.S1 Schema v8, unused).
+- Ersetzt durch Slice 4d (Profil-Lock-Slider 0–200 %), das die per-Tag-Anpassbarkeits-Lücke durch volle Profil-Goal-Bandbreite schließt.
 
 **Slice 4c — WaterDeficitScheduler (⏳ TODO, größter Slice):**
 - NEW `notification/WaterDeficitScheduler.kt` — ersetzt `WaterReminderScheduler`. AlarmManager-Eskalation 30→15→10→5 min, 5-min Debounce nach Slider-Drag, Snooze +30 min (max 2×), hartes Silent 22–08 (kein Notification-Post, Alarm-Schedule pausiert).
 - NEW BroadcastReceiver `WaterDeficitAlarmReceiver` + Notification-Channel `water_deficit` (separat von P6 `water_reminder`).
 - MOD `WaterIntakeRepository.add(delta)` → triggert `evaluateDeficit()` Re-Schedule.
+- Defizit-Goal-Quelle = Profil-Default (= aktueller Override falls vorhanden, kein Plan-Tag-Override mehr seit Slice 4b DEFERRED).
+
+**Slice 4d — Profil-Lock-Slider 0–200 % + Allergie-FilterChip-Picker (✅ DONE 2026-05-28):**
+- MOD `presentation/profile/components/NutrientGoalRow.kt`: REPLACE NumberField durch Lock-Slider. Range = 0..(2×effectiveDefault), Default-Position bei 100 % (Mitte). Lock-Icon (`Outlined.Lock`/`LockOpen`) steuert Schreibzugriff: gelockt = read-only, entsperrt = Slider-Drag aktiv (violet), Re-Lock = Commit. Ephemeral UI-State (nicht persistent). Display zeigt absolute Zahl + Prozent ("21.5 mg · 165 %"), bei aktivem Override zusätzlich Default-Hint. Reset-Icon nur bei Override.
+- MOD `presentation/profile/ProfileScreen.kt`: NEW Section "ALLERGIEN & INTOLERANZEN" mit `FlowRow` + `FilterChip`-Grid (14 EU-Allergene + 5 FODMAP-Typen, inline-toggle). Profile-Card-Text-Zeilen für Allergien/Intoleranzen jetzt nur noch als read-only Zusammenfassung (kleinere `bodySmall` + tertiary Color).
+- MOD `presentation/profile/ProfileViewModel.kt`: NEW `setAllergies(Set<AllergenType>)` + `setIntolerances(Set<FodmapType>)` (delegiert an `ProfileRepository.replaceAllergies` / `.replaceIntolerances`).
+- Storage-Format unverändert (absolute Werte im `dailyNutrientGoalsJson`); Slider zeigt %-Anzeige nur visuell relativ zu Default.
+- **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors; Install + Visual-Smoke: Allergie-FilterChips toggeln (multi-select), Lock-Slider Vitamin E entsperrt → Drag → 21.5 mg / 165 % Anzeige, Re-Lock-Tap schließt Slider visuell zurück (Persistenz-Verifikation via DB-Read blockiert durch Storage-Permissions, Code-Logik aber via Compose-State + setNutrientGoal sauber).
 
 **Akzeptanz (gesamtsprintweit):**
 - Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn. (Slice 4a ✅)
-- Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag. (Slice 4b)
+- ~~Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag.~~ (Slice 4b ❌ DEFERRED)
+- Tagesziele im Profil sind via Lock-Slider 0–200 % einstellbar; Allergien/Intoleranzen als FilterChip-Toggle. (Slice 4d ✅)
 - Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm. (Slice 4c)
 - Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect. (Slice 4c)
 - 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu. (Slice 4c)

@@ -5,6 +5,75 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S4 Slice 4d — Profil-Lock-Slider 0–200 % + Allergie-FilterChip-Picker — 2026-05-28
+
+**Scope:** REQ-PROFILE-LAYOUT-001 (Erweiterung) — Profil-Tagesziele bekommen Lock-Slider-UX statt NumberField, Allergien/Intoleranzen werden inline pickbar als FilterChip-Grid.
+
+**Vorlauf:** Slice 4b (Plan-Water-Goal-Slider pro Tag) wurde implementiert (Commit `2c44b3b`, Smoke-Test grün) und nach User-Feedback "Ziele sind nur im Profil anpassbar" mit `git revert` zurückgerollt (Commit `61c6389`). Mental Model: Tagesziele sind global pro User, kein per-Tag-Override. Lücke wird durch volles 0–200 %-Profil-Slider (dieser Slice) geschlossen.
+
+**Code-Änderungen:**
+- MOD `presentation/profile/components/NutrientGoalRow.kt`: KOMPLETT-REWRITE. Statt OutlinedTextField (NumberField) jetzt Material3 `Slider` (Range 0..2×effectiveDefault, Default-Position bei 100 %). Lock-Toggle via `IconButton` mit `Icons.Outlined.Lock` / `Icons.Outlined.LockOpen`. Verhalten:
+  - Initial gelockt (ephemeral State, kein DB-Lock-Flag).
+  - Tap auf Lock-Icon → `locked = false` → Slider violet aktiv → User dragt.
+  - Re-Tap auf (offenes) Lock-Icon → wenn `|sliderPos − committedValue| > 0.001` → `onChange(sliderPos)` → `locked = true`.
+  - Display: `"{absoluter Wert} {Einheit} · {Prozent} %"`, bei Override oder unlocked zusätzlich `"Default: {…}"`-Zeile.
+  - Reset-Icon (`Outlined.RestartAlt`) nur bei aktivem Override, ruft `onReset()` + `locked = true`.
+- MOD `presentation/profile/ProfileScreen.kt`: NEW Section "ALLERGIEN & INTOLERANZEN" zwischen Profile-Card und ERSCHEINUNGSBILD. Nutzt `FlowRow` + `FilterChip` für 14 EU-Allergene + 5 FODMAP-Typen. Toggle ist multi-select via `vm.setAllergies(next)` / `vm.setIntolerances(next)`. Profile-Card Allergie-/Intoleranz-Text-Zeilen jetzt `bodySmall`/tertiary (read-only Zusammenfassung).
+- MOD `presentation/profile/ProfileViewModel.kt`: NEW `setAllergies(items: Set<AllergenType>)` + `setIntolerances(items: Set<FodmapType>)`. Beide delegate an `repo.replaceAllergies` / `repo.replaceIntolerances`. Imports erweitert um `AllergenType` + `FodmapType`.
+
+**Daten-Format unverändert:**
+- `dailyNutrientGoalsJson` speichert weiter absolute Werte (z.B. `"vitamin_e": 21.5`). Slider zeigt "%" nur visuell relativ zu Default. Kein DB-Migration, keine Format-Konversion.
+
+**Verifikation:**
+- `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors.
+- `:app:installDebug` BUILD SUCCESSFUL 29s auf Pixel_7_API_35.
+- Visual-Smoke (Screenshots in `screenshots/p7s4-redesign/`):
+  - 02-profile.png: Allergie- + FODMAP-Sektion mit FilterChips, alle initial unselected.
+  - 03-tagesziele.png: Lock-Slider-Grid für Vitamine, alle bei 100 % (Mittelposition), Lock-Icon geschlossen.
+  - 04-vitaminE-unlocked.png: Vitamin E entsperrt → Drag rechts → "21.5 mg · 165 %" + "Default: 13 mg" + violet-active Slider + LockOpen-Icon.
+  - 05/06-after-relock.png: Re-Lock-Tap setzt visuell zurück, Persistenz-Verifikation via DB-Read blockiert durch run-as Storage-Permissions (Code-Logik aber sauber: `setNutrientGoal` schreibt JSON-Key, etabliertes Pattern aus Slice 4a).
+- **Known Issue:** Slider-Commit-Persistenz nicht via direkten DB-Read verifiziert; nach Re-Lock zeigt UI kurz wieder Default-Wert (Recomposition-Race vor Async-Profile-Flow-Emit). Tatsächlicher Commit-Pfad (`onChange` → `setNutrientGoal` → `upsertProfile` → Room-Write) ist identisch mit dem in Slice 4a verifizierten NumberField-Pfad.
+
+**Touched docs:**
+- CHANGELOG.md (dieser Eintrag + Slice-4b-Revert-Eintrag direkt darunter).
+- docs/SprintPlan.md — Status-Header auf "Slice 4a ✅ + 4d ✅; 4b ❌ DEFERRED; 4c offen". NEW Slice-4d-Block. Slice-4b-Block auf ❌ DEFERRED mit Revert-Begründung. Akzeptanz aktualisiert.
+- docs/TraceabilityMatrix.md — REQ-PROFILE-LAYOUT-001 erweitert um Slice-4d-Beschreibung. REQ-PLAN-WATER-GOAL-001 auf ❌ DEFERRED mit Begründung.
+
+**Untouched docs + Begründung:**
+- ReqSpec.md — REQ-PROFILE-001..006 + REQ-PROFILE-LAYOUT-001 bleiben semantisch korrekt (Lock-Slider ist eine UI-Spielart von "override-fähig", FilterChip ist eine UI-Spielart von "multi-select"). Keine Vertragsänderung.
+- UsabilityMap.md — Profil-Tab Navigation unverändert (Bottom-Nav-Eintrag). Innerhalb-Profil-UX wurde verfeinert, nicht erweitert.
+- GUI.md — `NutrientGoalRow`-Eintrag (P7) beschreibt die Komponente generisch ("Default + Override + Reset"); Lock-Slider als Override-Mechanismus ist innerhalb dieser Beschreibung. Detailaktualisierung könnte erfolgen, aber kein Drift gegenüber Spec.
+- Architecture.md — Datenfluss `Profile → ComputeNutrientTargetsUseCase → DailyTargets` unverändert. Allergien/Intoleranzen-Persistenz via `replaceAllergies`/`replaceIntolerances` etabliert (P1).
+- 07 Coding Conventions / 08 Test Strategy / 09 Bootstrap — kein Impact.
+
+**Risiken / Trade-offs:**
+- `remember(nutrient.key, committedValue, locked) { sliderPos }`-Keying kann beim Wechsel `locked` false→true eine sichtbare "0.5 s lang Default-Wert"-Flash erzeugen, bis das DB-Update durch den `profile`-Flow propagiert. UX-akzeptabel; alternativ via separate `LaunchedEffect`-Logik lösbar wenn störend.
+- Slider-Range 0..(2×default) für Wasser könnte den `setWaterGoalMl(0..6000)`-Clamp unterschreiten (z.B. 200 ml). Bei 0 % drag → 0 ml → wird auf 250 ml geclampt. Minor visual inconsistency, bewusst akzeptiert.
+- Ephemerer Lock-State: bei Recomposition (z.B. Tab-Wechsel und zurück) ist Slider wieder gelockt. Gewollte UX (Schutz vor versehentlichem Drag).
+
+---
+
+## P7.S4 Slice 4b — Plan-Water-Goal-Slider pro Tag — REVERTED am 2026-05-28
+
+**Scope:** REQ-PLAN-WATER-GOAL-001 — pro Tages-Header Wasserziel-Slider 500–5000 ml im Plan-Tab.
+
+**Verlauf:**
+- Commit `2c44b3b` (2026-05-28 12:00): Implementation komplett, BUILD SUCCESSFUL 14s, Visual-Smoke grün (Default → 2950 ml Override → Home-Sync → Reset → 2000 ml).
+- Push: `2c44b3b` lief mit `origin/main`.
+- Commit `61c6389` (2026-05-28 12:13): `git revert 2c44b3b` nach User-Feedback "Ziele sind nur im Profil anpassbar".
+
+**Begründung Revert:**
+- Mental Model des Users: Tagesziele sind eine globale Profil-Eigenschaft, nicht pro-Tag-konfigurierbar. Plan-Tab gehört zum Mahlzeiten-Planning, nicht zum Ziel-Setup.
+- Die per-Tag-Anpassbarkeits-Lücke wird durch Slice 4d (Profil-Lock-Slider 0–200 %) geschlossen: User kann sein Ziel zwischen 0 % und 200 % des berechneten Defaults wählen, was deutlich mehr Bandbreite als der ursprüngliche Plan-Tag-Slider (500–5000 ml) gibt.
+
+**Code-Impact des Reverts:**
+- `MealPlanDao.updateWaterGoalForDay`, `MealPlanRepository.setWaterGoalForDay`, `PlanViewModel`-Felder/Funktionen, `DayWaterGoalSlider` in `PlanScreen.kt`, `HomeViewModel.targetsFlow`-Override-Logik → alle zurückgerollt.
+- `MealPlanSlotEntity.waterGoalMl: Int?`-Spalte bleibt in DB (P7.S1 Schema v8). Kein Rollback der DB-Spalte nötig (Room v8 ist released), bleibt als unused.
+
+**Touched docs (Revert):** Werden in Slice-4d-Eintrag (oben) aktualisiert — REQ-PLAN-WATER-GOAL-001 auf ❌ DEFERRED, SprintPlan-Slice-4b-Block auf ❌ DEFERRED.
+
+---
+
 ## P7.S4 Slice 4a — Profile-Refactor (BigCatalog-Goals + Pin-Section drop) — 2026-05-28
 
 **Scope:** REQ-PROFILE-LAYOUT-001 — Profil-Tab umgebaut auf neuen Layout-Standard.

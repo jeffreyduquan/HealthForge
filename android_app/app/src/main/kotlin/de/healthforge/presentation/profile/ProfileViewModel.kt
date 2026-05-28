@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.prefs.SettingsDataStore
 import de.healthforge.data.repository.FullProfile
 import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.data.db.entities.AllergenType
+import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.ThemePreference
@@ -100,5 +102,18 @@ class ProfileViewModel @Inject constructor(
             list.forEach { out.put(it) }
             repo.upsertProfile(current.copy(pinnedNutrientsJson = out.toString(), updatedAt = System.currentTimeMillis()))
         }
+    }
+
+    /**
+     * Profil-Redesign (post-Slice-4b-revert) — Allergien-Toggle aus FilterChip-Grid.
+     * Vollständiges Replace pro Tap (idempotent), nutzt [ProfileRepository.replaceAllergies].
+     */
+    fun setAllergies(items: Set<AllergenType>) = viewModelScope.launch {
+        repo.replaceAllergies(items)
+    }
+
+    /** Profil-Redesign — Intoleranzen-Toggle (FODMAP). */
+    fun setIntolerances(items: Set<FodmapType>) = viewModelScope.launch {
+        repo.replaceIntolerances(items)
     }
 }
