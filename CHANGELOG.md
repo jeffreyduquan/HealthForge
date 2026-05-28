@@ -5,6 +5,63 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S4 Slice 4d v2 — Slider-Range stabil + Baseline/Effective-Targets-Split — 2026-05-28
+
+**Scope:** Bugfix-Folge auf Slice 4d. Drei zusammenhängende Designfehler entdeckt + sauber aufgelöst.
+
+**Bug 1: Profil-Slider rezentrierte nach Re-Lock.**
+- Ursache: `ComputeNutrientTargetsUseCase` lieferte für Wasser bereits den Override (`profile.waterGoalMl`) zurück. Slider-Range basierte auf `computed.waterMl` → nach Commit war Range = 0..(2 × 4000) → Slider-Position visuell zurück zur Mitte (= 100% von 4000 = 4000 ml).
+- Fix: Baseline/Effective-Trennung. Baseline ist STABIL.
+
+**Bug 2: `?: return@launch` ohne Profil-Row.**
+- Ursache: User-Skip-Onboarding → keine Row in `user_profile` → alle `setNutrientGoal`/`setWaterGoalMl`-Aufrufe brachen ab.
+- Fix: Auto-Create `UserProfileEntity()` (Singleton id=1L, alle Felder Defaults) wenn `profile.value?.profile == null`.
+
+**Bug 3: Home las kcal/macros-Overrides nicht.**
+- Ursache: `HomeViewModel.targetsFlow` rief nur `targetsUseCase(profile)` (Mifflin) auf, ignorierte `dailyNutrientGoalsJson`.
+- Fix: NEUE Extension `DailyTargets.applyOverrides(profile)` wendet alle Overrides (waterGoalMl + JSON-Map für kcal/protein/carbs/fat) auf die Baseline an. HomeViewModel ruft sie auf. ProfileViewModel.computedDefaults NUTZT die Baseline (für Slider-Range).
+
+**Code-Änderungen:**
+- MOD `domain/ComputeNutrientTargetsUseCase.kt`:
+  - `invoke()` liefert Wasser jetzt aus `DailyTargets.FALLBACK.waterMl` (= 2000 ml Catalog-Konstante), NICHT mehr aus `profile.waterGoalMl`.
+  - NEW Extension `fun DailyTargets.applyOverrides(profile)` parsed JSON und kombiniert mit `waterGoalMl`. Pure function, kein DI.
+- MOD `presentation/home/HomeViewModel.kt`:
+  - `targetsFlow.map { targetsUseCase(it.profile).applyOverrides(it.profile) }` — ein Schritt für Baseline → Effective.
+- MOD `presentation/profile/ProfileViewModel.kt`:
+  - `setWaterGoalMl` und `setNutrientGoal`: `profile.value?.profile ?: UserProfileEntity()` (Auto-Create).
+  - Debug-Logs entfernt.
+- MOD `presentation/profile/components/NutrientGoalRow.kt`:
+  - `LaunchedEffect(committedValue)` (entkoppelt von `locked`) — verhindert Slider-Reset auf Lock-Flip.
+  - Kompakter Stil: Slider-Track 2 dp via `track`-Slot mit `SliderDefaults.Track(modifier = Modifier.height(2.dp))`, Thumb 12 dp via `SliderDefaults.Thumb`, IconButton 32 dp, Icons 16 dp.
+
+**Architektur-Pattern dokumentiert:**
+- **Baseline** (auto-berechnet, stabil) — Slider-Range-Basis, Profil-„Default"-Anzeige.
+- **Effective** (= Baseline + Profil-Overrides) — Single-Source für alle Konsumenten (Home, Insights, Plan, später Scheduler).
+- Profil-Slider committed in das Profil → Effective ändert sich → Konsumenten beobachten via Flow → UI updated. Baseline ändert sich NIE durch User-Input.
+
+**Verifikation:**
+- `:app:compileDebugKotlin` BUILD SUCCESSFUL.
+- `:app:installDebug` Pixel_7_API_35.
+- Manuelles Smoke: Wasser-Slider auf 200% (= 4000 ml) → Lock → Slider bleibt am rechten Anschlag, Display "4000 ml · 200%". Tab Home → Wasser-Ziel 4000 ml. Tab Profil → Slider weiterhin rechts.
+- Auto-Profile-Create verifiziert (Skip-Onboarding-State).
+- kcal-Override via Slider in `dailyNutrientGoalsJson` → Home liest erhöhten kcal-Wert (vorher nicht durchgereicht).
+
+**Touched docs:** CHANGELOG.md (dieser Eintrag).
+
+**Untouched docs + Begründung:**
+- ReqSpec.md — REQ-PROFILE-LAYOUT-001 sagt „Profil = Tagesziel ground-truth"; Baseline-vs-Effective ist Architektur-internes Refinement.
+- docs/Architecture.md — Pattern „Baseline + applyOverrides" passt zum bestehenden Repository/UseCase-Pattern; künftig könnte ein eigener Abschnitt entstehen.
+- docs/SprintPlan.md — Slice 4d war bereits ✅, dieser Eintrag ist Bugfix-Erweiterung.
+- docs/TraceabilityMatrix.md — REQ-PROFILE-LAYOUT-001 ist seit Slice 4d ✅; die Implementierung ist jetzt SAUBERER, nicht erweitert.
+- UsabilityMap/GUI/TestStrategy — kein UX-Wechsel, kein neuer Test-Vektor (Smoke-Path identisch).
+
+**Risiken / Trade-offs:**
+- Slider-Range 0..(2×Baseline) bedeutet: User kann maximal 2× den Baseline-Wert eintragen. Für Wasser = 4000 ml, für kcal eines 70-kg-Mannes ≈ 5000 kcal. Realistische Obergrenzen.
+- `applyOverrides` parsed JSON pro Flow-Emit. Bei tausend Emits/sec wäre das wasteful — hier <1 Hz, akzeptabel.
+- `UserProfileEntity()` Auto-Create persistiert eine „leere" Profil-Row. Onboarding-Flow muss tolerant gegenüber existierender Row sein (ist es bereits, weil `upsert` mit id=1L overschreibt).
+
+---
+
 ## P7.S4 Slice 4d — Profil-Lock-Slider 0–200 % + Allergie-FilterChip-Picker — 2026-05-28
 
 **Scope:** REQ-PROFILE-LAYOUT-001 (Erweiterung) — Profil-Tagesziele bekommen Lock-Slider-UX statt NumberField, Allergien/Intoleranzen werden inline pickbar als FilterChip-Grid.

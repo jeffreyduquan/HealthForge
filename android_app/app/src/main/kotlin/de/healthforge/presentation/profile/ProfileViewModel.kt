@@ -8,6 +8,7 @@ import de.healthforge.data.repository.FullProfile
 import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
+import de.healthforge.data.db.entities.UserProfileEntity
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.ThemePreference
@@ -48,7 +49,7 @@ class ProfileViewModel @Inject constructor(
     fun setWaterGoalMl(ml: Int) {
         val clamped = ml.coerceIn(250, 6000)
         viewModelScope.launch {
-            val current = profile.value?.profile ?: return@launch
+            val current = profile.value?.profile ?: UserProfileEntity()
             repo.upsertProfile(current.copy(waterGoalMl = clamped, updatedAt = System.currentTimeMillis()))
         }
     }
@@ -70,7 +71,9 @@ class ProfileViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            val current = profile.value?.profile ?: return@launch
+            // Auto-create default profile wenn noch keiner existiert (REQ-ONBOARD-002:
+            // Skip-Onboarding-Pfad). Singleton-Row id=1L, alle anderen Felder Defaults.
+            val current = profile.value?.profile ?: UserProfileEntity()
             val obj = runCatching { org.json.JSONObject(current.dailyNutrientGoalsJson) }.getOrElse { org.json.JSONObject() }
             obj.put(slug, value)
             repo.upsertProfile(current.copy(dailyNutrientGoalsJson = obj.toString(), updatedAt = System.currentTimeMillis()))

@@ -17,10 +17,13 @@ data class DailyTargets(
 }
 
 /**
- * Computes [DailyTargets] from a [UserProfileEntity].
+ * **Baseline** (= auto-berechnete biologische Tagesziele OHNE Profil-Override).
  *
- * If any of weight/height/age/sex/activity/goal are null (user skipped onboarding),
- * returns [DailyTargets.FALLBACK] but uses the profile's `waterGoalMl`.
+ * Für Mifflin/Macros: berechnet aus age/sex/weight/activity/goal.
+ * Für Wasser: KATALOG-Default (2000 ml), NICHT `profile.waterGoalMl`, damit der
+ * Profil-Slider-Range stabil bleibt (REQ-PROFILE-LAYOUT-001 / Slice 4d).
+ *
+ * Wenn Onboarding-Pflichtfelder fehlen → [DailyTargets.FALLBACK].
  */
 class ComputeNutrientTargetsUseCase @Inject constructor() {
 
@@ -31,15 +34,38 @@ class ComputeNutrientTargetsUseCase @Inject constructor() {
         val s = profile?.biologicalSex
         val act = profile?.activityLevel
         val goal = profile?.dietGoal
-        val water = profile?.waterGoalMl ?: DailyTargets.FALLBACK.waterMl
 
         if (w == null || h == null || a == null || s == null || act == null || goal == null) {
-            return DailyTargets.FALLBACK.copy(waterMl = water)
+            return DailyTargets.FALLBACK
         }
         val bmr = NutritionMath.bmr(w, h, a, s)
         val tdee = NutritionMath.tdee(bmr, act)
         val kcal = NutritionMath.targetKcal(tdee, goal)
         val (p, c, f) = NutritionMath.macros(kcal)
-        return DailyTargets(kcal, p, c, f, water)
+        return DailyTargets(kcal, p, c, f, DailyTargets.FALLBACK.waterMl)
     }
+}
+
+/**
+ * Wendet Profil-Overrides auf eine [DailyTargets]-Baseline an:
+ * - Wasser: `profile.waterGoalMl` ersetzt Baseline-Wasser immer (Single-Source).
+ * - Makros (kcal/protein/carbs/fat): JSON-Key in `dailyNutrientGoalsJson` ersetzt Baseline.
+ *
+ * Damit gilt: "Profil-Werte sind ground truth" (REQ-PROFILE-LAYOUT-001 / Slice 4d).
+ * Home/Insights/Plan rufen das nach [ComputeNutrientTargetsUseCase] auf.
+ */
+fun DailyTargets.applyOverrides(profile: UserProfileEntity?): DailyTargets {
+    if (profile == null) return this
+    val obj = runCatching { org.json.JSONObject(profile.dailyNutrientGoalsJson) }.getOrNull()
+    val kcalOv = obj?.optDouble("kcal", Double.NaN)
+    val proteinOv = obj?.optDouble("protein", Double.NaN)
+    val carbsOv = obj?.optDouble("carbs", Double.NaN)
+    val fatOv = obj?.optDouble("fat", Double.NaN)
+    return DailyTargets(
+        kcal = if (kcalOv != null && !kcalOv.isNaN()) kcalOv.toInt() else this.kcal,
+        proteinG = if (proteinOv != null && !proteinOv.isNaN()) proteinOv.toInt() else this.proteinG,
+        carbsG = if (carbsOv != null && !carbsOv.isNaN()) carbsOv.toInt() else this.carbsG,
+        fatG = if (fatOv != null && !fatOv.isNaN()) fatOv.toInt() else this.fatG,
+        waterMl = profile.waterGoalMl,
+    )
 }

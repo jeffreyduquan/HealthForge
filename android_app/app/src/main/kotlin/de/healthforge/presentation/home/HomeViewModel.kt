@@ -18,6 +18,7 @@ import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.data.repository.WaterIntakeRepository
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
+import de.healthforge.domain.applyOverrides
 import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.notification.WaterReminderPrefs
 import de.healthforge.notification.WaterReminderScheduler
@@ -98,7 +99,7 @@ class HomeViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     val targetsFlow: StateFlow<DailyTargets> = profileRepo.observe()
-        .map { targetsUseCase(it.profile) }
+        .map { targetsUseCase(it.profile).applyOverrides(it.profile) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DailyTargets.FALLBACK)
 
     init {
