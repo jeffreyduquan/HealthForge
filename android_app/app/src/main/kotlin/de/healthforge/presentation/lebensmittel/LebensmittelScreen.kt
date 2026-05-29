@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.presentation.lebensmittel.components.IngredientDetailSheet
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.LocalHmTokens
 
@@ -76,6 +77,7 @@ fun LebensmittelScreen(
     val hm = LocalHmTokens.current
     var showFilters by remember { mutableStateOf(false) }
     var fieldPrTarget by remember { mutableStateOf<IngredientDto?>(null) }
+    var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.toast) {
@@ -165,6 +167,7 @@ fun LebensmittelScreen(
                             item = item,
                             preselect = preselect,
                             onPick = { onPick(item) },
+                            onOpenDetail = { detailTarget = item },
                             onCorrect = { fieldPrTarget = item },
                         )
                     }
@@ -194,6 +197,14 @@ fun LebensmittelScreen(
         )
     }
 
+    // P7.S5 — Detail-Sheet bei Tap auf Karte (nur Standard-Modus).
+    detailTarget?.let { target ->
+        IngredientDetailSheet(
+            item = target,
+            onDismiss = { detailTarget = null },
+        )
+    }
+
     SnackbarHost(hostState = snackbarHostState)
 }
 
@@ -203,13 +214,14 @@ private fun IngredientRow(
     item: IngredientDto,
     preselect: Boolean,
     onPick: () -> Unit,
+    onOpenDetail: () -> Unit,
     onCorrect: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
     GlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .let { if (preselect) it.clickable(onClick = onPick) else it },
+            .clickable(onClick = if (preselect) onPick else onOpenDetail),
         padding = PaddingValues(12.dp),
     ) {
         Column {

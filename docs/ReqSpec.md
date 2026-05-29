@@ -642,6 +642,8 @@ Server-Flyway V12 erweitert `ingredients` (PostgreSQL):
 
 Mikronährstoffe von Rezepten SHALL live aus `recipe_ingredients × ingredients.micronutrients_json` aggregiert werden (analog REQ-RECIPE-007 für Makros).
 
+**Client-Aufnahme (P7.S5 4f, 2026-05-29):** `data/network/IngredientDto` führt `fdc_id: Long?` + `micronutrients: Map<String, Double>` als optionale Felder (Default `null` / `emptyMap`). UI-Sichtbarmachung im `IngredientDetailSheet` (siehe REQ-INGR-DETAIL-SHEET-001).
+
 ### REQ-INGR-ALLERGEN-MAPPING-001 — Allergen-Mapping aus FDC
 USDA-FDC liefert `ingredients`-Volltext-String + `labelNutrients`. ETL SHALL daraus die EU-14er-Allergen-Liste per Keyword-Match befüllen (`allergens_json`):
 
@@ -685,6 +687,14 @@ Gelöscht in P7.S3.b: `presentation/home/components/MacroRing.kt`, `MacroBarColu
 
 Pin-Verwaltung erfolgt **ausschließlich** im Home-Screen. Profil-Sektion „Pinned-Nutrients" wird entfernt (siehe REQ-PROFILE-LAYOUT-001).
 
+**Pin-Management UI (P7.S4 Slice 4e, Revision 2026-05-28)**:
+- `PinnedNutrientCard` hat **zwei** Modi, gesteuert durch genau **einen** Chevron-IconButton im Header (Stift-Edit-Modus und separates Picker-Sheet wurden in der Revision entfernt).
+- **Collapsed (default, `expanded = false`)**: Header-Titel "Angepinnt"; Card zeigt nur die gepinnten Nährstoffe als Progress-Rows + Wasser-Slider als `trailingSlot`. Steady-State der Home-Ansicht.
+- **Expanded (`expanded = true`)**: Header-Titel "Nährstoffe verwalten"; Card zeigt **alle** im `NutrientCatalog` definierten Nährstoffe, gruppiert in vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges = Wasser). Pro Eintrag eine kompakte Toggle-Row mit Name + DGE-Default + trailing `IconButton(PushPin)`. **Filled** = aktuell gepinnt, **Outlined** = nicht gepinnt. Tap auf das Icon ruft `HomeViewModel.togglePin(key)` → persistiert sofort in `UserProfileEntity.pinnedNutrientsJson`.
+- **Min-1-Pin-Invariant**: der letzte verbleibende Pin ist nicht entpinnbar (`togglePin` returnt no-op).
+- **Wasser**: ist Teil von `NutrientCatalog.defaultPinnedKeys`, erscheint im Expanded-View in Sektion "Sonstiges" und ist normal entpinnbar wie jeder andere Nährstoff (keine UI-Sonderbehandlung mehr seit Revision 2026-05-28). Solange Wasser gepinnt ist, erscheint der `WaterStageSlider` als `trailingSlot` im Collapsed-View.
+- Expand-Status ist **in-memory only** (`HomeState.pinsExpanded` — Session-State); nur die Pin-Liste selbst ist persistent.
+
 ### REQ-HOME-WATER-BAR-001 — Wasser als Stufen-Slider in der Pinned-Nutrient-Card
 Wasser wird als **letzte Zeile innerhalb der `PinnedNutrientCard`** dargestellt — optisch identisch zu den anderen gepinnten Nährstoffen (Label, Wert/Ziel, Prozent, gefüllte Bar), aber die Bar IST gleichzeitig ein Slider:
 
@@ -727,6 +737,22 @@ Pinned-Nutrients-Sektion (P6.S6-Pre-Spec) wird **entfernt**.
 ### REQ-PLAN-WATER-GOAL-001 — Wasser-Tagesziel im Plan
 Plan-Tab erhält pro Tag einen optionalen **Wasser-Tagesziel-Slot** (device-local in Room-Tabelle `meal_plan_slots.water_goal_ml NULL`, Room-Schema-Bump 7→8). Default = Profil-Wert. Home liest `effective_water_goal = plan_slot_value ?? profile_value`. Slider 500–5000 ml, Schritt 50 ml.
 
+### REQ-INGR-DETAIL-SHEET-001 — Lebensmittel-Detail als ModalBottomSheet (P7.S5 4f, 2026-05-29)
+Tap auf eine Lebensmittel-Karte im `LebensmittelScreen` (Standard-Modus, NICHT Picker-Modus) MUSS einen `ModalBottomSheet` öffnen, der pro 100 g zeigt:
+1. **Header**: `name_de`, optional Brand, Source-Badge mit Quelle + `fdc_id` (z. B. „USDA-FDC #170150").
+2. **Nährwerte pro 100 g**: kcal, Protein, Kohlenhydrate (+davon Zucker), Fett (+davon gesättigt), Ballaststoffe, Salz — nur Felder mit Wert.
+3. **Mikronährstoffe pro 100 g**: Werte aus `IngredientDto.micronutrients` mit `value > 0`, gruppiert in zwei Sektionen via `NutrientCatalog.ofCategory`:
+   - „Vitamine" (Catalog-Reihenfolge).
+   - „Mineralstoffe" (Catalog-Reihenfolge).
+   - Pro Zeile: `displayDe` + Wert + Einheit + Prozent-DGE-Pill (`(value / nutrient.defaultPerDay) × 100`, gerundet).
+4. **Allergene** (conditional): AssistChips mit `AllergenType.germanLabel`.
+5. **FODMAP** (conditional): AssistChips mit `FodmapType.germanLabel`.
+6. **Histamin** (conditional): nur bei `histamine_score != null` (aktuell 0/8354 Rows → Block bis SIGHI-CSV bereitgestellt unsichtbar).
+
+Picker-Modus (`LebensmittelScreen(preselect = true)`) zeigt KEIN Sheet — Tap = direktes `onPick`. Detail-Sheet ist exklusiv für Stöber-Pfad.
+
+Traceability: Mikro-Coverage-Audit gegen Produktiv-Postgres (2026-05-29): 87.9 % der USDA-Rows haben ≥ 10 Mikros, 66 % ≥ 20.
+
 ### Traceability (Erweiterung)
 
 | REQ-ID | Sprint | Implementation-Anker |
@@ -734,12 +760,13 @@ Plan-Tab erhält pro Tag einen optionalen **Wasser-Tagesziel-Slot** (device-loca
 | REQ-NUTRIENT-CATALOG-001 | P7.S1 | `domain/nutrition/NutrientCatalog.kt` |
 | REQ-DATA-SOURCE-001 | P7.S2 | `server/tools/FetchFdcTopIds.kt` (Slice 1, ✅ 2026-05-27, 8487 IDs), `server/etl/UsdaFdcImporter.kt`, `EtlOrchestrator` |
 | REQ-DATA-TRANSLATE-001 | P7.S2 | `server/scripts/translate_fdc_names.kts`, Admin-CSV-Review |
-| REQ-INGR-MICRONUTRIENTS-001 | P7.S1 | `V12__nutrients_overhaul.sql` (Server), `IngredientEntity`, `IngredientDto` |
+| REQ-INGR-MICRONUTRIENTS-001 | P7.S1 / P7.S5 4f | `V12__nutrients_overhaul.sql` (Server), `IngredientEntity`, `IngredientDto` (Server + Android), `presentation/lebensmittel/components/IngredientDetailSheet.kt` |
 | REQ-INGR-ALLERGEN-MAPPING-001 | P7.S2 | `server/etl/AllergenMapper.kt` |
-| REQ-HOME-NUTRIENT-LIST-001 | P7.S3 / P7.S3.b | `presentation/home/HomeScreen.kt`, `NutrientListSection.kt`, `PinnedNutrientCard.kt` (Stufen-Bar in `PinnedNutrientRow`, nutzt `waterStageGradient`/`waterStageTrackColor`) |
+| REQ-HOME-NUTRIENT-LIST-001 | P7.S3 / P7.S3.b / P7.S4 4e | `presentation/home/HomeScreen.kt`, `NutrientListSection.kt`, `PinnedNutrientCard.kt` (Stufen-Bar in `PinnedNutrientRow`, Header mit Edit/Collapse, Unpin-Affordance, AddNutrientRow), `NutrientPinPickerSheet.kt` (NEU P7.S4), `HomeViewModel.togglePin/reorderPins/parsePinnedKeys` (Persistenz in `UserProfileEntity.pinnedNutrientsJson`) |
 | REQ-HOME-WATER-BAR-001 | P7.S3a / P7.S3.b | `presentation/home/components/WaterStageSlider.kt` (Track via `waterStageTrackColor`), `WaterStageColors.kt` (public + `waterStageTrackColor`), `PinnedNutrientCard.kt` (trailingSlot), `data/repository/WaterIntakeRepository.setDayTotal`, `data/db/dao/WaterIntakeDao.replaceDayTotal` |
 | REQ-HOME-WATER-ALARM-001 | P7.S3 | `notification/WaterDeficitScheduler.kt`, `AlarmReceiver.kt` (ACTION_WATER_DEFICIT) |
 | REQ-PROFILE-LAYOUT-001 | P7.S4 | `presentation/profile/ProfileScreen.kt`, `NutrientGoalRow.kt`, Room v7→v8 |
 | REQ-PLAN-WATER-GOAL-001 | P7.S4 | `presentation/plan/PlanScreen.kt`, `MealPlanSlotEntity.waterGoalMl`, Room v7→v8 |
+| REQ-INGR-DETAIL-SHEET-001 | P7.S5 4f | `presentation/lebensmittel/LebensmittelScreen.kt` (`detailTarget`-State + `IngredientRow.onOpenDetail`), `presentation/lebensmittel/components/IngredientDetailSheet.kt` |
 
 **End of §12.**

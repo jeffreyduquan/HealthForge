@@ -147,6 +147,10 @@ fun HomeScreen(
                             )
                         }
                     } else null,
+                    pinnedKeys = s.pinnedKeys,
+                    expanded = s.pinsExpanded,
+                    onToggleExpanded = vm::togglePinsExpanded,
+                    onTogglePin = vm::togglePin,
                 )
             }
 
@@ -226,6 +230,9 @@ fun HomeScreen(
             onDismiss = vm::closeQuickAdd,
         )
     }
+
+    // P7.S4 4e — Picker-Sheet entfernt; Pinnen erfolgt inline im
+    // PinnedNutrientCard (Expanded-View).
 }
 
 @Composable

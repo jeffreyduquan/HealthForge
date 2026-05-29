@@ -14,6 +14,7 @@ data class IngredientDto(
     val brand: String?,
     val barcode: String?,
     val source: String,
+    val fdc_id: Long? = null,
     val energy_kcal_per_100g: Double?,
     val protein_g_per_100g: Double?,
     val carbs_g_per_100g: Double?,
@@ -25,6 +26,8 @@ data class IngredientDto(
     val histamine_score: Int?,
     val allergens: List<String> = emptyList(),
     val fodmap_flags: List<String> = emptyList(),
+    /** P7.S5 — Map<NutrientCatalog.key, Wert pro 100 g> (Vitamine + Mineralstoffe). */
+    val micronutrients: Map<String, Double> = emptyMap(),
     val locked: Boolean = true,
 )
 

@@ -1761,7 +1761,7 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:** Prozent-Anzeige bedeutet jetzt "Prozent in aktueller Stufe" — bei Überkonsum kann das verwirrend sein. Mitigation: Lv-Badge macht Stufe sichtbar.
 
 ### Sprint P7.S4 — Profile + Plan + Defizit-Alarm
-**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4d ✅ + Slice 4c ✅ — alle 2026-05-28; Slice 4b ❌ DEFERRED — Tagesziele bleiben Profil-only)
+**Status:** 🟡 IN PROGRESS (Slice 4a ✅ + Slice 4d ✅ + Slice 4c ✅ + Slice 4e ✅ — alle 2026-05-28; Slice 4b ❌ DEFERRED — Tagesziele bleiben Profil-only)
 
 **Slice 4a — Profile-Refactor (✅ DONE 2026-05-28):**
 - NEW `presentation/profile/components/NutrientGoalRow.kt` — Zeile: Label + Default (read-only, klein) + Override-NumberField (Decimal-Input, Komma-tolerant) + Reset-Icon (`Icons.Outlined.RestartAlt`). Override-Range clamped in `nutrient.min..nutrient.max`.
@@ -1798,6 +1798,16 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - Storage-Format unverändert (absolute Werte im `dailyNutrientGoalsJson`); Slider zeigt %-Anzeige nur visuell relativ zu Default.
 - **Verifikation:** `:app:compileDebugKotlin` BUILD SUCCESSFUL 21s, 0 Errors; Install + Visual-Smoke: Allergie-FilterChips toggeln (multi-select), Lock-Slider Vitamin E entsperrt → Drag → 21.5 mg / 165 % Anzeige, Re-Lock-Tap schließt Slider visuell zurück (Persistenz-Verifikation via DB-Read blockiert durch Storage-Permissions, Code-Logik aber via Compose-State + setNutrientGoal sauber).
 
+**Slice 4e — PinnedNutrientCard Persistenz + Expanded-Inline-Picker (✅ DONE 2026-05-28, **Revision** gleicher Tag):**
+- Schließt P7.S3-Defer "Persistente Speicherung folgt in P7.S5" — fällt jetzt natürlich in P7.S4, weil das gesamte Profil-/Pin-Modell hier konsolidiert wird.
+- **Persistenz (unverändert seit 4e-v1):** `presentation/home/HomeViewModel.kt` — `profileRepo` als Field; Init-Subscription `profileRepo.observe().map { parsePinnedKeys(...) }` → `state.pinnedKeys` (Fallback `NutrientCatalog.defaultPinnedKeys`). `togglePin(key)` persistiert sofort via `profileRepo.upsertProfile(pinnedNutrientsJson = ...)`. Min-1-Pin-Invariant. `reorderPins(newOrder)` als P7.S5-Drag-Vorbereitung. `parsePinnedKeys`-companion.
+- **UX-Revision (User-Feedback: 1 Chevron statt 3 Affordances):** Stift-Edit-Modus + Picker-Sheet **entfernt**. `HomeState.pinsEditMode` + `pinPickerOpen` entfernt; `pinsCollapsed` umbenannt in `pinsExpanded` (default `false` = nur gepinnte sichtbar).
+- MOD `PinnedNutrientCard.kt`: neue Signatur `(entries, pinnedKeys, expanded, onToggleExpanded, onTogglePin, trailingSlot)`. Header: Titel ("Angepinnt"/"Nährstoffe verwalten") + **Chevron**. Collapsed = Progress-Rows + Wasser-Slot. Expanded = vier Kategorie-Sections (Makros/Vitamine/Mineralien/Sonstiges) mit kompakten Toggle-Rows + trailing PushPin (Filled = pinned, Outlined = nicht). Tap → `onTogglePin`.
+- DEL `presentation/home/components/NutrientPinPickerSheet.kt`.
+- MOD `HomeScreen.kt`: Picker-Sheet-Block entfernt; Card-Call: `pinnedKeys`, `expanded`, `onToggleExpanded`, `onTogglePin`.
+- **Wasser:** keine Sonderbehandlung mehr — default gepinnt (`NutrientCatalog.defaultPinnedKeys`), normal entpinnbar im Expanded-Toggle, Min-1-Invariant verhindert komplettes Leeren.
+- **Verifikation:** VS Code Kotlin LSP 0 Errors; `:app:installDebug` BUILD SUCCESSFUL 20s auf Pixel_7_API_35, 0 Errors.
+
 **Akzeptanz (gesamtsprintweit):**
 - Override eines Nährstoffs setzt JSON-Key, Reset-Icon entfernt ihn. (Slice 4a ✅)
 - ~~Plan-Wasser-Goal-Slider übersteuert Profil-Wert nur für ausgewählten Tag.~~ (Slice 4b ❌ DEFERRED)
@@ -1805,14 +1815,28 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 - Slider-Drag auf 0 ml + 5 min warten → erster Defizit-Alarm. (Slice 4c)
 - Snooze verschiebt nächsten Alarm um 30 min ohne Persistenz-Side-Effect. (Slice 4c)
 - 22:30 → kein Alarm; 08:01 → Defizit-Auswertung läuft neu. (Slice 4c)
+- Pin-Verwaltung im Home-Tab: Chevron → Expand-View mit Kategorie-Sections (Makros/Vitamine/Mineralien/Sonstiges), PushPin-Icon je Zeile (Filled = pinned, Outlined = nicht). Tap = sofort persistent. Pin-Reihenfolge persistiert in `UserProfileEntity.pinnedNutrientsJson`. Min-1-Pin-Invariant. (Slice 4e ✅)
 
 **Risiken:**
 - AlarmManager-Doze-Mode kann Alarme verzögern. Mitigation: `setExactAndAllowWhileIdle` für kritischen Mindest-5min-Alarm.
 
 ### Sprint P7.S5 — Polish + Admin-UI + Migration-Smoke
-**Status:** ⏳ TODO
+**Status:** 🟡 Slice 4f (Lebensmittel-Detail-Sheet) ✅; Rest TODO
 
-**Deliverables:**
+**Slice 4f — Lebensmittel-Detail-Sheet (Mikronährwerte sichtbar) (✅ DONE 2026-05-29):**
+- Pre: User-Direktive *„macht es nicht sinn, wenn wir server/backend für DB Lebensmittel erst fertig machen, sodass wir im UI dann tatsächlich inhalte haben"*. Antwort = Daten-Audit gegen `healthforge-postgres-dev`:
+  - 8326 / 8354 (99.7 %) Rows haben ≥ 1 Mikro, **7340 (87.9 %) ≥ 10 Mikros**, 5549 (66 %) 20+.
+  - Top-Mikros: Natrium 99 %, Eisen/Calcium 98 %, B-Vitamine 88-90 %; Lücken Biotin (B7) 1.2 %, Jod 0.4 %.
+  - 0/8354 Histamin (SIGHI fehlt), 0/8354 FODMAP (kein automated Mapper), 1840/8354 (22 %) Allergene.
+  - Übersetzung-Stichprobe n=10: solide, gelegentliche Holprigkeit, Marken korrekt.
+- Schluss: Datenbasis trägt UI-Slice. Histamin + FODMAP = separate Backend-Slices (nicht UI-Blocker).
+- MOD `data/network/IngredientApi.kt` — `IngredientDto` um `fdc_id: Long?` + `micronutrients: Map<String, Double>` erweitert (Server liefert beide seit P7.S1 V12, Android hat sie bisher ignoriert).
+- NEW `presentation/lebensmittel/components/IngredientDetailSheet.kt` — `ModalBottomSheet` (skipPartiallyExpanded), vertikal-scroll, Sections via `SectionPill`: "Nährwerte pro 100 g" (Makros) → "Mikronährstoffe pro 100 g" (gefiltert > 0, gruppiert per `NutrientCatalog.ofCategory`, Vitamine + Mineralstoffe, mit `%-DGE`-Pill via `defaultPerDay`) → Allergene/FODMAP-Chips (conditional) → Histamin-Block (conditional, aktuell nie sichtbar). Header zeigt `name_de` + Brand + Source-Badge (Quelle + `fdc_id`).
+- MOD `presentation/lebensmittel/LebensmittelScreen.kt` — `IngredientRow` Click-Verhalten: `preselect` ⇒ `onPick` (alt), sonst ⇒ neues `onOpenDetail` (öffnet Sheet via `detailTarget`-State).
+- **Verifikation:** `:app:installDebug` BUILD SUCCESSFUL **28s**, 42 actionable tasks, 0 Errors. Installiert auf Pixel_7_API_35.
+- Bekannte Datenkanten (für Folge-Slices): Histamin-Block niemals sichtbar bis SIGHI-Pipeline (separater Slice); FODMAP-Chips niemals sichtbar bis FODMAP-Mapper für FDC.
+
+**Restliche P7.S5-Deliverables:**
 - NEW `admin-ui/src/pages/FdcTranslationsPage.tsx` — Tabelle mit en/de_machine/de_review-Spalten, Inline-Edit, Bulk-Apply.
 - MOD `admin-ui/src/pages/IngredientQueuePage.tsx`: zeigt `micronutrients_json` als Expandable-Tabelle.
 - Migration-Smoke (dev-DB): `V12__` apply + USDA-FDC Top-100 Import + DeepL Top-100 Translate + Admin-Review + Bulk-Apply + Android E2E auf Home zeigt deutsche Namen + Mikro-Werte.

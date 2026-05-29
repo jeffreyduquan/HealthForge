@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -67,6 +68,14 @@ data class HomeState(
      * Persistente Speicherung (UserProfile JSON) folgt in P7.S5.
      */
     val pinnedKeys: List<String> = NutrientCatalog.defaultPinnedKeys,
+    /**
+     * P7.S4 / REQ-HOME-NUTRIENT-LIST-001 — `PinnedNutrientCard` expanded:
+     * `false` (default) = nur gepinnte Nährstoffe sichtbar (steady-state).
+     * `true` = alle Nährstoffe sichtbar (gruppiert nach Kategorie) zum
+     * Inline-Pinnen/Entpinnen via PushPin-Icon. Toggle via Chevron im
+     * Card-Header. In-Memory only (Session-State).
+     */
+    val pinsExpanded: Boolean = false,
     val supplementChecklist: List<SupplementChecklistItem> = emptyList(),
     val showQuickAdd: Boolean = false,
     val quickAddQuery: String = "",
@@ -87,7 +96,7 @@ class HomeViewModel @Inject constructor(
     private val supplementRepo: SupplementRepository,
     private val waterReminderPrefs: WaterReminderPrefs,
     private val waterReminderScheduler: WaterReminderScheduler,
-    profileRepo: ProfileRepository,
+    private val profileRepo: ProfileRepository,
     targetsUseCase: ComputeNutrientTargetsUseCase,
 ) : ViewModel() {
 
@@ -161,6 +170,16 @@ class HomeViewModel @Inject constructor(
                     waterGhostMl = computeWaterGhostMl(t.waterMl, _state.value.date),
                 )
             }
+            .launchIn(viewModelScope)
+
+        // P7.S4 / REQ-HOME-NUTRIENT-LIST-001 — Pin-Reihenfolge aus
+        // `UserProfileEntity.pinnedNutrientsJson` lesen. Fallback auf
+        // `NutrientCatalog.defaultPinnedKeys` wenn JSON leer oder Profil
+        // noch nicht initialisiert (Onboarding-Skip).
+        profileRepo.observe()
+            .map { parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
+            .distinctUntilChanged()
+            .onEach { keys -> _state.value = _state.value.copy(pinnedKeys = keys) }
             .launchIn(viewModelScope)
 
         queryFlow
@@ -285,9 +304,12 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * P7.S3 / REQ-HOME-NUTRIENT-LIST-001 \u2014 togglet einen Nutrient-Key in der
-     * Pin-Liste. Verhindert das L\u00f6schen aller Pins (mind. 1 Pin bleibt).
-     * Persistente Speicherung folgt in P7.S5 (UserProfile JSON).
+     * P7.S4 / REQ-HOME-NUTRIENT-LIST-001 — togglet einen Nutrient-Key in der
+     * Pin-Liste und persistiert sofort in
+     * `UserProfileEntity.pinnedNutrientsJson` (kein Save-Button,
+     * UsabilityMap §3 Home). Verhindert das Löschen aller Pins
+     * (mind. 1 Pin bleibt). Bei fehlendem Profil-Row (Onboarding-Skip)
+     * bleibt nur in-memory.
      */
     fun togglePin(key: String) {
         val cur = _state.value.pinnedKeys
@@ -296,10 +318,60 @@ class HomeViewModel @Inject constructor(
             key in cur -> cur
             else -> cur + key
         }
+        if (next == cur) return
         _state.value = _state.value.copy(pinnedKeys = next)
+        viewModelScope.launch {
+            val current = profileRepo.observe().first().profile ?: return@launch
+            val out = org.json.JSONArray()
+            next.forEach { out.put(it) }
+            profileRepo.upsertProfile(
+                current.copy(
+                    pinnedNutrientsJson = out.toString(),
+                    updatedAt = System.currentTimeMillis(),
+                )
+            )
+        }
+    }
+
+    /** Reorder-Helper für Drag&Drop (P7.S4 follow-up). Persistiert sofort. */
+    fun reorderPins(newOrder: List<String>) {
+        if (newOrder == _state.value.pinnedKeys) return
+        _state.value = _state.value.copy(pinnedKeys = newOrder)
+        viewModelScope.launch {
+            val current = profileRepo.observe().first().profile ?: return@launch
+            val out = org.json.JSONArray()
+            newOrder.forEach { out.put(it) }
+            profileRepo.upsertProfile(
+                current.copy(
+                    pinnedNutrientsJson = out.toString(),
+                    updatedAt = System.currentTimeMillis(),
+                )
+            )
+        }
+    }
+
+    /**
+     * P7.S4 — UI-Toggle Expand der Pin-Card.
+     * Collapsed = nur gepinnte, Expanded = alle (mit Inline-Pin-Toggle).
+     */
+    fun togglePinsExpanded() {
+        _state.value = _state.value.copy(pinsExpanded = !_state.value.pinsExpanded)
     }
 
     companion object {
+        /**
+         * P7.S4 — Parst `pinnedNutrientsJson` zu Key-Liste. Fallback auf
+         * `NutrientCatalog.defaultPinnedKeys` bei null/leer/parse-error.
+         */
+        internal fun parsePinnedKeys(json: String?): List<String> {
+            if (json.isNullOrBlank()) return NutrientCatalog.defaultPinnedKeys
+            return runCatching {
+                val arr = org.json.JSONArray(json)
+                (0 until arr.length()).map { arr.getString(it) }
+                    .takeIf { it.isNotEmpty() }
+            }.getOrNull() ?: NutrientCatalog.defaultPinnedKeys
+        }
+
         /**
          * P7.S3 / REQ-HOME-WATER-BAR-001 \u2014 Anteil des Tages, der bis "jetzt"
          * vergangen ist, multipliziert mit dem Tagesziel. Bei Anzeige eines

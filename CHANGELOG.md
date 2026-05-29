@@ -5,6 +5,170 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S5 4f — Lebensmittel-Detail-Sheet (Mikronährwerte sichtbar) — 2026-05-29
+
+**Scope:** Tap auf eine Lebensmittel-Karte im `LebensmittelScreen` öffnet jetzt ein `ModalBottomSheet` mit voller Detail-Aufschlüsselung: Makros pro 100 g, Mikronährwerte (gefiltert auf Werte > 0, gruppiert in Vitamine / Mineralstoffe in `NutrientCatalog`-Reihenfolge, mit Prozent-DGE-Pill pro Zeile), Allergene/FODMAP-Chips falls vorhanden, Quelle (z. B. „USDA-FDC #170150"). Histamin-Block wird nur gerendert, wenn `histamine_score` gesetzt ist (aktuell 0/8354 Rows → Block unsichtbar bis SIGHI-Pipeline kommt).
+
+**Vorab: Daten-Audit gegen Produktiv-Postgres** (User-Direktive *„macht es nicht sinn, wenn wir server/backend für DB Lebensmittel erst fertig machen, sodass wir im UI dann tatsächlich inhalte haben"*):
+- 8326 / 8354 (99.7 %) Rows haben ≥ 1 Mikro, **7340 (87.9 %) ≥ 10 Mikros**, 5549 (66 %) 20+. Top-Coverage: Natrium 99 %, Eisen/Calcium 98 %, B-Vitamine 88-90 %. Lücken Biotin (B7) 1.2 %, Jod 0.4 % — USDA misst diese Kategorien selten.
+- Übersetzungsqualität (n=10 Random): solide, gelegentliche Holprigkeit („kurze Lende"), Markennamen korrekt unübersetzt.
+- Bestätigte Lücken (separate Slices): Histamin 0/8354 (SIGHI-CSV fehlt, REQ-INGR-003), FODMAP 0/8354 (kein automated Mapper für FDC-Import), Allergene 1840/8354 = 22 % (AllergenMapper greift nur bei FDC-Ingredients-Text).
+→ **Schluss:** Datenbasis trägt UI-Slice. Histamin + FODMAP sind eigenständige Backend-Slices (nicht UI-Blocker).
+
+### Code
+
+- **MOD** `data/network/IngredientApi.kt`
+  - `IngredientDto` erweitert um `fdc_id: Long? = null` und `micronutrients: Map<String, Double> = emptyMap()` — Server liefert beide Felder bereits seit P7.S1 (V12), Android-Client hat sie bisher ignoriert.
+- **NEW** `presentation/lebensmittel/components/IngredientDetailSheet.kt`
+  - Composable `IngredientDetailSheet(item: IngredientDto, onDismiss: () -> Unit)`.
+  - Layout: `ModalBottomSheet` (skipPartiallyExpanded) → vertical-scroll Column mit Header (`name_de` + Brand), `SourceBadge` (Quelle + `fdc_id`), Sections via `SectionPill`:
+    - "Nährwerte pro 100 g" → `MacrosGrid` (8 Zeilen, nur gesetzte Felder).
+    - "Mikronährstoffe (pro 100 g)" → `MicroSection` je Kategorie (Vitamine, Mineralstoffe), nutzt `NutrientCatalog.ofCategory()` für Reihenfolge, filtert auf `value > 0`, zeigt pro Zeile Name + Wert + `%-DGE`-Pill.
+    - "Allergene" / "FODMAP" / "Histamin" → conditional, AssistChips bzw. Score.
+  - `format(v)`-Helper: ≥100 ⇒ Int, ≥10 ⇒ 1 Dezimale, sonst 2.
+- **MOD** `presentation/lebensmittel/LebensmittelScreen.kt`
+  - `IngredientRow` neuer Parameter `onOpenDetail: () -> Unit`; clickable wechselt: `preselect` ⇒ `onPick`, sonst ⇒ `onOpenDetail`.
+  - Neue State-Variable `detailTarget: IngredientDto?` + ModalBottomSheet-Render unten im Composable.
+
+### Touched Docs
+
+- ✅ `CHANGELOG.md` — dieser Eintrag.
+- ✅ `docs/SprintPlan.md` — neuer Slice 4f-Eintrag unter P7-Sprint.
+- ✅ `docs/ReqSpec.md` — REQ-INGR-MICRONUTRIENTS-001 erweitert um Client-Aspekt; neue REQ-INGR-DETAIL-SHEET-001.
+- ✅ `docs/UsabilityMap.md` — §5.3 „Lebensmittel-Detail" aktualisiert (BottomSheet statt Vollscreen, Mikro-Section mit %-DGE).
+- ✅ `docs/GUI.md` — neues §8.4 `IngredientDetailSheet`-Component-Spec.
+- ✅ `docs/TraceabilityMatrix.md` — REQ-INGR-MICRONUTRIENTS-001 → ✅ (UI sichtbar), neue Row REQ-INGR-DETAIL-SHEET-001.
+
+### Untouched Docs (Begründung)
+
+- `docs/00 Plan` / `01 Vision` / `02 Glossary` — keine Strategie-/Vokabular-Änderungen; Detail-Sheet ist UX-Verfeinerung bestehender Lebensmittel-DB.
+- `docs/Architecture.md` — kein Layer-Wechsel; lediglich neues Compose-Component im bestehenden `presentation/lebensmittel`-Subtree, Datenfluss unverändert (DTO ⇒ ViewModel ⇒ Composable).
+- `docs/TestStrategy.md` — keine neuen Test-Kategorien; UI-Smoke deckt das Sheet manuell ab (Pattern wie restliche P7-Slices).
+- `docs/Runbook.md` / `docs/BattleTestPlan.md` — kein Ops-/Deploy-Impact, keine Migration.
+
+### Verifikation
+
+- `:app:installDebug` **BUILD SUCCESSFUL in 28s**, 42 actionable tasks (11 executed, 31 up-to-date). Installiert auf `Pixel_7_API_35` (AVD-15). Keine Compile-Errors, keine neuen Warnings außer bestehender Moshi-kapt-Hinweis.
+- Daten-Audit-SQL gegen `healthforge-postgres-dev` ausgeführt (siehe Scope-Section oben).
+- Manueller Smoke-Test offen: Sheet öffnen, Mikro-Sektion bei FDC-Row mit ≥ 15 Mikros sichten, Mikro-Sektion bei Branded-Food mit < 5 Mikros sichten, Allergen-Chips bei FDC-Foundation-Food sichten.
+
+### Bekannte Datenkanten (für nächste Slices)
+
+1. **Histamin-Block niemals sichtbar** bis SIGHI-CSV bereitgestellt + `loadSighiHistamine.kt`-Tool gebaut (REQ-INGR-003 / P7.S5 separate Slice).
+2. **FODMAP-Chips niemals sichtbar** bis FODMAP-Mapper für FDC-Import existiert (analog `AllergenMapper`, eigene Slice).
+3. **% DGE für Wasser**: Aktuell zeigen wir DGE-Default = 2000 ml, aber FDC liefert Wasser nicht als Mikro-Key („water" ist Pseudo-Nährstoff im Catalog) → Wasser-Zeile erscheint nicht. Korrekt.
+
+---
+
+## P7.S4 4e (Revision) — PinnedNutrientCard: Expanded-Inline-Picker statt Edit-Modus + Sheet — 2026-05-28
+
+**Scope:** UX-Vereinfachung auf direkten User-Wunsch (*"Der Collapse und expand soll zwischen ALLEN Nährstoffen (expanded) oder nur den gepinnten (collapsed) zeigen. In diesem View kann man dann pinnen oder Unpinnen."*). Stift-Edit-Modus und `NutrientPinPickerSheet` werden entfernt; ihre Aufgaben übernimmt der Chevron-Toggle direkt in der `PinnedNutrientCard`. Wasser bleibt per Default gepinnt (`NutrientCatalog.defaultPinnedKeys`), erhält aber keine Sonderbehandlung — normal entpinnbar wie jede andere Zeile (Min-1-Invariant unverändert).
+
+### Code
+
+- **MOD** `presentation/home/HomeViewModel.kt`
+  - `HomeState.pinsEditMode` **entfernt**.
+  - `HomeState.pinPickerOpen` **entfernt**.
+  - `HomeState.pinsCollapsed` **umbenannt** in `pinsExpanded` (default `false` ⇒ steady-state = nur gepinnte sichtbar).
+  - `togglePinsEditMode()` + `setPinPickerOpen()` **entfernt**; `togglePinsCollapsed()` ⇒ `togglePinsExpanded()`.
+  - `togglePin` + `reorderPins` + `parsePinnedKeys` **unverändert** (Persistenz aus Slice 4e-v1 bleibt).
+- **MOD** `presentation/home/components/PinnedNutrientCard.kt`
+  - Neue Signatur: `(entries, pinnedKeys, modifier, expanded, onToggleExpanded, onTogglePin, trailingSlot)`. Alte Params `editMode`/`collapsed`/`onToggleEdit`/`onToggleCollapse`/`onUnpin`/`onOpenPicker` **entfallen**.
+  - Header: Titel + **Chevron** (Stift entfernt). Titel kontextbasiert "Angepinnt" (collapsed) ↔ "Nährstoffe verwalten" (expanded).
+  - Collapsed (default): Progress-Rows für `entries` + `trailingSlot` (Wasser-Slider) — unverändert zur Slice-4e-v1-Steady-State-Optik.
+  - Expanded: Vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges) mit kompakter Toggle-Row pro Nährstoff: Name + DGE-Default + trailing `IconButton(PushPin)`. **Filled** = pinned, **Outlined** = nicht pinned. Tap → `onTogglePin(key)` (sofort persistent, Min-1 in VM).
+  - Wasser-Toggle erscheint im Expanded in Sektion "Sonstiges" — kein Sonderfall.
+  - `AnimatedVisibility` und `AddNutrientRow` **entfernt**.
+- **DEL** `presentation/home/components/NutrientPinPickerSheet.kt` (Datei gelöscht).
+- **MOD** `presentation/home/HomeScreen.kt`
+  - `NutrientPinPickerSheet`-Import + Aufruf-Block **entfernt**.
+  - `PinnedNutrientCard`-Call: `pinnedKeys = s.pinnedKeys, expanded = s.pinsExpanded, onToggleExpanded = vm::togglePinsExpanded, onTogglePin = vm::togglePin`.
+
+### Touched Docs
+
+- **CHANGELOG.md** — dieser Eintrag.
+- **docs/SprintPlan.md** — Slice 4e Revision-Hinweis (Scope-Reduktion).
+- **docs/ReqSpec.md** — REQ-HOME-NUTRIENT-LIST-001 UI-Beschreibung neu: Chevron-Single-Toggle statt Stift+Sheet.
+- **docs/UsabilityMap.md** §3 — Pin-Management-Flow neu (1 Affordance statt 3).
+- **docs/GUI.md** §8 — `PinnedNutrientCard` Expanded-Modus dokumentiert; `NutrientPinPickerSheet`-Zeile entfernt.
+- **docs/TraceabilityMatrix.md** — REQ-HOME-NUTRIENT-LIST-001 Anker: Picker-Sheet entfernt.
+
+### Untouched (Begründung)
+
+- **docs/Architecture.md** — keine Layer-Änderung.
+- **docs/TestStrategy.md** — Code-Reduktion (1 Composable + Sheet weniger), keine neue Test-Kategorie.
+- **docs/00 Plan, 01 Vision, 02 Glossary, 09 Bootstrap** — keine Domain-/Vision-Drift.
+- **docs/BattleTestPlan.md / Runbook.md** — Smoke-Test-Cases werden im selben Slice-4e-Block der Test-Plan-Sektion einfach angepasst (Stift-Step entfällt).
+- `ProfileViewModel.togglePinnedNutrient` — unverändert (orthogonal zu Home-Path).
+
+### Verifikation
+
+- VS Code Kotlin LSP: 0 Errors in HomeViewModel, PinnedNutrientCard, HomeScreen.
+- Gradle: `:app:installDebug` **BUILD SUCCESSFUL 20s** (Pixel_7_API_35), 0 Errors (2026-05-28).
+- Follow-up Patch (selber Sprint, gleicher Tag) auf User-Feedback *"Pin nadeln … muss farblich besser differenzierbar sein"*: in `CategoryPinRow` aktiver Pin jetzt `Icons.Filled.PushPin` in `hm.ambientViolet` (größeres 18.dp Icon) auf rundem violet-tinted Background (`ambientViolet` Alpha 0.22), inaktiver Pin `Icons.Outlined.PushPin` in `hm.fgTertiary` (16.dp, kein Hintergrund). Build: `:app:installDebug` BUILD SUCCESSFUL 12s.
+- Follow-up Patch 2 auf User-Feedback *"Collapse/expand knopf MUSS auch graphisch hervorrufen werden"*: Chevron-Header-Button erhält jetzt eine violette Pill-Background-Affordance (analog zum aktiven Pin). Im Collapsed-Modus: Background `ambientViolet` Alpha 0.12 + Border Alpha 0.35, Icon-Tint `fgPrimary`. Im Expanded-Modus: Background Alpha 0.28 + Border Alpha 0.7, Icon-Tint `ambientViolet`. Button-Box auf 32.dp Pill vergrößert (Touch-Target 40.dp). Build: `:app:installDebug` BUILD SUCCESSFUL 11s.
+- Manuelle Smoke-Tests (User am Emulator):
+  1. Home → Chevron → alle Nährstoffe sichtbar, Pinned-Icons filled.
+  2. Vitamin C Pin-Icon tippen → wird filled → Chevron schließen → Vitamin C erscheint zwischen Pinned-Bars → App-Restart → bleibt gepinnt.
+  3. Wasser-Pin-Icon im Expanded tippen → Wasser-Slider verschwindet aus Collapsed-View → wieder tippen → erscheint.
+  4. Min-1: alle bis auf einen entpinnen → letzter Tap ist no-op.
+
+---
+
+## P7.S4 — PinnedNutrientCard: Persistenz + Edit-Modus + Picker-Sheet — 2026-05-28
+
+**Scope:** Schließt die in P7.S3 als TODO markierte "Persistente Speicherung folgt in P7.S5" — Pin-Reihenfolge wandert von In-Memory in `UserProfileEntity.pinnedNutrientsJson`. Plus User-Verwaltung: Edit-Modus (Stift), Collapse (Chevron), Unpin pro Zeile, Nutrient-Picker-BottomSheet zum Anpinnen weiterer Nährstoffe aus dem [NutrientCatalog].
+
+### Code
+
+- **MOD** `presentation/home/HomeViewModel.kt`
+  - `profileRepo` jetzt als Field (war Konstruktor-only-Param) → Schreib-Zugriff für Pin-Persistenz.
+  - NEU Init-Subscription `profileRepo.observe().map { parsePinnedKeys(it.profile?.pinnedNutrientsJson) }` → `state.pinnedKeys`. Fallback auf `NutrientCatalog.defaultPinnedKeys` bei null/leer/parse-error oder fehlendem Profile-Row (Onboarding-Skip).
+  - `togglePin(key)` schreibt jetzt sofort `UserProfileEntity.copy(pinnedNutrientsJson = ..., updatedAt = now)` via `profileRepo.upsertProfile`. Min-1-Pin-Invariant beibehalten.
+  - NEU `reorderPins(newOrder)` als Persistenz-Helper für späteres Drag-Reorder.
+  - NEU `HomeState.pinsEditMode`, `pinsCollapsed`, `pinPickerOpen` (alle in-memory, kein DataStore).
+  - NEU `togglePinsEditMode()`, `togglePinsCollapsed()`, `setPinPickerOpen(open)`.
+  - NEU companion `parsePinnedKeys(json)`.
+- **MOD** `presentation/home/components/PinnedNutrientCard.kt`
+  - Card-Header mit Titel "Angepinnt" + optionalem Stift-IconButton (Edit-Toggle) + Chevron-IconButton (Collapse-Toggle). Header wird nur gerendert wenn mindestens ein `onToggle*` gesetzt ist (Backward-Compat).
+  - `AnimatedVisibility` um die Entry-Liste — Collapse versteckt Entries **und** `trailingSlot` (Wasser-Slider).
+  - Im Edit-Modus zeigt jede `PinnedNutrientRow` ein 45°-rotiertes `Icons.Outlined.PushPin` als Unpin-Affordance (ruft `onUnpin(key)` → sofort persistent).
+  - NEU `onOpenPicker`-Param → rendert "+ Nährstoff hinzufügen"-Footer-Row (`AddNutrientRow`) als letzte Zeile, sichtbar nur im Edit-Modus.
+- **NEU** `presentation/home/components/NutrientPinPickerSheet.kt`
+  - Material3 `ModalBottomSheet` mit Kategorien-Sections (Makros / Vitamine / Mineralien / Sonstiges = Wasser). Pro Eintrag `Switch`. Toggle ruft sofort `HomeViewModel.togglePin` → sofort persistent. Untertitel zeigt DGE-Default + Einheit/Tag.
+- **MOD** `presentation/home/HomeScreen.kt`
+  - `PinnedNutrientCard`-Call um `editMode`/`collapsed`/`onToggleEdit`/`onToggleCollapse`/`onUnpin`/`onOpenPicker` erweitert.
+  - `NutrientPinPickerSheet` am Ende der Composable-Tree, sichtbar wenn `s.pinPickerOpen`.
+
+### Touched Docs
+
+- **CHANGELOG.md** — dieser Eintrag.
+- **docs/SprintPlan.md** — P7.S4-Sektion: Pin-Verwaltung als ✅ markiert (war als TODO/Slice geführt).
+- **docs/ReqSpec.md** — REQ-HOME-NUTRIENT-LIST-001: "Persistente Speicherung folgt in P7.S5" → **erfüllt P7.S4**. Edit-Modus + Picker-Verhalten dokumentiert.
+- **docs/UsabilityMap.md** §3 Home — Edit-Modus-Flow (Stift→Unpin/+), Collapse-Affordance, Picker-Sheet.
+- **docs/GUI.md** §8 — `PinnedNutrientCard` Header + Edit-Modus; NEU-Komponente `NutrientPinPickerSheet`.
+- **docs/TraceabilityMatrix.md** — REQ-HOME-NUTRIENT-LIST-001 Implementation-Anker erweitert um `NutrientPinPickerSheet.kt` + `HomeViewModel.togglePin/parsePinnedKeys`.
+
+### Untouched (Begründung)
+
+- **docs/Architecture.md** — keine Layer-Änderung (bleibt presentation+data). `UserProfileEntity` als Single-Source-of-Truth war bereits in P6.S6 etabliert.
+- **docs/SprintPlan.md** P6.S6 / P7.S3 / P7.S3.a — historische Einträge bleiben unverändert; P7.S4 schreibt die Defer-Notiz fort.
+- **docs/TestStrategy.md** — Keine neue Test-Kategorie; Pin-Persistenz fällt unter bestehende Profile-Repo-Unit-Tests-Strategie.
+- **docs/00 Plan, 01 Vision, 02 Glossary, 09 Bootstrap** — keine Domain-/Vision-Drift.
+- `ProfileViewModel.togglePinnedNutrient` bleibt unverändert (no-op-Public-Method, kein Caller; Home nutzt eigene Path — wie bereits in P7.S4a notiert).
+
+### Verifikation
+
+- Static-Analyse (VS Code Kotlin LSP): keine Errors in den 4 betroffenen Dateien.
+- Gradle: `:app:compileDebugKotlin` **BUILD SUCCESSFUL 8s**, 0 Errors (2026-05-28).
+- Manuell zu testen (BattleTestPlan-Ergänzung folgt im nächsten Build-Cycle):
+  1. Home öffnen → Stift tippen → Pin-Icon je Zeile sichtbar → Unpin → Re-Open App → Pin bleibt entpinnt.
+  2. Chevron tippen → Card kollabiert (Wasser-Slider mit verborgen).
+  3. "+ Nährstoff hinzufügen" → Sheet öffnet → Vitamin C anpinnen → Sheet schließen → Zeile erscheint → App-Restart → Vitamin C bleibt gepinnt.
+  4. Min-1-Pin: alle bis auf einen entpinnen → letzter ist nicht entpinnbar (Tap ist no-op).
+
+---
+
 ## P7.S4 Slice 4c — WaterDeficitScheduler (Defizit-basierte Wasser-Reminder) — 2026-05-28
 
 **Scope:** Ersetzt den festen 2h-Tick-Reminder durch einen Defizit-Check (REQ-WATER-005 / REQ-HOME-WATER-ALARM-001). Nutzer-Quote: *"wir brauchen nur ein alarmsystem"* + *"Profil Werte sind ground trough. Alle funktionen lesen den wert von hier ab"*.

@@ -115,16 +115,20 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 - **Pinned-Bars Stufen-Anzeige (P7.S3.b, einheitlich mit Wasser):** Alle Pin-Bars (kcal/Protein/Carbs/Fett/Wasser) zeigen den Konsum als Stufen-Bar. Stufe N = `N×goal..(N+1)×goal`. Bar-Füllung = Prozent **innerhalb der aktuellen Stufe** (0–100 %). Farbe = `waterStageGradient(stage)` (10-Stufen-Cycle, ab Stufe 9 endless). Track = Akzent der **Vorgängerstufe × 0.25 Alpha** (Stufe 0 → neutraler `barTrack`). Ab Stufe ≥ 1 erscheint rechts ein Lv-Badge. Überkonsum (> 100 % Tagesziel) führt zu Stufen-Roll-over mit neuer Farbe — analog Wasser.
 - **WaterStageSlider drag (Stufen-Logik, v2.3):** Wasser ist die letzte Zeile in der `PinnedNutrientCard`, optisch identisch zu den anderen Pin-Bars. Range = 0..goal (0–100 % der aktuellen Stufe). 50-ml-Steps. Stufe N umfasst `N×goal..(N+1)×goal`. **In-Drag Stage-Up**: erreicht der Slider 100 %, schaltet die Bar in die nächste Stufe (Bar 0 %, neue Farbe, Thumb am linken Rand). **In-Drag Stage-Down (Drag-Through-Zero)**: erreicht der Slider in einer Stufe > 0 das untere Ende, schaltet die Bar eine Stufe zurück (Bar 100 %, Thumb am rechten Rand). **Touch-Disconnect bei Stufenwechsel**: Sobald während eines Drags ein Stage-Up/Down ausgelöst wird, wird die aktive Geste per `key`-Remount des Sliders abgebrochen. Für weitere Stufenwechsel muss der User loslassen und neu tippen. Cascade-Effekt konstruktionsbedingt unmöglich. Beim Loslassen genau an einer Stufengrenze rückt der State zusätzlich noch eine Stufe weiter (oben) bzw. zurück (unten). Stufen 0..9 haben je eine eigene Farbe aus der Histamind-Palette; ab Stufe 10+ bleibt die Farbe gleich. Stufen sind endlos. **Ghost-Soll-Marker**: feine weiße vertikale Linie an der Soll-Position innerhalb der gerade angezeigten Stufe. **Defizit-Rotanteil**: Bereich zwischen aktueller Füllung und Soll wird rot (StatusOverUl) gefärbt, wenn current < Soll und beide in derselben Stufe. Persistenz via `WaterIntakeRepository.setDayTotal` (Day-Aggregate).
 - **Reminder-Bell-Toggle:** Trailing-Icon der Wasser-Zeile (statt eigener Card-Header). Stoppt nur Defizit-Notifications. Persistiert in `WaterReminderPrefs`.
-- **Expand „Alle Nährstoffe anzeigen“:** zeigt komplette Katalog-Liste (~30 Einträge) mit Pin-Toggle pro Zeile. Pin-Tap persistiert sofort in `UserProfileEntity.pinnedNutrientsJson` (kein Save-Button).
+- **Pin-Card Header (P7.S4 Slice 4e, Revision 2026-05-28):** Card-Titel + **ein** Chevron-IconButton rechts. Titel zeigt "Angepinnt" wenn collapsed, "Nährstoffe verwalten" wenn expanded. Stift-Edit-Modus und separates Picker-BottomSheet wurden in der Revision entfernt — alle Pin-Aktionen laufen jetzt direkt in der Card.
+- **Collapsed (default):** zeigt nur die gepinnten Nährstoffe als Progress-Rows + Wasser-Slider als letzte Zeile. Steady-State der Home-Ansicht.
+- **Expanded (Tap auf Chevron):** zeigt **alle** Nährstoffe gruppiert in vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges). Pro Eintrag: Name + DGE-Default-Hinweis ("X mg/Tag") + trailing PushPin-Icon. **Filled** = gepinnt, **Outlined** = nicht gepinnt. Tap auf das Icon **pinnt/entpinnt sofort** und persistiert in `UserProfileEntity.pinnedNutrientsJson`.
+- **Min-1-Pin-Invariant:** Der letzte verbleibende Pin kann nicht entfernt werden (Tap = no-op).
+- **Wasser:** keine UI-Sonderbehandlung — gehört zu Sektion "Sonstiges", per Default in `NutrientCatalog.defaultPinnedKeys` gepinnt, aber im Expanded-View normal entpinnbar wie jeder andere Nährstoff. Solange Wasser gepinnt ist, erscheint der `WaterStageSlider` im Collapsed-View als letzte Zeile.
 - **Geplante-Mahlzeiten-Checkbox:** ☑ → `intake_entries`-Insert mit Snapshot der Nutrient-Werte; ☐-Undo binnen 60 s per Snackbar.
 - **+ Eintrag:** Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement — Wasser ist nicht mehr hier, weil im Home-Card direkt steuerbar).
 
 ### 3.3 Pin-Verwaltung
 - **Default-Pins** (nach Onboarding): `kcal, protein, carbs, fat, water` (5 Stück).
-- **Hinzufügen:** Expand „Alle Nährstoffe anzeigen“ → Pin-Icon-Tap auf Zeile.
-- **Entfernen:** Pin-Icon-Tap auf Karte oder Zeile.
-- **Mindest-Pin:** keine (auch 0 Pins erlaubt; Liste läuft über Expand).
-- **Reihenfolge:** Insert-Reihenfolge in JSON-Array, kein Drag-Sort in P7 (Polish-Backlog).
+- **Hinzufügen / Entfernen (einziger Pfad, P7.S4 4e Revision):** Chevron im Card-Header → Expanded-View → PushPin-Icon-Tap auf gewünschtem Nährstoff. Persistiert sofort (kein Save-Button).
+- **Mindest-Pin:** **genau 1** (Min-1-Invariant in `HomeViewModel.togglePin`) — verhindert leere Card.
+- **Wasser:** wird wie jeder andere Nährstoff behandelt. Default-pinned, normal entpinnbar.
+- **Reihenfolge:** Insert-Reihenfolge in JSON-Array, kein Drag-Sort in P7 (Polish-Backlog; `HomeViewModel.reorderPins()` ist als Persistenz-Helper bereits vorhanden).
 
 ---
 
@@ -217,35 +221,40 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ### 5.3 Lebensmittel-Detail
 
+**Stand P7.S5 4f (2026-05-29):** Tap auf eine Karte im Standard-Modus öffnet ein `ModalBottomSheet` (skipPartiallyExpanded), nicht den ursprünglich geplanten Vollbild-Screen. Begründung: Liste bleibt scannbar; Back-Affordance ist Tap-outside oder Drag-down statt Nav-Stack.
+
 ```
-┌─────────────────────────────────┐
-│ [Großes Bild]                   │
-├─────────────────────────────────┤
-│ Müsli Knusper                   │
-│ Kölln  ·  ✓ verified  ·  BLS    │ Badge-Row
-├─────────────────────────────────┤
-│ Nährwerte pro 100g              │
-│  kcal 380  P 8  F 6  C 70       │
-│  Ballast 5  Zucker 18  Salz 0.1 │
-├─────────────────────────────────┤
-│ Allergene                       │
-│  ⚠️ Enthält: Gluten             │
-│  ✓ Frei von: Milch, Eier        │
-│  ? Unbekannt: Sellerie          │
-├─────────────────────────────────┤
-│ Histamin: 1/3 (SIGHI)           │
-├─────────────────────────────────┤
-│ FODMAP                          │
-│  Fructose: low                  │
-│  Lactose: low  ...              │
-├─────────────────────────────────┤
-│ Quelle: BLS 2023 + Admin        │
-│  [Feld korrigieren] (P4)        │
-└─────────────────────────────────┘
-        [+ Zum Tagebuch]
+─ ModalBottomSheet ──────────────
+│ Name (deutsch)                │  ← titleLarge
+│ Brand                         │  ← bodyMedium fgSecondary
+│ [USDA-FDC #170150]            │  ← Source-Badge (violet pill)
+│ ──────────────                │
+│ NÄHRWERTE PRO 100 G           │  ← SectionPill
+│  Kalorien …  78 kcal          │
+│  Eiweiß  …  18.5 g            │
+│  …                            │
+│ MIKRONÄHRSTOFFE (PRO 100 G)   │  ← SectionPill
+│  Vitamine                     │  ← Kategorie-Label
+│   Vitamin B12 …  2.4 µg [60 %]│
+│   …                           │
+│  Mineralstoffe                │
+│   Calcium …  120 mg [12 %]    │
+│   …                           │
+│ ALLERGENE                     │  ← only if any
+│  [Fisch] [Gluten]             │  ← AssistChips
+│ FODMAP                        │  ← only if any
+│ HISTAMIN                      │  ← only if histamine_score != null
+─────────────────────────────────
 ```
 
-**Aktionen:** [+ Zum Tagebuch] → Mengen-Dialog → Intake-Log. Bei Feld-Korrektur (P4): wähle Feld → neuer Wert + Begründung → Submit zu PR-Queue.
+**Picker-Modus** (`preselect = true`, z. B. Plan-Slot-Picker): Sheet wird NICHT geöffnet — Tap = sofortiges `onPick`.
+
+**Bekannte unsichtbare Sektionen** (bis Backend-Slices nachziehen):
+- Histamin-Block: 0/8354 Rows haben `histamine_score` (SIGHI-CSV fehlt, REQ-INGR-003).
+- FODMAP-Chips: 0/8354 Rows haben `fodmap_flags` (kein automated FODMAP-Mapper für FDC).
+- Allergene-Chips: nur 22 % der Rows haben Werte (AllergenMapper greift nur bei FDC-Ingredients-Text).
+
+**Aktionen geplant (NICHT in 4f):** [+ Zum Tagebuch] → Mengen-Dialog → Intake-Log. Bei Feld-Korrektur (P4): wähle Feld → neuer Wert + Begründung → Submit zu PR-Queue.
 
 ### 5.4 Rezepte-Sub-Tab
 
