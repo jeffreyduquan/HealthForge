@@ -154,3 +154,19 @@ tasks.register<JavaExec>("translateFdcNames") {
     workingDir = project.projectDir
     environment(loadDotEnv())
 }
+
+tasks.register<JavaExec>("curateUsdaSeed") {
+    group = "tools"
+    description = "P7.S3 Slice 1 / REQ-DATA-CURATION-001: Filtert usda_fdc.csv runter auf kuratierte Top-N (Qualität > Quantität)."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.tools.CurateUsdaSeed")
+    workingDir = project.projectDir
+}
+
+tasks.register<JavaExec>("curateByWhitelist") {
+    group = "tools"
+    description = "P7.S3 Slice 1 Hotfix / REQ-DATA-CURATION-002: Matcht deutsche Essentials-Whitelist gegen USDA-FDC."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.tools.CurateByWhitelist")
+    workingDir = project.projectDir
+}

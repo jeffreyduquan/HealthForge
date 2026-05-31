@@ -635,6 +635,59 @@ Lebensmittelnamen aus FDC sind englisch. Die App SHALL deutsche Übersetzungen p
 
 Nährstoff-Namen werden **nicht** übersetzt — Katalog ist fix deutsch hardcoded (REQ-NUTRIENT-CATALOG-001).
 
+### REQ-DATA-CURATION-001 — Kuratiertes Seed (Qualität vor Quantität)
+**Hinzugefügt P7.S3 Slice 1 (2026-05-29)** — User-Direktive: „die wichtigsten Lebensmittel reichen, Qualität vor Quantität".
+
+Der USDA-Voll-Seed (`usda_fdc.csv`, ~8.354 Zeilen) SHALL durch eine kuratierte Top-N-Liste (`usda_fdc_curated.csv`, **1.500 Einträge**) ersetzt werden. Generiert vom Build-Time-Tool `de.healthforge.tools.CurateUsdaSeed` (Gradle-Task `:curateUsdaSeed`).
+
+**Filter-Pipeline:**
+1. `data_type ∈ {Foundation, SR Legacy}` (Branded/Survey raus) — Datenqualität, keine Markenprodukte
+2. `name_de` vorhanden UND ≠ `name_en` (DeepL hat übersetzt)
+3. Makros vollständig (`kcal > 0`, mind. eines von protein/carbs/fat > 0)
+4. Mindestens 3 Mikronährstoff-Werte > 0 (sonst kein App-Mehrwert)
+5. Name-Blacklist (Fragmente: „NFS", „spices, mixed", „leavening agents", „infant formula", „babyfood", „junior", „toddler", „strained", „fast foods", „restaurant", „dietary supplement", „candies", „snacks, …", Komma-Modifier-Ketten ≥ 4)
+6. Brand-Spalte leer (keine Markenprodukte)
+7. Dedupe nach normalisiertem Namen (NFD-Diakritika-Strip), höchster Quality-Score gewinnt
+8. Top-N nach Quality-Score (Foundation +10, SR-Legacy +5, +je Mikro bis 20, kurzer Name +3, „prepared/cooked/raw" −5, „infant/baby/formula" −3)
+
+**Idempotenz:** Tool ist reine read+write CSV-Pipeline, kein Netzwerk, kein State. Re-Run nach DeepL-Update überschreibt deterministisch.
+
+**Migration:** `V14__curated_ingredients_reset.sql` (DESTRUKTIV, Pre-Launch-User-Bestätigung) trunkiert `ingredients`, `recipes`, `recipe_ingredients`, `recipe_reports`, `ingredient_field_pr`, `etl_runs`. Beim nächsten App-Start importiert `UsdaFdcImporter` aus dem kuratierten Seed (Fallback auf Voll-Seed, falls kuratierter fehlt).
+
+**Out-of-Scope (Folge-Sprint P7.S3 Slice 2/3):**
+- FODMAP-Werte (Monash-Lizenz nötig oder eigene Heuristik basierend auf publizierten Studien)
+- Histamin-Werte (SIGHI-Liste, frei, PDF-Parser erforderlich)
+- Diese werden in `fodmap_flags_json` + `histamine_score` (Spalten existieren schon) per separater Migration nachgezogen.
+
+### REQ-DATA-CURATION-002 — Whitelist-driven Curation (deutsche Essentials)
+**Hinzugefügt P7.S3 Slice 1 Hotfix (2026-05-29)** — User-Smoketest in Android-App ergab: Top-1500-Quality-Score-Set (REQ-DATA-CURATION-001) liefert zu viele US-spezifische Items, Convenience-Mixes, Near-Duplikate ("Apfel getrocknet geschwefelt" + "Apfel dehydriert geschwefelt") und Cocktails — wenig alltagstauglich für deutschen Markt.
+
+**Lösung:** Strategy-B-Approach: kuratierte deutsche **Essentials-Whitelist** (`server/src/main/resources/seed/essentials_de.csv`, ~700-800 Einträge in 24 Kategorien: Obst/Gemüse/Pilze/Salate/Fleisch/Geflügel/Fisch/Eier/Milch/Käse/Getreide/Reis-Pasta/Mehle/Hülsen/Nüsse/Fette/Kräuter/Gewürze/Süßes/Saucen/Getränke/Tofu/Schoko/Alkohol-zum-Kochen). Jeder Eintrag hat: `category;name_de;search_en;search_alt_en`.
+
+**Matching-Algorithmus:**
+- Für jede Whitelist-Zeile suche im Voll-Seed (`usda_fdc.csv`) den besten `name_en`-Match per Token-Overlap-Score (Jaccard auf normalisierten Wort-Tokens) + Substring-Boost
+- Bevorzuge `data_type ∈ {Foundation, SR Legacy}` mit Mikronährstoff-Vollständigkeit
+- Bei Mehrfach-Treffern: höchster Quality-Score (analog REQ-DATA-CURATION-001) gewinnt
+- Misses werden in `curation_report.md` aufgelistet (Whitelist-Eintrag ohne USDA-Match)
+- Output: `usda_fdc_curated.csv` (überschreibt das Top-N-Set) mit deutschem Whitelist-Namen + USDA-Nährwerten
+
+**Tool:** `de.healthforge.tools.CurateByWhitelist` (Gradle-Task `:curateByWhitelist`). Read-only auf Source-CSVs.
+
+**Akzeptanz:**
+- Whitelist-CSV hat ≥ 700 Einträge, deckt alle 24 vom User gewählten Kategorien
+- Matching-Run produziert `usda_fdc_curated.csv` mit ≥ 80 % Match-Quote
+- App-Smoketest: Liste zeigt echte Alltags-Zutaten (Apfel/Banane/Brokkoli/Hähnchenbrust/Reis/Quark) statt USA-Restaurant-Junk oder Cocktails
+- Stichprobe per SQL: 0 Einträge mit `name_de LIKE 'Alkoholisches Getränk%'` außer den explizit gewollten Koch-Alkoholika
+
+**Reverts:** REQ-DATA-CURATION-001 Filter-Pipeline bleibt als Tool intakt (`:curateUsdaSeed`), wird aber nicht mehr für die App-Datenbasis verwendet — das Whitelist-Tool ist autoritativ.
+
+**Akzeptanz:**
+- `:curateUsdaSeed` läuft fehlerfrei → schreibt CSV + `curation_report.md`
+- Kurierte CSV hat `1.500` Datenzeilen (+1 Header)
+- Stichprobe: kein Eintrag enthält „Babynahrung", „Junior", „NFS", „, prepared, with salt" o.ä.
+- Migration V14 läuft idempotent (Tabellen-Existenz-Check via `information_schema`)
+- App-Start nach Migration: `ingredient`-Tabelle hat ~1.500 Rows mit `source='USDA_FDC'` und `locked=true`
+
 ### REQ-INGR-MICRONUTRIENTS-001 — Mikronährstoff-Speicherung (Server)
 Server-Flyway V12 erweitert `ingredients` (PostgreSQL):
 - `micronutrients_json JSONB DEFAULT '{}'` — Schlüssel = Katalog-Key (REQ-NUTRIENT-CATALOG-001), Wert = numerisch pro 100g.
@@ -760,6 +813,8 @@ Traceability: Mikro-Coverage-Audit gegen Produktiv-Postgres (2026-05-29): 87.9 %
 | REQ-NUTRIENT-CATALOG-001 | P7.S1 | `domain/nutrition/NutrientCatalog.kt` |
 | REQ-DATA-SOURCE-001 | P7.S2 | `server/tools/FetchFdcTopIds.kt` (Slice 1, ✅ 2026-05-27, 8487 IDs), `server/etl/UsdaFdcImporter.kt`, `EtlOrchestrator` |
 | REQ-DATA-TRANSLATE-001 | P7.S2 | `server/scripts/translate_fdc_names.kts`, Admin-CSV-Review |
+| REQ-DATA-CURATION-001 | P7.S3 Slice 1 | ✅ 2026-05-29 — `server/tools/CurateUsdaSeed.kt`, Gradle-Task `:curateUsdaSeed`, `seed/usda_fdc_curated.csv` (1500 rows), `seed/curation_report.md`, `V14__curated_ingredients_reset.sql`, `UsdaFdcImporter.seedResourcePath()` → kuratierter Pfad mit Fallback. **SUPERSEDED durch REQ-DATA-CURATION-002 (Strategy B Whitelist).** |
+| REQ-DATA-CURATION-002 | P7.S3 Slice 1 Hotfix | ✅ 2026-05-29 — `server/tools/CurateByWhitelist.kt`, Gradle-Task `:curateByWhitelist`, `seed/essentials_de.csv` (638 kuratierte deutsche Pflicht-Zutaten in 24 Kategorien), Output überschreibt `seed/usda_fdc_curated.csv` (632 Rows nach Re-Import). |
 | REQ-INGR-MICRONUTRIENTS-001 | P7.S1 / P7.S5 4f | `V12__nutrients_overhaul.sql` (Server), `IngredientEntity`, `IngredientDto` (Server + Android), `presentation/lebensmittel/components/IngredientDetailSheet.kt` |
 | REQ-INGR-ALLERGEN-MAPPING-001 | P7.S2 | `server/etl/AllergenMapper.kt` |
 | REQ-HOME-NUTRIENT-LIST-001 | P7.S3 / P7.S3.b / P7.S4 4e | `presentation/home/HomeScreen.kt`, `NutrientListSection.kt`, `PinnedNutrientCard.kt` (Stufen-Bar in `PinnedNutrientRow`, Header mit Edit/Collapse, Unpin-Affordance, AddNutrientRow), `NutrientPinPickerSheet.kt` (NEU P7.S4), `HomeViewModel.togglePin/reorderPins/parsePinnedKeys` (Persistenz in `UserProfileEntity.pinnedNutrientsJson`) |

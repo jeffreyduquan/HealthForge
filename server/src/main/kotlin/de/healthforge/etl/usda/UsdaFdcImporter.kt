@@ -51,17 +51,25 @@ class UsdaFdcImporter(
 ) : Importer {
 
     override val source: EtlSource = EtlSource.USDA_FDC
-    override fun seedResourcePath(): String = "seed/usda_fdc.csv"
+    // P7.S3 Slice 1 / REQ-DATA-CURATION-001 — kuratierter Seed (~1.500 hochwertige
+    // Foundation/SR-Legacy Foods statt 8.354). Fallback auf Voll-Seed nur falls
+    // kuratierter fehlt (z.B. Dev-Branch ohne CurateUsdaSeed-Run).
+    override fun seedResourcePath(): String = "seed/usda_fdc_curated.csv"
+    private val fallbackSeedPath = "seed/usda_fdc.csv"
 
     private val log = LoggerFactory.getLogger(UsdaFdcImporter::class.java)
     private val mapper = ObjectMapper()
 
     @Transactional
     override fun import(): Counts {
-        val reader = classpathReader(seedResourcePath()) ?: run {
-            log.info("USDA-FDC seed not present at {} — skipping", seedResourcePath())
-            return Counts.skipped
-        }
+        val reader = classpathReader(seedResourcePath())
+            ?: classpathReader(fallbackSeedPath)?.also {
+                log.warn("USDA-FDC: kuratierter Seed {} fehlt — Fallback auf {}", seedResourcePath(), fallbackSeedPath)
+            }
+            ?: run {
+                log.info("USDA-FDC seed not present at {} — skipping", seedResourcePath())
+                return Counts.skipped
+            }
         var inserted = 0
         var updated = 0
         var skipped = 0

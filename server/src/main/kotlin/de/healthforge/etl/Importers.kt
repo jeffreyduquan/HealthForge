@@ -108,36 +108,81 @@ private fun String.toBigDecimalOrNull(): BigDecimal? =
     trim().replace(',', '.').takeIf { it.isNotBlank() }?.toBigDecimalOrNull()
 
 /**
- * Skeleton importer for the SIGHI histamine list (UPDATE-only — never inserts new rows).
+ * SIGHI Histamin-Verträglichkeits-Importer (REQ-INGR-003).
  *
- * Expected CSV columns: `bls_sbls;histamine_score`
+ * UPDATE-only: matcht Keywords aus `seed/sighi.csv` als Substring (akzent-/case-insensitiv)
+ * gegen alle vorhandenen `Ingredient.nameDe` und setzt `histamineScore` (0..3).
+ *
+ * CSV-Format (Kommentar-Zeilen `#…` + Header `keyword;…` werden übersprungen):
+ *   keyword;score;category
+ *
+ * Source der Daten: SIGHI-Merkblatt v2021-11-17 (PDF, public, c) SIGHI),
+ * kuratiert in 3 Buckets (3 = zu meiden, 1 = unsicher, 0 = gut verträglich).
+ *
+ * Match-Regeln:
+ *  - Score wird normalisiert: keyword + nameDe → lowercase, ß→ss, Diakritika entfernt.
+ *  - Substring-Match. Bei mehreren Treffern in einer Zutat gewinnt der **höchste Score**
+ *    (Vorsichtsprinzip: schon eine Hochrisiko-Komponente macht das Lebensmittel kritisch).
+ *  - Bei Score-Gleichstand gewinnt das **längere Keyword** (spezifischer).
+ *  - Nicht-gematchte Zutaten behalten ihren bisherigen `histamineScore` (null = unbekannt
+ *    laut REQ-QUALITY-003).
  */
 @Component
 class SighiImporter(private val ingredients: IngredientRepository) : Importer {
     override val source = EtlSource.SIGHI
     override fun seedResourcePath() = "seed/sighi.csv"
 
+    private data class Rule(val keyword: String, val normalized: String, val score: Short)
+
     @Transactional
     override fun import(): Counts {
         val reader = classpathReader(seedResourcePath()) ?: return Counts.skipped
-        var updated = 0; var skipped = 0
+        val rules = mutableListOf<Rule>()
         reader.useLines { lines ->
-            lines.drop(1).forEach { raw ->
-                val cols = raw.split(';')
-                if (cols.size < 2) { skipped++; return@forEach }
-                val sourceId = cols[0].trim()
-                val score = cols[1].trim().toShortOrNull()?.takeIf { it in 0..3 }
-                if (score == null) { skipped++; return@forEach }
-                val existing = ingredients.findBySourceAndSourceId(IngredientSource.BLS, sourceId)
-                if (existing.isEmpty) { skipped++; return@forEach }
-                val e = existing.get()
-                e.histamineScore = score
-                e.updatedAt = Instant.now()
-                ingredients.save(e)
-                updated++
+            lines.forEach { raw ->
+                val line = raw.trim()
+                if (line.isEmpty() || line.startsWith("#")) return@forEach
+                val cols = line.split(';')
+                if (cols.size < 2) return@forEach
+                val keyword = cols[0].trim()
+                if (keyword.equals("keyword", ignoreCase = true)) return@forEach // header
+                if (keyword.isBlank()) return@forEach
+                val score = cols[1].trim().toShortOrNull()?.takeIf { it in 0..3 } ?: return@forEach
+                rules += Rule(keyword, normalize(keyword), score)
             }
         }
+        if (rules.isEmpty()) {
+            LOG.warn("SIGHI: keine Regeln aus {} geladen", seedResourcePath())
+            return Counts.skipped
+        }
+        LOG.info("SIGHI: {} Verträglichkeits-Regeln geladen", rules.size)
+
+        var updated = 0; var skipped = 0
+        for (e in ingredients.findAll()) {
+            val name = normalize(e.nameDe)
+            if (name.isBlank()) { skipped++; continue }
+            // pick best matching rule: max score, ties → longer keyword
+            val best = rules
+                .asSequence()
+                .filter { it.normalized.isNotBlank() && name.contains(it.normalized) }
+                .maxWithOrNull(
+                    compareBy<Rule>({ it.score }, { it.normalized.length })
+                )
+            if (best == null) { skipped++; continue }
+            if (e.histamineScore == best.score) { skipped++; continue }
+            e.histamineScore = best.score
+            e.updatedAt = Instant.now()
+            ingredients.save(e)
+            updated++
+        }
+        LOG.info("SIGHI: {} Ingredients aktualisiert, {} ohne Match", updated, skipped)
         return Counts(0, updated, skipped)
+    }
+
+    private fun normalize(s: String): String {
+        val lower = s.lowercase().replace('ß', 's').let { it.replace("ss", "ss") } // ß→ss (idempotent)
+        val nfd = java.text.Normalizer.normalize(lower, java.text.Normalizer.Form.NFD)
+        return nfd.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
     }
 }
 

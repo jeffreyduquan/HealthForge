@@ -1,0 +1,639 @@
+category;name_de;search_en;search_alt_en
+Obst;Apfel;apple raw with skin;apple raw
+Obst;Apfel geschält;apple raw without skin;apple peeled
+Obst;Birne;pear raw;pears raw
+Obst;Banane;banana raw;bananas raw
+Obst;Orange;orange raw;oranges raw
+Obst;Mandarine;tangerines raw;mandarin raw
+Obst;Clementine;clementine raw;tangerines raw
+Obst;Grapefruit;grapefruit raw pink;grapefruit raw
+Obst;Zitrone;lemon raw;lemons raw
+Obst;Limette;lime raw;limes raw
+Obst;Erdbeere;strawberries raw;strawberry raw
+Obst;Himbeere;raspberries raw;raspberry raw
+Obst;Blaubeere;blueberries raw;blueberry raw
+Obst;Brombeere;blackberries raw;blackberry raw
+Obst;Johannisbeere rot;currants red raw;red currants
+Obst;Johannisbeere schwarz;currants european black raw;black currants
+Obst;Kirsche süß;cherries sweet raw;cherry sweet raw
+Obst;Kirsche sauer;cherries sour red raw;sour cherries
+Obst;Pflaume;plums raw;plum raw
+Obst;Aprikose;apricots raw;apricot raw
+Obst;Pfirsich;peaches raw;peach raw
+Obst;Nektarine;nectarines raw;nectarine raw
+Obst;Weintraube grün;grapes green raw;grapes thompson seedless
+Obst;Weintraube rot;grapes red raw;grapes red
+Obst;Wassermelone;watermelon raw;watermelon
+Obst;Honigmelone;melons honeydew raw;honeydew melon
+Obst;Cantaloupe;melons cantaloupe raw;cantaloupe melon
+Obst;Ananas;pineapple raw;pineapples raw
+Obst;Mango;mangos raw;mango raw
+Obst;Papaya;papayas raw;papaya raw
+Obst;Kiwi;kiwifruit green raw;kiwi raw
+Obst;Granatapfel;pomegranate raw;pomegranates raw
+Obst;Feige frisch;figs raw;fig raw
+Obst;Dattel;dates medjool;dates deglet noor
+Obst;Avocado;avocados raw california;avocado raw
+Obst;Kaki;persimmons japanese raw;persimmon raw
+Obst;Litschi;litchis raw;lychee raw
+Obst;Stachelbeere;gooseberries raw;gooseberry raw
+Obst;Holunderbeere;elderberries raw;elderberry raw
+Obst;Heidelbeere;blueberries wild raw;huckleberry
+Obst;Preiselbeere;cranberries raw;cranberry raw
+Obst;Sanddorn;sea buckthorn berries;sea buckthorn
+Obst;Quitte;quinces raw;quince raw
+Obst;Rhabarber;rhubarb raw;rhubarb stalks
+Obst;Rosine;raisins seedless;raisins
+Gemüse;Tomate;tomatoes red ripe raw;tomato raw
+Gemüse;Cherrytomate;tomatoes cherry red raw;cherry tomato
+Gemüse;Gurke;cucumber with peel raw;cucumber raw
+Gemüse;Salatgurke;cucumber peeled raw;cucumber
+Gemüse;Paprika rot;peppers sweet red raw;red bell pepper
+Gemüse;Paprika gelb;peppers sweet yellow raw;yellow bell pepper
+Gemüse;Paprika grün;peppers sweet green raw;green bell pepper
+Gemüse;Karotte;carrots raw;carrot raw
+Gemüse;Zwiebel;onions raw;onion raw
+Gemüse;Rote Zwiebel;onions red raw;red onion
+Gemüse;Frühlingszwiebel;onions spring or scallions raw;scallions raw
+Gemüse;Knoblauch;garlic raw;garlic cloves
+Gemüse;Lauch;leeks bulb and lower leaf raw;leek raw
+Gemüse;Schalotte;shallots raw;shallot raw
+Gemüse;Brokkoli;broccoli raw;broccoli flowerets raw
+Gemüse;Blumenkohl;cauliflower raw;cauliflower
+Gemüse;Romanesco;broccoli romanesco;romanesco
+Gemüse;Rosenkohl;brussels sprouts raw;brussels sprout
+Gemüse;Weißkohl;cabbage raw;cabbage white raw
+Gemüse;Rotkohl;cabbage red raw;red cabbage
+Gemüse;Spitzkohl;cabbage savoy raw;pointed cabbage
+Gemüse;Wirsing;cabbage savoy raw;savoy cabbage
+Gemüse;Chinakohl;cabbage chinese pe-tsai raw;napa cabbage
+Gemüse;Pak Choi;cabbage chinese pak-choi raw;bok choy
+Gemüse;Kohlrabi;kohlrabi raw;kohlrabi
+Gemüse;Grünkohl;kale raw;kale cooked
+Gemüse;Mangold;chard swiss raw;swiss chard
+Gemüse;Spinat;spinach raw;spinach baby
+Gemüse;Aubergine;eggplant raw;aubergine raw
+Gemüse;Zucchini;squash summer zucchini raw;zucchini raw
+Gemüse;Gurkenkürbis;squash summer crookneck raw;summer squash
+Gemüse;Kürbis Hokkaido;squash winter hubbard raw;hokkaido squash
+Gemüse;Kürbis Butternut;squash winter butternut raw;butternut squash
+Gemüse;Süßkartoffel;sweet potato raw unprepared;sweet potato
+Gemüse;Kartoffel;potatoes raw skin;potato raw
+Gemüse;Kartoffel festkochend;potatoes red raw;potato red
+Gemüse;Pastinake;parsnips raw;parsnip raw
+Gemüse;Rote Bete;beets raw;beetroot raw
+Gemüse;Sellerieknolle;celeriac raw;celery root raw
+Gemüse;Staudensellerie;celery raw;celery stalks raw
+Gemüse;Spargel grün;asparagus raw;asparagus green
+Gemüse;Spargel weiß;asparagus white;white asparagus
+Gemüse;Artischocke;artichokes globe raw;artichoke raw
+Gemüse;Fenchel;fennel bulb raw;fennel raw
+Gemüse;Mais;corn sweet yellow raw;sweet corn raw
+Gemüse;Erbsen grün;peas green raw;green peas
+Gemüse;Zuckerschote;peas edible-podded raw;snow peas
+Gemüse;Grüne Bohne;beans snap green raw;green beans
+Gemüse;Wachsbohne;beans snap yellow raw;wax beans
+Gemüse;Saubohne;broadbeans raw;fava beans raw
+Gemüse;Okra;okra raw;okra pods
+Gemüse;Radieschen;radishes raw;radish raw
+Gemüse;Rettich;radishes oriental raw;daikon raw
+Gemüse;Steckrübe;rutabagas raw;rutabaga raw
+Gemüse;Topinambur;jerusalem artichokes raw;sunchoke
+Gemüse;Rote Rübe;turnips raw;turnip raw
+Gemüse;Ingwer;ginger root raw;ginger raw
+Gemüse;Kurkuma Wurzel;turmeric raw;turmeric root
+Gemüse;Meerrettich;horseradish prepared;horseradish raw
+Gemüse;Maniok;cassava raw;manioc
+Gemüse;Yamswurzel;yam raw;yam
+Gemüse;Wasserkresse;watercress raw;watercress
+Gemüse;Bambussprossen;bamboo shoots raw;bamboo shoot
+Gemüse;Sauerkraut;sauerkraut canned;sauerkraut raw
+Gemüse;Oliven grün;olives green;olives ripe canned
+Gemüse;Oliven schwarz;olives ripe canned;black olives
+Gemüse;Algen Nori;seaweed nori;seaweed laver
+Gemüse;Algen Wakame;seaweed wakame raw;wakame
+Pilze;Champignon weiß;mushrooms white raw;mushroom button
+Pilze;Champignon braun;mushrooms brown italian raw;cremini mushroom
+Pilze;Portobello;mushrooms portabella raw;portobello
+Pilze;Shiitake;mushrooms shiitake raw;shiitake mushroom
+Pilze;Austernpilz;mushrooms oyster raw;oyster mushroom
+Pilze;Pfifferling;mushrooms chanterelle raw;chanterelle
+Pilze;Steinpilz;mushrooms porcini;porcini mushroom
+Pilze;Morchel;mushrooms morel raw;morel
+Pilze;Enoki;mushrooms enoki raw;enoki mushroom
+Pilze;Maitake;mushrooms maitake raw;maitake
+Pilze;Trüffel;truffles raw;truffle
+Pilze;Pilze gemischt;mushrooms straw canned;mixed mushrooms
+Salate;Eisbergsalat;lettuce iceberg raw;iceberg lettuce
+Salate;Kopfsalat;lettuce butterhead raw;butterhead lettuce
+Salate;Römersalat;lettuce cos romaine raw;romaine lettuce
+Salate;Feldsalat;lettuce lambs raw;mache lettuce
+Salate;Rucola;arugula raw;rocket lettuce
+Salate;Endivie;endive raw;endive
+Salate;Chicorée;chicory greens raw;chicory raw
+Salate;Radicchio;radicchio raw;radicchio
+Salate;Lollo Rosso;lettuce red leaf raw;red leaf lettuce
+Salate;Eichblattsalat;lettuce green leaf raw;green leaf lettuce
+Salate;Frisée;chicory roots raw;frisee
+Salate;Brunnenkresse;watercress raw;watercress
+Salate;Mizuna;mizuna;mizuna greens
+Salate;Mesclun;lettuce mesclun;mixed greens
+Salate;Löwenzahn;dandelion greens raw;dandelion
+Fleisch;Rinderhack mager;beef ground 90% lean raw;ground beef lean
+Fleisch;Rinderhack;beef ground 80% lean raw;ground beef regular
+Fleisch;Rindfleisch Roastbeef;beef top sirloin raw;roast beef
+Fleisch;Rindfleisch Filet;beef tenderloin raw;beef filet
+Fleisch;Rindfleisch Rib-Eye;beef rib eye steak raw;ribeye steak
+Fleisch;Rindfleisch Rumpsteak;beef top loin raw;rump steak
+Fleisch;Rindfleisch Schmorbraten;beef chuck raw;chuck roast
+Fleisch;Rindfleisch Brust;beef brisket raw;beef brisket
+Fleisch;Rindfleisch Flanksteak;beef flank steak raw;flank steak
+Fleisch;Rinderleber;beef liver raw;beef liver
+Fleisch;Rinderzunge;beef tongue raw;beef tongue
+Fleisch;Kalbfleisch;veal cubed for stew raw;veal raw
+Fleisch;Kalbsschnitzel;veal cutlet raw;veal cutlet
+Fleisch;Schweinefilet;pork tenderloin raw;pork loin
+Fleisch;Schweinekotelett;pork chop raw;pork chop
+Fleisch;Schweineschnitzel;pork cutlet raw;pork schnitzel
+Fleisch;Schweinebraten;pork shoulder raw;pork shoulder
+Fleisch;Schweinebauch;pork belly raw;pork belly
+Fleisch;Schweinehack;pork ground raw;ground pork
+Fleisch;Bacon;bacon pork raw;pork bacon
+Fleisch;Schinken gekocht;ham cooked;ham boiled
+Fleisch;Schinken roh;ham prosciutto;prosciutto
+Fleisch;Salami;salami pork;salami dry
+Fleisch;Bratwurst;sausage bratwurst pork raw;bratwurst
+Fleisch;Frankfurter Würstchen;frankfurter beef pork;frankfurter
+Fleisch;Wiener Würstchen;sausage vienna;vienna sausage
+Fleisch;Leberwurst;liverwurst pork;liverwurst
+Fleisch;Mortadella;mortadella beef pork;mortadella
+Fleisch;Corned Beef;corned beef brisket;corned beef
+Fleisch;Lammkeule;lamb leg raw;leg of lamb
+Fleisch;Lammkotelett;lamb loin chop raw;lamb chops
+Fleisch;Lammhack;lamb ground raw;ground lamb
+Fleisch;Lammschulter;lamb shoulder raw;lamb shoulder
+Fleisch;Wildschwein;game meat wild boar raw;wild boar
+Fleisch;Hirsch;game meat deer raw;venison raw
+Fleisch;Reh;game meat deer roasted;deer meat
+Fleisch;Kaninchen;game meat rabbit raw;rabbit meat
+Gefluegel;Hähnchenbrust;chicken breast meat only raw;chicken breast skinless
+Gefluegel;Hähnchenbrust mit Haut;chicken breast meat skin raw;chicken breast skin
+Gefluegel;Hähnchenschenkel;chicken leg meat only raw;chicken thigh
+Gefluegel;Hähnchenoberkeule;chicken thigh meat only raw;chicken upper leg
+Gefluegel;Hähnchenflügel;chicken wing meat only raw;chicken wings
+Gefluegel;Hähnchen ganz;chicken whole raw;whole chicken
+Gefluegel;Hähnchenhack;chicken ground raw;ground chicken
+Gefluegel;Hähnchenleber;chicken liver raw;chicken livers
+Gefluegel;Hähnchenherz;chicken heart raw;chicken hearts
+Gefluegel;Putenbrust;turkey breast meat only raw;turkey breast skinless
+Gefluegel;Putenbrust mit Haut;turkey breast meat skin raw;turkey breast skin
+Gefluegel;Putenschenkel;turkey leg meat only raw;turkey thigh
+Gefluegel;Putenhack;turkey ground 93%;ground turkey
+Gefluegel;Pute ganz;turkey whole raw;whole turkey
+Gefluegel;Ente Brust;duck breast meat only raw;duck breast skinless
+Gefluegel;Ente ganz;duck domesticated raw;whole duck
+Gefluegel;Gans Brust;goose meat only raw;goose meat
+Gefluegel;Gans ganz;goose domesticated raw;whole goose
+Gefluegel;Wachtel;quail meat skin raw;quail
+Gefluegel;Perlhuhn;guinea hen raw;guinea fowl
+Gefluegel;Fasan;pheasant raw;pheasant meat
+Gefluegel;Hähnchen Bratrolle;chicken roasting whole raw;rotisserie chicken
+Gefluegel;Hähnchenstreifen;chicken breast strips;chicken strips
+Gefluegel;Putenaufschnitt;turkey breast deli sliced;turkey lunch meat
+Gefluegel;Hähnchenaufschnitt;chicken breast deli sliced;chicken lunch meat
+Fisch;Lachs;salmon atlantic farmed raw;atlantic salmon
+Fisch;Wildlachs;salmon atlantic wild raw;wild salmon
+Fisch;Räucherlachs;salmon smoked atlantic;smoked salmon
+Fisch;Thunfisch frisch;tuna yellowfin raw;yellowfin tuna
+Fisch;Thunfisch Dose;tuna light canned water;canned tuna
+Fisch;Forelle;trout rainbow farmed raw;rainbow trout
+Fisch;Forelle Wild;trout rainbow wild raw;wild trout
+Fisch;Kabeljau;cod atlantic raw;atlantic cod
+Fisch;Schellfisch;haddock raw;haddock fish
+Fisch;Seelachs;pollock atlantic raw;pollock atlantic
+Fisch;Alaska-Seelachs;pollock alaska raw;alaska pollock
+Fisch;Hering;herring atlantic raw;atlantic herring
+Fisch;Hering eingelegt;herring pickled;pickled herring
+Fisch;Matjes;herring kippered;kipper herring
+Fisch;Makrele;mackerel atlantic raw;atlantic mackerel
+Fisch;Sardelle;anchovies canned oil;anchovy raw
+Fisch;Sardine;sardine atlantic canned oil;sardines
+Fisch;Scholle;flatfish flounder raw;flounder
+Fisch;Heilbutt;halibut atlantic raw;atlantic halibut
+Fisch;Seezunge;sole raw;sole fish
+Fisch;Wolfsbarsch;bass sea raw;sea bass
+Fisch;Dorade;sea bream;gilt-head bream
+Fisch;Karpfen;carp raw;carp fish
+Fisch;Zander;walleye raw;walleye pike
+Fisch;Hecht;pike northern raw;pike fish
+Fisch;Aal;eel raw;eel fish
+Fisch;Schwertfisch;swordfish raw;swordfish
+Fisch;Tilapia;tilapia raw;tilapia fish
+Fisch;Pangasius;catfish channel farmed raw;pangasius
+Fisch;Wels;catfish wild raw;catfish raw
+Fisch;Garnele;shrimp raw;prawn raw
+Fisch;Garnele gekocht;shrimp cooked moist;cooked shrimp
+Fisch;Kaisergranat;lobster northern raw;langoustine
+Fisch;Hummer;lobster northern raw;lobster meat
+Fisch;Krabben;crab dungeness raw;crab meat
+Fisch;Krebsfleisch;crab blue raw;crab blue
+Fisch;Muschel;mussels blue raw;blue mussel
+Fisch;Auster;oyster eastern wild raw;oysters raw
+Fisch;Jakobsmuschel;scallops raw;scallop
+Fisch;Tintenfisch;squid raw;calamari raw
+Fisch;Oktopus;octopus raw;octopus fresh
+Eier;Hühnerei ganz;egg whole raw fresh;chicken egg
+Eier;Eiweiß;egg white raw fresh;egg whites
+Eier;Eigelb;egg yolk raw fresh;egg yolks
+Eier;Hühnerei gekocht;egg whole hard boiled;hard boiled egg
+Eier;Rührei;egg scrambled;scrambled egg
+Eier;Wachtelei;egg quail whole fresh raw;quail egg
+Eier;Entenei;egg duck whole fresh raw;duck egg
+Eier;Gänseei;egg goose whole fresh raw;goose egg
+Milchprodukte;Vollmilch;milk whole 3.25% fat;whole milk
+Milchprodukte;Fettarme Milch;milk reduced fat 2%;2% milk
+Milchprodukte;Magermilch;milk nonfat;skim milk
+Milchprodukte;Buttermilch;buttermilk low fat;buttermilk
+Milchprodukte;Schlagsahne;cream heavy whipping;heavy cream
+Milchprodukte;Saure Sahne;sour cream cultured;sour cream
+Milchprodukte;Crème fraîche;cream fluid heavy whipping;creme fraiche
+Milchprodukte;Schmand;sour cream reduced fat;sour cream half
+Milchprodukte;Kondensmilch;milk canned condensed sweetened;sweetened condensed
+Milchprodukte;Evaporated Milk;milk canned evaporated;evaporated milk
+Milchprodukte;Joghurt natur;yogurt plain whole milk;plain yogurt
+Milchprodukte;Joghurt fettarm;yogurt plain low fat;low fat yogurt
+Milchprodukte;Griechischer Joghurt;yogurt greek plain whole milk;greek yogurt
+Milchprodukte;Skyr;yogurt greek nonfat;skyr
+Milchprodukte;Kefir;kefir low fat;kefir milk
+Milchprodukte;Quark Magerstufe;cheese cottage low fat 1%;low fat quark
+Milchprodukte;Quark Vollfett;cheese cottage creamed;quark whole
+Milchprodukte;Hüttenkäse;cheese cottage creamed large curd;cottage cheese
+Milchprodukte;Ricotta;cheese ricotta whole milk;ricotta
+Milchprodukte;Mascarpone;cheese mascarpone;mascarpone cheese
+Milchprodukte;Frischkäse;cheese cream;cream cheese
+Milchprodukte;Sojamilch;soymilk original;soy milk
+Milchprodukte;Mandelmilch;almond milk;almond beverage
+Milchprodukte;Hafermilch;oat milk;oat beverage
+Milchprodukte;Kokosmilch;coconut milk canned;coconut beverage
+Kaese;Gouda;cheese gouda;gouda cheese
+Kaese;Edamer;cheese edam;edam cheese
+Kaese;Emmentaler;cheese swiss;emmental cheese
+Kaese;Bergkäse;cheese gruyere;gruyere cheese
+Kaese;Cheddar;cheese cheddar;cheddar cheese
+Kaese;Parmesan;cheese parmesan grated;parmigiano
+Kaese;Pecorino;cheese romano;pecorino romano
+Kaese;Grana Padano;cheese parmesan hard;grana padano
+Kaese;Mozzarella;cheese mozzarella whole milk;fresh mozzarella
+Kaese;Mozzarella Light;cheese mozzarella part skim;part skim mozzarella
+Kaese;Burrata;cheese mozzarella low moisture;burrata
+Kaese;Provolone;cheese provolone;provolone cheese
+Kaese;Camembert;cheese camembert;camembert cheese
+Kaese;Brie;cheese brie;brie cheese
+Kaese;Feta;cheese feta;feta cheese
+Kaese;Halloumi;cheese feta;halloumi cheese
+Kaese;Manchego;cheese manchego;manchego cheese
+Kaese;Roquefort;cheese roquefort;roquefort
+Kaese;Gorgonzola;cheese blue;gorgonzola
+Kaese;Blauschimmelkäse;cheese blue;blue cheese
+Kaese;Ziegenkäse weich;cheese goat soft;soft goat cheese
+Kaese;Ziegenkäse hart;cheese goat hard;hard goat cheese
+Kaese;Schafskäse;cheese feta sheep;sheep cheese
+Kaese;Bergader;cheese limburger;limburger
+Kaese;Tilsiter;cheese tilsit;tilsit cheese
+Kaese;Raclettekäse;cheese raclette;raclette
+Kaese;Reibekäse;cheese mozzarella shredded;shredded cheese
+Kaese;Schmelzkäse;cheese pasteurized process american;processed cheese
+Kaese;Käseaufschnitt;cheese provolone slices;sliced cheese
+Kaese;Käsemix gerieben;cheese mexican shredded;mexican blend cheese
+Getreide;Vollkornbrot;bread whole wheat;whole wheat bread
+Getreide;Roggenbrot;bread rye;rye bread
+Getreide;Pumpernickel;bread pumpernickel;pumpernickel
+Getreide;Weißbrot;bread white;white bread
+Getreide;Toastbrot;bread white toasted;toast white
+Getreide;Mehrkornbrot;bread multigrain;multi grain bread
+Getreide;Baguette;bread french;french bread
+Getreide;Brötchen;rolls hard;hard rolls
+Getreide;Vollkornbrötchen;rolls whole wheat;whole wheat rolls
+Getreide;Bagel;bagels plain;bagel plain
+Getreide;Ciabatta;bread italian;italian bread
+Getreide;Focaccia;focaccia;focaccia bread
+Getreide;Pita;bread pita white;pita
+Getreide;Pita Vollkorn;bread pita whole wheat;whole wheat pita
+Getreide;Tortilla Weizen;tortillas wheat;flour tortilla
+Getreide;Tortilla Mais;tortillas corn;corn tortilla
+Getreide;Knäckebrot;crispbread rye;crisp bread
+Getreide;Zwieback;melba toast;rusks
+Getreide;Croissant;croissants butter;butter croissant
+Getreide;Brezel;pretzels soft;pretzel
+Getreide;Haferflocken;oats raw;rolled oats
+Getreide;Haferkleie;oat bran raw;oat bran
+Getreide;Müsli;cereals muesli;muesli
+Getreide;Granola;granola homemade;granola
+Getreide;Cornflakes;cereals corn flakes;corn flakes
+Getreide;Weizenkleie;wheat bran crude;wheat bran
+Getreide;Weizenkeime;wheat germ;wheat germ raw
+Getreide;Bulgur trocken;bulgur dry;bulgur grain
+Getreide;Couscous trocken;couscous dry;couscous
+Getreide;Polenta;cornmeal whole grain yellow;polenta
+ReisPasta;Reis weiß;rice white long-grain regular raw;white rice
+ReisPasta;Reis Vollkorn;rice brown long-grain raw;brown rice
+ReisPasta;Basmati Reis;rice white basmati;basmati rice
+ReisPasta;Jasmin Reis;rice white jasmine;jasmine rice
+ReisPasta;Wildreis;wild rice raw;wild rice
+ReisPasta;Risotto Reis;rice white arborio;arborio rice
+ReisPasta;Sushi Reis;rice white short-grain raw;sushi rice
+ReisPasta;Milchreis;rice white medium-grain raw;medium grain rice
+ReisPasta;Schwarzer Reis;rice black;black rice
+ReisPasta;Roter Reis;rice red;red rice
+ReisPasta;Spaghetti;pasta dry;spaghetti
+ReisPasta;Penne;pasta dry enriched;penne
+ReisPasta;Fusilli;pasta dry enriched;fusilli
+ReisPasta;Farfalle;pasta dry enriched;farfalle
+ReisPasta;Tagliatelle;pasta egg dry;egg pasta
+ReisPasta;Lasagne Platten;pasta dry;lasagna noodles
+ReisPasta;Spaghetti Vollkorn;spaghetti whole-wheat dry;whole wheat pasta
+ReisPasta;Glasnudeln;noodles cellophane;mung bean noodle
+ReisPasta;Reisnudeln;noodles rice dry;rice noodles
+ReisPasta;Eiernudeln;noodles egg dry;egg noodles
+ReisPasta;Soba Nudeln;noodles soba dry;buckwheat noodle
+ReisPasta;Udon Nudeln;noodles udon;udon
+ReisPasta;Ramen Nudeln;noodles ramen;ramen noodle
+ReisPasta;Gnocchi;gnocchi;potato gnocchi
+ReisPasta;Tortellini;tortellini;tortellini cheese
+Mehle;Weizenmehl Type 405;wheat flour white all-purpose enriched;all purpose flour
+Mehle;Weizenmehl Vollkorn;wheat flour whole grain;whole wheat flour
+Mehle;Dinkelmehl;spelt flour;spelt
+Mehle;Roggenmehl;rye flour dark;rye flour
+Mehle;Hafermehl;oat flour partially debranned;oat flour
+Mehle;Buchweizenmehl;buckwheat flour whole-groat;buckwheat flour
+Mehle;Maismehl;corn flour whole-grain yellow;corn flour
+Mehle;Reismehl;rice flour white;rice flour
+Mehle;Mandelmehl;almond flour;almond meal
+Mehle;Kokosmehl;coconut flour;coconut flour
+Mehle;Kichererbsenmehl;chickpea flour besan;chickpea flour
+Mehle;Sojamehl;soy flour full-fat raw;soybean flour
+Mehle;Hartweizengrieß;semolina enriched;semolina
+Mehle;Speisestärke Mais;cornstarch;corn starch
+Mehle;Speisestärke Kartoffel;potato starch;potato starch
+Mehle;Backpulver;leavening agents baking powder;baking powder double
+Mehle;Natron;leavening agents baking soda;baking soda
+Mehle;Hefe frisch;yeast bakers compressed;fresh yeast
+Mehle;Hefe trocken;yeast bakers active dry;dry yeast
+Mehle;Sauerteig;leavening agents yeast bakers active dry;sourdough starter
+Mehle;Gluten Weizen;wheat gluten;vital wheat gluten
+Mehle;Kakaopulver;cocoa dry powder unsweetened;cocoa powder unsweetened
+Mehle;Vanilleextrakt;vanilla extract;vanilla
+Mehle;Gelatine;gelatins dry powder unsweetened;gelatin
+Huelsenfruechte;Linsen rot;lentils raw;red lentils
+Huelsenfruechte;Linsen grün;lentils raw;green lentils
+Huelsenfruechte;Linsen Beluga;lentils raw;black lentils
+Huelsenfruechte;Linsen Berg;lentils raw;mountain lentils
+Huelsenfruechte;Kichererbsen trocken;chickpeas garbanzo dry raw;dried chickpeas
+Huelsenfruechte;Kichererbsen Dose;chickpeas garbanzo canned;canned chickpeas
+Huelsenfruechte;Kidneybohnen trocken;beans kidney red mature raw;dried kidney beans
+Huelsenfruechte;Kidneybohnen Dose;beans kidney red canned;canned kidney beans
+Huelsenfruechte;Weiße Bohnen;beans white mature raw;white beans navy
+Huelsenfruechte;Cannellini Bohnen;beans white mature canned;cannellini
+Huelsenfruechte;Schwarze Bohnen;beans black mature raw;black beans
+Huelsenfruechte;Pintobohnen;beans pinto mature raw;pinto beans
+Huelsenfruechte;Limabohnen;beans lima large mature raw;lima beans
+Huelsenfruechte;Mungbohnen;mungo beans mature raw;mung beans
+Huelsenfruechte;Adzuki Bohnen;adzuki beans mature raw;adzuki
+Huelsenfruechte;Lupinen;lupins mature raw;lupini
+Huelsenfruechte;Erbsen getrocknet;peas split mature raw;split peas
+Huelsenfruechte;Erdnüsse;peanuts all types raw;raw peanuts
+Huelsenfruechte;Erdnüsse geröstet;peanuts all types dry-roasted;roasted peanuts
+Huelsenfruechte;Sojabohnen trocken;soybeans mature raw;dried soybeans
+Nuesse;Mandeln;almonds raw;raw almonds
+Nuesse;Mandeln geröstet;almonds dry roasted;roasted almonds
+Nuesse;Haselnüsse;hazelnuts raw;raw hazelnuts
+Nuesse;Walnüsse;walnuts english;walnut english
+Nuesse;Pekannüsse;pecans raw;pecan nuts
+Nuesse;Cashewkerne roh;cashew nuts raw;raw cashews
+Nuesse;Cashewkerne geröstet;cashew nuts dry roasted;roasted cashews
+Nuesse;Pistazien roh;pistachio nuts raw;raw pistachio
+Nuesse;Pistazien geröstet;pistachio nuts dry roasted;roasted pistachio
+Nuesse;Paranüsse;brazilnuts dried;brazil nuts
+Nuesse;Macadamia;macadamia nuts raw;macadamia
+Nuesse;Pinienkerne;pine nuts dried;pignoli
+Nuesse;Kokosnuss frisch;coconut meat raw;fresh coconut
+Nuesse;Kokosflocken;coconut meat dried unsweetened;coconut shredded
+Nuesse;Kürbiskerne;seeds pumpkin and squash seed kernels dried;pumpkin seeds
+Nuesse;Sonnenblumenkerne;seeds sunflower seed kernels dried;sunflower seeds
+Nuesse;Sesam;seeds sesame seeds whole dried;sesame
+Nuesse;Leinsamen;seeds flaxseed;flax seed
+Nuesse;Chia Samen;seeds chia seeds dried;chia
+Nuesse;Hanfsamen;seeds hemp seed hulled;hemp seeds
+Nuesse;Mohn;seeds poppy seed;poppyseed
+Nuesse;Erdnussbutter;peanut butter smooth;creamy peanut butter
+Nuesse;Mandelmus;almond butter plain;almond butter
+Nuesse;Cashewmus;cashew butter;cashew butter spread
+Nuesse;Tahini;sesame butter tahini;tahin paste
+Nuesse;Haselnusscreme;hazelnut butter;nutella
+Nuesse;Sonnenblumenkernmus;sunflower seed butter;sunflower butter
+Nuesse;Kokosmus;coconut cream raw;coconut butter
+Nuesse;Walnussmus;walnut butter;walnut spread
+Fette;Butter;butter without salt;unsalted butter
+Fette;Butter gesalzen;butter salted;salted butter
+Fette;Margarine;margarine regular hard 80% fat;margarine
+Fette;Ghee;butter oil anhydrous;clarified butter
+Fette;Olivenöl;oil olive salad or cooking;olive oil extra virgin
+Fette;Rapsöl;oil canola;canola oil
+Fette;Sonnenblumenöl;oil sunflower linoleic;sunflower oil
+Fette;Sesamöl;oil sesame salad or cooking;sesame oil
+Fette;Walnussöl;oil walnut;walnut oil
+Fette;Leinöl;oil flaxseed cold pressed;flax oil
+Fette;Kokosöl;oil coconut;coconut oil
+Fette;Erdnussöl;oil peanut salad or cooking;peanut oil
+Fette;Avocadoöl;oil avocado;avocado oil
+Fette;Distelöl;oil safflower salad or cooking high oleic;safflower oil
+Fette;Sojaöl;oil soybean salad or cooking;soybean oil
+Fette;Maiskeimöl;oil corn industrial and retail;corn oil
+Fette;Traubenkernöl;oil grapeseed;grape seed oil
+Fette;Palmöl;oil palm;palm oil
+Fette;Schmalz;lard;pork fat
+Fette;Gänseschmalz;chicken fat;goose fat
+Kraeuter;Basilikum frisch;basil fresh;fresh basil
+Kraeuter;Basilikum getrocknet;spices basil dried;dried basil
+Kraeuter;Petersilie frisch;parsley fresh;fresh parsley
+Kraeuter;Petersilie getrocknet;parsley dried;dried parsley
+Kraeuter;Schnittlauch;chives raw;fresh chives
+Kraeuter;Dill frisch;dill weed fresh;fresh dill
+Kraeuter;Dill getrocknet;dill weed dried;dried dill
+Kraeuter;Koriander frisch;coriander leaves cilantro raw;cilantro
+Kraeuter;Koriander getrocknet;spices coriander leaf dried;dried coriander
+Kraeuter;Minze frisch;peppermint fresh;fresh mint
+Kraeuter;Minze getrocknet;spices peppermint dried;dried mint
+Kraeuter;Oregano frisch;oregano fresh;fresh oregano
+Kraeuter;Oregano getrocknet;spices oregano dried;dried oregano
+Kraeuter;Rosmarin frisch;rosemary fresh;fresh rosemary
+Kraeuter;Rosmarin getrocknet;spices rosemary dried;dried rosemary
+Kraeuter;Thymian frisch;thyme fresh;fresh thyme
+Kraeuter;Thymian getrocknet;spices thyme dried;dried thyme
+Kraeuter;Salbei frisch;sage ground;fresh sage
+Kraeuter;Salbei getrocknet;spices sage ground;dried sage
+Kraeuter;Estragon frisch;tarragon fresh;fresh tarragon
+Kraeuter;Estragon getrocknet;spices tarragon dried;dried tarragon
+Kraeuter;Kerbel;spices marjoram dried;chervil
+Kraeuter;Lorbeerblatt;spices bay leaf;bay leaves
+Kraeuter;Liebstöckel;celery seed;lovage
+Kraeuter;Bohnenkraut;savory ground;summer savory
+Kraeuter;Majoran;spices marjoram dried;dried marjoram
+Kraeuter;Bärlauch;chives raw;ramson
+Kraeuter;Zitronenmelisse;peppermint fresh;lemon balm
+Kraeuter;Kresse;cress garden raw;garden cress
+Kraeuter;Basilikum Thai;basil fresh;thai basil
+Gewuerze;Salz;salt table;table salt
+Gewuerze;Meersalz;salt sea;sea salt
+Gewuerze;Pfeffer schwarz;spices pepper black;black pepper ground
+Gewuerze;Pfeffer weiß;spices pepper white;white pepper
+Gewuerze;Cayennepfeffer;spices pepper red or cayenne;cayenne pepper
+Gewuerze;Paprika edelsüß;spices paprika;sweet paprika
+Gewuerze;Paprika rosenscharf;spices paprika;hot paprika
+Gewuerze;Paprika geräuchert;spices paprika;smoked paprika
+Gewuerze;Chilipulver;chili powder;ground chili
+Gewuerze;Currypulver;spices curry powder;curry powder
+Gewuerze;Kreuzkümmel ganz;spices cumin seed;cumin seeds
+Gewuerze;Kreuzkümmel gemahlen;spices cumin seed;ground cumin
+Gewuerze;Kümmel ganz;spices caraway seed;caraway seeds
+Gewuerze;Koriander gemahlen;spices coriander seed;ground coriander
+Gewuerze;Fenchelsamen;spices fennel seed;fennel seeds
+Gewuerze;Senfsamen;spices mustard seed yellow;mustard seeds
+Gewuerze;Anis;spices anise seed;anise seed
+Gewuerze;Sternanis;spices star anise;star anise
+Gewuerze;Kardamom;spices cardamom;cardamom pods
+Gewuerze;Zimt gemahlen;spices cinnamon ground;cinnamon
+Gewuerze;Zimtstange;spices cinnamon ground;cinnamon stick
+Gewuerze;Nelken;spices cloves ground;whole cloves
+Gewuerze;Muskatnuss;spices nutmeg ground;nutmeg
+Gewuerze;Piment;spices allspice ground;allspice
+Gewuerze;Wacholderbeeren;juniper;juniper berries
+Gewuerze;Ingwer gemahlen;spices ginger ground;ground ginger
+Gewuerze;Kurkuma gemahlen;spices turmeric ground;ground turmeric
+Gewuerze;Safran;spices saffron;saffron threads
+Gewuerze;Vanille Schote;vanilla bean;vanilla pod
+Gewuerze;Sumach;sumac;sumac powder
+Gewuerze;Za'atar;spices thyme dried;zaatar
+Gewuerze;Italienische Kräuter;spices italian seasoning;italian seasoning
+Gewuerze;Kräuter der Provence;spices italian seasoning;herbes de provence
+Gewuerze;Bockshornklee;spices fenugreek seed;fenugreek
+Gewuerze;Asafötida;asafoetida;hing
+Gewuerze;Schwarzkümmel;spices nutmeg ground;black cumin
+Gewuerze;Mohnpaste;seeds poppy seed;poppy paste
+Gewuerze;Knoblauchpulver;spices garlic powder;garlic granulated
+Gewuerze;Zwiebelpulver;spices onion powder;onion granulated
+Sweeteners;Zucker weiß;sugars granulated;white sugar
+Sweeteners;Zucker braun;sugars brown;brown sugar
+Sweeteners;Puderzucker;sugars powdered;icing sugar
+Sweeteners;Rohrzucker;sugars granulated;cane sugar
+Sweeteners;Kokosblütenzucker;sugars granulated;coconut sugar
+Sweeteners;Honig;honey;raw honey
+Sweeteners;Ahornsirup;syrups maple;maple syrup
+Sweeteners;Agavendicksaft;syrups agave;agave nectar
+Sweeteners;Reissirup;syrups maple;rice syrup
+Sweeteners;Stevia;stevia;stevia leaf
+Sweeteners;Erythrit;sugars granulated;erythritol
+Sweeteners;Xylit;sugars granulated;xylitol
+Sweeteners;Melasse;molasses;blackstrap molasses
+Sweeteners;Karamellsirup;syrups corn light;caramel syrup
+Sweeteners;Zuckersirup;sugars granulated;simple syrup
+Saucen;Essig Weißwein;vinegar distilled;white wine vinegar
+Saucen;Essig Rotwein;vinegar red wine;red wine vinegar
+Saucen;Apfelessig;vinegar cider;apple cider vinegar
+Saucen;Balsamico;vinegar balsamic;balsamic vinegar
+Saucen;Reisessig;vinegar rice;rice vinegar
+Saucen;Sherryessig;vinegar red wine;sherry vinegar
+Saucen;Sojasauce;soy sauce made from soy and wheat;soy sauce
+Saucen;Tamari;soy sauce reduced sodium;tamari sauce
+Saucen;Worcestershiresauce;sauce ready-to-serve worcestershire;worcestershire
+Saucen;Fischsauce;fish sauce;nam pla
+Saucen;Austernsauce;oyster sauce;oyster
+Saucen;Ketchup;catsup;tomato ketchup
+Saucen;Senf;mustard prepared yellow;yellow mustard
+Saucen;Senf Dijon;mustard prepared dijon;dijon mustard
+Saucen;Senf süß;mustard prepared honey;honey mustard
+Saucen;Mayonnaise;salad dressing mayonnaise;mayo
+Saucen;Mayonnaise leicht;salad dressing mayonnaise light;light mayo
+Saucen;Sriracha;sauce ready-to-serve chili sriracha;sriracha sauce
+Saucen;Tabasco;sauce hot;hot pepper sauce
+Saucen;Pesto;sauce pesto;basil pesto
+Saucen;Tomatenmark;tomato paste;tomato concentrate
+Saucen;Passata;tomato puree;tomato puree
+Saucen;Tomaten gehackt Dose;tomatoes red ripe canned;diced tomatoes
+Saucen;Salsa;sauce salsa;tomato salsa
+Saucen;Guacamole;avocados raw california;guacamole
+Saucen;Hummus;hummus commercial;hummus
+Saucen;Tzatziki;dip yogurt;tzatziki
+Saucen;BBQ Sauce;sauce barbecue;barbecue sauce
+Saucen;Teriyaki Sauce;teriyaki sauce;teriyaki
+Saucen;Hoisin Sauce;sauce hoisin ready-to-serve;hoisin
+Getraenke;Wasser;water;mineral water
+Getraenke;Mineralwasser;water bottled non-carbonated;sparkling water
+Getraenke;Kaffee schwarz;coffee brewed prepared with tap water;black coffee
+Getraenke;Espresso;coffee brewed espresso restaurant-prepared;espresso shot
+Getraenke;Tee schwarz;tea brewed prepared with tap water;black tea
+Getraenke;Tee grün;tea green brewed regular;green tea
+Getraenke;Tee Kamille;tea chamomile;chamomile tea
+Getraenke;Tee Pfefferminz;tea herb other than chamomile;peppermint tea
+Getraenke;Tee Rooibos;tea herb other than chamomile;rooibos
+Getraenke;Apfelsaft;apple juice canned or bottled;apple juice
+Getraenke;Orangensaft;orange juice raw fresh;orange juice
+Getraenke;Grapefruitsaft;grapefruit juice white raw;grapefruit juice
+Getraenke;Tomatensaft;tomato juice canned;tomato juice
+Getraenke;Karottensaft;carrot juice canned;carrot juice
+Getraenke;Traubensaft;grape juice canned or bottled;grape juice
+Getraenke;Ananassaft;pineapple juice unsweetened;pineapple juice
+Getraenke;Cranberrysaft;cranberry juice cocktail;cranberry juice
+Getraenke;Limonade;lemonade powder prepared;lemonade
+Getraenke;Sprite;carbonated beverage lemon-lime soda;lemon lime soda
+Getraenke;Tonic Water;carbonated beverage tonic water;tonic
+Getraenke;Eistee;tea instant decaffeinated unsweetened;iced tea
+Getraenke;Kokoswasser;coconut water;coconut juice
+Getraenke;Energy Drink;energy drink;energy drinks
+Tofu;Tofu fest;tofu raw firm prepared with calcium sulfate;firm tofu
+Tofu;Tofu seiden;tofu silken;silken tofu
+Tofu;Tofu geräuchert;tofu hard prepared with nigari;smoked tofu
+Tofu;Tempeh;tempeh;tempeh cooked
+Tofu;Seitan;wheat gluten;seitan
+Tofu;Sojagranulat;soy meal defatted raw;soy crumbles
+Tofu;Sojaschnetzel;meat extender;soy protein chunks
+Tofu;Soja Geschnetzeltes;soy protein isolate;soy strips
+Tofu;Edamame;edamame frozen prepared;edamame
+Tofu;Natto;natto;natto fermented
+Tofu;Veggie Burger;veggie burger meatless;vegetarian burger
+Tofu;Vegane Wurst;sausage meatless;veggie sausage
+Tofu;Veganer Aufschnitt;luncheon meatless;vegan cold cuts
+Tofu;Hafer Hack;meat substitute;oat mince
+Tofu;Erbsenprotein;peas mature seeds raw;pea protein
+Suesswaren;Zartbitterschokolade;chocolate dark 70-85% cacao;dark chocolate
+Suesswaren;Vollmilchschokolade;chocolate milk;milk chocolate
+Suesswaren;Weiße Schokolade;chocolate white;white chocolate
+Suesswaren;Schokoladenstückchen;chocolate chips semisweet;chocolate chips
+Suesswaren;Kakao Tropfen;chocolate dark 70-85% cacao;cocoa nibs
+Suesswaren;Pralinen;chocolate truffles;truffle
+Suesswaren;Schokoriegel;candies milk chocolate coated peanuts;chocolate bar
+Suesswaren;Gummibärchen;candies gummy bears;gummi bears
+Suesswaren;Lakritze;candies licorice;licorice
+Suesswaren;Bonbons hart;candies hard;hard candy
+Suesswaren;Karamellbonbons;candies caramels;caramels
+Suesswaren;Marshmallows;candies marshmallows;marshmallow
+Suesswaren;Nougat;candies nougat;nougat
+Suesswaren;Marzipan;candies marzipan;marzipan
+Suesswaren;Halva;halvah;halwa
+Suesswaren;Türkischer Honig;candies sugar coated almonds;turkish delight
+Suesswaren;Speiseeis Vanille;ice creams vanilla;vanilla ice cream
+Suesswaren;Speiseeis Schokolade;ice creams chocolate;chocolate ice cream
+Suesswaren;Speiseeis Erdbeere;ice creams strawberry;strawberry ice cream
+Suesswaren;Sorbet;frozen novelties italian ice;fruit sorbet
+Suesswaren;Joghurteis;yogurt frozen vanilla soft-serve;frozen yogurt
+Suesswaren;Pudding Vanille;puddings vanilla ready-to-eat;vanilla pudding
+Suesswaren;Pudding Schokolade;puddings chocolate ready-to-eat;chocolate pudding
+Suesswaren;Kuchen;cake yellow commercially prepared;sponge cake
+Suesswaren;Kekse;cookies butter commercially prepared;butter cookies
+Alkohol;Rotwein trocken;alcoholic beverage wine table red;red wine
+Alkohol;Weißwein trocken;alcoholic beverage wine table white;white wine
+Alkohol;Sherry;alcoholic beverage wine cooking;sherry
+Alkohol;Bier hell;alcoholic beverage beer regular all;lager beer
+Alkohol;Rum;alcoholic beverage distilled rum 80 proof;dark rum
+Alkohol;Wodka;alcoholic beverage distilled vodka 80 proof;vodka
+Alkohol;Whisky;alcoholic beverage distilled whiskey 86 proof;whiskey

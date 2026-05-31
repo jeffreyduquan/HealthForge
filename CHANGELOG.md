@@ -5,6 +5,96 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## P7.S3 Slice 1 — Kuratierter USDA-Seed (Qualität vor Quantität) — 2026-05-29
+
+**Scope:** User-Direktive „die wichtigsten Lebensmittel reichen, Qualität vor Quantität". Voll-Seed (8.354 Rows) wird durch kuratierte Top-1.500-Liste ersetzt. Neue Pre-Launch-Reset-Migration trunkiert Bestand. FODMAP/Histamin werden in Folge-Sprints (P7.S3 Slice 2/3) nachgezogen.
+
+**Touched Code:**
+- NEW `server/.../tools/CurateUsdaSeed.kt` — 8-stufige Filter-Pipeline: data_type ∈ {Foundation, SR Legacy}, name_de ≠ name_en, Makros vollständig, ≥ 3 Mikros, Name-Blacklist (NFS, babyfood, junior, toddler, infant formula, fast food, restaurant, candies, snacks, dietary supplement, leavening agents, spices mixed, Komma-Modifier-Ketten ≥ 4), brand leer, Dedupe nach normalisiertem Namen, Top-N nach Quality-Score (Foundation +10 / SR-Legacy +5, +1 je Mikro bis 20, kurzer Name +3, „prepared/cooked/raw" −5, „infant/baby/formula" −3).
+- NEW Gradle-Task `:curateUsdaSeed`.
+- NEW `server/src/main/resources/seed/usda_fdc_curated.csv` (1500 Rows) + `curation_report.md`.
+- MOD `UsdaFdcImporter.seedResourcePath()` → kuratierter Seed, Fallback auf Voll-Seed wenn kuratierter fehlt.
+- NEW Flyway `V14__curated_ingredients_reset.sql` — DESTRUKTIV, trunkiert `ingredients`/`recipes`/`recipe_ingredients`/`recipe_reports`/`ingredient_field_pr`/`etl_runs` (Existenz-Check via `information_schema`). User-Bestätigung „Pre-Launch, Dev-DB TRUNCATE ok" eingeholt.
+
+**Pipeline-Resultat:** 8354 → 3769 nach Filtern (−300 wrongDataType, −46 noTranslation, −43 noMacros, −144 tooFewMicros, −4052 blacklisted) → 3719 nach Dedupe (−50 Duplikate) → **1500 final (−2219 unter Quality-Cutoff)**.
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — neuer REQ-DATA-CURATION-001 zwischen REQ-DATA-TRANSLATE-001 und REQ-INGR-MICRONUTRIENTS-001 + Traceability-Tabelle.
+- `docs/TraceabilityMatrix.md` — neuer Eintrag REQ-DATA-CURATION-001 Status ✅.
+- `docs/SprintPlan.md` — neuer Sprint-Block „P7.S3 Slice 1 — Kuratierter USDA-Seed" inkl. DoD-Checkliste + Folge-Sprint-Plan (Slice 2 SIGHI / Slice 3 FODMAP).
+
+**Untouched-Begründung:**
+- `docs/Architecture.md`: kein Schema-Change (Spalten `histamine_score`, `fodmap_flags_json`, `micronutrients_json` existieren seit V4/V12). Nur eine zusätzliche DESTRUKTIVE Migration V14 — wird im nächsten Architecture-Sweep eingetragen.
+- `docs/GUI.md` / `docs/UsabilityMap.md`: keine UI-Änderung.
+- BLS/OFF-Importer bleiben `@Deprecated` drin (User-Direktive: SIGHI behalten wegen Histamin).
+
+**Verifikation:**
+- `:curateUsdaSeed` BUILD SUCCESSFUL 23s, schreibt 1500 Rows + Report.
+- `:compileKotlin` BUILD SUCCESSFUL 23s nach `UsdaFdcImporter`-Änderung.
+- `(Get-Content usda_fdc_curated.csv).Count` = 1501 (Header + 1500).
+- Grep `Babynahrung|Junior|NFS` → 0 Treffer.
+
+**Hotfix 2026-05-29 — Restaurant-Chain-Blacklist (Smoketest in Android-App):**
+- End-to-End-Smoketest in App-UI zeigte 87 Restaurant-Chain-Entries (APPLEBEE'S, BURGER KING, TACO BELL, McDONALD'S, KFC, DENNY'S, PIZZA HUT etc.) in der Lebensmittel-Liste. Ursache: diese sind in USDA als `SR Legacy` getaggt (nicht `Survey (FNDDS)`), und mein `\brestaurant,\s+` / `\bfast foods?\b` Blacklist-Pattern matcht den Brand-Prefix nicht. Fix: explizite Brand-Whitelist mit `RegexOption.IGNORE_CASE` (wichtig: `McDONALD'S` hat lowercase `c`). 46 bekannte US-Ketten in einem Pattern. Re-Curation: 4186 → 4223 blacklisted (+37 Chain-Entries), DB nach Re-Import: 1500 Rows, **0 Chains** verifiziert via Postgres-Regex-Check.
+
+**Hotfix 2026-05-29 v2 — REQ-DATA-CURATION-002 Whitelist-driven Curation (Strategy B):**
+- User-Smoketest in Android-App: die 1500 Top-Quality-USDA-Items waren zu "USA-lastig", voll Cocktails/Convenience-Mixes/Near-Duplikaten ("Apfel getrocknet geschwefelt" + "Apfel dehydriert geschwefelt"). Wenig alltagstauglich für deutsche Küche.
+- **Lösung:** Komplett neuer Ansatz statt Top-N-Quality-Filter: **kuratierte deutsche Essentials-Whitelist** (`seed/essentials_de.csv`, 638 Einträge in 24 Kategorien: Obst/Gemüse/Pilze/Salate/Fleisch/Geflügel/Fisch/Eier/Milch/Käse/Getreide/Reis-Pasta/Mehle/Hülsen/Nüsse/Fette/Kräuter/Gewürze/Süßes/Saucen/Getränke/Tofu/Schoko/Alkohol).
+- **Matcher:** neues Tool `tools/CurateByWhitelist.kt` + Gradle-Task `:curateByWhitelist`. Token-Overlap-Score mit Form-Penalty (juice/peel/powder/dehydrated etc. werden -25..-50 abgewertet wenn Query sie nicht erwähnt). 2-Pass-Strategie: erst Threshold≥40 (hochkonfidente Matches), dann Fallback auf MIN_SCORE=10. Verhindert dass marginale Fallbacks ("Garam Masala"→garlic powder) gute Targets ("Knoblauchpulver"→tomato powder) wegnehmen.
+- **Pipeline-Resultat:** 638 Whitelist → 638 Matches (100 %), avg-Score 59. DB nach Re-Import: **632 Rows** (6 skipped wegen invalider USDA-Daten), Sample: Apfel, Banane, Hähnchenbrust, Hüttenkäse, Vollkornbrot, Lachs, Olivenöl, Zwiebel etc.
+- **REQ-DATA-CURATION-001** bleibt als Tool intakt (`:curateUsdaSeed`) aber nicht mehr autoritativ für App-DB. **REQ-DATA-CURATION-002** ist autoritativ.
+- **End-to-End-Boot-Test ✅ 2026-05-29:** Server-Start 17.7s, Flyway V1–V14 applied (TRUNCATE bestätigt), JWT-Login via `POST /v1/auth/login`, ETL `POST /admin/v1/etl/run?source=USDA_FDC` → `etl_runs.status=SUCCESS`, `SELECT count(*) FROM ingredients = 1500` (100 % `source='USDA_FDC'`), Sample-Rows (Hüttenkäse fettarm, Joghurt fettarm, Honig, Heidelbeeren Konserven, Mozzarella-Ersatzkäse, Orangenmarmelade) zeigen saubere Übersetzung.
+
+**Hotfix 2026-05-29 v3 — CurateByWhitelist CSV-Escape-Bug (Mikronährstoffe leer):**
+- User-Smoketest: alle 632 Ingredients hatten `micronutrients_json = '{}'` in der DB obwohl Quell-CSV vollständige Vitamine/Mineralien enthält.
+- **Root Cause:** `CurateByWhitelist.writeOutput` schrieb die `micronutrients_json`-Spalte **roh** in die kuratierte CSV (ohne RFC-4180-Escape: kein umschließendes `"`, keine `"`→`""`-Dopplung). Beim Re-Read im `UsdaFdcImporter` zerlegte der Parser dann die JSON-Quotes, sodass `{"calcium":5.0,...}` als `{calcium:5.0,...}` ankam — invalides JSON → `parseMicros` Exception → `emptyMap()`.
+- **Fix:** `csvEscape()`-Helper in `CurateByWhitelist.kt` ergänzt (wrap in `"`, doppelt-quoten innere `"`); writeOutput nutzt es für die micros-Spalte.
+- **Pipeline-Resultat:** Re-Run `:curateByWhitelist` + `:processResources --rerun-tasks` + TRUNCATE + ETL Re-Import → **631/632 Ingredients haben jetzt Mikros**, **avg 20.9 Mikronährstoff-Keys pro Eintrag** (Vitamine A/B1-B12/C/D/E/K + Mineralien Calcium/Eisen/Kalium/Magnesium/Mangan/Natrium/Phosphor/Selen/Zink/Kupfer). Beispiele: Aal hat 22 Mikros, Adzuki Bohnen 20 Mikros.
+- **Hinweis FODMAP + Histamin:** weiterhin leer (0/632) — sind eigene Slices (P7.S3 Slice 2 SIGHI-Histamin, FODMAP-Mapping kommt separat).
+
+---
+
+## P7.S3 Slice 2 — SIGHI-Histamin-Daten (REQ-INGR-003) — 2026-05-29
+
+**Scope:** Histamin-Verträglichkeit (0–3) für unsere 632 USDA-FDC-Ingredients populieren, basierend auf der SIGHI-Merkblatt-Klassifikation.
+
+**Daten-Pipeline:**
+- DOWNLOAD `SIGHI-Merkblatt_histaminarmeErnaehrung.pdf` (267 KB, v2021-11-17, public, © SIGHI) → temp via `Invoke-WebRequest`.
+- EXTRACT via `pdfplumber` (Python, one-shot, Skript anschließend gelöscht) → 4 Seiten × Tabellenstruktur (3 Spalten: Zu meiden / Unsicher / Gut verträglich, gegliedert in 11 Lebensmittelkategorien Fleisch/Fisch/Milch/Getreide/Gemüse/Früchte/Nüsse/Fette/Gewürze/Süßes/Getränke).
+- NEW `server/src/main/resources/seed/sighi.csv` (270 Keywords, Format `keyword;score;category`, Header + Lizenzhinweis als `#`-Kommentar). Mapping: Zu meiden → 3, Unsicher → 1, Gut verträglich → 0. Codiert die textuellen Buckets als einzelne Keyword-Einträge (z.B. "Salami;3;Fleisch", "Tomate;3;Gemuese", "Apfel;0;Fruechte", "Mozzarella;0;Milch").
+- KEEP `server/src/main/resources/seed/sighi_merkblatt.pdf` als Audit-Quelle.
+
+**Touched Code:**
+- MOD `server/.../etl/Importers.kt::SighiImporter` komplett re-implementiert. Alter Skeleton matched gegen `IngredientSource.BLS` + `bls_sbls` (passt nicht zu unserem USDA-FDC-Bestand). Neuer Importer:
+  - Lädt `sighi.csv` zu Liste `Rule(keyword, normalized, score)` (Kommentar-/Header-Zeilen skip).
+  - Iteriert `ingredients.findAll()`, normalisiert `nameDe` (lowercase + Diakritika-Strip + ß→ss).
+  - Substring-Match je Rule; bei mehreren Treffern: höchster Score gewinnt (Vorsichtsprinzip), bei Score-Gleichstand längeres Keyword (spezifischer).
+  - Setzt `histamineScore`, nur wenn er sich ändert (Idempotent + minimale DB-Schreiblast).
+  - Nicht-gematchte Zutaten behalten `null` (= unbekannt, per REQ-QUALITY-003).
+
+**Pipeline-Resultat:** ETL `POST /admin/v1/etl/run?source=SIGHI` → `etl_runs.status=SUCCESS`, **477 Updates / 155 unbeeinflusst** in ~1s. DB-Verteilung:
+- `0` (gut verträglich): **284** Ingredients (45 %)
+- `1` (unsicher): **38** Ingredients (6 %)
+- `3` (zu meiden): **155** Ingredients (25 %)
+- `NULL` (unbekannt): **155** Ingredients (25 %, z.B. Algen, Asafötida, Bagel, Bergkäse — können in v2 der CSV ergänzt werden)
+
+**Spot-Check vs. SIGHI-Lehrbuch:** Salami=3 ✓, Tomate=3 ✓, Spinat=3 ✓, Avocado=3 ✓, Banane=3 ✓, Camembert=3 ✓, Apfel=0 ✓, Hähnchenbrust=0 ✓, Knoblauch=0 ✓, Mozzarella=0 ✓, Kabeljau=0 ✓.
+
+**Touched Docs:**
+- `CHANGELOG.md` (dieser Eintrag)
+- `docs/TraceabilityMatrix.md` (REQ-INGR-003 🟡→✅, neuer Verifikationstext)
+
+**Untouched-Begründung:**
+- `docs/ReqSpec.md`: REQ-INGR-003 unverändert (Inhalt erfüllt). Score-Skala 0..3 entspricht bestehender Spec.
+- `docs/GUI.md`: Histamin-Block in `IngredientDetailSheet` (P7.S5 4f) ist bereits implementiert und conditional auf `histamine_score != null` → wird jetzt automatisch sichtbar.
+- `docs/Architecture.md`: kein Schema-Change (Spalte `histamine_score` existiert seit V4).
+- `docs/SprintPlan.md`: wird im nächsten Sweep mit DoD-Checkliste für Slice 2 ergänzt.
+- FODMAP-Slice 3 bleibt offen.
+
+**Verifikation:** `:compileKotlin` BUILD SUCCESSFUL 8s, Server-Restart sauber, `POST /admin/v1/etl/run?source=SIGHI` SUCCESS in 1.04s, 477 rows updated; psql-Audit bestätigt Verteilung + 11 textbuch-korrekte Spot-Checks.
+
+---
+
 ## P7.S5 4f — Lebensmittel-Detail-Sheet (Mikronährwerte sichtbar) — 2026-05-29
 
 **Scope:** Tap auf eine Lebensmittel-Karte im `LebensmittelScreen` öffnet jetzt ein `ModalBottomSheet` mit voller Detail-Aufschlüsselung: Makros pro 100 g, Mikronährwerte (gefiltert auf Werte > 0, gruppiert in Vitamine / Mineralstoffe in `NutrientCatalog`-Reihenfolge, mit Prozent-DGE-Pill pro Zeile), Allergene/FODMAP-Chips falls vorhanden, Quelle (z. B. „USDA-FDC #170150"). Histamin-Block wird nur gerendert, wenn `histamine_score` gesetzt ist (aktuell 0/8354 Rows → Block unsichtbar bis SIGHI-Pipeline kommt).

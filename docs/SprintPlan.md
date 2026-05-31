@@ -1820,6 +1820,78 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Risiken:**
 - AlarmManager-Doze-Mode kann Alarme verzögern. Mitigation: `setExactAndAllowWhileIdle` für kritischen Mindest-5min-Alarm.
 
+### Sprint P7.S3 Slice 1 — Kuratierter USDA-Seed (REQ-DATA-CURATION-001)
+**Status:** ✅ 2026-05-29
+
+**Auslöser:** User-Direktive „die wichtigsten Lebensmittel reichen, Qualität vor Quantität" — Voll-Seed mit 8.354 Rows enthielt zu viele Industrieprodukte, Babynahrung, Mixe und Fragmente.
+
+**Deliverables:**
+- NEW `server/.../tools/CurateUsdaSeed.kt` — Standalone-Kotlin-Tool mit 8-stufiger Filter-Pipeline (data_type, Übersetzung, Makros, Mikros ≥ 3, Name-Blacklist, kein Brand, Dedupe, Top-N nach Quality-Score).
+- NEW Gradle-Task `:curateUsdaSeed` (group `tools`).
+- NEW `server/src/main/resources/seed/usda_fdc_curated.csv` (1500 Rows, 14 Spalten, identisches Format wie `usda_fdc.csv`).
+- NEW `server/src/main/resources/seed/curation_report.md` (Drop-Buckets + Top-50-Liste + Knapp-aussortiert).
+- MOD `server/.../etl/usda/UsdaFdcImporter.kt` — `seedResourcePath()` → `seed/usda_fdc_curated.csv`, Fallback auf Voll-Seed wenn kuratierter fehlt.
+- NEW Flyway `V14__curated_ingredients_reset.sql` — DESTRUKTIV, trunkiert `ingredients`, `recipes`, `recipe_ingredients`, `recipe_reports`, `ingredient_field_pr`, `etl_runs` (Existenz-Check via `information_schema`). Pre-Launch-User-Bestätigung explizit eingeholt.
+
+**Testing-Strategie:**
+- `:curateUsdaSeed` läuft ohne Fehler → CSV + Report werden geschrieben (✅ 23s).
+- Zeilenzahl-Check: `(Get-Content usda_fdc_curated.csv).Count == 1501` (1 Header + 1500 Daten) (✅).
+- Stichproben-Grep: `Babynahrung|Junior|NFS` → 0 Matches (✅).
+- `:compileKotlin` BUILD SUCCESSFUL (✅ 23s).
+
+**Definition of Done:**
+- [x] Tool kompiliert + läuft deterministisch.
+- [x] Kurierte CSV ≤ 1.500 Rows, alle Spalten gefüllt.
+- [x] Report zeigt Pipeline-Statistiken + Drop-Buckets.
+- [x] Importer-Pfad umgestellt + Fallback dokumentiert.
+- [x] Migration vorbereitet (V14).
+- [x] ReqSpec REQ-DATA-CURATION-001 eingetragen.
+- [x] TraceabilityMatrix-Eintrag mit Status ✅.
+- [x] End-to-End-Boot-Test (✅ 2026-05-29): Server boot 17.7s, Flyway V1–V14 angewandt, ETL `POST /admin/v1/etl/run?source=USDA_FDC` → `etl_runs.status=SUCCESS`, `SELECT count(*) FROM ingredients = 1500` (100 % `source='USDA_FDC'`), Sample-Rows korrekt übersetzt (Hüttenkäse, Joghurt, Honig, Heidelbeeren …).
+
+**Folge-Sprints (P7.S3 Slice 2/3, geplant):**
+- Slice 2: SIGHI-Histamin-Liste PDF-Parser + Import in `ingredient.histamine_score` (frei verfügbar, parsbar).
+- Slice 3: FODMAP-Werte — Heuristik basierend auf publizierten Studien (Monash-Lizenz nicht erwerbbar) ODER kuratierte CSV nach Lebensmittel-Klasse, schreibt in `ingredient.fodmap_flags_json`.
+
+### Sprint P7.S3 Slice 2 — SIGHI-Histamin-Daten (REQ-INGR-003)
+**Status:** ✅ 2026-05-29
+
+**Auslöser:** User-Smoketest meldete „es fehlen Vitamine/Mineralstoffe, FODMAP, Histamin". Mikros wurden in Slice 1 v3-Hotfix gefixt; Histamin ist Slice 2.
+
+**Daten-Pipeline:**
+- Download `SIGHI-Merkblatt_histaminarmeErnaehrung.pdf` (267 KB, v2021-11-17, public, © SIGHI).
+- One-shot Python-Skript via `pdfplumber` → extrahierte 4 Seiten × Tabellenstruktur (3 Spalten: Zu meiden / Unsicher / Gut verträglich × 11 Lebensmittelkategorien).
+- NEW `server/src/main/resources/seed/sighi.csv` (270 Keywords, Format `keyword;score;category`, Header + Lizenzkommentar). Mapping: Zu-meiden=3, Unsicher=1, Gut-verträglich=0.
+- Audit-Quelle: `seed/sighi_merkblatt.pdf` bleibt im Repo.
+
+**Deliverables:**
+- MOD `server/.../etl/Importers.kt::SighiImporter` komplett re-implementiert. Alter Skeleton matched gegen `IngredientSource.BLS` + `bls_sbls` — Bestand ist aber USDA-FDC. Neuer Importer iteriert `ingredients.findAll()`, normalisiert Namen (lowercase + Diakritika-Strip + ß→ss), Substring-Match je Rule, höchster Score gewinnt (Vorsichtsprinzip), bei Ties längeres Keyword (spezifischer), idempotent.
+
+**Testing-Strategie:**
+- `:compileKotlin` BUILD SUCCESSFUL (✅ 8s).
+- Server-Restart + JWT-Login + `POST /admin/v1/etl/run?source=SIGHI` → `etl_runs.status=SUCCESS` (1.04s).
+- psql-Audit: `SELECT histamine_score, COUNT(*) FROM ingredients GROUP BY 1` → 0:284 / 1:38 / 3:155 / NULL:155.
+- Spot-Check 11 SIGHI-Lehrbuchfälle: Salami/Tomate/Spinat/Avocado/Banane/Camembert=3 ✓, Apfel/Hähnchenbrust/Knoblauch/Mozzarella/Kabeljau=0 ✓.
+
+**Definition of Done:**
+- [x] SIGHI-PDF lokal verfügbar (Audit-Quelle).
+- [x] `sighi.csv` aus PDF-Buckets kuratiert.
+- [x] Importer aktualisiert + kompiliert ohne Fehler.
+- [x] ETL-Lauf erfolgreich, `etl_runs`-Row SUCCESS.
+- [x] DB-Verteilung plausibel (75 % der Ingredients haben jetzt einen Score).
+- [x] Spot-Check Lehrbuchfälle korrekt.
+- [x] TraceabilityMatrix REQ-INGR-003 von 🟡 → ✅.
+- [x] CHANGELOG-Eintrag.
+
+**Bekannte Lücken (für v2 dieser CSV):** 25 % der Zutaten (155) ohne Match — z.B. Algen Nori/Wakame, Asafötida, Bagel, Bergader, Bergkäse, Bonbons, Burrata, Corned Beef, Croissant. Diese können durch Erweiterung der `sighi.csv` (zusätzliche Keywords) abgedeckt werden, ohne Importer-Änderung.
+
+**Risiken:**
+- SIGHI-Keyword-Substring-Match kann False-Positives erzeugen wenn z.B. "Brombeere" auf "Beere" matched (nicht passiert, aber Risiko). Mitigation: längste-Match-Wins-Regel.
+- Vorsichtsprinzip (höchster Score) kann Mischprodukte zu vorsichtig einstufen. Akzeptiert für v1.
+
+### Sprint P7.S3 Slice 3 — FODMAP-Daten (geplant, noch nicht gestartet)
+**Status:** ❌ TODO. Heuristik basierend auf publizierten Studien (Monash-Lizenz nicht erwerbbar) ODER kuratierte CSV nach Lebensmittel-Klasse → schreibt `ingredient.fodmap_flags_json`. Erst zu starten, wenn UI-Smoketest Slice 2 (Histamin) bestätigt.
+
 ### Sprint P7.S5 — Polish + Admin-UI + Migration-Smoke
 **Status:** 🟡 Slice 4f (Lebensmittel-Detail-Sheet) ✅; Rest TODO
 
