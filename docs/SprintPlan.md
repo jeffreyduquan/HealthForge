@@ -1828,30 +1828,162 @@ Jeder Sprint = ein Commit (oder kleine Slices). Jeder Sprint endet mit askQuesti
 **Deliverables:**
 - NEW `server/.../tools/CurateUsdaSeed.kt` — Standalone-Kotlin-Tool mit 8-stufiger Filter-Pipeline (data_type, Übersetzung, Makros, Mikros ≥ 3, Name-Blacklist, kein Brand, Dedupe, Top-N nach Quality-Score).
 - NEW Gradle-Task `:curateUsdaSeed` (group `tools`).
-- NEW `server/src/main/resources/seed/usda_fdc_curated.csv` (1500 Rows, 14 Spalten, identisches Format wie `usda_fdc.csv`).
+- NEW `server/src/main/resources/seed/usda_fdc_curated.csv` (638 Rows, 14 Spalten, identisches Format wie `usda_fdc.csv`). **Korrektur 2026-05-31:** Doku sprach ursprünglich von 1500; tatsächliche kurierte Liste hat 638 Rows (= Länge der essentials_de-Whitelist). Importer liefert 632/638 erfolgreich (6 skipped wegen fehlender Makros).
 - NEW `server/src/main/resources/seed/curation_report.md` (Drop-Buckets + Top-50-Liste + Knapp-aussortiert).
 - MOD `server/.../etl/usda/UsdaFdcImporter.kt` — `seedResourcePath()` → `seed/usda_fdc_curated.csv`, Fallback auf Voll-Seed wenn kuratierter fehlt.
 - NEW Flyway `V14__curated_ingredients_reset.sql` — DESTRUKTIV, trunkiert `ingredients`, `recipes`, `recipe_ingredients`, `recipe_reports`, `ingredient_field_pr`, `etl_runs` (Existenz-Check via `information_schema`). Pre-Launch-User-Bestätigung explizit eingeholt.
 
 **Testing-Strategie:**
 - `:curateUsdaSeed` läuft ohne Fehler → CSV + Report werden geschrieben (✅ 23s).
-- Zeilenzahl-Check: `(Get-Content usda_fdc_curated.csv).Count == 1501` (1 Header + 1500 Daten) (✅).
+- Zeilenzahl-Check: `(Get-Content usda_fdc_curated.csv).Count == 639` (1 Header + 638 Daten) (✅ korrigiert 2026-05-31).
 - Stichproben-Grep: `Babynahrung|Junior|NFS` → 0 Matches (✅).
 - `:compileKotlin` BUILD SUCCESSFUL (✅ 23s).
 
 **Definition of Done:**
 - [x] Tool kompiliert + läuft deterministisch.
-- [x] Kurierte CSV ≤ 1.500 Rows, alle Spalten gefüllt.
+- [x] Kurierte CSV ≤ 1.500 Rows (effektiv 638), alle Spalten gefüllt.
 - [x] Report zeigt Pipeline-Statistiken + Drop-Buckets.
 - [x] Importer-Pfad umgestellt + Fallback dokumentiert.
 - [x] Migration vorbereitet (V14).
 - [x] ReqSpec REQ-DATA-CURATION-001 eingetragen.
 - [x] TraceabilityMatrix-Eintrag mit Status ✅.
-- [x] End-to-End-Boot-Test (✅ 2026-05-29): Server boot 17.7s, Flyway V1–V14 angewandt, ETL `POST /admin/v1/etl/run?source=USDA_FDC` → `etl_runs.status=SUCCESS`, `SELECT count(*) FROM ingredients = 1500` (100 % `source='USDA_FDC'`), Sample-Rows korrekt übersetzt (Hüttenkäse, Joghurt, Honig, Heidelbeeren …).
+- [x] End-to-End-Boot-Test (✅ 2026-05-29 + re-verifiziert 2026-05-31): Server boot 14s, Flyway V1–V14 angewandt, ETL `POST /admin/v1/etl/run?source=USDA_FDC` → `etl_runs.status=SUCCESS, rowsInserted=632, rowsSkipped=6`, `SELECT count(*) FROM ingredients = 632` (100 % `source='USDA_FDC'`). SIGHI re-run: 477 updated / 155 unmatched (24.5 % Lücke → sighi.csv-Erweiterung backlog). Sample-Rows korrekt übersetzt (Hüttenkäse, Joghurt, Honig, Heidelbeeren …).
 
 **Folge-Sprints (P7.S3 Slice 2/3, geplant):**
 - Slice 2: SIGHI-Histamin-Liste PDF-Parser + Import in `ingredient.histamine_score` (frei verfügbar, parsbar).
 - Slice 3: FODMAP-Werte — Heuristik basierend auf publizierten Studien (Monash-Lizenz nicht erwerbbar) ODER kuratierte CSV nach Lebensmittel-Klasse, schreibt in `ingredient.fodmap_flags_json`.
+
+### Sprint P7.S3 Slice 1 Hotfix-2 — Translation-Mismatch-Audit + Overrides (REQ-DATA-TRANSLATE-001)
+**Status:** ✅ 2026-05-31
+
+**Auslöser:** Beim Allergen-Audit (siehe „DB-Reset + Coverage-Audit" Eintrag) wurden für ~12 Foods auffällige Allergen-False-Negatives gefunden (Räucherlachs ohne FISH, Pekannüsse ohne NUT etc.). Stichproben-Untersuchung der CSV-Quellen zeigte, dass nicht der Allergen-Mapper das Problem ist, sondern **DeepL bei seltenen englischen Begriffen semantisch komplett halluziniert** hat (Salmonberries → „Räucherlachs", Yardlong bean → „Vanille Schote", Breadfruit → „Gnocchi", Butterbur → „Ghee", Chicken meatless → „Hähnchenhack"). Voller Audit über alle 638 curated Rows: 149 Kandidaten, 26 hart falsch.
+
+**Deliverables:**
+- NEW `server/tools/audit_translations.ps1` — PowerShell-Audit mit 35 Trigger/Required-Word-Regeln (Berry/Milk/Cheese/Oil/Chicken/Bread/Rice/Noodles/Egg/Salmon/Tuna/…). Scant CSV, gibt Mismatch-Liste + Per-Rule-Häufigkeit aus, schreibt `translation_audit.txt`.
+- NEW `server/tools/patch_translations.ps1` — In-Place CSV-Patcher mit fdc_id → name_de Override-Map (26 Korrekturen). Idempotent, UTF-8 ohne BOM (matched bestehende Datei).
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv` — 26 Zeilen mit korrigiertem `name_de`. Beispiele: fdc=168048 „Räucherlachs"→„Salmonbeere roh", fdc=168880 „Milchreis"→„Reis weiss gekocht", fdc=169886 „Hähnchenhack"→„Veggie-Haehnchenhack", fdc=169334 „Ghee"→„Pestwurz gekocht".
+
+**Testing-Strategie:**
+- `audit_translations.ps1` → 638 Rows scanned, 149 Mismatches grouped per Rule (Cheese=28, Milk=21, Oil=16, Chicken=14, …).
+- Manuelle Triage durch Agent: 26 hart-falsch / ~30 borderline / ~95 false-positives des Scripts (Eigennamen ohne Suffix wie Brie↔Brie, Olivenöl↔Olive oil, Kopfsalat↔Lettuce butterhead).
+- `patch_translations.ps1` → 26/26 Rows patched in CSV.
+- Server-Restart + USDA_FDC Re-Import: SUCCESS 2.2s, **0 inserted, 632 updated, 6 skipped** (etl_run `fdf60d29-2d34-4d04-9a79-3fbdcb333ee1`).
+- DB-Verifikation: `SELECT fdc_id, name_de FROM ingredients WHERE fdc_id IN (…26 ids…)` → alle 26 mit neuem name_de.
+
+**Definition of Done:**
+- [x] Audit-Tool deterministisch, Mismatch-Report reproduzierbar.
+- [x] 26 Korrekturen via Override-Map angewandt.
+- [x] Re-Import idempotent, alle 26 Rows updated.
+- [x] CHANGELOG / ReqSpec (REQ-DATA-TRANSLATE-001 Bekannte-Limitierung) / TraceabilityMatrix erweitert.
+
+**Folge-Backlog:**
+- ~30 Borderline-Mismatches (Käsesorten Bergader↔Monterey, Halloumi↔Feta, Pralinen↔dark chocolate etc.) → manuelle Review-Session geplant.
+- Verlorene kanonische DE-Foods (echter Räucherlachs/Marzipan/Tzatziki/Vanille-Schote/Gnocchi/Ghee/Sojaschnetzel/Udon/Milchreis/Hähnchenhack/…) müssen als neue Rows aus tatsächlich passenden FDC-Einträgen ergänzt werden (separater Slice, evtl. P7.S3 Slice 1 Hotfix-3).
+- Allergen-Mapper-Bugs unverändert offen: Plural-Forms (`yogurts`, `pecans`), Single-Word-Compounds (`soymilk`, `kefir`), generische Container-Begriffe (`bread`).
+
+### Sprint P7.S3 Slice 1 Hotfix-3 — Verlorene DE-Foods nachpflegen (REQ-DATA-CURATION-002)
+**Status:** ✅ 2026-05-31 (Teil-Lieferung: 5 von 17 wiederhergestellt — Rest braucht externe Daten-Quelle)
+
+**Auslöser:** Hotfix-2 hat 26 falsche DeepL-Übersetzungen korrigiert. Damit gingen aber 26 kanonische DE-Foods „verloren" (z. B. statt „Räucherlachs" steht jetzt „Salmonbeere"). User-Direktive: 8-12 wichtigste Foods nachpflegen.
+
+**Befund-Realität:** Von den 17 gesuchten Essential-Foods sind nur **5 im USDA-Voll-Seed enthalten**. Restliche 12 (Halloumi, Marzipan, Tzatziki, Gnocchi, Sourdough, Smoked Salmon, Udon, Erythrit, Sauerteig, Bohnenkraut, Schwarzkümmel, Fischsauce, Enoki, Maitake, Walnussmus, Haselnusscreme, Kokosmus) sind in FDC nicht abgedeckt — brauchen DGE/BLS/Souci-Fachmann oder manuelle Pflege.
+
+**Deliverables:**
+- NEW `server/tools/find_replacement_fdc.ps1` — Such-Helper über usda_fdc.csv mit kuratierter Pattern-Liste pro Ziel-Food.
+- NEW `server/tools/append_lost_foods.ps1` — Idempotenter Patcher: 1 Rename + 4 Appends. UTF-8 ohne BOM.
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv`:
+  - Rename fdc=171116 „Hähnchen ganz" → „Haehnchenhack roh" (Quelle: Chicken, ground, raw).
+  - Append fdc=171314 „Ghee (Butterschmalz)" (Butter, clarified butter (ghee)).
+  - Append fdc=174301 „Sojaproteinkonzentrat (Sojaschnetzel-Ersatz)" (Soy protein concentrate, acid-wash).
+  - Append fdc=168063 „Milchreis (Arroz con leche)" (Restaurant, Latino, arroz con leche / rice pudding).
+  - Append fdc=171852 „Mehrkornbagel" (Bagels, multigrain).
+
+**Definition of Done:**
+- [x] Append-Skript idempotent, kein Duplicate bei Re-Run.
+- [x] Re-Import: 4 inserted, 632 updated, 6 skipped.
+- [x] Stichprobe DB: alle 5 Rows mit korrekten Makros, Ghee=LACTOSE+hist=1, Sojaproteinkonzentrat=SOY+hist=3.
+- [x] DB-Total: 636 Rows.
+- [x] CHANGELOG erweitert.
+
+**Folge-Backlog (priorisiert):**
+- **External-Data-Source-Slice (verschoben auf Hotfix-5):** Pflege der 12 verbleibenden Essentials aus externer Quelle (DGE-Tabelle Souci-Fachmann-Kraut oder kuratierte Manual-CSV `seed/manual_de_foods.csv`).
+
+### Sprint P7.S3 Slice 1 Hotfix-4 — AllergenMapper Plural/Compound Keywords (REQ-INGR-ALLERGEN-MAPPING-001)
+**Status:** ✅ 2026-05-31
+
+**Auslöser:** Während Hotfix-2/3-Audit identifizierte False-Negatives im `AllergenMapper`: Plural-Forms (`yogurts`, `pecans`, `walnuts`, `shrimps`), Compounds (`soymilk`, `kefir`, `soyabean`), generische Container (`bread`, `bagel`, `pasta`, `noodles`, `pita`). User-Vorgabe: Hafer/Oats NICHT als GLUTEN flaggen (botanisch glutenfrei).
+
+**Deliverables:**
+- MOD `server/src/main/kotlin/de/healthforge/etl/usda/AllergenMapper.kt` — KEYWORDS-Map erweitert um ~22 Plural-/Compound-Einträge in GLUTEN, CRUSTACEAN, FISH, SOY, LACTOSE, NUT, MOLLUSC.
+- Re-Import: 636 updated, etl_run=`912e817d-…`.
+
+**Definition of Done:**
+- [x] `gradlew test --tests "*AllergenMapperTest*"` BUILD SUCCESSFUL.
+- [x] Re-Import refresht `allergens_json` auf UPDATE-Pfad (Importer line ~123).
+- [x] DB-Delta `allergens_json<>'[]'`: 188 → 212 (+24 neu geflaggte Ingredients).
+- [x] Spot-Check: Mehrkornbagel=[GLUTEN] ✓, Kefir/Mozzarella Light/Joghurteis=[LACTOSE] ✓, Pekannüsse=[NUT] ✓, Sojamilch=[SOY] ✓.
+- [x] CHANGELOG + TraceabilityMatrix erweitert.
+
+**Folge-Backlog:**
+- ~30 Borderline-Mismatches Triage (Bergader↔Monterey, Halloumi↔Feta etc.).
+- Final Re-Audit (Mikros / Allergens / Histamin / FODMAP Coverage).
+
+### Sprint P7.S3 Slice 1 Hotfix-5 — SighiImporter Compound/Region/Sorte Keywords (REQ-INGR-003)
+**Status:** ✅ 2026-05-31
+
+**Auslöser:** Audit-Snapshot 2026-05-31 zeigte 150 Ingredients (23.6 %) ohne Histamin-Score. SIGHI-Substring-Matcher kannte generische Kategorien („Wurst", „Hartkäse") aber keine konkreten Produkt-/Sortennamen.
+
+**Deliverables:**
+- MOD `server/src/main/resources/seed/sighi.csv` — Hotfix-5-Supplement (~140 neue Keywords gruppiert): Fleisch (Bacon, Mortadella, Hirsch, Reh, Fasan, Kaninchen …), Fisch (Matjes, Auster, Oktopus, Schellfisch, Tilapia, Dorade …), Käse (Bergader, Bergkäse, Gouda, Grana Padano, Manchego, Provolone …), Hefe/fermentierte Soja (Hefe frisch/trocken, Natto, Tamari, Hoisin, Teriyaki, Sriracha, Tabasco), Saucen (Mayonnaise, Pesto, Salsa, Passata, Guacamole, Hummus), Brot (Pumpernickel, Bagel, Baguette, Brezel, Croissant, Ciabatta, Focaccia, Pita, Müsli, Granola, Cornflakes …), Pasta (Lasagne, Tagliatelle, Tortellini, Farfalle, Fusilli, Penne), Alkohol (Sherry, Sherryessig), Süß (Pralinen, Schokoriegel, Nougat, Gummibärchen, Karamell, Xylit …), Obst (Cantaloupe, Holunderbeere, Quitte, Sanddorn, Stachelbeere, Rosine), Gewürze (Asafötida, Bockshornklee, Currypulver, Italienische Kräuter, Sumach, Wacholderbeeren, Backpulver, Natron …), Öle (Distelöl, Palmöl, Traubenkernöl), Gemüse (Algen, Bambussprossen, Maniok, Yamswurzel, Okra, Pak Choi, Portobello=3, Trüffel=3, Radicchio, Romanesco, Brunnenkresse …) + 3 Final-Fixups (Chia Samen, Kokosflocken, Pekannuss).
+- ETL-Runs `c71bd613-…` (148 updated) + `2aea5a8a-…` (+3 fixups).
+
+**Definition of Done:**
+- [x] **Histamin-Coverage: 486 → 636 (100 %).** 0 verbleibende NULL.
+- [x] Verteilung Final: 380 × Score 0, 60 × Score 1, 196 × Score 3.
+- [x] Spot-Check: Mortadella=3, Bergader=3, Sherry=3, Pak Choi=0, Pumpernickel=1, Bagel=0.
+- [x] CHANGELOG + TraceabilityMatrix + IngredientDbAudit updated.
+
+**Folge-Backlog:**
+- FODMAP-Mapper-Slice (0 % Coverage, eigener Slice).
+- External-Source-Slice für Jod/Biotin (USDA-Lücke) und 12 fehlende DE-Foods.
+- ~30 Borderline-Mismatches Triage.
+
+### Sprint P7.S3 Slice 1 Hotfix-7 — Magermilch-Bugfix & Fluid-Variante (REQ-DATA-CURATION-001)
+**Status:** ✅ 2026-05-31
+
+**Auslöser:** Smoketest enthüllte: „Magermilch" zeigte 362 kcal/100g — entspricht USDA FDC 172195 = „Milk, dry, nonfat" (Magermilchpulver), nicht flüssige Magermilch. Translation-Bug analog Hotfix-2.
+
+**Deliverables:**
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv` — FDC 172195 umbenannt zu „Magermilchpulver"; neue Zeile FDC 171269 als „Magermilch" (34 kcal, 3.37 g Protein, 0.08 g Fett).
+- NEW `server/tools/fix_magermilch.ps1`.
+
+**Definition of Done:**
+- [x] DB-Check: 5 Milch-Varianten konsistent (Vollmilch 61, Fettarme Milch 56, Magermilch 34, Magermilchpulver 362, Buttermilch 43 kcal).
+- [x] ETL-Runs idempotent.
+- [x] CHANGELOG + IngredientDbAudit aktualisiert.
+
+**Folge-Backlog (verwandt):**
+- „Fettarme Milch" (FDC 167697) ist tatsächlich Buttermilch reduced-fat → Umbenennung + Ersatz durch echte fluid-low-fat-Milk.
+
+### Sprint P7.S3 Slice 1 Hotfix-6 — Score-1-Audit & Korrektur Eigenbewertungen (REQ-INGR-003 / REQ-QUALITY-003)
+**Status:** ✅ 2026-05-31
+
+**Auslöser:** User-Challenge zur Score-1-Verteilung (9.4 % / 60 Rows): „stehen die auf unknown? oder hast du ihnen einfach einen Wert gegeben?". Pro-Item-Audit als Ernährungsberater ergab 12 Einträge ohne direkten SIGHI-Merkblatt-Bezug.
+
+**Deliverables:**
+- MOD `server/src/main/resources/seed/sighi.csv` — 9 Regeln entfernt (Sriracha, Mayonnaise, Currypulver, Sumach, Lupinen, Veggie Burger, Nougat, Energy Drink, Rosine); 3 Korrekturen (Schwertfisch 1→3, BBQ 1→3, Pesto 1→3).
+- NEW `server/tools/score1_audit_cleanup.ps1`.
+- DB-Direkt-UPDATE: 10 × NULL, 3 × Score 3, 1 × Score 0 (Wildreis-Bug-Fix).
+
+**Definition of Done:**
+- [x] Neue Verteilung: 381 × 0 / **46 × 1 (alle direkt-SIGHI)** / 199 × 3 / **10 × NULL (transparent „unbekannt")**.
+- [x] Datenintegrität: Score 1 enthält ausschließlich SIGHI-Merkblatt-direkte Klassifikationen.
+- [x] Wildreis-Substring-Bug per DB-Override gefixt (Code-Fix bleibt Tech-Debt).
+- [x] CHANGELOG + IngredientDbAudit aktualisiert.
+
+**Folge-Backlog / Tech-Debt:**
+- SighiImporter Word-Boundary-Matcher statt Substring (Bug-Klasse: „Wild"→„Wildreis", „Senf"→„Senfsamen" etc.).
+- Community/User-Override der 10 NULL-Rows.
 
 ### Sprint P7.S3 Slice 2 — SIGHI-Histamin-Daten (REQ-INGR-003)
 **Status:** ✅ 2026-05-29

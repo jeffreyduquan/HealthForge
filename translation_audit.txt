@@ -1,0 +1,182 @@
+﻿# Translation-Mismatch-Audit - 2026-05-31 12:51
+# Total scanned: 638, Mismatches: 149
+
+## Per-Rule-Count
+Rule          Count
+----          -----
+Cheese           28
+Milk             21
+Oil              16
+Chicken          14
+Butter           12
+Bread             8
+Egg               8
+Beans             6
+Mushroom          6
+Beef              5
+Noodles/Pasta     5
+Apple             3
+Berry             3
+Spinach           2
+Chocolate         2
+Tomato            2
+Lettuce           2
+Coffee            1
+Yogurt            1
+Peas              1
+Onion             1
+Soy               1
+Pork              1
+
+## Full List (sorted by Rule, NameDe)
+Rule          FdcId   NameDe                 NameEn                                                                                                                     
+----          -----   ------                 ------                                                                                                                     
+Apple         169124  Ananas                 Pineapple, raw, all varieties                                                                                              
+Apple         168187  Ananassaft             Pineapple juice, canned or bottled, unsweetened, with added ascorbic acid                                                  
+Apple         167792  Orangensaft            Orange Pineapple Juice Blend                                                                                               
+Beans         173800  Kichererbsen Dose      Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids                                              
+Beans         2644282 Kichererbsen trocken   Chickpeas, (garbanzo beans, bengal gram), dry                                                                              
+Beans         167991  Marzipan               Candies, jellybeans                                                                                                        
+Beans         171411  Sojaöl                 Oil, soybean, salad or cooking                                                                                             
+Beans         171832  Tzatziki               Dip, bean, original flavor                                                                                                 
+Beans         169222  Vanille Schote         Yardlong bean, raw                                                                                                         
+Beef          171599  Bohnenkraut            Gravy, HEINZ Home Style, savory beef                                                                                       
+Beef          174579  Bratwurst              Sausage, pork and beef, fresh, cooked                                                                                      
+Beef          172949  Frankfurter Würstchen  Frankfurter, beef, pork, and turkey, fat free                                                                              
+Beef          174573  Mortadella             Mortadella, beef, pork                                                                                                     
+Beef          172936  Salami                 Salami, cooked, beef and pork                                                                                              
+Berry         171903  Cranberrysaft          Cranberry juice cocktail, bottled                                                                                          
+Berry         168048  Räucherlachs           Salmonberries, raw (Alaska Native)                                                                                         
+Berry         170901  Skyr                   Yogurt, Greek, strawberry, nonfat                                                                                          
+Bread         174913  Ciabatta               Bread, Italian                                                                                                             
+Bread         167945  Focaccia               Focaccia, Italian flatbread, plain                                                                                         
+Bread         171714  Gnocchi                Breadfruit, raw                                                                                                            
+Bread         171514  Hähnchenstreifen       Chicken breast tenders, breaded, cooked, microwaved                                                                        
+Bread         174915  Pita                   Bread, pita, white, enriched                                                                                               
+Bread         174916  Pita Vollkorn          Bread, pita, whole-wheat                                                                                                   
+Bread         174918  Pumpernickel           Bread, pumpernickel                                                                                                        
+Bread         174977  Zwieback               Crackers, melba toast, plain                                                                                               
+Butter        168597  Cashewmus              Nuts, cashew butter, plain, with salt added                                                                                
+Butter        174987  Croissant              Croissants, butter                                                                                                         
+Butter        167697  Fettarme Milch         Milk, buttermilk, fluid, cultured, reduced fat                                                                             
+Butter        169334  Ghee                   Butterbur, cooked, boiled, drained, with salt                                                                              
+Butter        167972  Gummibärchen           Candies, butterscotch                                                                                                      
+Butter        173411  Haselnusscreme         Butter, whipped, with salt                                                                                                 
+Butter        174950  Kekse                  Cookies, butter, commercially prepared, enriched                                                                           
+Butter        168429  Kopfsalat              Lettuce, butterhead (includes boston and bibb types), raw                                                                  
+Butter        168603  Mandelmus              Nuts, almond butter, plain, with salt added                                                                                
+Butter        172335  Schwarzkümmel          Oil, nutmeg butter                                                                                                         
+Butter        170155  Sonnenblumenkernmus    Seeds, sunflower seed butter, without salt                                                                                 
+Butter        171421  Walnussmus             Oil, cocoa butter                                                                                                          
+Cheese        170844  Bergader               Cheese, monterey                                                                                                           
+Cheese        171242  Bergkäse               Cheese, gruyere                                                                                                            
+Cheese        170843  Blauschimmelkäse       Cheese, fontina                                                                                                            
+Cheese        172177  Brie                   Cheese, brie                                                                                                               
+Cheese        172178  Camembert              Cheese, camembert                                                                                                          
+Cheese        169901  Cheddar                Cheese, american cheddar, imitation                                                                                        
+Cheese        173419  Edamer                 Cheese, edam                                                                                                               
+Cheese        171251  Emmentaler             Cheese, swiss                                                                                                              
+Cheese        173416  Gorgonzola             Cheese, colby                                                                                                              
+Cheese        171241  Gouda                  Cheese, gouda                                                                                                              
+Cheese        170848  Grana Padano           Cheese, parmesan, hard                                                                                                     
+Cheese        172215  Käseaufschnitt         Cheese, provolone, reduced fat                                                                                             
+Cheese        171288  Käsemix gerieben       Cheese, Mexican blend                                                                                                      
+Cheese        172176  Manchego               Cheese, brick                                                                                                              
+Cheese        172175  Mascarpone             Cheese, blue                                                                                                               
+Cheese        167944  Mehrkornbrot           Bread, cheese                                                                                                              
+Cheese        171249  Pecorino               Cheese, romano                                                                                                             
+Cheese        170850  Provolone              Cheese, provolone                                                                                                          
+Cheese        171245  Raclettekäse           Cheese, muenster                                                                                                           
+Cheese        170900  Reibekäse              Cheese, mozzarella, low moisture, part-skim, shredded                                                                      
+Cheese        171250  Roquefort              Cheese, roquefort                                                                                                          
+Cheese        171243  Schafskäse             Cheese, limburger                                                                                                          
+Cheese        171628  Schinken roh           Ham and cheese loaf or roll                                                                                                
+Cheese        170853  Schmelzkäse            Cheese, pasteurized process, American, fortified with vitamin D                                                            
+Cheese        170852  Tilsiter               Cheese, tilsit                                                                                                             
+Cheese        172094  Tortellini             Tortellini, pasta with cheese filling, fresh-refrigerated, as purchased                                                    
+Cheese        172197  Ziegenkäse hart        Cheese, goat, hard type                                                                                                    
+Cheese        173435  Ziegenkäse weich       Cheese, goat, soft type                                                                                                    
+Chicken       171468  Gänseschmalz           Chicken, broilers or fryers, separable fat, raw                                                                            
+Chicken       172396  Hähnchen Bratrolle     Chicken, roasting, giblets, raw                                                                                            
+Chicken       171116  Hähnchen ganz          Chicken, ground, raw                                                                                                       
+Chicken       173874  Hähnchenaufschnitt     Chicken breast, deli, rotisserie seasoned, sliced, prepackaged                                                             
+Chicken       171445  Hähnchenbrust          Chicken, broiler, rotisserie, BBQ, breast, meat only                                                                       
+Chicken       171474  Hähnchenbrust mit Haut Chicken, broilers or fryers, breast, meat and skin, raw                                                                    
+Chicken       173632  Hähnchenflügel         Chicken, broilers or fryers, wing, meat only, raw                                                                          
+Chicken       169886  Hähnchenhack           Chicken, meatless                                                                                                          
+Chicken       171458  Hähnchenherz           Chicken, heart, all classes, raw                                                                                           
+Chicken       171060  Hähnchenleber          Chicken, liver, all classes, raw                                                                                           
+Chicken       171118  Hähnchenoberkeule      Chicken, broiler, rotisserie, BBQ, thigh, meat only                                                                        
+Chicken       173619  Hähnchenschenkel       Chicken, broilers or fryers, leg, meat only, raw                                                                           
+Chicken       173347  Roter Reis             RICE-A-RONI, chicken flavor, unprepared                                                                                    
+Chicken       172942  Wiener Würstchen       Sausage, Vienna, canned, chicken, beef, pork                                                                               
+Chocolate     167566  Karamellbonbons        Candies, caramels, chocolate-flavor roll                                                                                   
+Chocolate     170271  Pralinen               Chocolate, dark, 45- 59% cacao solids                                                                                      
+Coffee        171891  Espresso               Beverages, coffee, brewed, espresso, restaurant-prepared                                                                   
+Egg           172204  Eiweiß                 Egg, white, dried                                                                                                          
+Egg           172189  Entenei                Egg, duck, whole, fresh, raw                                                                                               
+Egg           171287  Erythrit               Egg, whole, raw, fresh                                                                                                     
+Egg           172190  Gänseei                Egg, goose, whole, fresh, raw                                                                                              
+Egg           169732  Glasnudeln             Noodles, egg, enriched, cooked                                                                                             
+Egg           169755  Ramen Nudeln           Noodles, egg, dry, unenriched                                                                                              
+Egg           172187  Rührei                 Egg, whole, cooked, scrambled                                                                                              
+Egg           172191  Wachtelei              Egg, quail, whole, fresh, raw                                                                                              
+Lettuce       168431  Lollo Rosso            Lettuce, red leaf, raw                                                                                                     
+Lettuce       2346389 Mesclun                Lettuce, romaine, green, raw                                                                                               
+Milk          170846  Burrata                Cheese, mozzarella, whole milk, low moisture                                                                               
+Milk          170858  Crème fraîche          Cream, fluid, light whipping                                                                                               
+Milk          171276  Evaporated Milk        Milk, canned, evaporated, with added vitamin D and without added vitamin A                                                 
+Milk          173418  Frischkäse             Cheese, cream                                                                                                              
+Milk          171304  Griechischer Joghurt   Yogurt, Greek, plain, whole milk                                                                                           
+Milk          2259796 Halloumi               Cheese, feta, whole milk, crumbled                                                                                         
+Milk          172179  Hüttenkäse             Cheese, cottage, creamed, large or small curd                                                                              
+Milk          171284  Joghurt natur          Yogurt, plain, whole milk                                                                                                  
+Milk          168585  Kokosflocken           Nuts, coconut meat, dried (desiccated), creamed                                                                            
+Milk          168828  Kokosmus               Puddings, coconut cream, dry mix, regular                                                                                  
+Milk          170845  Mozzarella             Cheese, mozzarella, whole milk                                                                                             
+Milk          170847  Mozzarella Light       Cheese, mozzarella, part skim milk                                                                                         
+Milk          173417  Quark Magerstufe       Cheese, cottage, lowfat, 1% milkfat                                                                                        
+Milk          172180  Quark Vollfett         Cheese, cottage, creamed, with fruit                                                                                       
+Milk          170851  Ricotta                Cheese, ricotta, whole milk                                                                                                
+Milk          175041  Sauerteig              Leavening agents, cream of tartar                                                                                          
+Milk          168001  Schokoriegel           Candies, milk chocolate coated peanuts                                                                                     
+Milk          168810  Speiseeis Erdbeere     Ice creams, strawberry                                                                                                     
+Milk          168809  Speiseeis Schokolade   Ice creams, chocolate                                                                                                      
+Milk          167575  Speiseeis Vanille      Ice creams, vanilla                                                                                                        
+Milk          2262073 Tahini                 Sesame butter, creamy                                                                                                      
+Mushroom      169403  Enoki                  Mushrooms, maitake, raw                                                                                                    
+Mushroom      169243  Maitake                Mushrooms, portabella, grilled                                                                                             
+Mushroom      168423  Morchel                Mushrooms, morel, raw                                                                                                      
+Mushroom      168422  Pfifferling            Mushrooms, Chanterelle, raw                                                                                                
+Mushroom      169255  Portobello             Mushrooms, portabella, raw                                                                                                 
+Mushroom      168436  Shiitake               Mushrooms, shiitake, dried                                                                                                 
+Noodles/Pasta 172025  Farfalle               Pasta, whole grain, 51% whole wheat, remaining enriched semolina, dry (Includes foods for USDA's Food Distribution Program)
+Noodles/Pasta 168915  Fusilli                Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, dry                                                    
+Noodles/Pasta 169850  Kräuter der Provence   Restaurant, Italian, lasagna with meat                                                                                     
+Noodles/Pasta 168927  Penne                  Pasta, dry, unenriched                                                                                                     
+Noodles/Pasta 168899  Tagliatelle            Pasta, gluten-free, corn, dry                                                                                              
+Oil           173573  Avocadoöl              Oil, avocado                                                                                                               
+Oil           173412  Butter gesalzen        Butter oil, anhydrous                                                                                                      
+Oil           171027  Distelöl               Oil, safflower, salad or cooking, high oleic (primary safflower oil of commerce)                                           
+Oil           171410  Erdnussöl              Oil, peanut, salad or cooking                                                                                              
+Oil           171412  Kokosöl                Oil, coconut                                                                                                               
+Oil           167702  Leinöl                 Oil, flaxseed, cold pressed                                                                                                
+Oil           171029  Maiskeimöl             Oil, corn, industrial and retail, all purpose salad or cooking                                                             
+Oil           171413  Olivenöl               Oil, olive, salad or cooking                                                                                               
+Oil           171015  Palmöl                 Oil, palm                                                                                                                  
+Oil           172336  Rapsöl                 Oil, canola                                                                                                                
+Oil           2747652 Sardelle               Anchovies, canned in olive oil, with salt, drained                                                                         
+Oil           175139  Sardine                Fish, sardine, Atlantic, canned in oil, drained solids with bone                                                           
+Oil           171016  Sesamöl                Oil, sesame, salad or cooking                                                                                              
+Oil           171025  Sonnenblumenöl         Oil, sunflower, linoleic, (approx. 65%)                                                                                    
+Oil           171028  Traubenkernöl          Oil, grapeseed                                                                                                             
+Oil           171030  Walnussöl              Oil, walnut                                                                                                                
+Onion         174899  Bagel                  Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)                                           
+Peas          170010  Zuckerschote           Peas, edible-podded, raw                                                                                                   
+Pork          173870  Leberwurst             Liver sausage, liverwurst, pork                                                                                            
+Soy           172474  Tamari                 Soy sauce, reduced sodium, made from hydrolyzed vegetable protein                                                          
+Spinach       168438  Senf süß               Mustard spinach, (tendergreen), raw                                                                                        
+Spinach       168911  Spaghetti Vollkorn     Spaghetti, spinach, dry                                                                                                    
+Tomato        175140  Fischsauce             Fish, sardine, Pacific, canned in tomato sauce, drained solids with bone                                                   
+Tomato        170546  Passata                Tomato products, canned, puree, with salt added                                                                            
+Yogurt        167722  Tofu seiden            Tofu yogurt

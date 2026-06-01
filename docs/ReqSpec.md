@@ -635,6 +635,8 @@ Lebensmittelnamen aus FDC sind englisch. Die App SHALL deutsche Übersetzungen p
 
 Nährstoff-Namen werden **nicht** übersetzt — Katalog ist fix deutsch hardcoded (REQ-NUTRIENT-CATALOG-001).
 
+**Bekannte Limitierung (P7.S3 Slice 1 Hotfix-2, 2026-05-31):** DeepL halluziniert bei seltenen Begriffen (z. B. `Salmonberries` → „Räucherlachs"; `Yardlong bean` → „Vanille Schote"; `Breadfruit` → „Gnocchi"). Mitigation: **Mismatch-Audit** über alle curated Rows via `server/tools/audit_translations.ps1` (Trigger/Required-Word-Regeln, z. B. „EN enthält 'berry' → DE muss 'beere' enthalten"). Korrekturen werden über `server/tools/patch_translations.ps1` (fdc_id → name_de Override-Map) direkt in `seed/usda_fdc_curated.csv` persistiert. Re-Import via Admin-ETL ist idempotent (UPDATE per fdc_id).
+
 ### REQ-DATA-CURATION-001 — Kuratiertes Seed (Qualität vor Quantität)
 **Hinzugefügt P7.S3 Slice 1 (2026-05-29)** — User-Direktive: „die wichtigsten Lebensmittel reichen, Qualität vor Quantität".
 

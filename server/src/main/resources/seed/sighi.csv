@@ -278,6 +278,7 @@ Wassermelone;0;Fruechte
 Honigmelone;0;Fruechte
 Mango;0;Fruechte
 Kaki;0;Fruechte
+Litschi;0;Fruechte
 Litchi;0;Fruechte
 Kirsche;0;Fruechte
 Sauerkirsche;0;Fruechte
@@ -426,3 +427,155 @@ Rooibos;0;Getraenke
 Fruchtsaft;0;Getraenke
 Mandelmilch;0;Getraenke
 koffeinfreier Kaffee;0;Getraenke
+
+# === HOTFIX-5 SUPPLEMENT (2026-05-31) — Schließt 150 Match-Lücken nach DB-Audit-Snapshot ===
+# Klassifikationen folgen SIGHI-Merkblatt v2021-11-17 (Kategorien-Logik); spezifische deutsche/internationale
+# Produktnamen ergänzt die generische Liste oben. Keywords sind disjunkt von bestehenden Regeln.
+# --- Fleisch (Wurst/Pökel/Wild) ---
+Bacon;3;Fleisch
+Corned Beef;3;Fleisch
+Mortadella;3;Fleisch
+Schinken gekocht;1;Fleisch
+Schinken-Kaese;3;Fleisch
+Rinderzunge;3;Fleisch
+Rinderhack;1;Fleisch
+Hirsch;1;Fleisch
+Reh;1;Fleisch
+Fasan;1;Fleisch
+Kaninchen;0;Fleisch
+Ente;0;Fleisch
+Gans;0;Fleisch
+# --- Fisch & Meeresfrüchte ---
+Matjes;3;Fisch
+Auster;3;Fisch
+Austernsauce;3;Fisch
+Oktopus;3;Fisch
+Tintenfisch;3;Fisch
+Kaisergranat;3;Fisch
+Schwertfisch;3;Fisch
+Schellfisch;0;Fisch
+Scholle;0;Fisch
+Seezunge;0;Fisch
+Tilapia;0;Fisch
+Karpfen;0;Fisch
+Dorade;0;Fisch
+Wels;0;Fisch
+# --- Milch & Käse (Region/Sorte) ---
+Bergader;3;Milch
+Bergkäse;3;Milch
+Gouda;3;Milch
+Grana Padano;3;Milch
+Manchego;3;Milch
+Provolone;3;Milch
+Käsemix;3;Milch
+Burrata;0;Milch
+Skyr;1;Milch
+Evaporated Milk;0;Milch
+Gelatine;0;Milch
+# --- Hefe & fermentierte Soja-Würzen ---
+Hefe frisch;3;Gewuerze
+Hefe trocken;3;Gewuerze
+Trockenhefe;3;Gewuerze
+Natto;3;Gemuese
+Tamari;3;Gewuerze
+Hoisin;3;Gewuerze
+Teriyaki;3;Gewuerze
+Tabasco;3;Gewuerze
+# --- Saucen & Pasten ---
+BBQ;3;Gewuerze
+Pesto;3;Gewuerze
+Salsa;3;Gewuerze
+Passata;3;Gemuese
+Guacamole;3;Gemuese
+Hummus;3;Gemuese
+Halva;0;Suess
+Tahini;0;Nuesse
+# --- Brot & Backwaren ---
+Pumpernickel;1;Getreide
+Bagel;0;Getreide
+Baguette;0;Getreide
+Brezel;0;Getreide
+Croissant;0;Getreide
+Ciabatta;0;Getreide
+Focaccia;0;Getreide
+Pita;0;Getreide
+Kuchen;0;Getreide
+Kekse;0;Getreide
+Müsli;0;Getreide
+Granola;0;Getreide
+Cornflakes;0;Getreide
+Lasagne;0;Getreide
+Tagliatelle;0;Getreide
+Tortellini;0;Getreide
+Farfalle;0;Getreide
+Fusilli;0;Getreide
+Penne;0;Getreide
+# --- Alkohol & Getränke ---
+Sherry;3;Getraenke
+Sherryessig;3;Gewuerze
+Limonade;0;Getraenke
+Sprite;0;Getraenke
+Tonic;0;Getraenke
+Traubensaft;0;Getraenke
+# --- Süßes ---
+Gummibärchen;0;Suess
+Marshmallow;0;Suess
+Bonbon;0;Suess
+Jelly Bean;0;Suess
+Lakritze;0;Suess
+Karamell;0;Suess
+Pralinen;3;Suess
+Schokoriegel;3;Suess
+Sorbet;0;Suess
+Kokoscreme-Pudding;0;Suess
+Melasse;0;Suess
+Xylit;0;Suess
+# --- Obst & Trockenobst ---
+Cantaloupe;0;Fruechte
+Holunderbeere;0;Fruechte
+Quitte;0;Fruechte
+Sanddorn;0;Fruechte
+Stachelbeere;0;Fruechte
+# --- Gewürze, Kräuter, Backzutaten ---
+Asafötida;0;Gewuerze
+Bockshornklee;0;Gewuerze
+Italienische Kräuter;0;Gewuerze
+Kräuter der Provence;0;Gewuerze
+Minze;0;Gewuerze
+Piment;0;Gewuerze
+Safran;0;Gewuerze
+Wacholderbeeren;0;Gewuerze
+Za'atar;0;Gewuerze
+Backpulver;0;Gewuerze
+Natron;0;Gewuerze
+Hanfsamen;0;Nuesse
+# --- Öle ---
+Distelöl;0;Fette
+Palmöl;0;Fette
+Traubenkernöl;0;Fette
+# --- Gemüse & Pilze (Region/Sorte) ---
+Algen Nori;0;Gemuese
+Algen Wakame;0;Gemuese
+Nori;0;Gemuese
+Wakame;0;Gemuese
+Bambussprossen;0;Gemuese
+Maniok;0;Gemuese
+Yamswurzel;0;Gemuese
+Okra;0;Gemuese
+Pak Choi;0;Gemuese
+Portobello;3;Gemuese
+Trüffel;3;Gemuese
+Frisée;0;Gemuese
+Lollo Rosso;0;Gemuese
+Löwenzahn;0;Gemuese
+Mesclun;0;Gemuese
+Mizuna;0;Gemuese
+Radicchio;0;Gemuese
+Romanesco;0;Gemuese
+Brunnenkresse;0;Gemuese
+Kresse;0;Gemuese
+Artischocke;0;Gemuese
+Pestwurz;0;Gemuese
+Chia Samen;0;Nuesse
+Kokosflocken;0;Nuesse
+Pekannuss;0;Nuesse

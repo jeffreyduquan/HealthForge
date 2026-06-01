@@ -1,0 +1,1031 @@
+keyword;score;category;source_ref
+Eier, Hühnerei, Vollei;1;Eier;SIGHI_FoodList_2024-08-29_p4_r15
+Eigelb, Eidotter;0;Eier;SIGHI_FoodList_2024-08-29_p4_r17
+Eiklar, Eiweiß;1;Eier;SIGHI_FoodList_2024-08-29_p4_r18
+Eiweiss, Eiweiß, Eiklar;1;Eier;SIGHI_FoodList_2024-08-29_p4_r19
+Wachteleier;0;Eier;SIGHI_FoodList_2024-08-29_p4_r20
+Blauschimmelkäse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r22
+Butter: Sauerrahmbutter, mildgesäuerte Butter;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r23
+Butter: Süßrahmbutter, Süssrahmbutter;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r25
+Butterkäse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r27
+Buttermilch, angesäuert;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r28
+Camembert;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r29
+Cheddar Käse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r30
+crème fraïche;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r31
+Edelschimmelkäse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r32
+Feta, Feta-Käse;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r33
+Fontina Käse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r34
+Frischkäse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r35
+Geheimratskäse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r36
+Ghee;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r37
+Gouda Käse, gereift;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r39
+Gouda Käse, jung;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r40
+Haltbarmilch, H-Milch, UHT-Milch, Up-Milch;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r41
+Joghurt nature;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r43
+Käse: lange gereifte Sorten und Hartkäse (z.B.;3;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r44
+Käsezubereitungen (=Mischungen mit weiteren;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r46
+Kefir;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r48
+Mascarpone Käse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r49
+Milch, laktosefrei;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r50
+Milch, pasteurisiert (PAST-Milch);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r52
+Milchpulver;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r54
+Molke: Sauermolke;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r55
+Molke: Süßmolke, Süssmolke, Labmolke;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p4_r56
+Mozzarella Käse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r13
+Obers, Sahne (wenn ohne Zusatzstoffe);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r14
+Quark;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r17
+Raclette Käse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r18
+Rahm, süß (wenn ohne Zusatzstoffe);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r19
+Ricotta Käse;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r22
+Rohmilch;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r23
+Rohmilchkäse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r25
+Rohmilchprodukte;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r27
+Roquefort Käse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r28
+Sahne, süß (wenn ohne Zusatzstoffe);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r29
+Sauerrahm;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r32
+saure Sahne;1;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r33
+Schafmilch, Schafsmilch;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r34
+Schimmelkäse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r35
+Schlagobers, Schlagsahne (wenn ohne Zusatzstoffe);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r36
+Schmelzkäse;2;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r39
+Süssrahm, Süßrahm (wenn ohne Zusatzstoffe);0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r40
+Topfen;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r43
+UHT-Milch, Up-Milch, H-Milch, Haltbarmilch;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r44
+Ziegenmilch;0;Milchprodukte;SIGHI_FoodList_2024-08-29_p5_r46
+Dörrfleisch, Trockenfleisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p5_r48
+Ente, Entenfleisch;0;Fleisch;SIGHI_FoodList_2024-08-29_p5_r49
+Faschiertes (=Hackfleisch), bei Verzehr unmittelbar;0;Fleisch;SIGHI_FoodList_2024-08-29_p5_r50
+Faschiertes (=Hackfleisch), Offenverkauf oder unter;2;Fleisch;SIGHI_FoodList_2024-08-29_p5_r52
+Geflügelfleisch;0;Fleisch;SIGHI_FoodList_2024-08-29_p5_r54
+geräucherter Fisch, Räucherfisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p5_r55
+Geselchtes, Rauchfleisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p5_r56
+Hackfleisch, bei Verzehr unmittelbar nach;0;Fleisch;SIGHI_FoodList_2024-08-29_p5_r57
+Hackfleisch, Offenverkauf oder unter;2;Fleisch;SIGHI_FoodList_2024-08-29_p5_r59
+Hähnchen;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r13
+Hendl, Hühnchen;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r14
+Huhn;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r15
+Innereien;2;Fleisch;SIGHI_FoodList_2024-08-29_p6_r16
+Kalbfleisch, frisch;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r17
+Poulet;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r18
+Pute;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r19
+Räucherfisch, geräucherter Fisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r20
+Rauchfleisch, Räucherfleisch, geräuchertes Fleisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r21
+Rindfleisch, frisch;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r22
+Rohschinken;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r23
+Salami;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r24
+Schweinefleisch, frisch, unbehandelt;1;Fleisch;SIGHI_FoodList_2024-08-29_p6_r25
+Selchfleisch, Rauchfleisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r27
+Strauss, Strauß, Straußenfleisch;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r28
+Trockenfleisch;3;Fleisch;SIGHI_FoodList_2024-08-29_p6_r29
+Trute, Pute;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r30
+Wachtel;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r31
+Wildbret;1;Fleisch;SIGHI_FoodList_2024-08-29_p6_r32
+Wildfleisch;1;Fleisch;SIGHI_FoodList_2024-08-29_p6_r33
+Wurstwaren;2;Fleisch;SIGHI_FoodList_2024-08-29_p6_r34
+Zunge, Rindszunge, Kalbszunge;0;Fleisch;SIGHI_FoodList_2024-08-29_p6_r35
+Anchovis, Sardellen-Konserven;3;Fisch;SIGHI_FoodList_2024-08-29_p6_r39
+"Fisch, ""Frischfisch"" vom Kühlregal / auf Eis";3;Fisch;SIGHI_FoodList_2024-08-29_p6_r40
+Fisch, fangfrisch oder tiefgekühlt;0;Fisch;SIGHI_FoodList_2024-08-29_p6_r41
+Forellen (Süsswasser): Seeforelle, Bachforelle,;0;Fisch;SIGHI_FoodList_2024-08-29_p6_r42
+Lachs geräuchert, Räucherlachs;2;Fisch;SIGHI_FoodList_2024-08-29_p6_r44
+Räucherlachs, Lachs geräuchert;2;Fisch;SIGHI_FoodList_2024-08-29_p6_r45
+Sardellen-Konserven, Sardellenpaste, Anchovis;3;Fisch;SIGHI_FoodList_2024-08-29_p6_r46
+Thunfisch;3;Fisch;SIGHI_FoodList_2024-08-29_p6_r47
+Austern;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r49
+Crevetten;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r50
+Garnelen;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r51
+Hummer;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r52
+Krabben;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r53
+Krebse;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p6_r54
+Krevetten;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r13
+Krustentiere und Schalentiere;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r14
+Langusten;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r16
+Meeresfrüchte (=wirbellose Meerestiere);2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r17
+Muscheln (Miesmuschel, Austern, Venusmuschel,;2;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r18
+Schmalz: Schweineschmalz;0;Meeresfrüchte;SIGHI_FoodList_2024-08-29_p7_r21
+Amarant;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r24
+Backwaren;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r29
+Brot;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r31
+Buchweizen: Echter Buchweizen, Gemeiner;2;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r34
+Bulgur, Boulghour, Bulghur;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r36
+Cornflakes (ohne unverträgliche Zutaten wie Malz;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r37
+Dinkel;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r39
+Edelkastanien, frisch oder tiefgekühlt;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r41
+Einkorn, Blicken, Kleiner Spelz;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r42
+Emmer, Zweikorn;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r43
+Erdäpfel, frisch geerntet, mit Schale;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r44
+Erdäpfel, gelagert, geschält;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r45
+Erdäpfel, gelagert, mit Schale;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r46
+Esskastanien, frisch oder tiefgekühlt;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r48
+Gerste;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r49
+Gerstenmalz, Malz, Malzextrakt;2;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r50
+Grünkern, Grünkorn;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r51
+Hafer, Haferflocken, Hafermehl;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r52
+Hanfproteinpulver;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r53
+Hanfsamen (Cannabis sativa);0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r55
+Hirse;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p7_r57
+KAMUT®, Khorasan-Weizen;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r13
+Kartoffel, frisch geerntet, mit Schale;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r15
+Kartoffel, gelagert, geschält;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r16
+Kartoffel, gelagert, mit Schale;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r17
+Khorasan-Weizen, KAMUT®;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r19
+Kukuruz, getrocknet: Maisgriess, Maisgrieß,;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r21
+Kukuruz: Mais aus der Dose, Dosenmais;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r23
+Kukuruz: Maiskörner, Maiskolben frisch/pasteurisiert;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r25
+Mais aus der Dose, Dosenmais;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r26
+Mais, getrocknet: Maisgriess, Maisgrieß, Maismehl,;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r28
+Mais: Maiskörner, Maiskolben frisch/pasteurisiert;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r30
+Maltodextrin;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r31
+Malz, Malzextrakt, Gerstenmalz;2;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r32
+Maniok-Wurzelknollen;?;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r33
+Maroni, Marroni, Maronen, frisch oder tiefgekühlt;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r35
+Perlsago, Sagostärke;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r36
+Quinoa;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r37
+Reis;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r38
+Reisnudeln;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r39
+Reiswaffeln, Reis-Mais-Waffeln;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r41
+Rice Crispies;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r42
+Roggen;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r43
+Sago, Sagostärke;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r44
+Sonnenblumenkerne;2;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r45
+Süsskartoffel, Süßkartoffel;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r46
+Tapioka, Tapiokastärke;0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r47
+Weizen;1;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r48
+Weizenkeime;2;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r50
+Wildreis, Wasserreis (Zizania);0;Pflanzlich;SIGHI_FoodList_2024-08-29_p8_r51
+Baumnuss;3;Nüsse;SIGHI_FoodList_2024-08-29_p8_r53
+Cashew-Kerne, Cashewnüsse, Cashewnuss;1;Nüsse;SIGHI_FoodList_2024-08-29_p9_r13
+Erdmandel, geröstet;2;Nüsse;SIGHI_FoodList_2024-08-29_p9_r14
+Erdmandel, Tigernuss (Cyperus esculentus);0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r16
+Erdnüsse, Erdnuss;2;Nüsse;SIGHI_FoodList_2024-08-29_p9_r18
+Haselnuss, Haselnüsse;1;Nüsse;SIGHI_FoodList_2024-08-29_p9_r19
+Macadamia-Nuss;0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r20
+Mandeln;1;Nüsse;SIGHI_FoodList_2024-08-29_p9_r21
+Paranuss;0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r23
+Pekannuss, Pecannuss;0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r24
+Pinienkerne;1;Nüsse;SIGHI_FoodList_2024-08-29_p9_r25
+Pistazie;0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r26
+Spanische Nüssli (=Erdnuss);2;Nüsse;SIGHI_FoodList_2024-08-29_p9_r27
+Tigernuss, Erdmandel (Cyperus esculentus);0;Nüsse;SIGHI_FoodList_2024-08-29_p9_r28
+Walnuss;3;Nüsse;SIGHI_FoodList_2024-08-29_p9_r30
+Baumnussöl;2;Fette;SIGHI_FoodList_2024-08-29_p9_r32
+Distelöl, Färberdistelöl, Safloröl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r33
+Kokosfett, Kokosöl, Kokosnussfett, Kokosnussöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r34
+Kokosöl, Kokosfett;0;Fette;SIGHI_FoodList_2024-08-29_p9_r35
+Kürbiskernöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r36
+Leinöl, Leinsamenöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r40
+Maiskeimöl, Maisöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r41
+Margarine (wenn ohne unverträgliche Zusatzstoffe);0;Fette;SIGHI_FoodList_2024-08-29_p9_r42
+Nachtkerzenöl (Oenothera biennis);0;Fette;SIGHI_FoodList_2024-08-29_p9_r43
+Olivenöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r44
+Palmfett, Palmöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r45
+Palmöl, Palmfett, Palmkernöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r47
+Rapsöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r49
+Safloröl, Distelöl, Färberdistelöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r50
+Schwarzkümmelöl (Nigella sativa);0;Fette;SIGHI_FoodList_2024-08-29_p9_r51
+Sojaöl;1;Fette;SIGHI_FoodList_2024-08-29_p9_r52
+Sonnenblumenöl;0;Fette;SIGHI_FoodList_2024-08-29_p9_r53
+Walnussöl;2;Fette;SIGHI_FoodList_2024-08-29_p9_r55
+Ackerbohne (Vicia faba);2;Gemüse;SIGHI_FoodList_2024-08-29_p9_r57
+Ackersalat;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r13
+Artischocke;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r14
+Arugula, Rucola;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r15
+Aubergine;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r16
+Avocado;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r17
+Bambussprossen;?;Gemüse;SIGHI_FoodList_2024-08-29_p10_r18
+Blattsalate;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r19
+Blattsellerie, Schnittsellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r20
+Blaukabis, Blaukraut, Rotkohl;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r21
+Bleichsellerie, Staudensellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r22
+Blumenkohl;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r23
+Bohnen allgemein, diverse Arten;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r24
+Bohnen: Borlotti-Bohnen;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r26
+Bohnen: Buschbohnen, Grüne Bohnen;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r27
+Braunkohl, Grünkohl, Krauskohl, Federkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r28
+Brennnessel;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r29
+Broccoli, Brokkoli;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r30
+Brüsseler Kohl, Rosenkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r31
+Buschbohnen, Grüne Bohnen;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r32
+Chayote;?;Gemüse;SIGHI_FoodList_2024-08-29_p10_r33
+Chicorée (Cichorium intybus);0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r34
+Chilisauce, scharf, fermentiert;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r35
+Chilischoten, scharf, frisch;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r36
+Chinakohl;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r37
+Chinesischer Senfkohl, Chinesischer Blätterkohl, Pak;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r38
+Cornichons, eingelegt;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r40
+Eierfrucht, Eierpflanze, Aubergine;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r43
+Eisbergsalat;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r44
+Endiviensalat, Endivie (Cichorium endivia);0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r45
+Erbsen: Gartenerbsen;1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r46
+Essiggemüse;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r47
+Essiggurken, eingelegt;2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r50
+Favabohne (Vicia faba);2;Gemüse;SIGHI_FoodList_2024-08-29_p10_r53
+Feldsalat;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r54
+Fenchel;0;Gemüse;SIGHI_FoodList_2024-08-29_p10_r55
+Fisolen, Buschbohne (Phaseolus vulgaris var. nanus);1;Gemüse;SIGHI_FoodList_2024-08-29_p10_r56
+Gartenerbsen (Pisum sativum = Lathyrus oleraceus);1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r13
+Gartenkresse, Garten-Kresse (Lepidium sativum);?;Gemüse;SIGHI_FoodList_2024-08-29_p11_r14
+Garten-Senfrauke, Rucola;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r15
+Gemüse-Eibisch, Okra;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r16
+Gewürzgurken, eingelegt;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r17
+Grünkohl, Braunkohl, Krauskohl, Federkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r20
+Gurken: Gartengurke, Salatgurke, Kukumer;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r21
+Herbstrübe;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r22
+Hülsenfrüchte (Soja, Bohnen, Erbsen, Linsen, ...);2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r23
+Kaiserschote;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r24
+Kappes, Kohl, Kraut, Weißkohl;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r25
+Karfiol, Blumenkohl;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r26
+Karotte;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r27
+Kefen;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r28
+Kelp (große Braunalgen, Seetang, Blatttang,;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r29
+Kichererbse;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r31
+Kiefelerbse;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r32
+Knoblauch;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r33
+Knollensellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r34
+Kohlrabi;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r35
+Kohlsorten (außer Rosenkohl, Kohlrabi);0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r36
+Kohlsprossen, Rosenkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r37
+Krauskohl, Grünkohl, Braunkohl, Federkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r38
+Krautstiele (Beta vulgaris subsp. vulgaris);1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r39
+Kren, Meerrettich;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r40
+Kresse: Gartenkresse (Lepidium sativum);?;Gemüse;SIGHI_FoodList_2024-08-29_p11_r41
+Kürbisse, div. Sorten;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r42
+Lauch;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r43
+Linsen;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r44
+Mangold;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r45
+Meerrettich;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r46
+Melanzani, Melanzana, Aubergine;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r47
+Möhre, Mohrrübe;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r48
+Mungbohnen, Mungobohnen (-keimlinge/-sprossen);?;Gemüse;SIGHI_FoodList_2024-08-29_p11_r49
+Nüsslisalat, Nüssler;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r51
+Okra, Gemüse-Eibisch;1;Gemüse;SIGHI_FoodList_2024-08-29_p11_r52
+Oliven;2;Gemüse;SIGHI_FoodList_2024-08-29_p11_r53
+Pak Choi, Pak Choy, Pok Choi;0;Gemüse;SIGHI_FoodList_2024-08-29_p11_r55
+Paprika, Peperoni, milde Sorten;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r13
+Paprika, Peperoni, scharfe Sorten;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r14
+Paradeiser, Tomaten;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r15
+Pastinaken;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r16
+Peperoni, Paprika, milde Sorten;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r17
+Peperoni, Paprika, scharfe Sorten;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r18
+Porree;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r19
+Räbe;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r20
+Radieschen und Rettiche (Gattung Raphanus), milde;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r21
+Radieschen und Rettiche (Gattung Raphanus), scharfe;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r23
+Randen;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r25
+Rauke, Rucola;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r26
+Rettiche und Radieschen (Gattung Raphanus), milde;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r27
+Rettiche und Radieschen (Gattung Raphanus),;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r29
+Rosenkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r31
+Rote Bete, Rote Beete;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r32
+Rotkohl, Rotkraut;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r33
+Rucola, Rukola;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r34
+Rüebli;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r35
+Salat: Blattsalate;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r36
+Salzgurken;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r37
+Saubohne (Vicia faba);2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r39
+Sauerkraut;3;Gemüse;SIGHI_FoodList_2024-08-29_p12_r40
+Schmalblättriger Doppelsame, Rucola;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r41
+Schnittsellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r42
+Schweinsbohne (Vicia faba);2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r43
+Sellerie: Knollensellerie (Apium graveolens var.;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r44
+Sellerie: Schnittsellerie (Apium graveolens var.;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r46
+Sellerie: Staudensellerie (Apium graveolens var.;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r48
+Senfkohl, Pak Choi;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r50
+Soja (Sojabohne, Sojamehl);2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r51
+Sojasprossen [irrtümliche Bezeichnung. Korrekt:;?;Gemüse;SIGHI_FoodList_2024-08-29_p12_r52
+Spalterbsen, Gartenerbsen;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r54
+Spargel;0;Gemüse;SIGHI_FoodList_2024-08-29_p12_r55
+Speiserübe;1;Gemüse;SIGHI_FoodList_2024-08-29_p12_r56
+Spinat;2;Gemüse;SIGHI_FoodList_2024-08-29_p12_r57
+Sprossenkohl, Rosenkohl;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r13
+Stangensellerie, Staudensellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r14
+Staudensellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r15
+Tomaten;2;Gemüse;SIGHI_FoodList_2024-08-29_p13_r16
+Topinambur;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r17
+Vogerlsalat;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r19
+Weisskohl, Weisskabis, Weisskraut, Weißkohl,;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r20
+Welschkohl, Welschkraut, Wirsing;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r22
+Wilde Rauke, Rucola;2;Gemüse;SIGHI_FoodList_2024-08-29_p13_r23
+Wirsing, Wirz, Wirsingkohl, Welschkohl,;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r24
+Würzsellerie, Schnittsellerie;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r26
+Zichorie: Salatzichorie, Chicorée;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r27
+Zucchini, Zucchetti;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r28
+Zuckererbse, Zuckerschote;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r29
+Zwiebel: alle anderen, hier nicht als verträglich;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r30
+Zwiebel: Milde Zwiebeln der Cevennen;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r32
+Zwiebel: Tropea-Zwiebel;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r34
+Zwiebel: Weisse Zwiebel, Weiße Zwiebel;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r35
+Ährige Minze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r37
+Bärlauch (Allium ursinum);1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r38
+Basilikum;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r39
+Bockshornklee;2;Gemüse;SIGHI_FoodList_2024-08-29_p13_r40
+Bohnenkraut (Satureja hortensis, Satureja montana);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r41
+Dill, Dillkraut, Dillfenchel;1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r42
+Dorst, Dost, Gemeiner Dost, Dostenkraut, Oregano;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r43
+Echter Dost (Origanum vulgare), Oregano;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r44
+Echter Kerbel, Gartenkerbel (Anthriscus cerefolium);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r45
+Gartenkerbe, Echter Kerbel (Anthriscus cerefolium);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r46
+Grüne Minze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r47
+Gurkenkraut, Dill (Anethum graveolens);1;Gemüse;SIGHI_FoodList_2024-08-29_p13_r48
+Kerbel, Echter Kerbel, Gartenkerbel (Anthriscus;0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r49
+Kleesorten (Trigonella- und Trifolium-Arten);2;Gemüse;SIGHI_FoodList_2024-08-29_p13_r51
+Krause Minze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r52
+Marokkanische Minze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p13_r53
+Minze: Grüne Minze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r13
+Müllerkraut, Oregano;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r14
+Nanaminze (Mentha spicata);0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r15
+Oregano;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r16
+Petersilie;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r17
+Pfefferminze;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r18
+Rosmarin;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r19
+Salbei: Echte Salbei, Garten-Salbei, Küchensalbei;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r20
+Schabzigerklee;2;Gemüse;SIGHI_FoodList_2024-08-29_p14_r22
+Schnittlauch;1;Gemüse;SIGHI_FoodList_2024-08-29_p14_r23
+Speer-Minze (Mentha spicata, engl.: spearmint);0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r24
+Wohlgemut, Oregano;0;Gemüse;SIGHI_FoodList_2024-08-29_p14_r25
+Acerola, Acerolapulver, Acerolakirsche, Azerola,;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r27
+Ananas;2;Früchte;SIGHI_FoodList_2024-08-29_p14_r31
+Andenbeere, Andenkirsche (Physalis peruviana);0;Früchte;SIGHI_FoodList_2024-08-29_p14_r32
+Apfel;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r33
+Apfel: Golden Delicious;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r34
+Apfelsine, Orange;3;Früchte;SIGHI_FoodList_2024-08-29_p14_r35
+Aprikose;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r36
+Aronia, Apfelbeeren, Filzige Apfelbeere (Aronia;?;Früchte;SIGHI_FoodList_2024-08-29_p14_r37
+Babybanane;?;Früchte;SIGHI_FoodList_2024-08-29_p14_r41
+Banane, Dessertbanane, Obstbanane;2;Früchte;SIGHI_FoodList_2024-08-29_p14_r42
+Baumtomate (Solanum betaceum);?;Früchte;SIGHI_FoodList_2024-08-29_p14_r43
+Birne;1;Früchte;SIGHI_FoodList_2024-08-29_p14_r44
+Birne: Nashi-Birne;?;Früchte;SIGHI_FoodList_2024-08-29_p14_r45
+Blaubeere (Vaccinium myrtillus);0;Früchte;SIGHI_FoodList_2024-08-29_p14_r46
+Bocksdorn-Beeren, Goji-Beeren;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r47
+Boysenbeere (Rubus ursinus × idaeus);?;Früchte;SIGHI_FoodList_2024-08-29_p14_r48
+Brombeeren;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r49
+Carambola, Karambole, Sternfrucht;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r50
+Cassis;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r51
+Chinesische Quitte, Kaki;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r52
+Cranberry;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r53
+Datteln getrocknet;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r54
+Drachenfrucht, Pitaya, Pitahaya;0;Früchte;SIGHI_FoodList_2024-08-29_p14_r55
+Dreilappige Papau (Asimina triloba, Indianerbanane);?;Früchte;SIGHI_FoodList_2024-08-29_p15_r13
+Erdbeere;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r14
+Feigen, frisch oder getrocknet;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r15
+gelbe Granadilla, Passionsfrucht;?;Früchte;SIGHI_FoodList_2024-08-29_p15_r16
+Goiaba, Guave, Psidium guajava;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r17
+Goji-Beeren, Bocksdorn-Beeren;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r18
+Granatapfel;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r19
+Grapefruit;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r20
+Grossfrüchtige Moosbeere, Großfrüchtige Moosbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r21
+Guave, Guava, Guayave, Guayaba;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r22
+Hagebutte;1;Früchte;SIGHI_FoodList_2024-08-29_p15_r23
+Heidelbeeren;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r24
+Himbeeren;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r25
+Holler, Schwarzer Holunder;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r26
+Holunderbeeren, Schwarzer Holunder;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r27
+Johannisbeere, rote;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r28
+Jostabeeren, Jochelbeere, Joglbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r29
+Kakao, Kakaopulver (Schokolade etc.);2;Früchte;SIGHI_FoodList_2024-08-29_p15_r30
+Kakaobutter;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r31
+Kaki, Kakipflaume;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r32
+Kaktusfeigen (Opuntia ficus-indica);0;Früchte;SIGHI_FoodList_2024-08-29_p15_r33
+Kapstachelbeere (Physalis peruviana), Physalis;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r34
+Karambole, Karambola, Sternfrucht;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r35
+Kirschen, Süßkirschen;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r36
+Kiwi;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r37
+Kokosnuss, Kokosraspel, Kokosmilch, Kokoswasser;1;Früchte;SIGHI_FoodList_2024-08-29_p15_r38
+Korinthen;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r39
+Kranbeere (Vaccinium macrocarpon);0;Früchte;SIGHI_FoodList_2024-08-29_p15_r41
+Kronsbeere, Preiselbeere (Vaccinium vitis-idaea);0;Früchte;SIGHI_FoodList_2024-08-29_p15_r42
+Limette;3;Früchte;SIGHI_FoodList_2024-08-29_p15_r43
+Limone;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r44
+Litchi, Litschi;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r45
+Loganbeere;?;Früchte;SIGHI_FoodList_2024-08-29_p15_r46
+Mandarine;2;Früchte;SIGHI_FoodList_2024-08-29_p15_r47
+Mango;1;Früchte;SIGHI_FoodList_2024-08-29_p15_r48
+Maracuja (Passiflora edulis / flavicarpa),;?;Früchte;SIGHI_FoodList_2024-08-29_p15_r49
+Marille;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r51
+Maulbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p15_r52
+Melonen (außer Wassermelone);0;Früchte;SIGHI_FoodList_2024-08-29_p16_r13
+Melonenbirne, Pepino (Solanum muricatum);0;Früchte;SIGHI_FoodList_2024-08-29_p16_r15
+Nashi-Birne;?;Früchte;SIGHI_FoodList_2024-08-29_p16_r16
+Nektarinen;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r17
+Oemeli, Sauerkirsche;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r18
+Orangen;3;Früchte;SIGHI_FoodList_2024-08-29_p16_r19
+Orangenschale;3;Früchte;SIGHI_FoodList_2024-08-29_p16_r20
+Papaya;2;Früchte;SIGHI_FoodList_2024-08-29_p16_r21
+Passionsfrucht;?;Früchte;SIGHI_FoodList_2024-08-29_p16_r22
+Paw Paw (Asimina triloba, Indianerbanane);?;Früchte;SIGHI_FoodList_2024-08-29_p16_r23
+Pepino, Melonenbirne (Solanum muricatum);0;Früchte;SIGHI_FoodList_2024-08-29_p16_r24
+Persimone, Kaki;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r25
+Peruanische Blasenkirsche (Physalis peruviana);0;Früchte;SIGHI_FoodList_2024-08-29_p16_r26
+Pfirsich;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r27
+Pflaumen-Arten;1;Früchte;SIGHI_FoodList_2024-08-29_p16_r28
+Physalis (Physalis peruviana), Kapstachelbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r29
+Pitaya, Pitahaya, Drachenfrucht;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r30
+Preiselbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r33
+Purpurgranadilla, Passionsfrucht;?;Früchte;SIGHI_FoodList_2024-08-29_p16_r34
+Quetsche, Zwetschge (Prunus domestica subsp.;1;Früchte;SIGHI_FoodList_2024-08-29_p16_r35
+Quitten;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r37
+Rhabarber;1;Früchte;SIGHI_FoodList_2024-08-29_p16_r38
+Ribisel, rote;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r39
+Rigatze, Jostabeere;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r40
+Rosinen;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r41
+Rote Johannisbeere, Rote Ribisel;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r43
+Sanddorn;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r44
+Sauerkirsche;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r45
+Schattenmorelle, Sauerkirsche;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r46
+Schmalblättrige Ölweide (Elaeagnus angustifolia);0;Früchte;SIGHI_FoodList_2024-08-29_p16_r47
+Schwarze Johannisbeere;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r48
+Schwarze Ribisel;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r49
+Schwarzer Holunder, Holunderbeeren;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r50
+Sharonfrucht, Kaki;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r51
+Stachelbeeren;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r52
+Sternfrucht, Karambole, Karambola;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r53
+Sultaninen;0;Früchte;SIGHI_FoodList_2024-08-29_p16_r54
+Süßkirschen, Kirschen;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r13
+Tamarillo;?;Früchte;SIGHI_FoodList_2024-08-29_p17_r14
+Trauben, Weintrauben;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r15
+Wassermelone;1;Früchte;SIGHI_FoodList_2024-08-29_p17_r16
+Weichselkirsche, Weichsel, Sauerkirsche;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r17
+Weinbeeren, getrocknet (=Rosinen);0;Früchte;SIGHI_FoodList_2024-08-29_p17_r18
+Weintrauben;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r20
+Zitrone;2;Früchte;SIGHI_FoodList_2024-08-29_p17_r21
+Zitronenschale;2;Früchte;SIGHI_FoodList_2024-08-29_p17_r22
+Zitrusfrüchte;2;Früchte;SIGHI_FoodList_2024-08-29_p17_r23
+Zuckerbanane, Babybanane;?;Früchte;SIGHI_FoodList_2024-08-29_p17_r24
+Zwetschge, Zwetschke, Zwetsche (Prunus domestica;1;Früchte;SIGHI_FoodList_2024-08-29_p17_r25
+Chia-Samen, Mexikanische Chia (Salvia hispanica);0;Früchte;SIGHI_FoodList_2024-08-29_p17_r28
+Flohsamen, Flohsamenschalen;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r29
+Kürbiskerne;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r31
+Leinsamen;0;Früchte;SIGHI_FoodList_2024-08-29_p17_r33
+Sesam;1;Früchte;SIGHI_FoodList_2024-08-29_p17_r34
+Algen und Algenbestandteile;3;Früchte;SIGHI_FoodList_2024-08-29_p17_r37
+Backhefe, Bäckerhefe (frisch / getrocknet);0;Früchte;SIGHI_FoodList_2024-08-29_p17_r38
+Bierhefe (frisch / getrocknet);0;Früchte;SIGHI_FoodList_2024-08-29_p17_r42
+Braunalgen, Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p17_r46
+Champignons;1;Früchte;SIGHI_FoodList_2024-08-29_p17_r47
+Gemeiner Steinpilz (Boletus edulis);2;Früchte;SIGHI_FoodList_2024-08-29_p17_r48
+Gest, Germ, Hefe (frisch / getrocknet);0;Früchte;SIGHI_FoodList_2024-08-29_p17_r49
+Grünalgen, Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p17_r53
+Hefe (frisch / getrocknet);0;Früchte;SIGHI_FoodList_2024-08-29_p18_r13
+Kombu-Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r17
+Meeresalgen, Meeralgen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r18
+Morcheln;2;Früchte;SIGHI_FoodList_2024-08-29_p18_r19
+Nori-Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r20
+Pilze, diverse Arten;2;Früchte;SIGHI_FoodList_2024-08-29_p18_r21
+Reishi (Ganoderma lingzhi);0;Früchte;SIGHI_FoodList_2024-08-29_p18_r22
+Rotalgen, Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r24
+Schwammerl, Pilze;2;Früchte;SIGHI_FoodList_2024-08-29_p18_r25
+Seetang, Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r26
+Spirulina (Cyanobakterien: Arthrospira platensis, A.;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r27
+Steinpilze;2;Früchte;SIGHI_FoodList_2024-08-29_p18_r29
+Wakame-Algen;3;Früchte;SIGHI_FoodList_2024-08-29_p18_r30
+Wasserkefir;1;Früchte;SIGHI_FoodList_2024-08-29_p18_r31
+Agavendicksaft, Agavensirup;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r35
+Ahornsirup;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r36
+Birkenzucker, Xylit, Xylitol, E967;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r37
+Caramel;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r38
+Dextrose;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r39
+E420, Sorbit, Sorbitol;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r41
+E953, Isomalt;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r43
+E967, Xylit, Xylitol, Birkenzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r45
+Fruchtzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r46
+Fructose;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r47
+gebrannter Zucker;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r48
+Glucose;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r49
+Glucosesirup;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r51
+Honig;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r53
+Invertzucker, Invertose, Invertzuckersirup;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r54
+Isomalt, E953;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r55
+Karamell;0;Früchte;SIGHI_FoodList_2024-08-29_p18_r57
+Kristallzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r13
+Künstliche Süssstoffe, künstliche Süßstoffe;1;Früchte;SIGHI_FoodList_2024-08-29_p19_r15
+Lactose;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r16
+Maltose;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r17
+Malzextrakt;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r18
+Malzzucker, rein;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r19
+Milchzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r20
+Palmzucker;?;Früchte;SIGHI_FoodList_2024-08-29_p19_r21
+Rohrzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r22
+Rübenzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r24
+Saccharose;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r26
+Sorbit, Sorbitol, Glucitol, Hexanhexol, E420;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r28
+Stevia (Stevia-Blätter, Steviosid flüssig/pulverförmig);0;Früchte;SIGHI_FoodList_2024-08-29_p19_r30
+Süssholz, Süßholz;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r31
+Traubenzucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r32
+Xylit, Xylitol, Birkenzucker, E967;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r34
+Zucker;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r35
+Alkoholessig;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r38
+Anis;?;Früchte;SIGHI_FoodList_2024-08-29_p19_r40
+Bouillon;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r41
+Branntweinessig;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r44
+Brühe, Brühwürfel/-pulver;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r46
+Cumin;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r49
+Curcuma;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r50
+Curry;2;Früchte;SIGHI_FoodList_2024-08-29_p19_r51
+Essig: Aceto Balsamico, Balsamessig;3;Früchte;SIGHI_FoodList_2024-08-29_p19_r52
+Essig: Alkoholessig, Branntweinessig, Weingeistessig,;0;Früchte;SIGHI_FoodList_2024-08-29_p19_r53
+Essig: Apfelessig;1;Früchte;SIGHI_FoodList_2024-08-29_p19_r55
+Essig: Rotweinessig;3;Früchte;SIGHI_FoodList_2024-08-29_p19_r56
+Essig: Weissweinessig;3;Früchte;SIGHI_FoodList_2024-08-29_p19_r57
+Essigessenz;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r13
+Fleischextrakt;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r15
+Gelbwurz (Curcuma longa);0;Früchte;SIGHI_FoodList_2024-08-29_p20_r16
+Gerber-Sumach, Gerbersumach (Rhus coriaria),;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r17
+Gewürznelken, Nelken;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r21
+Hefeextrakt;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r23
+Ingwer;1;Früchte;SIGHI_FoodList_2024-08-29_p20_r24
+Kardamom;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r25
+Koriander, Echter Koriander, Gewürzkoriander,;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r28
+Kreuzkümmel (Cuminum cyminum);2;Früchte;SIGHI_FoodList_2024-08-29_p20_r30
+Kumin;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r31
+Kümmel: Echter Kümmel (Carum carvi);0;Früchte;SIGHI_FoodList_2024-08-29_p20_r32
+Kurkuma;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r35
+Lorbeerblätter, Echter Lorbeer (Laurus nobilis), Edler;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r36
+Mohnsamen;1;Früchte;SIGHI_FoodList_2024-08-29_p20_r38
+Muskatnuss;1;Früchte;SIGHI_FoodList_2024-08-29_p20_r39
+Nelken, Gewürznelken;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r40
+Paprikapulver, mild;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r42
+Paprikapulver, scharf;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r43
+Pfeffer, schwarz;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r44
+Pfeffer, weiß;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r45
+Quendel, Thymian, Echter Thymian (Thymus;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r46
+Schwarzkümmel (Nigella sativa);0;Früchte;SIGHI_FoodList_2024-08-29_p20_r48
+Senf, Senfkörner, Senfsamenpulver;2;Früchte;SIGHI_FoodList_2024-08-29_p20_r49
+Sojasauce;3;Früchte;SIGHI_FoodList_2024-08-29_p20_r50
+Sternanis;?;Früchte;SIGHI_FoodList_2024-08-29_p20_r51
+Sumach, Sumak: Gerber-Sumach (Rhus coriaria);0;Früchte;SIGHI_FoodList_2024-08-29_p20_r52
+Thymian, Echter Thymian (Thymus vulgaris),;0;Früchte;SIGHI_FoodList_2024-08-29_p20_r56
+Vanille, Vanilleschoten, Vanillepulver, Vanillezucker;1;Früchte;SIGHI_FoodList_2024-08-29_p21_r13
+Vanilleextrakt;1;Früchte;SIGHI_FoodList_2024-08-29_p21_r15
+Wacholderbeeren;0;Früchte;SIGHI_FoodList_2024-08-29_p21_r16
+Weingeistessig;0;Früchte;SIGHI_FoodList_2024-08-29_p21_r17
+Würze, Speisewürze, Suppenwürze (pflanzliches;2;Früchte;SIGHI_FoodList_2024-08-29_p21_r19
+Zimt, Zimtstangen, Zimtpulver;0;Früchte;SIGHI_FoodList_2024-08-29_p21_r21
+Heilquellen-Wasser mit viel;1;Getränke;SIGHI_FoodList_2024-08-29_p21_r24
+Leitungswasser;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r26
+Mineralwasser ohne Kohlensäure;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r27
+Alkohol, rein (Ethanol);3;Getränke;SIGHI_FoodList_2024-08-29_p21_r29
+Alkoholhaltige Getränke;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r30
+Bier;2;Getränke;SIGHI_FoodList_2024-08-29_p21_r31
+Champagner;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r32
+Ethanol, Ethylalkohol;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r33
+Rhum;2;Getränke;SIGHI_FoodList_2024-08-29_p21_r34
+Schnäpse, klar (farblos);2;Getränke;SIGHI_FoodList_2024-08-29_p21_r35
+Schnäpse, nicht klar (nicht farblos);3;Getränke;SIGHI_FoodList_2024-08-29_p21_r36
+Sekt;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r37
+Spirituosen, klar (farblos);2;Getränke;SIGHI_FoodList_2024-08-29_p21_r38
+Spirituosen, nicht klar (nicht farblos);3;Getränke;SIGHI_FoodList_2024-08-29_p21_r39
+Wein;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r40
+Wein, histaminfrei (<0.1 mg/l);1;Getränke;SIGHI_FoodList_2024-08-29_p21_r41
+Wein: Rotwein;3;Getränke;SIGHI_FoodList_2024-08-29_p21_r43
+Wein: Schilcherwein;2;Getränke;SIGHI_FoodList_2024-08-29_p21_r44
+Wein: Weisswein, Weißwein;2;Getränke;SIGHI_FoodList_2024-08-29_p21_r45
+Weinbrand, Brandy;2;Getränke;SIGHI_FoodList_2024-08-29_p21_r46
+Anistee;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r48
+Brennnesseltee;1;Getränke;SIGHI_FoodList_2024-08-29_p21_r49
+Eisenkraut-Tee;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r50
+Fencheltee;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r51
+Grüntee;1;Getränke;SIGHI_FoodList_2024-08-29_p21_r52
+Kamillentee;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r53
+Kräuterteemischungen aus Heilkräutern, z.B.;1;Getränke;SIGHI_FoodList_2024-08-29_p21_r54
+Kümmeltee, Echter Kümmel (Carum carvi);0;Getränke;SIGHI_FoodList_2024-08-29_p21_r56
+Lindenblütentee;0;Getränke;SIGHI_FoodList_2024-08-29_p21_r57
+Mate Tee;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r13
+Pfefferminztee;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r14
+Rooibostee;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r15
+Salbeitee;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r18
+Schwarztee;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r19
+Verveine-Tee;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r20
+Cranberry Nektar;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r22
+Orangensaft;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r23
+Zitronensaft, Zitronensaftkonzentrat;3;Getränke;SIGHI_FoodList_2024-08-29_p22_r24
+Tomatensaft;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r26
+Coca-Cola;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r28
+Colagetränke;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r29
+Energy-Drinks;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r30
+Espresso;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r31
+Kaffee;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r33
+Hafer-Drink;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r35
+Reismilch, Reis-Drink;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r36
+Sojamilch, Soja-Drink;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r37
+heisse Schokolade, heiße Schokolade;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r39
+Holunderblütensirup;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r40
+Kakaogetränke;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r41
+Limonadengetränke;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r42
+Ovomaltine;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r43
+Schokoladengetränke;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r44
+2-Phenylphenol, E231;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r46
+2-tert-Butylhydrochinon, tert-Butylhydrochinon,;?;Getränke;SIGHI_FoodList_2024-08-29_p22_r47
+Acid Red 1, E128;2;Getränke;SIGHI_FoodList_2024-08-29_p22_r49
+acidum hydrochloricum, Salzsäure,;0;Getränke;SIGHI_FoodList_2024-08-29_p22_r50
+Agar-Agar, E406;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r52
+Alginat, Propylenglycolalginat, E405;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r53
+Alginsäure, Algin, E400;1;Getränke;SIGHI_FoodList_2024-08-29_p22_r54
+Allurarot AC, E129, Food Red 17, CI 16035;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r13
+alpha-Tocopherol, Vitamin E, E307;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r14
+Aluminium, E173;?;Getränke;SIGHI_FoodList_2024-08-29_p23_r15
+Amaranth E123;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r16
+Ammoniumalginat, E403;1;Getränke;SIGHI_FoodList_2024-08-29_p23_r20
+Ammoniumcarbonat, E503;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r21
+Ammoniumcitrat, Triammoniumcitrat, E380;1;Getränke;SIGHI_FoodList_2024-08-29_p23_r22
+Anthocyane, E163;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r23
+Apfelsäure, Äpfelsäure, E296;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r24
+Apo-Carotinal, Beta-Apo-8-Carotinal, E160e, 8′-Apo-β-;?;Getränke;SIGHI_FoodList_2024-08-29_p23_r25
+Apo-carotinsäureethylester, beta-Apo-8′-;?;Getränke;SIGHI_FoodList_2024-08-29_p23_r27
+Aroma, Aromen, Aromastoffe;1;Getränke;SIGHI_FoodList_2024-08-29_p23_r29
+Ascorbinsäure, E300;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r31
+Ascorbylpalmitat, E304;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r33
+Azophloxin, E128;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r34
+Azorubin, Karmesin, E122;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r35
+Benzoesäure und deren Salze = Benzoate, E210 bis;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r36
+Benzoesäure, E210;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r38
+Betanin, Betanoin, Betenrot, Beetenrot, E162;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r39
+Bienenwachs, E901;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r40
+Borax, Tinkal, Natriumborat, Dinatriumtetraborat-;?;Getränke;SIGHI_FoodList_2024-08-29_p23_r41
+Borsäure, E284;?;Getränke;SIGHI_FoodList_2024-08-29_p23_r43
+Braun FK, E154;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r45
+Braun HT, Braun HTK, E155, C.I. 20285, C.I. Food;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r46
+Brillantschwarz BN, Brillantschwarz FCF, Schwarz;3;Getränke;SIGHI_FoodList_2024-08-29_p23_r48
+Butylhydroxyanisol, BHA, E320;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r50
+Butylhydroxytoluol, Butylhydroxytoluen, BHT, E321;2;Getränke;SIGHI_FoodList_2024-08-29_p23_r51
+Calciumacetat, Calciumethanoat, Kalziumacetat, E262;0;Getränke;SIGHI_FoodList_2024-08-29_p23_r52
+Calciumalginat, E404;1;Getränke;SIGHI_FoodList_2024-08-29_p23_r53
+Calciumascorbat, Calciumdiascorbat, Calcium-L-;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r13
+Calciumbenzoat, E213;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r15
+Calciumcarbonat, Kalziumkarbonat, Kalk, E170;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r16
+Calciumcitrat, E333;1;Getränke;SIGHI_FoodList_2024-08-29_p24_r17
+Calciumdiglutamat, Calciumglutamat, E623;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r19
+Calciumhydrogensulfit, E227;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r20
+Calciumlactat, Kalziumlaktat, E327;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r21
+Calciumphosphate, E340;1;Getränke;SIGHI_FoodList_2024-08-29_p24_r22
+Calciumpolyphosphat, E452;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r23
+Calciumpropionat, Calciumdipropionat, E282;?;Getränke;SIGHI_FoodList_2024-08-29_p24_r24
+Calciumsorbat, E203;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r25
+Calciumsulfit, E226;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r26
+Canthaxanthin, E161g;?;Getränke;SIGHI_FoodList_2024-08-29_p24_r27
+Capsanthin, Paprikaextrakt, E160c;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r28
+Carob, Carobpulver;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r29
+Carotine, Beta-Carotin, β-Carotin, E160a;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r30
+Carrageen, Carragaheen, E407, E407a;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r31
+Carubin, Carubenmehl, E410;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r32
+Cellulose, Cellulosepulver, mikrokristalline Cellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r34
+Celluloseethylether, Ethylcellulose, Ethylzellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r36
+Cellulosemethylether, Methylcellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r38
+Chinin (z.B. in Bitterlemon, Tonic Water);2;Getränke;SIGHI_FoodList_2024-08-29_p24_r40
+Chinolingelb;3;Getränke;SIGHI_FoodList_2024-08-29_p24_r41
+Chinolingelb, E104;3;Getränke;SIGHI_FoodList_2024-08-29_p24_r42
+Citronensäure E330;1;Getränke;SIGHI_FoodList_2024-08-29_p24_r43
+Cochenille, Karmin, E120;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r45
+Cochenillerot A, Ponceau 4R, E124;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r46
+Curcumin, E100;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r47
+delta-Tocopherol, Vitamin E, E309;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r48
+Dimethyldicarbonat, Dimethylpyrocarbonat,;?;Getränke;SIGHI_FoodList_2024-08-29_p24_r49
+Dimeticon, Dimethicone, Dimethylpolysiloxan,;?;Getränke;SIGHI_FoodList_2024-08-29_p24_r51
+Dodecylgallat, E312;2;Getränke;SIGHI_FoodList_2024-08-29_p24_r53
+E100, Curcumin;0;Getränke;SIGHI_FoodList_2024-08-29_p24_r54
+E101a, Riboflavin-5-Phosphat;1;Getränke;SIGHI_FoodList_2024-08-29_p25_r13
+E102, Tartrazin;3;Getränke;SIGHI_FoodList_2024-08-29_p25_r14
+E110, Gelborange S;3;Getränke;SIGHI_FoodList_2024-08-29_p25_r15
+E1103, Invertase, β-Fructofuranosidase, Saccharase;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r16
+E1105, Lysozym, Muramidase;?;Getränke;SIGHI_FoodList_2024-08-29_p25_r17
+E120, Karmin, Cochenille;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r18
+E1200, Polydextrose;?;Getränke;SIGHI_FoodList_2024-08-29_p25_r19
+E1201, Povidon, Polyvinylpyrrolidon, Polyvidone, 1-;1;Getränke;SIGHI_FoodList_2024-08-29_p25_r20
+E1202, Polyvinylpolypyrrolidon;1;Getränke;SIGHI_FoodList_2024-08-29_p25_r23
+E122, Karmesin, Azorubin;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r24
+E123, Amaranth;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r25
+E124, Cochenillerot A, Ponceau 4R;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r29
+E127, Erythrosin;3;Getränke;SIGHI_FoodList_2024-08-29_p25_r30
+E128, Azophloxin, Rot 2G;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r31
+E129, Allurarot AC, Food Red 17, CI 16035;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r32
+E131, Patentblau V;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r33
+E132, Indigokarmin, Indigocarmin, Indigotin I;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r34
+E133, Brillantblau FCF;?;Getränke;SIGHI_FoodList_2024-08-29_p25_r35
+E140, Chlorophylle, Chlorophylline;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r36
+E141, kupferhaltige Komplexe der Chlorophylle und;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r37
+E142, Grün S, Brillantsäuregrün BS, C.I. 44090, C.I. Acid;?;Getränke;SIGHI_FoodList_2024-08-29_p25_r39
+E150, E150a: Zuckercouleur;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r42
+E150b, Sulfitlaugen-Zuckerkulör;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r43
+E150c, Ammoniak-Zuckerkulör;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r44
+E150d: Ammoniumsulfit-Zuckerkulör;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r45
+E151, Brillantschwarz BN, Brillantschwarz FCF,;3;Getränke;SIGHI_FoodList_2024-08-29_p25_r46
+E153, Pflanzenkohle, Holzkohle;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r48
+E154, Braun FK;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r49
+E155, Braun HT, Braun HTK, C.I. 20285, C.I. Food;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r50
+E160a, Carotine, Beta-Carotin, β-Carotin;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r52
+E160b, Bixin, Norbixin, Annatto;2;Getränke;SIGHI_FoodList_2024-08-29_p25_r53
+E160c, Capsanthin, Paprikaextrakt;0;Getränke;SIGHI_FoodList_2024-08-29_p25_r54
+E160d, Lycopin, Lycopen, Leukopin, C.I. 75125, C.I.;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r13
+E160e, Beta-Apo-8-Carotinal, 8′-Apo-β-caroten-8′-al,;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r15
+E160f, Apo-carotinsäureethylester, beta-Apo-8′-;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r18
+E161b, Lutein;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r21
+E161g, Canthaxanthin, C.I. 40850, C.I. Food Orange 8;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r22
+E162, Betanin, Betanoin, Betenrot, Beetenrot;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r23
+E163, Anthocyane;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r24
+E170, Calciumcarbonat, Kalziumkarbonat, Kalk,;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r25
+E171, Titandioxid, Titan(IV)-oxid, Titansäureanhydrid,;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r27
+E172, Eisenoxide, Eisenhydroxide;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r29
+E173, Aluminium;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r30
+E174, Silber;?;Getränke;SIGHI_FoodList_2024-08-29_p26_r31
+E175, Gold;0;Getränke;SIGHI_FoodList_2024-08-29_p26_r32
+E180, Litholrubin BK, Rubinpigment BK, 4B-Toner, C.I.;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r33
+E200, Sorbinsäure;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r35
+E202, Kaliumsorbat;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r36
+E203, Calciumsorbat;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r37
+E210 bis E213: Benzoesäure und deren Salze =;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r38
+E210, Benzoesäure;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r40
+E211, Natriumbenzoat;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r41
+E212, Kaliumbenzoat;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r42
+E213, Calciumbenzoat;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r43
+E214, E215, Ethylparaben;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r44
+E218, E219, Methylparaben;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r45
+E220 - E228, Sulfite;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r46
+E220, Schwefeldioxid;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r47
+E221, Natriumsulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r48
+E222, Natriumhydrogensulfit, Natriumbisulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r49
+E223, Natriumdisulfit, Natriummetabisulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r50
+E224, Kaliumdisulfit, Kaliummetabisulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r51
+E225, Kaliumsulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r52
+E226, Calciumsulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r53
+E227, Calciumhydrogensulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p26_r54
+E228, Kaliumhydrogensulfit;2;Getränke;SIGHI_FoodList_2024-08-29_p27_r13
+E231, Orthophenylphenol;2;Getränke;SIGHI_FoodList_2024-08-29_p27_r14
+E232, Natriumorthophenylphenolat;2;Getränke;SIGHI_FoodList_2024-08-29_p27_r15
+E234, Nisin;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r16
+E235, Natamycin;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r17
+E239, Hexamethylentetramin, Urotropin,;2;Getränke;SIGHI_FoodList_2024-08-29_p27_r18
+E242, Dimethyldicarbonat, Dimethylpyrocarbonat,;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r20
+E249, Kaliumnitrit, Salpetrigsaures Kalium;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r22
+E250, Natriumnitrit;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r23
+E251, Natriumnitrat, Natronsalpeter, Chilesalpeter,;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r24
+E252, Kaliumnitrat, Salpeter, Kalisalpeter,;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r26
+E260, Essigsäure, Eisessig;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r28
+E261, Kaliumacetat, Kaliumethanoat;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r29
+E262, Natriumacetat, Natriumethanoat;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r30
+E263, Calciumacetat, Calciumethanoat,;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r31
+E270, Milchsäure, 2-Hydroxypropansäure, 2-;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r33
+E280, Propionsäure, Propansäure, Ethancarbonsäure,;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r36
+E281, Natriumpropionat;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r39
+E282, Calciumpropionat, Calciumdipropionat;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r40
+E283, Kaliumpropionat;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r41
+E284, Borsäure;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r42
+E285, Borax, Tinkal, Natriumborat,;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r44
+E290, Kohlendioxid gasförmig, Kohlenstoffdioxid,;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r46
+E296, Apfelsäure, Äpfelsäure, 2-Hydroxybutandisäure,;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r48
+E297, Fumarsäure, trans-Butendisäure, trans-;?;Getränke;SIGHI_FoodList_2024-08-29_p27_r50
+E300, Ascorbinsäure, Vitamin C;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r52
+E301, Natriumascorbat, Sodascorbat, Mononatrium;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r54
+E302, Calciumascorbat, Calciumdiascorbat, Calcium-L-;0;Getränke;SIGHI_FoodList_2024-08-29_p27_r56
+E304, Ascorbylpalmitat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r13
+E306, Tocopherol, Vitamin E, tocopherolhaltige;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r14
+E307, alpha-Tocopherol, α-Tocopherol, Vitamin E;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r16
+E308, gamma-Tocopherol, γ-Tocopherol, Vitamin E;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r17
+E309, delta-Tocopherol, Vitamin E;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r18
+E310, Propylgallat, Propylgallat, E310;2;Getränke;SIGHI_FoodList_2024-08-29_p28_r19
+E311, Octylgallat;2;Getränke;SIGHI_FoodList_2024-08-29_p28_r20
+E312, Dodecylgallat, Laurylgallat,;2;Getränke;SIGHI_FoodList_2024-08-29_p28_r21
+E315, Isoascorbinsäure, Erythorbinsäure, Isovitamin C;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r23
+E316, Natriumisoascorbat, Natriumerythorbat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r24
+E319, 2-tert-Butylhydrochinon, tert-;?;Getränke;SIGHI_FoodList_2024-08-29_p28_r25
+E320, Butylhydroxyanisol, BHA;2;Getränke;SIGHI_FoodList_2024-08-29_p28_r27
+E321, Butylhydroxytoluol, Butylhydroxytoluen, BHT;2;Getränke;SIGHI_FoodList_2024-08-29_p28_r28
+E322, Lecithine, Lezithine;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r29
+E325, Natriumlactat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r30
+E326, Kaliumlactat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r31
+E327, Calciumlactat, Kalziumlaktat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r32
+E330, Citronensäure;1;Getränke;SIGHI_FoodList_2024-08-29_p28_r33
+E331, Natriumcitrat, Trinatriumcitrat, Natriumzitrat,;1;Getränke;SIGHI_FoodList_2024-08-29_p28_r35
+E332, Kaliumcitrat;1;Getränke;SIGHI_FoodList_2024-08-29_p28_r37
+E333, Calciumcitrat, Tricalciumcitrat,;1;Getränke;SIGHI_FoodList_2024-08-29_p28_r38
+E334, Weinsäure, 2,3-Dihydroxybernsteinsäure, 2,3-;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r40
+E335, Natriumtartrat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r43
+E336, Weinsteinbackpulver, Kaliumtartrat;0;Getränke;SIGHI_FoodList_2024-08-29_p28_r44
+E340, Kaliumphosphate: Kaliumdihydrogenphosphat;1;Getränke;SIGHI_FoodList_2024-08-29_p28_r45
+E341, Calciumphosphate:;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r13
+E380, Ammoniumcitrat, Triammoniumcitrat,;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r18
+E400, Alginsäure, Algin;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r20
+E401, Natriumalginat;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r21
+E402, Natriumalginat;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r22
+E403, Ammoniumalginat;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r23
+E404, Calciumalginat, Kalziumalginat;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r24
+E405, Alginat, Algin, Propylenglycolalginat;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r25
+E406, Agar-Agar;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r26
+E407, E407a, Carrageen, Karrageen;2;Getränke;SIGHI_FoodList_2024-08-29_p29_r27
+E410, Johannisbrotkernmehl, Carubin, Carubenmehl;2;Getränke;SIGHI_FoodList_2024-08-29_p29_r28
+E412, Guarkernmehl;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r30
+E413, Traganth, Tragant;2;Getränke;SIGHI_FoodList_2024-08-29_p29_r31
+E414, Gummi arabicum, Gummiarabikum;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r32
+E415, Xanthan, Xantan, Xanthangummi;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r33
+E416, Karaya, Indischer Traganth, Karayagummi,;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r34
+E421, Mannit, Mannitol;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r36
+E422, Glycerin, Glycerol, Glyzerin, Propan-1,2,3-triol,;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r37
+E440, Pektin;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r39
+E441, Gelatine;1;Getränke;SIGHI_FoodList_2024-08-29_p29_r40
+E452, Polyphosphate: Natrium-, Kalium-,;2;Getränke;SIGHI_FoodList_2024-08-29_p29_r41
+E460, Cellulose, Zellulose, mikrokristalline Cellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r43
+E461, Methylcellulose, Methylzellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r45
+E462, Ethylcellulose, Ethylzellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r47
+E463, Hydroxypropylcellulose;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r49
+E464, Hydroxypropylmethylcellulose, Hypromellose,;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r50
+E465, Ethyl Methylcellulose, Ethylmethylcellulose;0;Getränke;SIGHI_FoodList_2024-08-29_p29_r55
+E466, Carboxymethylcellulosen, Carmellose;?;Getränke;SIGHI_FoodList_2024-08-29_p30_r13
+E500, Natriumcarbonat, Natriumkarbonat, Soda,;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r14
+E500ii, Natron, Natriumhydrogencarbonat,;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r17
+E501, Kaliumcarbonat, Kaliumkarbonat, Pottasche,;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r21
+E503, Ammoniumcarbonat, kohlensaures;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r23
+E504, Magnesiumcarbonat;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r25
+E507, Salzsäure, Chlorwasserstoffsäure, acidum;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r26
+E579, Eisengluconat;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r28
+E620, Glutaminsäure, (Glutamat);2;Getränke;SIGHI_FoodList_2024-08-29_p30_r29
+E620-E625, Glutamate, Geschmacksverstärker;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r30
+E621, Mononatriumglutamat, Natriumglutamat;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r31
+E622, Monokaliumglutamat, Kaliumglutamat;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r32
+E623, Calciumdiglutamat, Calciumglutamat,;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r33
+E624, Monoammoniumglutamat,;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r35
+E625, Magnesiumdiglutamat, Magnesiumglutamat;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r37
+E626, Guanosinmonophosphat, Guanylsäure,;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r38
+E650, Zinkacetat;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r40
+E900, Polydimethylsiloxan, PDMS, Dimeticon,;?;Getränke;SIGHI_FoodList_2024-08-29_p30_r41
+E901, Bienenwachs, cera flava, cera alba;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r43
+E955, Sucralose;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r44
+E960, Steviosid, Steviol-Glykosid;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r45
+Eisengluconat, E579;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r46
+Eisenoxide, Eisenhydroxide, E172;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r47
+Erythrosin, E127;3;Getränke;SIGHI_FoodList_2024-08-29_p30_r48
+Essigsäure, E260;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r49
+Ethyl Methylcellulose, E465;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r50
+Ethylcellulose, Ethylzellulose, Celluloseethylether,;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r51
+Ethylparaben, E214, E215;2;Getränke;SIGHI_FoodList_2024-08-29_p30_r53
+Flavinmononukleotid, E101a;1;Getränke;SIGHI_FoodList_2024-08-29_p30_r54
+Fumarsäure, trans-Butendisäure, E297;?;Getränke;SIGHI_FoodList_2024-08-29_p30_r55
+gamma-Tocopherol, Vitamin E, E308;0;Getränke;SIGHI_FoodList_2024-08-29_p30_r56
+Gelatine E441;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r13
+Gelborange S, E110;3;Getränke;SIGHI_FoodList_2024-08-29_p31_r14
+Geschmacksverstärker, E620-E625;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r15
+Glutamate, E620-E625;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r16
+Glutaminsäure, (Glutamat), E620;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r17
+Gluten, Weizenkleber;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r18
+Glycerin, Glycerol, Glyzerin, Propan-1,2,3-triol, 1,2,3-;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r19
+Gold, E175;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r21
+Grün S, E142, Brillantsäuregrün BS, C.I. 44090, C.I. Acid;?;Getränke;SIGHI_FoodList_2024-08-29_p31_r22
+Guanosinmonophosphat, Guanylsäure, Guanylat, E626;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r25
+Guarkernmehl, Guaran, E412;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r26
+Gummi arabicum, Gummiarabikum, E414;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r27
+Hexamethylentetramin, Urotropin, Methenamin,;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r28
+Holzkohle, Pflanzenkohle, E153;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r30
+Hydroxypropylcellulose, E463;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r32
+Hydroxypropylmethylcellulose, Hypromellose, E464;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r33
+Hypromellose, Hydroxypropylmethylcellulose, E464;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r34
+Indigokarmin, Indigocarmin, Indigotin I, E132;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r35
+Indischer Traganth, Karayagummi, E416;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r36
+Invertase, E1103;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r37
+Isoascorbinsäure, E315;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r38
+Johannisbrot, Johannisbrotpulver;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r39
+Johannisbrotkernmehl, E410;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r40
+Kaftan;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r42
+Kaliumacetat, E261;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r43
+Kaliumbenzoat, E212;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r44
+Kaliumcarbonat, Kaliumkarbonat, E501;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r45
+Kaliumcitrat, E332;1;Getränke;SIGHI_FoodList_2024-08-29_p31_r46
+Kaliumdisulfit, E224;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r47
+Kaliumhydrogensulfit, E228;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r48
+Kaliumlactat, E326;0;Getränke;SIGHI_FoodList_2024-08-29_p31_r49
+Kaliummetabisulfit, E224;2;Getränke;SIGHI_FoodList_2024-08-29_p31_r50
+Kaliumnitrat, Salpeter, Kalisalpeter, Bengalsalpeter,;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r13
+Kaliumnitrit, Salpetrigsaures Kalium, E249;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r15
+Kaliumphosphate, E340;1;Getränke;SIGHI_FoodList_2024-08-29_p32_r16
+Kaliumpolyphosphat, E452;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r17
+Kaliumpropionat, E283;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r18
+Kaliumpyrosulfit, E224;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r19
+Kaliumsorbat, E202;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r20
+Kaliumsulfit, E225;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r21
+Kaliumtartrat, E336;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r22
+Kalziumacetat, Calciumacetat, Calciumethanoat, E263;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r23
+Kalziumalginat, Calciumalginat, E404;1;Getränke;SIGHI_FoodList_2024-08-29_p32_r24
+Kalziumglutamat, E623;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r25
+Karaya, Karayagummi, Indischer Traganth, E416;1;Getränke;SIGHI_FoodList_2024-08-29_p32_r26
+Karmesin, Azorubin, E122;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r27
+Karmin, Cochenille, E120;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r28
+Karrageen, Karragheen, E407, E407a;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r29
+Karubenmehl, Johannisbrotkernmehl, E410;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r30
+Kohle, Pflanzenkohle, Holzkohle, E153;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r32
+Kohlensäure H2CO3, gelöstes CO2 in;1;Getränke;SIGHI_FoodList_2024-08-29_p32_r33
+Kolliphor® EL, Cremophor EL, Macrogolglycerol;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r35
+kupferhaltige Komplexe der Chlorophylle und;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r38
+Lecithine, Lezithine, E322;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r40
+Litholrubin BK, E180;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r41
+Lutein, E161b;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r42
+Lycopin, Lycopen, Leukopin, E160d, C.I. 75125, C.I.;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r43
+Lysozym, Muramidase, E1105;?;Getränke;SIGHI_FoodList_2024-08-29_p32_r45
+Magnesiumcarbonat, E504;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r46
+Magnesiumdiglutamat, Magnesiumglutamat, E625;2;Getränke;SIGHI_FoodList_2024-08-29_p32_r47
+Mannit, Mannitol, E421;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r48
+Menthol;1;Getränke;SIGHI_FoodList_2024-08-29_p32_r49
+Methylcellulose, Methylzellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p32_r50
+Methylparaben, E218, E219;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r13
+mikrokristalline Cellulose, Cellulosepulver, E460;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r14
+Milchsäure, 2-Hydroxypropansäure, 2-;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r15
+Mineralwasser mit Kohlensäure;1;Getränke;SIGHI_FoodList_2024-08-29_p33_r18
+modifizierte Stärke;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r19
+Monoammoniumglutamat, Ammoniumglutamat,;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r20
+Monokaliumglutamat, Kaliumglutamat, E622;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r22
+Mononatriumglutamat, Natriumglutamat,;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r23
+Natamycin, E235;?;Getränke;SIGHI_FoodList_2024-08-29_p33_r25
+Natriumacetat, E262;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r26
+Natriumalginat, E401;1;Getränke;SIGHI_FoodList_2024-08-29_p33_r27
+Natriumalginat, E402;1;Getränke;SIGHI_FoodList_2024-08-29_p33_r28
+Natriumascorbat, E301;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r29
+Natriumbenzoat, E211;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r30
+Natriumbisulfit, E222;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r31
+Natriumcalciumpolyphosphat, E452;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r32
+Natriumcarbonat, Natriumkarbonat, Soda, E500;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r33
+Natriumdisulfit, E223;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r34
+Natriumhydrogensulfit, E222;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r35
+Natriumisoascorbat, Natriumerythorbat, E316;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r36
+Natriumlactat, E325;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r37
+Natriummetabisulfit, E223;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r38
+Natriumnitrat, Natronsalpeter, Chilesalpeter,;?;Getränke;SIGHI_FoodList_2024-08-29_p33_r39
+Natriumnitrit, E250;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r41
+Natriumorthophenylphenolat, E232;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r42
+Natriumpolyphosphat, E452;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r43
+Natriumpropionat, E281;?;Getränke;SIGHI_FoodList_2024-08-29_p33_r44
+Natriumpyrosulfit, E223;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r45
+Natriumsulfit, E221;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r46
+Natriumtartrat, E335;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r47
+Natron, Natriumhydrogencarbonat,;0;Getränke;SIGHI_FoodList_2024-08-29_p33_r48
+Nisin, E234;?;Getränke;SIGHI_FoodList_2024-08-29_p33_r51
+Octylgallat, E311;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r52
+Orthophenylphenol, E231;2;Getränke;SIGHI_FoodList_2024-08-29_p33_r53
+Parabene = PHB-Ester, E214-E219, Methyl-, Ethyl-,;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r13
+Patentblau V, E131;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r15
+Pektin, Pektine, amidiertes Pektin, E440;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r16
+Pflanzenkohle, Holzkohle, E153;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r17
+Polydextrose, E1200;?;Getränke;SIGHI_FoodList_2024-08-29_p34_r18
+Polydimethylsiloxan, Dimeticon, Dimethicone,;?;Getränke;SIGHI_FoodList_2024-08-29_p34_r19
+Polyvinylpolypyrrolidon, E1202;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r21
+Polyvinylpyrrolidon, Povidon, Polyvidone, E1201;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r22
+Povidon, Polyvinylpyrrolidon, Polyvidone, E1201;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r23
+Propionsäure, Propansäure, Ethancarbonsäure,;?;Getränke;SIGHI_FoodList_2024-08-29_p34_r24
+Propylenglycolalginat, Alginat, E405;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r27
+Riboflavin-5-Phosphat, E101a;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r28
+Rot 2G, E128;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r29
+Salicylat, Salicylsäure;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r30
+Salzsäure, Chlorwasserstoffsäure, acidum;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r31
+Schwefeldioxid E220;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r33
+Seifenkrautextrakt (als Zutat in Halva);0;Getränke;SIGHI_FoodList_2024-08-29_p34_r34
+Silber, E174;?;Getränke;SIGHI_FoodList_2024-08-29_p34_r35
+Sorbate (=Salze der Sorbinsäure): Kaliumsorbat, E202,;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r36
+Sorbinsäure, E200;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r38
+Stärke (Kartoffelstärke, Maisstärke, Reisstärke,;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r39
+Sterculia-Gummi, Karayagummi, E416;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r41
+Steviosid, Steviol-Glykosid, E960;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r42
+Sucralose, E955;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r43
+Sulfite, E220 - E228;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r44
+Tartrazin, E102;3;Getränke;SIGHI_FoodList_2024-08-29_p34_r45
+tert-Butylhydrochinon, 2-tert-Butylhydrochinon,;?;Getränke;SIGHI_FoodList_2024-08-29_p34_r46
+Titandioxid, Titan(IV)-oxid, E171;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r48
+Tocopherol, Vitamin E, E306;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r50
+Traganth, Tragant, E413;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r51
+Triammoniumcitrat, Ammoniumcitrat, E380;1;Getränke;SIGHI_FoodList_2024-08-29_p34_r52
+Urotropin, Hexamethylentetramin, Methenamin,;2;Getränke;SIGHI_FoodList_2024-08-29_p34_r53
+Vanillin (synthetisch), Vanillinzucker;0;Getränke;SIGHI_FoodList_2024-08-29_p34_r55
+Vitamin C, E300;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r13
+Vitamin E, alpha-Tocopherol, E307;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r15
+Vitamin E, delta-Tocopherol, E309;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r16
+Vitamin E, gamma-Tocopherol, E308;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r17
+Vitamin E, Tocopherol, E306;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r18
+Weinsäure, E334;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r19
+Weinsteinbackpulver, E336;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r20
+Weizenkleber, Gluten;1;Getränke;SIGHI_FoodList_2024-08-29_p35_r21
+Xanthan, Xantan, E415;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r22
+Zellulose, Cellulose, mikrokristalline Cellulose,;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r23
+Zinkacetat, E650;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r25
+Zitronensäure E330;1;Getränke;SIGHI_FoodList_2024-08-29_p35_r26
+Zuckercouleur, Zuckerkulör, E150, E150a;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r28
+Zuckercouleur: Ammoniak-Zuckerkulör, E150c;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r29
+Zuckercouleur: Ammoniumsulfit-Zuckerkulör, E150d;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r30
+Zuckercouleur: Sulfitlaugen-Zuckerkulör, E150b;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r31
+Calcium;1;Getränke;SIGHI_FoodList_2024-08-29_p35_r33
+Calcium, Kalzium;1;Getränke;SIGHI_FoodList_2024-08-29_p35_r35
+Folsäure, Folat, Vitamin B9;2;Getränke;SIGHI_FoodList_2024-08-29_p35_r37
+Guaraná (Paullinia cupana);2;Getränke;SIGHI_FoodList_2024-08-29_p35_r39
+Iod, Jod;3;Getränke;SIGHI_FoodList_2024-08-29_p35_r40
+Jodsalz, Iodsalz (Jodzusatz in Form von Kaliumiodid,;2;Getränke;SIGHI_FoodList_2024-08-29_p35_r41
+Jodtabletten für den atomaren Störfall;3;Getränke;SIGHI_FoodList_2024-08-29_p35_r43
+Kaliumiodat, Kaliumjodat;3;Getränke;SIGHI_FoodList_2024-08-29_p35_r44
+Kaliumiodid, Kaliumjodid;3;Getränke;SIGHI_FoodList_2024-08-29_p35_r45
+Kalzium, Calcium;1;Getränke;SIGHI_FoodList_2024-08-29_p35_r46
+Kochsalz iodiert / jodiert;2;Getränke;SIGHI_FoodList_2024-08-29_p35_r48
+Tannenschoss, Tannenknospen;0;Getränke;SIGHI_FoodList_2024-08-29_p35_r49
+Theobromin;2;Getränke;SIGHI_FoodList_2024-08-29_p35_r50
+Gerstenmalzmehl, Malzmehl;0;Getränke;SIGHI_FoodList_2024-08-29_p36_r13
+Kimchi;2;Getränke;SIGHI_FoodList_2024-08-29_p36_r15
+"Lakritze, ""Bärendreck""";2;Getränke;SIGHI_FoodList_2024-08-29_p36_r17
+Malzmehl, Gerstenmalzmehl;0;Getränke;SIGHI_FoodList_2024-08-29_p36_r18
+Marzipan;1;Getränke;SIGHI_FoodList_2024-08-29_p36_r20
+Schokolade, braun / schwarz / dunkel;2;Getränke;SIGHI_FoodList_2024-08-29_p36_r22
+Schokolade, weiss;1;Getränke;SIGHI_FoodList_2024-08-29_p36_r23
+Seitan;1;Getränke;SIGHI_FoodList_2024-08-29_p36_r24
+Senf (Zubereitung);2;Getränke;SIGHI_FoodList_2024-08-29_p36_r25
+Tofu;2;Getränke;SIGHI_FoodList_2024-08-29_p36_r26
+weiße Schokolade;1;Getränke;SIGHI_FoodList_2024-08-29_p36_r27

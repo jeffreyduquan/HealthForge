@@ -1,0 +1,167 @@
+683;E100, Curcumin;0
+684;E101a, Riboflavin-5-Phosphat;1
+685;E102, Tartrazin;3
+686;E110, Gelborange S;3
+687;E1103, Invertase, β-Fructofuranosidase, Saccharase;0
+688;E1105, Lysozym, Muramidase;?
+689;E120, Karmin, Cochenille;2
+690;E1200, Polydextrose;?
+691;E1201, Povidon, Polyvinylpyrrolidon, Polyvidone, 1-;1
+692;E1202, Polyvinylpolypyrrolidon;1
+693;E122, Karmesin, Azorubin;2
+694;E123, Amaranth;2
+695;E124, Cochenillerot A, Ponceau 4R;2
+696;E127, Erythrosin;3
+697;E128, Azophloxin, Rot 2G;2
+698;E129, Allurarot AC, Food Red 17, CI 16035;2
+699;E131, Patentblau V;2
+700;E132, Indigokarmin, Indigocarmin, Indigotin I;2
+701;E133, Brillantblau FCF;?
+702;E140, Chlorophylle, Chlorophylline;0
+703;E141, kupferhaltige Komplexe der Chlorophylle und;0
+704;E142, Grün S, Brillantsäuregrün BS, C.I. 44090, C.I. Acid;?
+705;E150, E150a: Zuckercouleur;0
+706;E150b, Sulfitlaugen-Zuckerkulör;0
+707;E150c, Ammoniak-Zuckerkulör;0
+708;E150d: Ammoniumsulfit-Zuckerkulör;0
+709;E151, Brillantschwarz BN, Brillantschwarz FCF,;3
+710;E153, Pflanzenkohle, Holzkohle;0
+711;E154, Braun FK;2
+712;E155, Braun HT, Braun HTK, C.I. 20285, C.I. Food;2
+713;E160a, Carotine, Beta-Carotin, β-Carotin;0
+714;E160b, Bixin, Norbixin, Annatto;2
+715;E160c, Capsanthin, Paprikaextrakt;0
+716;E160d, Lycopin, Lycopen, Leukopin, C.I. 75125, C.I.;?
+717;E160e, Beta-Apo-8-Carotinal, 8′-Apo-β-caroten-8′-al,;?
+718;E160f, Apo-carotinsäureethylester, beta-Apo-8′-;?
+719;E161b, Lutein;?
+720;E161g, Canthaxanthin, C.I. 40850, C.I. Food Orange 8;?
+721;E162, Betanin, Betanoin, Betenrot, Beetenrot;0
+722;E163, Anthocyane;0
+723;E170, Calciumcarbonat, Kalziumkarbonat, Kalk,;0
+724;E171, Titandioxid, Titan(IV)-oxid, Titansäureanhydrid,;0
+725;E172, Eisenoxide, Eisenhydroxide;0
+726;E173, Aluminium;?
+727;E174, Silber;?
+728;E175, Gold;0
+729;E180, Litholrubin BK, Rubinpigment BK, 4B-Toner, C.I.;2
+730;E200, Sorbinsäure;2
+731;E202, Kaliumsorbat;2
+732;E203, Calciumsorbat;2
+733;E210 bis E213: Benzoesäure und deren Salze =;2
+734;E210, Benzoesäure;2
+735;E211, Natriumbenzoat;2
+736;E212, Kaliumbenzoat;2
+737;E213, Calciumbenzoat;2
+738;E214, E215, Ethylparaben;2
+739;E218, E219, Methylparaben;2
+740;E220 - E228, Sulfite;2
+741;E220, Schwefeldioxid;2
+742;E221, Natriumsulfit;2
+743;E222, Natriumhydrogensulfit, Natriumbisulfit;2
+744;E223, Natriumdisulfit, Natriummetabisulfit;2
+745;E224, Kaliumdisulfit, Kaliummetabisulfit;2
+746;E225, Kaliumsulfit;2
+747;E226, Calciumsulfit;2
+748;E227, Calciumhydrogensulfit;2
+749;E228, Kaliumhydrogensulfit;2
+750;E231, Orthophenylphenol;2
+751;E232, Natriumorthophenylphenolat;2
+752;E234, Nisin;?
+753;E235, Natamycin;?
+754;E239, Hexamethylentetramin, Urotropin,;2
+755;E242, Dimethyldicarbonat, Dimethylpyrocarbonat,;?
+756;E249, Kaliumnitrit, Salpetrigsaures Kalium;?
+757;E250, Natriumnitrit;0
+758;E251, Natriumnitrat, Natronsalpeter, Chilesalpeter,;?
+759;E252, Kaliumnitrat, Salpeter, Kalisalpeter,;?
+760;E260, Essigsäure, Eisessig;0
+761;E261, Kaliumacetat, Kaliumethanoat;0
+762;E262, Natriumacetat, Natriumethanoat;0
+763;E263, Calciumacetat, Calciumethanoat,;0
+764;E270, Milchsäure, 2-Hydroxypropansäure, 2-;0
+765;E280, Propionsäure, Propansäure, Ethancarbonsäure,;?
+766;E281, Natriumpropionat;?
+767;E282, Calciumpropionat, Calciumdipropionat;?
+768;E283, Kaliumpropionat;?
+769;E284, Borsäure;?
+770;E285, Borax, Tinkal, Natriumborat,;?
+771;E290, Kohlendioxid gasförmig, Kohlenstoffdioxid,;0
+772;E296, Apfelsäure, Äpfelsäure, 2-Hydroxybutandisäure,;0
+773;E297, Fumarsäure, trans-Butendisäure, trans-;?
+774;E300, Ascorbinsäure, Vitamin C;0
+775;E301, Natriumascorbat, Sodascorbat, Mononatrium;0
+776;E302, Calciumascorbat, Calciumdiascorbat, Calcium-L-;0
+777;E304, Ascorbylpalmitat;0
+778;E306, Tocopherol, Vitamin E, tocopherolhaltige;0
+779;E307, alpha-Tocopherol, α-Tocopherol, Vitamin E;0
+780;E308, gamma-Tocopherol, γ-Tocopherol, Vitamin E;0
+781;E309, delta-Tocopherol, Vitamin E;0
+782;E310, Propylgallat, Propylgallat, E310;2
+783;E311, Octylgallat;2
+784;E312, Dodecylgallat, Laurylgallat,;2
+785;E315, Isoascorbinsäure, Erythorbinsäure, Isovitamin C;0
+786;E316, Natriumisoascorbat, Natriumerythorbat;0
+787;E319, 2-tert-Butylhydrochinon, tert-;?
+788;E320, Butylhydroxyanisol, BHA;2
+789;E321, Butylhydroxytoluol, Butylhydroxytoluen, BHT;2
+790;E322, Lecithine, Lezithine;0
+791;E325, Natriumlactat;0
+792;E326, Kaliumlactat;0
+793;E327, Calciumlactat, Kalziumlaktat;0
+794;E330, Citronensäure;1
+795;E331, Natriumcitrat, Trinatriumcitrat, Natriumzitrat,;1
+796;E332, Kaliumcitrat;1
+797;E333, Calciumcitrat, Tricalciumcitrat,;1
+798;E334, Weinsäure, 2,3-Dihydroxybernsteinsäure, 2,3-;0
+799;E335, Natriumtartrat;0
+800;E336, Weinsteinbackpulver, Kaliumtartrat;0
+801;E340, Kaliumphosphate: Kaliumdihydrogenphosphat;1
+802;E341, Calciumphosphate:;1
+803;E380, Ammoniumcitrat, Triammoniumcitrat,;1
+804;E400, Alginsäure, Algin;1
+805;E401, Natriumalginat;1
+806;E402, Natriumalginat;1
+807;E403, Ammoniumalginat;1
+808;E404, Calciumalginat, Kalziumalginat;1
+809;E405, Alginat, Algin, Propylenglycolalginat;1
+810;E406, Agar-Agar;1
+811;E407, E407a, Carrageen, Karrageen;2
+812;E410, Johannisbrotkernmehl, Carubin, Carubenmehl;2
+813;E412, Guarkernmehl;1
+814;E413, Traganth, Tragant;2
+815;E414, Gummi arabicum, Gummiarabikum;1
+816;E415, Xanthan, Xantan, Xanthangummi;0
+817;E416, Karaya, Indischer Traganth, Karayagummi,;1
+818;E421, Mannit, Mannitol;0
+819;E422, Glycerin, Glycerol, Glyzerin, Propan-1,2,3-triol,;0
+820;E440, Pektin;0
+821;E441, Gelatine;1
+822;E452, Polyphosphate: Natrium-, Kalium-,;2
+823;E460, Cellulose, Zellulose, mikrokristalline Cellulose,;0
+824;E461, Methylcellulose, Methylzellulose,;0
+825;E462, Ethylcellulose, Ethylzellulose,;0
+826;E463, Hydroxypropylcellulose;0
+827;E464, Hydroxypropylmethylcellulose, Hypromellose,;0
+828;E465, Ethyl Methylcellulose, Ethylmethylcellulose;0
+829;E466, Carboxymethylcellulosen, Carmellose;?
+830;E500, Natriumcarbonat, Natriumkarbonat, Soda,;0
+831;E500ii, Natron, Natriumhydrogencarbonat,;0
+832;E501, Kaliumcarbonat, Kaliumkarbonat, Pottasche,;0
+833;E503, Ammoniumcarbonat, kohlensaures;0
+834;E504, Magnesiumcarbonat;0
+835;E507, Salzsäure, Chlorwasserstoffsäure, acidum;0
+836;E579, Eisengluconat;0
+837;E620, Glutaminsäure, (Glutamat);2
+838;E620-E625, Glutamate, Geschmacksverstärker;2
+839;E621, Mononatriumglutamat, Natriumglutamat;2
+840;E622, Monokaliumglutamat, Kaliumglutamat;2
+841;E623, Calciumdiglutamat, Calciumglutamat,;2
+842;E624, Monoammoniumglutamat,;2
+843;E625, Magnesiumdiglutamat, Magnesiumglutamat;2
+844;E626, Guanosinmonophosphat, Guanylsäure,;0
+845;E650, Zinkacetat;0
+846;E900, Polydimethylsiloxan, PDMS, Dimeticon,;?
+847;E901, Bienenwachs, cera flava, cera alba;0
+848;E955, Sucralose;0
+849;E960, Steviosid, Steviol-Glykosid;0

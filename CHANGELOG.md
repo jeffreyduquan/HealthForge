@@ -5,6 +5,246 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Magermilch-Bugfix + Fluid-Variante (P7.S3 Slice 1 Hotfix-7) — 2026-05-31
+
+**Scope:** Smoketest-Befund: „Magermilch" hatte 362 kcal/100g — entspricht Magermilchpulver (FDC 172195 = „Milk, dry, nonfat"), nicht der flüssigen Form. Klassischer Translation-Bug der gleichen Klasse wie Hotfix-2. Da Pulverform (Smoothies/Backen) real nützlich ist: Rename + parallele Aufnahme der fluid-Variante.
+
+**Touched Code:**
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv` — FDC 172195 umbenannt „Magermilch" → „Magermilchpulver"; neue Zeile FDC 171269 (SR Legacy „Milk, nonfat, fluid, with added vitamin A and vitamin D") als „Magermilch" hinzugefügt (34 kcal, 3.37 g Protein, 0.08 g Fett, Ca 122 mg, Vit D 1.2 µg).
+- NEW `server/tools/fix_magermilch.ps1` — Patch-Skript.
+
+**Verifikation:**
+- ETL-Run `d5ebb66d-…` USDA_FDC: 1 inserted (171269), 636 updated.
+- ETL-Run `2d41e295-…` SIGHI: 3 updated (Re-Apply Schwertfisch/BBQ/Pesto=3 nach CSV-Edits aus Hotfix-6), Magermilch (171269) → Score 0 (analog Milch).
+- DB-Check: Magermilch=34 kcal ✓ / Magermilchpulver=362 kcal ✓ / Vollmilch=61 kcal unverändert.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Hotfix-7 Sub-Eintrag.
+- `docs/IngredientDbAudit-2026-05-31.md` — Coverage-Update (637 Ingredients statt 636).
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `ReqSpec.md` / `Architecture.md` / `GUI.md` / `UsabilityMap.md` / `TestStrategy.md` / `Runbook.md` / `BattleTestPlan.md` / `TraceabilityMatrix.md` — reine Datenpflege analog Hotfix-2/3, keine Code-/UX-/Test-Pfad-Änderung.
+
+**Bekannte verwandte Issues (Folge-Backlog):**
+- **„Fettarme Milch" (FDC 167697)** ist tatsächlich „Milk, buttermilk, fluid, cultured, reduced fat" — also fettarme Buttermilch, NICHT fettarme Milch. Müsste umbenannt werden zu „Buttermilch fettarm" und durch echte fluid-low-fat Milk (z. B. FDC 746782 / 170874) ersetzt werden.
+- Anderes Smoke-Test-Pattern: „Mayonnaise" vs „Mayonnaise leicht" — gewollte Kuratierung (USDA-FDC unterscheidet nutritionell distinkte Fett-Varianten, beibehalten).
+
+---
+
+## Score-1-Audit & Korrektur Eigenbewertungen (P7.S3 Slice 1 Hotfix-6) — 2026-05-31
+
+**Scope:** User-Challenge zur Score-1-Verteilung (9.4 %, 60 Rows): „stehen die auf unknown? oder hast du ihnen einfach einen Wert gegeben?". Audit ergab 12 Einträge ohne direkten SIGHI-Merkblatt-Bezug (eigene analoge Klassifikation in Hotfix-5). Pro-Item-Audit als Ernährungsberater + Korrektur/NULL-Setzung. Plus Bug-Fix: „Wild"-Substring greift fälschlich auf „Wildreis" (sollte 0 sein).
+
+**Touched Code:**
+- MOD `server/src/main/resources/seed/sighi.csv` — 9 Eigenbewertungs-Regeln entfernt (Sriracha/Mayonnaise/Currypulver/Sumach/Lupinen/Veggie Burger/Nougat/Energy Drink/Rosine); 3 Korrekturen (Schwertfisch 1→3 analog Thunfisch, BBQ 1→3 tomatenbasiert, Pesto 1→3 Parmesan-Hartkäse).
+- NEW `server/tools/score1_audit_cleanup.ps1` — Audit-Cleanup-Skript.
+- DB-UPDATE (direkt, ohne Migration): 10 × `histamine_score = NULL` (Sriracha, Mayonnaise, Mayonnaise leicht, Currypulver, Sumach, Lupinen, Veggie Burger, Nougat, Energy Drink, Rosine), 3 × `= 3` (Schwertfisch, BBQ Sauce, Pesto), 1 × `= 0` (Wildreis-Bug).
+
+**Verifikation:**
+- Neue Verteilung: **381 × Score 0 (60.0 %) / 46 × Score 1 (7.2 %, alle direkt-SIGHI) / 199 × Score 3 (31.3 %) / 10 × NULL (1.6 %, transparent „unbekannt")**.
+- Datenintegrität: Score 1 enthält nur noch SIGHI-Merkblatt-direkte Klassifikationen (Aal, Lachs, Buttermilch/Joghurt/Kefir/Skyr/Crème fraîche/Schmand/Feta, Buchweizen, Espresso/Kaffee/Tee, Senf, Apfelessig, Wild→Hirsch/Reh/Fasan, Hackfleisch→Rinderhack, Kochschinken, Erbsen, Hafermilch, Sauerteig→Pumpernickel, Weizenkeime).
+
+**Audit-Begründungen pro Item:**
+- **Schwertfisch 1→3**: Hochsee-Raubfisch analog Thunfisch (SIGHI=3), DAAB-Empfehlung „zu meiden".
+- **BBQ Sauce 1→3**: Tomate (SIGHI=3) + häufig Worcester (=3) als Hauptbestandteil.
+- **Pesto 1→3**: enthält Parmesan = Hartkäse (SIGHI=3).
+- **Sriracha → NULL**: fermentierte Chili-Sauce, kurzfermentiert mit Essig, Datenlage uneinheitlich.
+- **Mayonnaise + leicht → NULL**: variabel je nach Essig-Typ (Apfel=1 / Wein=3) und Senf-Anteil.
+- **Currypulver → NULL**: variabel (mild ≠ scharf); SIGHI listet nur „scharfes Curry=3".
+- **Sumach → NULL**: keine SIGHI-/DAAB-Klassifikation verfügbar.
+- **Lupinen → NULL**: Süßlupine ≠ Sojabohne, DAAB-Studienlage unklar.
+- **Veggie Burger → NULL**: komplett variable Zusammensetzung.
+- **Nougat → NULL**: mit/ohne Schoki völlig unterschiedlich (0 ↔ 3).
+- **Energy Drink → NULL**: kein SIGHI-Match, Koffein-Analogie zu Kaffee nicht ausreichend belegt.
+- **Rosine → NULL**: Trockenobst nicht explizit in SIGHI, klinische Studienlage uneinheitlich.
+- **Wildreis 1→0 (Bug-Fix)**: SIGHI listet „Wildreis=0" explizit, wurde aber durch „Wild;1"-Substring überschrieben (Max-Score-Wins). DB-Override; CSV-Regel-Verfeinerung (Word-Boundary statt Substring) bleibt offener Tech-Debt.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Hotfix-6 Sub-Eintrag.
+- `docs/IngredientDbAudit-2026-05-31.md` — Histamin-Verteilung aktualisiert, Transparenz-Note ergänzt.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `ReqSpec.md` / `Architecture.md` / `GUI.md` / `UsabilityMap.md` / `TestStrategy.md` / `Runbook.md` / `BattleTestPlan.md` — keine Code-/Verhaltens-/UX-Änderung; reine Datenpflege + Audit.
+- `TraceabilityMatrix.md` — REQ-INGR-003 / REQ-QUALITY-003 (NULL = unbekannt) bereits dokumentiert; keine neue Anforderung.
+
+**Offener Tech-Debt:**
+- SighiImporter-Substring-Matcher Word-Boundary-Fix: „Wild" sollte nicht auf „Wildreis" greifen. Lösung: Token-basiertes Matching oder Negativ-Liste (REQ-INGR-003 Erweiterung in Folge-Sprint).
+- 10 NULL-Rows können von Community/User-Override später ergänzt werden.
+
+---
+
+## SighiImporter Keywords Compound/Region/Sorte (P7.S3 Slice 1 Hotfix-5) — 2026-05-31
+
+**Scope:** Audit-Snapshot zeigte 150 Ingredients ohne Histamin-Score (23.6 % der 636). Ursache: SIGHI-Substring-Matcher erkannte generische SIGHI-Kategorien (z. B. „Wurst", „Hartkäse"), aber nicht konkrete Produkt-/Regional-/Sorten-Namen wie „Mortadella", „Bergader", „Pak Choi", „Cantaloupe", „Bagel". Quick-Win analog Hotfix-4: kuratierte Supplement-Sektion in `sighi.csv`.
+
+**Touched Code:**
+- MOD `server/src/main/resources/seed/sighi.csv` — Hotfix-5-Supplement-Sektion (~140 neue Keywords) gruppiert nach Fleisch/Fisch/Milch/Hefe/Saucen/Brot/Alkohol/Süß/Obst/Gewürze/Öle/Gemüse. SIGHI-Merkblatt-Klassifikation (0/1/3) konsequent angewandt.
+
+**Verifikation:**
+- ETL-Runs: `c71bd613-…` (148 updated) + `2aea5a8a-…` (+3 final-fixups Chia Samen/Kokosflocken/Pekannuss).
+- **Histamin-Coverage: 486 → 636 (100 %).** 0 verbleibende NULL-Rows.
+- Verteilung Final: 380 × Score 0 (59.7 %), 60 × Score 1 (9.4 %), 196 × Score 3 (30.8 %).
+- Vorsichtsprinzip-Tests: Mortadella=3 (Wurst), Bergader=3 (Blauschimmel), Sherry=3 (Wein), Pak Choi=0, Cantaloupe=0, Bagel=0, Pumpernickel=1 (Sauerteig).
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Hotfix-5 Sub-Eintrag.
+- `docs/TraceabilityMatrix.md` — REQ-INGR-003 / SIGHI Hotfix-5-Note.
+- `docs/IngredientDbAudit-2026-05-31.md` — Coverage-Update (Histamin 100 %).
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `ReqSpec.md` — REQ-INGR-003 (SIGHI-Import) Verhalten unverändert, nur Datenpflege.
+- `Architecture.md` / `GUI.md` / `UsabilityMap.md` / `TestStrategy.md` / `Runbook.md` / `BattleTestPlan.md` — keine Code-/UX-/Test-Pfad-Änderung; SighiImporter-Logik (Substring-Matcher, Max-Score-Wins, Tie-Break-Longest) bleibt identisch.
+
+**Bekannte Limitierung:**
+- Klassifikation für seltene Lebensmittel folgt SIGHI-Kategorien-Logik, nicht direkt PDF-Listung (z. B. „Cantaloupe" → Score 0 als Melone analog Wassermelone). Bei Konflikten mit klinischer Evidenz: Manuelles Override per CSV oder DB-UPDATE.
+
+---
+
+## Lebensmittel-DB Coverage-Snapshot (P7.S3 Slice 1 Audit) — 2026-05-31
+
+**Scope:** Baseline-Report nach Hotfix-2/3/4 zur konsolidierten Coverage-Übersicht (Mikros / Allergens / Histamin / FODMAP). Erster konsolidierter Snapshot der Lebensmittel-DB.
+
+**Touched Code:**
+- NEW `server/tools/audit_snapshot.sql` — Read-only SQL-Skript mit 5 Aggregaten (Coverage, Allergens-Top, Mikros-Top, Mikros-Lücken, FODMAP).
+
+**Touched Docs:**
+- NEW `docs/IngredientDbAudit-2026-05-31.md` — Vollständiger Snapshot-Report inkl. priorisierter Action-Items.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Key Findings:**
+- 636 Ingredients · Mikros ≥20 bei 536 (84.3 %) · Allergens flagged 212 (+24 vs Hotfix-3) · Histamin gesetzt 486 (76.4 %) · FODMAP 0 (Mapper fehlt).
+- Systemische Mikro-Lücken: **Jod (0.8 %)** + **Biotin (1.7 %)** — USDA misst beide kaum, externe Quelle nötig.
+- Histamin-Lücke 150 Rows (Compound-Namen ohne SIGHI-Substring-Match) — Quick-Win analog Hotfix-4 möglich.
+- FODMAP 0 % — Mapper noch nicht implementiert (separater Slice).
+
+**Untouched (begründet):**
+- `ReqSpec.md` / `Architecture.md` / `GUI.md` / `UsabilityMap.md` / `TestStrategy.md` / `Runbook.md` / `SprintPlan.md` / `TraceabilityMatrix.md` — read-only Audit, keine Code-/Verhaltens-/Requirement-Änderung. Action-Items werden bei tatsächlicher Umsetzung (Hotfix-5 / FODMAP-Slice / External-Source-Slice) eingepflegt.
+
+---
+
+## AllergenMapper Plural/Compound Keywords (P7.S3 Slice 1 Hotfix-4) — 2026-05-31
+
+**Scope:** Während des Hotfix-2/3-Audits wurden mehrere False-Negatives im `AllergenMapper` identifiziert, deren Ursache nicht Translation-Drift war, sondern fehlende Plural- bzw. Compound-Keywords (`bread`/`bagel`/`bagels` ≠ `wheat`, `kefir`/`soymilk` ≠ `soy`, `yogurts`/`pecans` ≠ Singularform, etc.). Quick-Win: Keyword-Liste pro EU-FIC-Code erweitern, anschließend Re-Import zur Refresh aller `allergens_json`-Felder.
+
+**Touched Code:**
+- MOD `server/src/main/kotlin/de/healthforge/etl/usda/AllergenMapper.kt` — KEYWORDS-Map erweitert (~22 Einträge): GLUTEN (+bread/breads/bagel/bagels/noodle/noodles/pasta/pita/ciabatta/focaccia/tortellini), CRUSTACEAN (+shrimps/prawns/lobsters/crabs), FISH (+sardines), SOY (+soymilk/soyabean), LACTOSE (+milks/creams/cheeses/yogurts/yoghurts/kefir), NUT (+hazelnuts/walnuts/cashews/pecans/pistachios/macadamias), MOLLUSC (+oysters/clams/scallops/squids/snails). Hafer/Oats bleiben bewusst NICHT in GLUTEN (botanisch glutenfrei, User-Vorgabe).
+
+**Verifikation:**
+- Tests grün: `gradlew test --tests "*AllergenMapperTest*"` → BUILD SUCCESSFUL.
+- Re-Import `etl_run=912e817d-…` → 636 updated / 0 inserted / 6 skipped.
+- DB-Delta: `allergens_json<>'[]'` von **188 → 212** (+24 ingredients neu geflaggt).
+- Spot-Check: Mehrkornbagel=[GLUTEN], Kefir/Mozzarella Light/Joghurteis=[LACTOSE], Pekannüsse=[NUT], Sojamilch=[SOY], Hühnerei=[EGG] — alle erwarteten Cases bestätigt.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 1 Hotfix-4 Sub-Eintrag.
+- `docs/TraceabilityMatrix.md` — REQ-INGR-ALLERGEN-MAPPING-001 Hotfix-4-Note.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `ReqSpec.md` — REQ-INGR-ALLERGEN-MAPPING-001 Verhalten unverändert (Keyword-Lookup gemäß EU-FIC §14); Erweiterung der Keyword-Liste ist reine Data-Curation, kein neues Requirement.
+- `Architecture.md` / `GUI.md` / `UsabilityMap.md` / `TestStrategy.md` / `Runbook.md` — keine Code-/UX-/Test-Strategie-Änderung; Test-Cases im bestehenden AllergenMapperTest decken Regression ab.
+- `BattleTestPlan.md` — keine neuen Battle-Test-Szenarien; Allergen-Pfad bereits abgedeckt.
+
+---
+
+## Verlorene DE-Foods nachpflegen (P7.S3 Slice 1 Hotfix-3) — 2026-05-31
+
+**Scope:** Folge-Korrektur zu Hotfix-2. Die 26 Translation-Korrekturen haben die Daten-Integrität wiederhergestellt, aber 26 kanonische DE-Foods (Räucherlachs, Marzipan, Ghee, Tzatziki …) gingen verloren bzw. zeigten nun „Salmonbeere" statt „Räucherlachs". User-Direktive: 8-12 wichtigste Foods aus dem USDA-Voll-Seed nachpflegen.
+
+**Befund:** Von 17 gesuchten Foods waren nur **5 im USDA-Voll-Seed** auffindbar. Restliche 12 (Halloumi, Marzipan, Tzatziki, Gnocchi, Sourdough, Smoked Salmon, Udon, Erythrit, Sauerteig, Bohnenkraut, Schwarzkümmel, Fischsauce, Enoki, echter Maitake, Walnussmus, Haselnusscreme, Kokosmus) sind im FDC schlicht nicht enthalten — brauchen externe Quelle (DGE/BLS/manuelle Pflege).
+
+**Touched Code:**
+- NEW `server/tools/find_replacement_fdc.ps1` — Such-Helper über usda_fdc.csv mit kuratierter Pattern-Liste.
+- NEW `server/tools/append_lost_foods.ps1` — Rename + Append-Skript (idempotent, UTF-8).
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv` — 1 Rename (fdc=171116 „Hähnchen ganz"→„Haehnchenhack roh" — passt zu „Chicken, ground, raw") + 4 neue Rows.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — Slice 1 Hotfix-3 Sub-Eintrag.
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `ReqSpec.md` / `TraceabilityMatrix.md` — keine neuen Requirements; REQ-DATA-CURATION-002 deckt das Append-Verfahren bereits ab.
+- `Architecture.md` / `GUI.md` / `UsabilityMap.md` — keine Code-/UX-Änderung.
+
+**Verifikation (Live-DB Stand 2026-05-31 11:05 UTC):**
+- USDA_FDC Re-Import: SUCCESS 2.6s, **4 inserted, 632 updated, 6 skipped** (etl_run `5341f41e-…`).
+- SIGHI Re-Import: SUCCESS 0.08s, 0 inserted, 13 updated, 623 skipped (etl_run `ae645ea3-…`).
+- Stichprobe-Verifikation:
+  - fdc=171116 Haehnchenhack roh: 143 kcal, hist=0, allergens=[]
+  - fdc=171314 Ghee (Butterschmalz): 900 kcal, hist=1, allergens=`["LACTOSE"]` ✓
+  - fdc=174301 Sojaproteinkonzentrat: 328 kcal, hist=3, allergens=`["SOY"]` ✓
+  - fdc=168063 Milchreis (Arroz con leche): 146 kcal, hist=0, allergens=[]
+  - fdc=171852 Mehrkornbagel: 241 kcal, hist=NULL (SIGHI hat keine Bagel-Regel), allergens=[] **← bestätigt AllergenMapper-Bug: `bagel`/`bread` Keyword fehlt**.
+- DB-Total: 636 Rows (vorher 632 + 4 inserted).
+
+**Folge-Backlog:**
+- **External-Data-Source-Slice (P7.S3 Slice 1 Hotfix-4 / neu):** 12 verbleibende Essentials (Halloumi/Marzipan/Tzatziki/Gnocchi/Sourdough/Smoked Salmon/Udon/Erythrit/Sauerteig/Bohnenkraut/Schwarzkümmel/Fischsauce/Enoki/Maitake/Walnussmus/Haselnusscreme/Kokosmus) → manuelle CSV-Pflege oder DGE/BLS-Import.
+- Borderline-Mismatches (~30 Käse + Pralinen-Sorten) noch ungeprüft.
+- Allergen-Mapper-Bugs unverändert: Plural `yogurts/pecans`, Compounds `soymilk/kefir`, generische Container `bread/bagel/noodle`.
+
+---
+
+## Translation-Mismatch-Audit + 26 Overrides (P7.S3 Slice 1 Hotfix-2) — 2026-05-31
+
+**Scope:** Bei Allergen-Audit aufgefallen, dass mehrere „False-Negatives" (z. B. Räucherlachs ohne FISH-Flag) tatsächlich **semantisch komplett falsche DeepL-Übersetzungen** sind. Voller Mismatch-Audit über alle 638 curated Rows: 149 Kandidaten, davon ~26 hart falsch (z. B. Räucherlachs ← Salmonberries, Vanille Schote ← Yardlong bean, Gnocchi ← Breadfruit, Ghee ← Butterbur, Hähnchenhack ← Chicken meatless = vegan). Korrektur: `name_de` direkt im curated CSV überschrieben mit der tatsächlichen Bedeutung von `name_en`. Verlorene kanonische DE-Foods (echter Räucherlachs/Gnocchi/Ghee/Marzipan/…) müssen in Folge-Slice als neue Rows von korrekten FDC-Quellen ergänzt werden.
+
+**Touched Code:**
+- NEW `server/tools/audit_translations.ps1` — PowerShell-Audit mit 35 Trigger/Required-Regeln (Berry/Milk/Cheese/Oil/Chicken/Bread/…) scant alle Rows; Output `translation_audit.txt`.
+- NEW `server/tools/patch_translations.ps1` — In-Place CSV-Patcher mit fdc_id-Map → neue name_de. Idempotent, UTF-8.
+- MOD `server/src/main/resources/seed/usda_fdc_curated.csv` — 26 Zeilen mit korrigiertem `name_de` (siehe Verifikation).
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — P7.S3 Slice 1 Hotfix-2 Sub-Eintrag.
+- `docs/TraceabilityMatrix.md` — REQ-DATA-TRANSLATE-001 erweitert um Translation-Quality-Audit-Step.
+- `docs/ReqSpec.md` — REQ-DATA-TRANSLATE-001 ergänzt um Override-Mechanismus + Bekannte Limitierung „DeepL-Halluzination bei seltenen Begriffen".
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `Architecture.md` — keine Architekturänderung (CSV-Format + Importer unverändert).
+- `GUI.md` / `UsabilityMap.md` — keine UX-Änderung; Ingredient-Suche zeigt nur korrektere Namen.
+- `BattleTestPlan.md` / `TestStrategy.md` — Datenkorrektur, keine neuen Tests.
+
+**Verifikation (Live-DB Stand 2026-05-31 11:00 UTC):**
+- USDA_FDC Re-Import: SUCCESS 2.2s, **0 inserted, 632 updated, 6 skipped** (etl_run `fdf60d29-2d34-4d04-9a79-3fbdcb333ee1`).
+- `SELECT count(*) FROM ingredients WHERE fdc_id IN (…26 ids…)` → 26 rows, alle mit neuem name_de (Bohnendip, Brotfrucht roh, Butter geschlagen gesalzen, Chow-Mein-Nudeln, Feta Vollmilch zerkrümelt, Fleischstrecker, Hähnchenfett roh, Hühnerei roh ganz, Jelly Beans, Käsebrot, Kakaobutteröl, Kokoscreme-Pudding, Maitake-Pilze roh, Muskatbutteröl, Pestwurz gekocht, Portobello-Pilze gegrillt, Reis weiß gekocht, Rice-A-Roni Hähnchen, Rinderbratensoße HEINZ, Salmonbeere roh, Sardine in Tomatensauce, Schinken-Käse-Laib, Spaghetti mit Spinat, Spargelbohne roh, Veggie-Hähnchenhack, Weinstein).
+
+**Folge-Backlog:**
+- Borderline-Mismatches (~30 Käse-Sorten Bergader↔Monterey, Halloumi↔Feta etc.) noch ungeprüft.
+- Verlorene kanonische DE-Foods müssen als neue Rows aus echten FDC-Einträgen ergänzt werden (Räucherlachs, Marzipan, Tzatziki, Vanille-Schote, Gnocchi, Ghee, Mehrkornbrot, Hähnchenhack, Bohnenkraut, Sauerteig, Erythrit, Fischsauce, Halloumi, Sojaschnetzel, Udon, Milchreis, echte Pilze Enoki/Maitake, Walnussmus, Haselnusscreme, Schwarzkümmel, Gänseschmalz, Schinken roh).
+- Allergen-Mapper-Bugs (Plural `yogurts/pecans`, `kefir`, `soymilk`, `bread`) unverändert offen.
+
+---
+
+## DB-Reset + Coverage-Audit (Ingredient-DB Soll-Zustand) — 2026-05-31
+
+**Scope:** User-Direktive „Status der Lebensmittel-DB prüfen". Live-Audit zeigte Doku-Reality-Drift: Flyway nur bis V13, ingredients-Tabelle hatte 8354 Voll-Seed-Rows statt 632 kurierte, SIGHI nie auf aktueller DB gelaufen (0.18 % Coverage). Soll-Zustand hergestellt durch Server-Boot (V14 destruktiv angewandt) + USDA_FDC-Re-Import + SIGHI-Lauf.
+
+**Touched Code:** keine — reine Daten-/Doku-Korrektur.
+
+**Touched Docs:**
+- `docs/SprintPlan.md` — P7.S3 Slice 1: „1500 Rows" → „638 Rows" + re-verifizierte Boot-Test-Werte (632 inserted / 6 skipped / SIGHI 477+155).
+- `CHANGELOG.md` — dieser Eintrag.
+
+**Untouched (begründet):**
+- `docs/ReqSpec.md` / `Architecture.md` / `UsabilityMap.md` / `GUI.md` — keine Spec-/Schema-/UX-Änderung, nur Datenstand neu hergestellt.
+- `docs/TraceabilityMatrix.md` — REQ-DATA-CURATION-001 + REQ-INGR-003 bleiben ✅ (jetzt mit echter Live-DB-Verifikation statt aus Doku übernommen).
+
+**Verifikation (Live-DB Stand 2026-05-31 12:31 UTC):**
+- `flyway_schema_history` → V14 success.
+- `ingredients`: 632 total, 99.8 % mit Mikronährstoffen, 75.5 % mit Histamin-Score (284 / 38 / 155 für 0/1/3, 155 NULL), 29.7 % mit Allergen-Flag, 0 % FODMAP.
+- ETL-Runs: USDA_FDC SUCCESS 3.0s, SIGHI SUCCESS 0.6s.
+
+**Folge-Backlog:**
+- SIGHI-Lücke (155 unmatched, z. B. Algen, Bagel, Burrata, Croissant) → `sighi.csv`-Erweiterung.
+- Mikros-Audit (1 Row ohne Mikros + feldspezifische Lücken Biotin/Jod).
+- Allergen-Audit (188 mit, 444 ohne — Vollständigkeit prüfen).
+- FODMAP-Mapper (P7.S3 Slice 3, weiterhin TODO).
+
+---
+
 ## P7.S3 Slice 1 — Kuratierter USDA-Seed (Qualität vor Quantität) — 2026-05-29
 
 **Scope:** User-Direktive „die wichtigsten Lebensmittel reichen, Qualität vor Quantität". Voll-Seed (8.354 Rows) wird durch kuratierte Top-1.500-Liste ersetzt. Neue Pre-Launch-Reset-Migration trunkiert Bestand. FODMAP/Histamin werden in Folge-Sprints (P7.S3 Slice 2/3) nachgezogen.

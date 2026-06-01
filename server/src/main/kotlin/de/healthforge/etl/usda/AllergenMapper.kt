@@ -48,24 +48,37 @@ object AllergenMapper {
         Code.GLUTEN to listOf(
             "wheat", "barley", "rye", "spelt", "kamut", "triticale", "malt",
             "semolina", "durum", "farro", "bulgur", "couscous",
+            // Hotfix 2026-05-31: generische Weizen-Container (99% mit Weizen-Mehl).
+            // Hafer/Oats werden bewusst NICHT gelistet (botanisch glutenfrei).
+            "bread", "breads", "bagel", "bagels", "noodle", "noodles",
+            "pasta", "pita", "ciabatta", "focaccia", "tortellini",
         ),
         Code.CRUSTACEAN to listOf(
-            "shrimp", "prawn", "lobster", "crab", "crayfish", "langoustine",
+            "shrimp", "shrimps", "prawn", "prawns", "lobster", "lobsters",
+            "crab", "crabs", "crayfish", "langoustine",
         ),
         Code.EGG to listOf("egg", "eggs", "albumin", "ovalbumin", "egg white", "egg yolk"),
         Code.FISH to listOf(
-            "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "herring",
-            "mackerel", "trout", "halibut", "bass", "haddock", "pollock",
+            "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "sardines",
+            "herring", "mackerel", "trout", "halibut", "bass", "haddock", "pollock",
         ),
         Code.PEANUT to listOf("peanut", "peanuts", "groundnut"),
-        Code.SOY to listOf("soy", "soya", "soybean", "soybeans", "edamame", "tofu", "tempeh"),
+        Code.SOY to listOf(
+            "soy", "soya", "soybean", "soybeans", "edamame", "tofu", "tempeh",
+            // Hotfix 2026-05-31: Single-Word-Compounds (z.B. "Soymilk, original")
+            "soymilk", "soyabean",
+        ),
         Code.LACTOSE to listOf(
-            "milk", "cream", "butter", "cheese", "yogurt", "yoghurt", "whey",
+            "milk", "milks", "cream", "creams", "butter", "cheese", "cheeses",
+            "yogurt", "yogurts", "yoghurt", "yoghurts", "whey",
             "casein", "lactose", "buttermilk", "ghee", "curd",
+            // Hotfix 2026-05-31: spezifische Milchprodukte ohne "milk"-Substring im Namen
+            "kefir",
         ),
         Code.NUT to listOf(
-            "almond", "almonds", "hazelnut", "walnut", "cashew", "pecan",
-            "pistachio", "macadamia", "brazil nut",
+            "almond", "almonds", "hazelnut", "hazelnuts", "walnut", "walnuts",
+            "cashew", "cashews", "pecan", "pecans", "pistachio", "pistachios",
+            "macadamia", "macadamias", "brazil nut",
         ),
         Code.CELERY to listOf("celery", "celeriac"),
         Code.MUSTARD to listOf("mustard"),
@@ -73,7 +86,8 @@ object AllergenMapper {
         Code.SULFITE to listOf("sulfite", "sulphite", "sulfur dioxide", "sulphur dioxide", "e220"),
         Code.LUPIN to listOf("lupin", "lupine"),
         Code.MOLLUSC to listOf(
-            "mussel", "mussels", "oyster", "clam", "scallop", "squid", "octopus", "snail",
+            "mussel", "mussels", "oyster", "oysters", "clam", "clams",
+            "scallop", "scallops", "squid", "squids", "octopus", "snail", "snails",
         ),
         Code.HISTAMINE to listOf(
             "fermented", "aged cheese", "sauerkraut", "kimchi", "miso", "soy sauce",

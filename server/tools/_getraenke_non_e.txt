@@ -1,0 +1,705 @@
+### # 562  score=1  'Heilquellen-Wasser mit viel'
+    172915|Pilzcremesuppe aus der Dose, zubereitet mit gleich viel Wasser|Soup, cream of mushroom, canned, prepared with equal volume water
+    174551|Suppe, Hühnerbrühe, in Dosen, zubereitet mit gleich viel Wasser|Soup, chicken broth, canned, prepared with equal volume water
+### # 563  score=0  'Leitungswasser'
+    173647|Getränke, Wasser, Leitungswasser, Trinken|Beverages, water, tap, drinking
+    175096|Getränke, Wasser, Leitungswasser, Brunnen|Beverages, water, tap, well
+### # 564  score=0  'Mineralwasser ohne Kohlensäure'
+    174854|Getränke, kohlensäurehaltig, orange|Beverages, carbonated, orange
+    174842|Getränke, kohlensäurehaltig, Club Soda|Beverages, carbonated, club soda
+### # 565  score=3  'Alkohol, rein (Ethanol)'
+    173330|Rindereintopf, Dosengericht|Beef stew, canned entree
+    174157|Getränke, Wein, alkoholfrei|Beverages, Wine, non-alcoholic
+### # 566  score=3  'Alkoholhaltige Getränke'
+    174825|Getränke, ZEVIA, Cola|Beverages, ZEVIA, cola
+    174117|Getränke, Schokoladensirup|Beverages, chocolate syrup
+### # 567  score=2  'Bier'
+    2346395|Nüsse, Pekannüsse, halbiert, roh|Nuts, pecans, halves, raw
+    168749|Alkoholisches Getränk, Bier, leicht|Alcoholic beverage, beer, light
+### # 568  score=3  'Champagner'
+    [keine Auto-Kandidaten]
+### # 569  score=3  'Ethanol, Ethylalkohol'
+    [keine Auto-Kandidaten]
+### # 570  score=2  'Rhum'
+    [keine Auto-Kandidaten]
+### # 571  score=2  'Schnäpse, klar (farblos)'
+    1999630|Sojamilch, ungesüßt, klar, haltbar|Soy milk, unsweetened, plain, shelf stable
+    172363|Öl, industriell, Soja (teilweise hydriert) und Soja (winterisiert), gießbares, klares Bratöl|Oil, industrial, soy (partially hydrogenated ) and soy (winterized), pourable clear fry
+### # 572  score=3  'Schnäpse, nicht klar (nicht farblos)'
+    168933|Grieß, nicht angereichert|Semolina, unenriched
+    167730|Milch, Nachahmung, nicht Soja|Milk, imitation, non-soy
+### # 573  score=3  'Sekt'
+    [keine Auto-Kandidaten]
+### # 574  score=2  'Spirituosen, klar (farblos)'
+    1999630|Sojamilch, ungesüßt, klar, haltbar|Soy milk, unsweetened, plain, shelf stable
+    172363|Öl, industriell, Soja (teilweise hydriert) und Soja (winterisiert), gießbares, klares Bratöl|Oil, industrial, soy (partially hydrogenated ) and soy (winterized), pourable clear fry
+### # 575  score=3  'Spirituosen, nicht klar (nicht farblos)'
+    168933|Grieß, nicht angereichert|Semolina, unenriched
+    167730|Milch, Nachahmung, nicht Soja|Milk, imitation, non-soy
+### # 576  score=3  'Wein'
+    172240|Essig, Rotwein|Vinegar, red wine
+    170849|Käse, Portwein, Salat|Cheese, port de salut
+### # 577  score=1  'Wein, histaminfrei (<0.1 mg/l)'
+    172240|Essig, Rotwein|Vinegar, red wine
+    170849|Käse, Portwein, Salat|Cheese, port de salut
+### # 578  score=3  'Wein: Rotwein'
+    172240|Essig, Rotwein|Vinegar, red wine
+    172932|Mutterbrot, Schweinefleisch|Mother's loaf, pork
+### # 579  score=2  'Wein: Schilcherwein'
+    172240|Essig, Rotwein|Vinegar, red wine
+    170849|Käse, Portwein, Salat|Cheese, port de salut
+### # 580  score=2  'Wein: Weisswein, Weißwein'
+    174837|Alkoholisches Getränk, Wein, Tafelwein, weiß|Alcoholic beverage, wine, table, white
+    173200|Alkoholisches Getränk, Wein, Tisch, weiß, Riesling|Alcoholic beverage, wine, table, white, Riesling
+### # 581  score=2  'Weinbrand, Brandy'
+    [keine Auto-Kandidaten]
+### # 582  score=0  'Anistee'
+    [keine Auto-Kandidaten]
+### # 583  score=1  'Brennnesseltee'
+    [keine Auto-Kandidaten]
+### # 584  score=0  'Eisenkraut-Tee'
+    170004|Zwiebeln, gelb, sautiert|Onions, yellow, sauteed
+    168550|Paprika, süß, rot, gedünstet|Peppers, sweet, red, sauteed
+### # 585  score=0  'Fencheltee'
+    [keine Auto-Kandidaten]
+### # 586  score=1  'Grüntee'
+    [keine Auto-Kandidaten]
+### # 587  score=0  'Kamillentee'
+    [keine Auto-Kandidaten]
+### # 588  score=1  'Kräuterteemischungen aus Heilkräutern, z.B.'
+    [keine Auto-Kandidaten]
+### # 589  score=0  'Kümmeltee, Echter Kümmel (Carum carvi)'
+    173413|Käse, Kümmel|Cheese, caraway
+    170918|Gewürze, Kümmel|Spices, caraway seed
+### # 590  score=0  'Lindenblütentee'
+    [keine Auto-Kandidaten]
+### # 591  score=1  'Mate Tee'
+    1999634|Tomate, roma|Tomato, roma
+    170461|Tomatenpulver|Tomato powder
+### # 592  score=0  'Pfefferminztee'
+    [keine Auto-Kandidaten]
+### # 593  score=0  'Rooibostee'
+    [keine Auto-Kandidaten]
+### # 594  score=0  'Salbeitee'
+    [keine Auto-Kandidaten]
+### # 595  score=2  'Schwarztee'
+    [keine Auto-Kandidaten]
+### # 596  score=0  'Verveine-Tee'
+    170004|Zwiebeln, gelb, sautiert|Onions, yellow, sauteed
+    168550|Paprika, süß, rot, gedünstet|Peppers, sweet, red, sauteed
+### # 597  score=0  'Cranberry Nektar'
+    169914|Nektarinen, roh|Nectarines, raw
+    167785|Mango-Nektar, Konserven|Mango nectar, canned
+### # 598  score=2  'Orangensaft'
+    169044|Getränke, Orangensaftgetränk|Beverages, Orange juice drink
+    169099|Orangensaft, in Dosen, ungesüßt|Orange juice, canned, unsweetened
+### # 599  score=3  'Zitronensaft, Zitronensaftkonzentrat'
+    167747|Zitronensaft, roh|Lemon juice, raw
+    167801|Zitronensaft aus Konzentrat, abgefüllt, CONCORD|Lemon juice from concentrate, bottled, CONCORD
+### # 600  score=2  'Tomatensaft'
+    171424|Öl, Tomatensaft|Oil, tomatoseed
+    167708|Tomaten- und Gemüsesaft, natriumarm|Tomato and vegetable juice, low sodium
+### # 601  score=2  'Coca-Cola'
+    171884|Getränke, Das Unternehmen COCA-COLA, Minute Maid, Limonade|Beverages, The COCA-COLA company, Minute Maid, Lemonade
+    173179|Getränke, Das Unternehmen COCA-COLA, Hi-C Flashin' Fruit Punch|Beverages, The COCA-COLA company, Hi-C Flashin' Fruit Punch
+### # 602  score=2  'Colagetränke'
+    [keine Auto-Kandidaten]
+### # 603  score=2  'Energy-Drinks'
+    174171|Getränke, Energiegetränk, AMP|Beverages, Energy drink, AMP
+    173210|Getränke, Energy-Drink, RED BULL|Beverages, Energy drink, RED BULL
+### # 604  score=1  'Espresso'
+    171891|Getränke, Kaffee, gebrüht, Espresso, zubereitet im Restaurant|Beverages, coffee, brewed, espresso, restaurant-prepared
+    174125|Getränke, Kaffee, Brühkaffee, Espresso, Restaurantkaffee, entkoffeiniert|Beverages, coffee, brewed, espresso, restaurant-prepared, decaffeinated
+### # 605  score=1  'Kaffee'
+    175224|SILK Kaffee, Sojamilch|SILK Coffee, soymilk
+    172699|Torte, Kaffeekuchen, Käse|Cake, coffeecake, cheese
+### # 606  score=1  'Hafer-Drink'
+    173576|Öl, Hafer|Oil, oat
+    168872|Haferkleie, roh|Oat bran, raw
+### # 607  score=1  'Reismilch, Reis-Drink'
+    171942|Getränke, Reismilch, ungesüßt|Beverages, rice milk, unsweetened
+    168755|Bonbons, Milchschokolade, mit Reisflocken|Candies, milk chocolate, with rice cereal
+### # 608  score=2  'Sojamilch, Soja-Drink'
+    171873|Getränke, Schokoladengetränk, auf Milch- und Sojabasis, trinkfertig, angereichert|Beverages, chocolate drink, milk and soy based, ready to drink, fortified
+    173775|SILK Nog, Sojamilch|SILK Nog, soymilk
+### # 609  score=2  'heisse Schokolade, heiße Schokolade'
+    171277|Milch, Schokoladengetränk, heißer Kakao, selbstgemacht|Milk, chocolate beverage, hot cocoa, homemade
+    168809|Speiseeis, Schokolade|Ice creams, chocolate
+### # 610  score=0  'Holunderblütensirup'
+    167953|Fruchtsirup|Fruit syrup
+    169660|Sirupe, Malz|Syrups, malt
+### # 611  score=2  'Kakaogetränke'
+    [keine Auto-Kandidaten]
+### # 612  score=1  'Limonadengetränke'
+    [keine Auto-Kandidaten]
+### # 613  score=2  'Ovomaltine'
+    [keine Auto-Kandidaten]
+### # 614  score=2  'Schokoladengetränke'
+    [keine Auto-Kandidaten]
+### # 615  score=2  '2-Phenylphenol, E231'
+    [keine Auto-Kandidaten]
+### # 616  score=?  '2-tert-Butylhydrochinon, tert-Butylhydrochinon,'
+    175293|Bison, gemahlen, grasgefüttert, roh|Bison, ground, grass-fed, raw
+    173847|Bison, gemahlen, grasgefüttert, gekocht|Bison, ground, grass-fed, cooked
+### # 617  score=2  'Acid Red 1, E128'
+    171870|Getränke, Energy-Drink, RED BULL, zuckerfrei, mit Zusatz von Koffein, Niacin, Pantothensäure, Vitaminen B6 und B12|Beverages, Energy drink, RED BULL, sugar free, with added caffeine, niacin, pantothenic acid, vitamins B6 and B12
+    172950|Mittagsfleisch, Schweinefleisch, Schinken und Hühnerfleisch, gehackt, in Dosen, natriumreduziert, mit Ascorbinsäure, einschließlich SPAM, 25% weniger Natrium|Luncheon meat, pork, ham, and chicken, minced, canned, reduced sodium, added ascorbic acid, includes SPAM, 25% less sodium
+### # 618  score=0  'acidum hydrochloricum, Salzsäure,'
+    [keine Auto-Kandidaten]
+### # 619  score=1  'Agar-Agar, E406'
+    169280|Seetang, Agar, roh|Seaweed, agar, raw
+    170090|Seetang, Agar, getrocknet|Seaweed, agar, dried
+### # 620  score=1  'Alginat, Propylenglycolalginat, E405'
+    [keine Auto-Kandidaten]
+### # 621  score=1  'Alginsäure, Algin, E400'
+    [keine Auto-Kandidaten]
+### # 622  score=2  'Allurarot AC, E129, Food Red 17, CI 16035'
+    172694|Kuchen, Angelfood, kommerziell zubereitet|Cake, angelfood, commercially prepared
+    172695|Kuchen, Angelfood, Trockenmischung, zubereitet|Cake, angelfood, dry mix, prepared
+### # 623  score=0  'alpha-Tocopherol, Vitamin E, E307'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    171641|Verzehrfertiges Müsli, POST, ALPHA-BITS|Cereals ready-to-eat, POST, ALPHA-BITS
+### # 624  score=?  'Aluminium, E173'
+    172803|Backtriebmittel, Backpulver, doppelt wirkend, Natriumaluminiumsulfat|Leavening agents, baking powder, double-acting, sodium aluminum sulfate
+### # 625  score=2  'Amaranth E123'
+    2512371|Mehl, Amaranth|Flour, amaranth
+    168385|Amaranthblätter, roh|Amaranth leaves, raw
+### # 626  score=1  'Ammoniumalginat, E403'
+    [keine Auto-Kandidaten]
+### # 627  score=0  'Ammoniumcarbonat, E503'
+    [keine Auto-Kandidaten]
+### # 628  score=1  'Ammoniumcitrat, Triammoniumcitrat, E380'
+    [keine Auto-Kandidaten]
+### # 629  score=0  'Anthocyane, E163'
+    [keine Auto-Kandidaten]
+### # 630  score=0  'Apfelsäure, Äpfelsäure, E296'
+    [keine Auto-Kandidaten]
+### # 631  score=?  'Apo-Carotinal, Beta-Apo-8-Carotinal, E160e, 8′-Apo-β-'
+    167759|Sapodilla, roh|Sapodilla, raw
+    167760|Sapote, Mamey, roh|Sapote, mamey, raw
+### # 632  score=?  'Apo-carotinsäureethylester, beta-Apo-8′-'
+    167759|Sapodilla, roh|Sapodilla, raw
+    167760|Sapote, Mamey, roh|Sapote, mamey, raw
+### # 633  score=1  'Aroma, Aromen, Aromastoffe'
+    173596|Öl, industriell, Soja (teilweise hydriert), Hauptverwendung: Popcorn und Aromastoffe für Gemüse|Oil, industrial, soy (partially hydrogenated), principal uses popcorn and flavoring vegetables
+    174098|Kekse, aromatisiert, in Fischform|Crackers, flavored, fish-shaped
+### # 634  score=0  'Ascorbinsäure, E300'
+    167784|Guavennektar, in Dosen, mit Zusatz von Ascorbinsäure|Guava nectar, canned, with added ascorbic acid
+    168186|Birnennektar, in Dosen, mit Zusatz von Ascorbinsäure|Pear nectar, canned, with added ascorbic acid
+### # 635  score=0  'Ascorbylpalmitat, E304'
+    [keine Auto-Kandidaten]
+### # 636  score=2  'Azophloxin, E128'
+    [keine Auto-Kandidaten]
+### # 637  score=2  'Azorubin, Karmesin, E122'
+    [keine Auto-Kandidaten]
+### # 638  score=2  'Benzoesäure und deren Salze = Benzoate, E210 bis'
+    170339|KFC, Kekse|KFC, biscuit
+    168448|Kürbis, roh|Pumpkin, raw
+### # 639  score=2  'Benzoesäure, E210'
+    [keine Auto-Kandidaten]
+### # 640  score=0  'Betanin, Betanoin, Betenrot, Beetenrot, E162'
+    [keine Auto-Kandidaten]
+### # 641  score=0  'Bienenwachs, E901'
+    [keine Auto-Kandidaten]
+### # 642  score=?  'Borax, Tinkal, Natriumborat, Dinatriumtetraborat-'
+    [keine Auto-Kandidaten]
+### # 643  score=?  'Borsäure, E284'
+    [keine Auto-Kandidaten]
+### # 644  score=2  'Braun FK, E154'
+    168833|Zucker, braun|Sugars, brown
+    168898|Reismehl, braun|Rice flour, brown
+### # 645  score=2  'Braun HT, Braun HTK, E155, C.I. 20285, C.I. Food'
+    169865|Babynahrung, Erbsen und brauner Reis|Babyfood, peas and brown rice
+    169864|Babynahrung, Gemüse und brauner Reis, abgeseiht|Babyfood, vegetable and brown rice, strained
+### # 646  score=3  'Brillantschwarz BN, Brillantschwarz FCF, Schwarz'
+    170931|Gewürze, Pfeffer, schwarz|Spices, pepper, black
+    2710837|Pflaume, schwarz, mit Haut, roh|Plum, black, with skin, raw
+### # 647  score=2  'Butylhydroxyanisol, BHA, E320'
+    [keine Auto-Kandidaten]
+### # 648  score=2  'Butylhydroxytoluol, Butylhydroxytoluen, BHT, E321'
+    [keine Auto-Kandidaten]
+### # 649  score=0  'Calciumacetat, Calciumethanoat, Kalziumacetat, E262'
+    [keine Auto-Kandidaten]
+### # 650  score=1  'Calciumalginat, E404'
+    [keine Auto-Kandidaten]
+### # 651  score=0  'Calciumascorbat, Calciumdiascorbat, Calcium-L-'
+    170985|Babynahrung, Saft, Apfel, mit Kalzium|Babyfood, juice, apple, with calcium
+    171273|Milch, trocken, fettfrei, kalziumreduziert|Milk, dry, nonfat, calcium reduced
+### # 652  score=2  'Calciumbenzoat, E213'
+    [keine Auto-Kandidaten]
+### # 653  score=0  'Calciumcarbonat, Kalziumkarbonat, Kalk, E170'
+    [keine Auto-Kandidaten]
+### # 654  score=1  'Calciumcitrat, E333'
+    [keine Auto-Kandidaten]
+### # 655  score=2  'Calciumdiglutamat, Calciumglutamat, E623'
+    [keine Auto-Kandidaten]
+### # 656  score=2  'Calciumhydrogensulfit, E227'
+    [keine Auto-Kandidaten]
+### # 657  score=0  'Calciumlactat, Kalziumlaktat, E327'
+    [keine Auto-Kandidaten]
+### # 658  score=1  'Calciumphosphate, E340'
+    [keine Auto-Kandidaten]
+### # 659  score=2  'Calciumpolyphosphat, E452'
+    [keine Auto-Kandidaten]
+### # 660  score=?  'Calciumpropionat, Calciumdipropionat, E282'
+    174899|Bagels, normal, angereichert, mit Calciumpropionat (einschließlich Zwiebel, Mohn, Sesam)|Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)
+    175049|Bagels, einfach, angereichert, ohne Calciumpropionat (einschließlich Zwiebel, Mohn, Sesam)|Bagels, plain, enriched, without calcium propionate (includes onion, poppy, sesame)
+### # 661  score=2  'Calciumsorbat, E203'
+    [keine Auto-Kandidaten]
+### # 662  score=2  'Calciumsulfit, E226'
+    [keine Auto-Kandidaten]
+### # 663  score=?  'Canthaxanthin, E161g'
+    [keine Auto-Kandidaten]
+### # 664  score=0  'Capsanthin, Paprikaextrakt, E160c'
+    [keine Auto-Kandidaten]
+### # 665  score=2  'Carob, Carobpulver'
+    174114|Getränke, Getränkemischung mit Johannisbrotgeschmack, Pulver|Beverages, Carob-flavor beverage mix, powder
+    174115|Getränke, Getränkemischung mit Johannisbrotgeschmack, Pulver, zubereitet mit Vollmilch|Beverages, Carob-flavor beverage mix, powder, prepared with whole milk
+### # 666  score=0  'Carotine, Beta-Carotin, β-Carotin, E160a'
+    [keine Auto-Kandidaten]
+### # 667  score=2  'Carrageen, Carragaheen, E407, E407a'
+    [keine Auto-Kandidaten]
+### # 668  score=2  'Carubin, Carubenmehl, E410'
+    2003586|Mehl, 00|Flour, 00
+    172023|Hirsemehl|Millet flour
+### # 669  score=0  'Cellulose, Cellulosepulver, mikrokristalline Cellulose,'
+    167806|Baobab-Pulver|Baobab powder
+    170461|Tomatenpulver|Tomato powder
+### # 670  score=0  'Celluloseethylether, Ethylcellulose, Ethylzellulose,'
+    [keine Auto-Kandidaten]
+### # 671  score=0  'Cellulosemethylether, Methylcellulose,'
+    [keine Auto-Kandidaten]
+### # 672  score=2  'Chinin (z.B. in Bitterlemon, Tonic Water)'
+    171869|Getränke, kohlensäurehaltig, Tonic Water|Beverages, carbonated, tonic water
+    169301|Wasserwinde, roh|Water convolvulus,raw
+### # 673  score=3  'Chinolingelb'
+    [keine Auto-Kandidaten]
+### # 674  score=3  'Chinolingelb, E104'
+    [keine Auto-Kandidaten]
+### # 675  score=1  'Citronensäure E330'
+    [keine Auto-Kandidaten]
+### # 676  score=2  'Cochenille, Karmin, E120'
+    [keine Auto-Kandidaten]
+### # 677  score=2  'Cochenillerot A, Ponceau 4R, E124'
+    [keine Auto-Kandidaten]
+### # 678  score=0  'Curcumin, E100'
+    [keine Auto-Kandidaten]
+### # 679  score=0  'delta-Tocopherol, Vitamin E, E309'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 680  score=?  'Dimethyldicarbonat, Dimethylpyrocarbonat,'
+    [keine Auto-Kandidaten]
+### # 681  score=?  'Dimeticon, Dimethicone, Dimethylpolysiloxan,'
+    [keine Auto-Kandidaten]
+### # 682  score=2  'Dodecylgallat, E312'
+    [keine Auto-Kandidaten]
+### # 850  score=0  'Eisengluconat, E579'
+    [keine Auto-Kandidaten]
+### # 851  score=0  'Eisenoxide, Eisenhydroxide, E172'
+    [keine Auto-Kandidaten]
+### # 852  score=3  'Erythrosin, E127'
+    [keine Auto-Kandidaten]
+### # 853  score=0  'Essigsäure, E260'
+    [keine Auto-Kandidaten]
+### # 854  score=0  'Ethyl Methylcellulose, E465'
+    [keine Auto-Kandidaten]
+### # 855  score=0  'Ethylcellulose, Ethylzellulose, Celluloseethylether,'
+    [keine Auto-Kandidaten]
+### # 856  score=2  'Ethylparaben, E214, E215'
+    [keine Auto-Kandidaten]
+### # 857  score=1  'Flavinmononukleotid, E101a'
+    [keine Auto-Kandidaten]
+### # 858  score=?  'Fumarsäure, trans-Butendisäure, E297'
+    171033|Öl, pflanzlich, Natreon Raps, hohe Stabilität, nicht trans, hohe Ölsäure (70%)|Oil, vegetable, Natreon canola, high stability, non trans, high oleic (70%)
+    167549|Snacks, Popcorn, in Öl gepoppt, Mikrowelle, normaler Geschmack, ohne Transfette|Snacks, popcorn, oil-popped, microwave, regular flavor, no trans fat
+### # 859  score=0  'gamma-Tocopherol, Vitamin E, E308'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 860  score=1  'Gelatine E441'
+    169599|Gelatine, Trockenpulver, ungesüßt|Gelatins, dry powder, unsweetened
+    168775|Gelatine-Desserts, Trockenmischung|Gelatin desserts, dry mix
+### # 861  score=3  'Gelborange S, E110'
+    [keine Auto-Kandidaten]
+### # 862  score=2  'Geschmacksverstärker, E620-E625'
+    [keine Auto-Kandidaten]
+### # 863  score=2  'Glutamate, E620-E625'
+    [keine Auto-Kandidaten]
+### # 864  score=2  'Glutaminsäure, (Glutamat), E620'
+    [keine Auto-Kandidaten]
+### # 865  score=1  'Gluten, Weizenkleber'
+    168147|Vitales Weizengluten|Vital wheat gluten
+    174917|Brot, Eiweiß (enthält Gluten)|Bread, protein (includes gluten)
+### # 866  score=0  'Glycerin, Glycerol, Glyzerin, Propan-1,2,3-triol, 1,2,3-'
+    [keine Auto-Kandidaten]
+### # 867  score=0  'Gold, E175'
+    2685574|Mangold, roh|Collards, raw
+    170406|Mangold, roh|Collards, raw
+### # 868  score=?  'Grün S, E142, Brillantsäuregrün BS, C.I. 44090, C.I. Acid'
+    323505|Grünkohl, roh|Kale, raw
+    168421|Grünkohl, roh|Kale, raw
+### # 869  score=0  'Guanosinmonophosphat, Guanylsäure, Guanylat, E626'
+    [keine Auto-Kandidaten]
+### # 870  score=1  'Guarkernmehl, Guaran, E412'
+    2003586|Mehl, 00|Flour, 00
+    172023|Hirsemehl|Millet flour
+### # 871  score=1  'Gummi arabicum, Gummiarabikum, E414'
+    168771|Kaugummi|Chewing gum
+    169882|Kaugummi, zuckerfrei|Chewing gum, sugarless
+### # 872  score=2  'Hexamethylentetramin, Urotropin, Methenamin,'
+    [keine Auto-Kandidaten]
+### # 873  score=0  'Holzkohle, Pflanzenkohle, E153'
+    [keine Auto-Kandidaten]
+### # 874  score=0  'Hydroxypropylcellulose, E463'
+    [keine Auto-Kandidaten]
+### # 875  score=0  'Hydroxypropylmethylcellulose, Hypromellose, E464'
+    [keine Auto-Kandidaten]
+### # 876  score=0  'Hypromellose, Hydroxypropylmethylcellulose, E464'
+    [keine Auto-Kandidaten]
+### # 877  score=2  'Indigokarmin, Indigocarmin, Indigotin I, E132'
+    [keine Auto-Kandidaten]
+### # 878  score=1  'Indischer Traganth, Karayagummi, E416'
+    171280|Milch, indischer Büffel, flüssig|Milk, indian buffalo, fluid
+### # 879  score=0  'Invertase, E1103'
+    [keine Auto-Kandidaten]
+### # 880  score=0  'Isoascorbinsäure, E315'
+    [keine Auto-Kandidaten]
+### # 881  score=2  'Johannisbrot, Johannisbrotpulver'
+    174114|Getränke, Getränkemischung mit Johannisbrotgeschmack, Pulver|Beverages, Carob-flavor beverage mix, powder
+    174115|Getränke, Getränkemischung mit Johannisbrotgeschmack, Pulver, zubereitet mit Vollmilch|Beverages, Carob-flavor beverage mix, powder, prepared with whole milk
+### # 882  score=2  'Johannisbrotkernmehl, E410'
+    169045|Gummen, Samengummis (einschließlich Johannisbrotkernmehl, Guar)|Gums, seed gums (includes locust bean, guar)
+    2003586|Mehl, 00|Flour, 00
+### # 883  score=2  'Kaftan'
+    [keine Auto-Kandidaten]
+### # 884  score=0  'Kaliumacetat, E261'
+    [keine Auto-Kandidaten]
+### # 885  score=2  'Kaliumbenzoat, E212'
+    [keine Auto-Kandidaten]
+### # 886  score=0  'Kaliumcarbonat, Kaliumkarbonat, E501'
+    [keine Auto-Kandidaten]
+### # 887  score=1  'Kaliumcitrat, E332'
+    [keine Auto-Kandidaten]
+### # 888  score=2  'Kaliumdisulfit, E224'
+    [keine Auto-Kandidaten]
+### # 889  score=2  'Kaliumhydrogensulfit, E228'
+    [keine Auto-Kandidaten]
+### # 890  score=0  'Kaliumlactat, E326'
+    [keine Auto-Kandidaten]
+### # 891  score=2  'Kaliummetabisulfit, E224'
+    [keine Auto-Kandidaten]
+### # 892  score=?  'Kaliumnitrat, Salpeter, Kalisalpeter, Bengalsalpeter,'
+    [keine Auto-Kandidaten]
+### # 893  score=?  'Kaliumnitrit, Salpetrigsaures Kalium, E249'
+    174302|Sojaproteinisolat, Typ Kalium|Soy protein isolate, potassium type
+    170646|Sirupe, Tafelmischungen, Pfannkuchen, mit 2% Ahorn, mit Kaliumzusatz|Syrups, table blends, pancake, with 2% maple, with added potassium
+### # 894  score=1  'Kaliumphosphate, E340'
+    [keine Auto-Kandidaten]
+### # 895  score=2  'Kaliumpolyphosphat, E452'
+    [keine Auto-Kandidaten]
+### # 896  score=?  'Kaliumpropionat, E283'
+    [keine Auto-Kandidaten]
+### # 897  score=2  'Kaliumpyrosulfit, E224'
+    [keine Auto-Kandidaten]
+### # 898  score=2  'Kaliumsorbat, E202'
+    [keine Auto-Kandidaten]
+### # 899  score=2  'Kaliumsulfit, E225'
+    [keine Auto-Kandidaten]
+### # 900  score=0  'Kaliumtartrat, E336'
+    [keine Auto-Kandidaten]
+### # 901  score=0  'Kalziumacetat, Calciumacetat, Calciumethanoat, E263'
+    [keine Auto-Kandidaten]
+### # 902  score=1  'Kalziumalginat, Calciumalginat, E404'
+    [keine Auto-Kandidaten]
+### # 903  score=2  'Kalziumglutamat, E623'
+    [keine Auto-Kandidaten]
+### # 904  score=1  'Karaya, Karayagummi, Indischer Traganth, E416'
+    171280|Milch, indischer Büffel, flüssig|Milk, indian buffalo, fluid
+### # 905  score=2  'Karmesin, Azorubin, E122'
+    [keine Auto-Kandidaten]
+### # 906  score=2  'Karmin, Cochenille, E120'
+    [keine Auto-Kandidaten]
+### # 907  score=2  'Karrageen, Karragheen, E407, E407a'
+    [keine Auto-Kandidaten]
+### # 908  score=2  'Karubenmehl, Johannisbrotkernmehl, E410'
+    169045|Gummen, Samengummis (einschließlich Johannisbrotkernmehl, Guar)|Gums, seed gums (includes locust bean, guar)
+    2003586|Mehl, 00|Flour, 00
+### # 909  score=0  'Kohle, Pflanzenkohle, Holzkohle, E153'
+    174854|Getränke, kohlensäurehaltig, orange|Beverages, carbonated, orange
+    174842|Getränke, kohlensäurehaltig, Club Soda|Beverages, carbonated, club soda
+### # 910  score=1  'Kohlensäure H2CO3, gelöstes CO2 in'
+    174854|Getränke, kohlensäurehaltig, orange|Beverages, carbonated, orange
+    174842|Getränke, kohlensäurehaltig, Club Soda|Beverages, carbonated, club soda
+### # 911  score=?  'Kolliphor® EL, Cremophor EL, Macrogolglycerol'
+    [keine Auto-Kandidaten]
+### # 912  score=0  'kupferhaltige Komplexe der Chlorophylle und'
+    [keine Auto-Kandidaten]
+### # 913  score=0  'Lecithine, Lezithine, E322'
+    [keine Auto-Kandidaten]
+### # 914  score=2  'Litholrubin BK, E180'
+    [keine Auto-Kandidaten]
+### # 915  score=?  'Lutein, E161b'
+    [keine Auto-Kandidaten]
+### # 916  score=?  'Lycopin, Lycopen, Leukopin, E160d, C.I. 75125, C.I.'
+    [keine Auto-Kandidaten]
+### # 917  score=?  'Lysozym, Muramidase, E1105'
+    [keine Auto-Kandidaten]
+### # 918  score=0  'Magnesiumcarbonat, E504'
+    [keine Auto-Kandidaten]
+### # 919  score=2  'Magnesiumdiglutamat, Magnesiumglutamat, E625'
+    [keine Auto-Kandidaten]
+### # 920  score=0  'Mannit, Mannitol, E421'
+    [keine Auto-Kandidaten]
+### # 921  score=1  'Menthol'
+    [keine Auto-Kandidaten]
+### # 922  score=0  'Methylcellulose, Methylzellulose,'
+    [keine Auto-Kandidaten]
+### # 923  score=2  'Methylparaben, E218, E219'
+    [keine Auto-Kandidaten]
+### # 924  score=0  'mikrokristalline Cellulose, Cellulosepulver, E460'
+    167806|Baobab-Pulver|Baobab powder
+    170461|Tomatenpulver|Tomato powder
+### # 925  score=0  'Milchsäure, 2-Hydroxypropansäure, 2-'
+    [keine Auto-Kandidaten]
+### # 926  score=1  'Mineralwasser mit Kohlensäure'
+    174854|Getränke, kohlensäurehaltig, orange|Beverages, carbonated, orange
+    174842|Getränke, kohlensäurehaltig, Club Soda|Beverages, carbonated, club soda
+### # 927  score=0  'modifizierte Stärke'
+    169698|Speisestärke|Cornstarch
+    167989|Bonbons, Gummibonbons, Gelee-Stärke-Stücke|Candies, gumdrops, starch jelly pieces
+### # 928  score=2  'Monoammoniumglutamat, Ammoniumglutamat,'
+    [keine Auto-Kandidaten]
+### # 929  score=2  'Monokaliumglutamat, Kaliumglutamat, E622'
+    [keine Auto-Kandidaten]
+### # 930  score=2  'Mononatriumglutamat, Natriumglutamat,'
+    [keine Auto-Kandidaten]
+### # 931  score=?  'Natamycin, E235'
+    [keine Auto-Kandidaten]
+### # 932  score=0  'Natriumacetat, E262'
+    [keine Auto-Kandidaten]
+### # 933  score=1  'Natriumalginat, E401'
+    [keine Auto-Kandidaten]
+### # 934  score=1  'Natriumalginat, E402'
+    [keine Auto-Kandidaten]
+### # 935  score=0  'Natriumascorbat, E301'
+    [keine Auto-Kandidaten]
+### # 936  score=2  'Natriumbenzoat, E211'
+    [keine Auto-Kandidaten]
+### # 937  score=2  'Natriumbisulfit, E222'
+    [keine Auto-Kandidaten]
+### # 938  score=2  'Natriumcalciumpolyphosphat, E452'
+    [keine Auto-Kandidaten]
+### # 939  score=0  'Natriumcarbonat, Natriumkarbonat, Soda, E500'
+    175040|Backtriebmittel, Backsoda|Leavening agents, baking soda
+    2040083|"HONOLULU BLUE" CREME SODA|""HONOLULU BLUE"" CREAM SODA
+### # 940  score=2  'Natriumdisulfit, E223'
+    [keine Auto-Kandidaten]
+### # 941  score=2  'Natriumhydrogensulfit, E222'
+    [keine Auto-Kandidaten]
+### # 942  score=0  'Natriumisoascorbat, Natriumerythorbat, E316'
+    [keine Auto-Kandidaten]
+### # 943  score=0  'Natriumlactat, E325'
+    [keine Auto-Kandidaten]
+### # 944  score=2  'Natriummetabisulfit, E223'
+    [keine Auto-Kandidaten]
+### # 945  score=?  'Natriumnitrat, Natronsalpeter, Chilesalpeter,'
+    [keine Auto-Kandidaten]
+### # 946  score=0  'Natriumnitrit, E250'
+    [keine Auto-Kandidaten]
+### # 947  score=2  'Natriumorthophenylphenolat, E232'
+    [keine Auto-Kandidaten]
+### # 948  score=2  'Natriumpolyphosphat, E452'
+    [keine Auto-Kandidaten]
+### # 949  score=?  'Natriumpropionat, E281'
+    [keine Auto-Kandidaten]
+### # 950  score=2  'Natriumpyrosulfit, E223'
+    [keine Auto-Kandidaten]
+### # 951  score=2  'Natriumsulfit, E221'
+    [keine Auto-Kandidaten]
+### # 952  score=0  'Natriumtartrat, E335'
+    [keine Auto-Kandidaten]
+### # 953  score=0  'Natron, Natriumhydrogencarbonat,'
+    [keine Auto-Kandidaten]
+### # 954  score=?  'Nisin, E234'
+    [keine Auto-Kandidaten]
+### # 955  score=2  'Octylgallat, E311'
+    [keine Auto-Kandidaten]
+### # 956  score=2  'Orthophenylphenol, E231'
+    [keine Auto-Kandidaten]
+### # 957  score=2  'Parabene = PHB-Ester, E214-E219, Methyl-, Ethyl-,'
+    171610|Sauce, Worcestershire|Sauce, worcestershire
+    173433|Käse, Ziege, halbfester Typ|Cheese, goat, semisoft type
+### # 958  score=2  'Patentblau V, E131'
+    [keine Auto-Kandidaten]
+### # 959  score=0  'Pektin, Pektine, amidiertes Pektin, E440'
+    167682|Pektin, flüssig|Pectin, liquid
+    168821|Pektin, ungesüßt, Trockenmischung|Pectin, unsweetened, dry mix
+### # 960  score=0  'Pflanzenkohle, Holzkohle, E153'
+    [keine Auto-Kandidaten]
+### # 961  score=?  'Polydextrose, E1200'
+    [keine Auto-Kandidaten]
+### # 962  score=?  'Polydimethylsiloxan, Dimeticon, Dimethicone,'
+    [keine Auto-Kandidaten]
+### # 963  score=1  'Polyvinylpolypyrrolidon, E1202'
+    [keine Auto-Kandidaten]
+### # 964  score=1  'Polyvinylpyrrolidon, Povidon, Polyvidone, E1201'
+    [keine Auto-Kandidaten]
+### # 965  score=1  'Povidon, Polyvinylpyrrolidon, Polyvidone, E1201'
+    [keine Auto-Kandidaten]
+### # 966  score=?  'Propionsäure, Propansäure, Ethancarbonsäure,'
+    [keine Auto-Kandidaten]
+### # 967  score=1  'Propylenglycolalginat, Alginat, E405'
+    [keine Auto-Kandidaten]
+### # 968  score=1  'Riboflavin-5-Phosphat, E101a'
+    172804|Backtriebmittel, Backpulver, doppelt wirkend, reines Phosphat|Leavening agents, baking powder, double-acting, straight phosphate
+### # 969  score=2  'Rot 2G, E128'
+    172673|Brot, Ei|Bread, egg
+    167944|Brot, Käse|Bread, cheese
+### # 970  score=2  'Salicylat, Salicylsäure'
+    [keine Auto-Kandidaten]
+### # 971  score=0  'Salzsäure, Chlorwasserstoffsäure, acidum'
+    [keine Auto-Kandidaten]
+### # 972  score=2  'Schwefeldioxid E220'
+    [keine Auto-Kandidaten]
+### # 973  score=0  'Seifenkrautextrakt (als Zutat in Halva)'
+    172241|Essig, Balsamico|Vinegar, balsamic
+    2616495|MITTELGROBKÖRNIGE SALSA|MEDIUM CHUNKY SALSA
+### # 974  score=?  'Silber, E174'
+    167639|Fisch, Lachs, Coho (Silber), roh (Alaska Native)|Fish, salmon, coho (silver), raw (Alaska Native)
+### # 975  score=2  'Sorbate (=Salze der Sorbinsäure): Kaliumsorbat, E202,'
+    169891|Kraut, Senf, gesalzen|Cabbage, mustard, salted
+    168149|Fisch, Makrele, gesalzen|Fish, mackerel, salted
+### # 976  score=2  'Sorbinsäure, E200'
+    [keine Auto-Kandidaten]
+### # 977  score=0  'Stärke (Kartoffelstärke, Maisstärke, Reisstärke,'
+    171862|Brötchen, glutenfrei, weiß, hergestellt aus Reismehl, Reisstärke und Maisstärke|Rolls, gluten-free, white, made with rice flour, rice starch, and corn starch
+    174806|Snacks, Brezeln, glutenfrei mit Maisstärke und Kartoffelmehl hergestellt|Snacks, Pretzels, gluten- free made with cornstarch and potato flour
+### # 978  score=1  'Sterculia-Gummi, Karayagummi, E416'
+    168771|Kaugummi|Chewing gum
+    169882|Kaugummi, zuckerfrei|Chewing gum, sugarless
+### # 979  score=0  'Steviosid, Steviol-Glykosid, E960'
+    [keine Auto-Kandidaten]
+### # 980  score=0  'Sucralose, E955'
+    168210|Guavennektar, mit Sucralose, in Dosen|Guava nectar, with sucralose, canned
+    170257|Süßstoffe, Tabletten, Sucralose, SPLENDA-Pakete|Sweeteners, tabletop, sucralose, SPLENDA packets
+### # 981  score=2  'Sulfite, E220 - E228'
+    [keine Auto-Kandidaten]
+### # 982  score=3  'Tartrazin, E102'
+    [keine Auto-Kandidaten]
+### # 983  score=?  'tert-Butylhydrochinon, 2-tert-Butylhydrochinon,'
+    175293|Bison, gemahlen, grasgefüttert, roh|Bison, ground, grass-fed, raw
+    173847|Bison, gemahlen, grasgefüttert, gekocht|Bison, ground, grass-fed, cooked
+### # 984  score=0  'Titandioxid, Titan(IV)-oxid, E171'
+    173166|Getränke, Wasser, in Flaschen, Gurke, Granatapfel mit Antioxidantien, kalorienfrei|Beverages, water, bottled, yumberry, pomegranate with anti-oxidants, zero calories
+### # 985  score=0  'Tocopherol, Vitamin E, E306'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 986  score=2  'Traganth, Tragant, E413'
+    [keine Auto-Kandidaten]
+### # 987  score=1  'Triammoniumcitrat, Ammoniumcitrat, E380'
+    [keine Auto-Kandidaten]
+### # 988  score=2  'Urotropin, Hexamethylentetramin, Methenamin,'
+    [keine Auto-Kandidaten]
+### # 989  score=0  'Vanillin (synthetisch), Vanillinzucker'
+    168833|Zucker, braun|Sugars, brown
+    169658|Zucker, Ahorn|Sugars, maple
+### # 990  score=0  'Vitamin C, E300'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 991  score=0  'Vitamin E, alpha-Tocopherol, E307'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    171641|Verzehrfertiges Müsli, POST, ALPHA-BITS|Cereals ready-to-eat, POST, ALPHA-BITS
+### # 992  score=0  'Vitamin E, delta-Tocopherol, E309'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 993  score=0  'Vitamin E, gamma-Tocopherol, E308'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 994  score=0  'Vitamin E, Tocopherol, E306'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### # 995  score=0  'Weinsäure, E334'
+    [keine Auto-Kandidaten]
+### # 996  score=0  'Weinsteinbackpulver, E336'
+    167806|Baobab-Pulver|Baobab powder
+    170461|Tomatenpulver|Tomato powder
+### # 997  score=1  'Weizenkleber, Gluten'
+    168147|Vitales Weizengluten|Vital wheat gluten
+    174917|Brot, Eiweiß (enthält Gluten)|Bread, protein (includes gluten)
+### # 998  score=0  'Xanthan, Xantan, E415'
+    [keine Auto-Kandidaten]
+### # 999  score=0  'Zellulose, Cellulose, mikrokristalline Cellulose,'
+    [keine Auto-Kandidaten]
+### #1000  score=0  'Zinkacetat, E650'
+    [keine Auto-Kandidaten]
+### #1001  score=1  'Zitronensäure E330'
+    [keine Auto-Kandidaten]
+### #1002  score=0  'Zuckercouleur, Zuckerkulör, E150, E150a'
+    [keine Auto-Kandidaten]
+### #1003  score=0  'Zuckercouleur: Ammoniak-Zuckerkulör, E150c'
+    [keine Auto-Kandidaten]
+### #1004  score=0  'Zuckercouleur: Ammoniumsulfit-Zuckerkulör, E150d'
+    [keine Auto-Kandidaten]
+### #1005  score=0  'Zuckercouleur: Sulfitlaugen-Zuckerkulör, E150b'
+    [keine Auto-Kandidaten]
+### #1006  score=1  'Calcium'
+    170985|Babynahrung, Saft, Apfel, mit Kalzium|Babyfood, juice, apple, with calcium
+    171273|Milch, trocken, fettfrei, kalziumreduziert|Milk, dry, nonfat, calcium reduced
+### #1007  score=1  'Calcium, Kalzium'
+    170985|Babynahrung, Saft, Apfel, mit Kalzium|Babyfood, juice, apple, with calcium
+    171273|Milch, trocken, fettfrei, kalziumreduziert|Milk, dry, nonfat, calcium reduced
+### #1008  score=2  'Folsäure, Folat, Vitamin B9'
+    174798|Snacks, Bonbons, Joghurt mit Vitamin C|Snacks, candy bits, yogurt covered with vitamin C
+    169636|Snacks, Fruchtleder, Stücke, mit Vitamin C|Snacks, fruit leather, pieces, with vitamin C
+### #1009  score=2  'Guaraná (Paullinia cupana)'
+    [keine Auto-Kandidaten]
+### #1010  score=3  'Iod, Jod'
+    [keine Auto-Kandidaten]
+### #1011  score=2  'Jodsalz, Iodsalz (Jodzusatz in Form von Kaliumiodid,'
+    170180|Nüsse, formuliert, auf Weizenbasis, nicht aromatisiert, mit Zusatz von Salz|Nuts, formulated, wheat-based, unflavored, with salt added
+    169411|Nüsse, formuliert, auf Weizenbasis, alle Geschmacksrichtungen außer Macadamia, ohne Salz|Nuts, formulated, wheat-based, all flavors except macadamia, without salt
+### #1012  score=3  'Jodtabletten für den atomaren Störfall'
+    168606|Rindfleisch, Teilstücke für den Einzelhandel, Fett abgetrennt, gekocht|Beef, retail cuts, separable fat, cooked
+    172733|Kekse, Schokoladen-Sandwich, mit Cremefüllung, für besondere Ernährungszwecke|Cookies, chocolate sandwich, with creme filling, special dietary
+### #1013  score=3  'Kaliumiodat, Kaliumjodat'
+    [keine Auto-Kandidaten]
+### #1014  score=3  'Kaliumiodid, Kaliumjodid'
+    [keine Auto-Kandidaten]
+### #1015  score=1  'Kalzium, Calcium'
+    170985|Babynahrung, Saft, Apfel, mit Kalzium|Babyfood, juice, apple, with calcium
+    171273|Milch, trocken, fettfrei, kalziumreduziert|Milk, dry, nonfat, calcium reduced
+### #1016  score=2  'Kochsalz iodiert / jodiert'
+    170543|Taro, gekocht, mit Salz|Taro, cooked, with salt
+    168486|Taro, gekocht, ohne Salz|Taro, cooked, without salt
+### #1017  score=0  'Tannenschoss, Tannenknospen'
+    [keine Auto-Kandidaten]
+### #1018  score=2  'Theobromin'
+    [keine Auto-Kandidaten]
+### #1019  score=0  'Gerstenmalzmehl, Malzmehl'
+    169740|Gerstenmalzmehl|Barley malt flour
+    171401|Schmalz|Lard
+### #1020  score=2  'Kimchi'
+    170392|Kohl, Kimchi|Cabbage, kimchi
+### #1021  score=2  'Lakritze, "Bärendreck"'
+    [keine Auto-Kandidaten]
+### #1022  score=0  'Malzmehl, Gerstenmalzmehl'
+    169740|Gerstenmalzmehl|Barley malt flour
+    171401|Schmalz|Lard
+### #1023  score=1  'Marzipan'
+    [keine Auto-Kandidaten]
+### #1024  score=2  'Schokolade, braun / schwarz / dunkel'
+    170272|Schokolade, dunkel, 60-69% Kakaoanteil|Chocolate, dark, 60-69% cacao solids
+    170273|Schokolade, dunkel, 70-85% Kakaoanteil|Chocolate, dark, 70-85% cacao solids
+### #1025  score=1  'Schokolade, weiss'
+    167571|Bonbons, weiße Schokolade|Candies, white chocolate
+    167532|Brot, Weißweizen|Bread, white wheat
+### #1026  score=1  'Seitan'
+    [keine Auto-Kandidaten]
+### #1027  score=2  'Senf (Zubereitung)'
+    172337|Öl, Senf|Oil, mustard
+    169256|Senfkörner, roh|Mustard greens, raw
+### #1028  score=2  'Tofu'
+    167722|Tofu-Joghurt|Tofu yogurt
+    172451|Tofu, gebraten|Tofu, fried
+### #1029  score=1  'weiße Schokolade'
+    167571|Bonbons, weiße Schokolade|Candies, white chocolate
+    168809|Speiseeis, Schokolade|Ice creams, chocolate
