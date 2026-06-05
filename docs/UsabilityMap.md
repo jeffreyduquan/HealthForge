@@ -10,21 +10,22 @@ Diese Datei beschreibt das **UX-Gerüst**: Navigation, Screens, Aktionen, User-F
 
 ## 1. Navigation (LOCKED)
 
-### 1.1 Bottom-Navigation (5 Tabs)
+### 1.1 Bottom-Navigation (6 Tabs)
 
 ```
-┌─────────────────────────────────────────┐
-│   Home    Plan    Essen    Log    Profil│
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│ Home  Plan  Gruppen  Essen  Log  Profil│
+└──────────────────────────────────────────────────┘
 ```
 
 | Tab | Icon (lucide) | Zweck |
 |-----|---------------|-------|
 | **Home** | `home` | Heutiger Überblick, Quick-Add, Tagesdashboard |
 | **Plan** | `calendar-days` | Mahlzeiten-Wochenplaner |
+| **Gruppen** | `users` | Eigene Gruppen, Gruppen-Rezepte, Mitglieder, Gruppen entdecken |
 | **Essen** | `utensils` | Lebensmittel + Rezepte + Supplements (3 Sub-Tabs) |
 | **Log** | `book-open` | Symptom-Tagebuch (Mood/Schlaf/Symptome) |
-| **Profil** | `user` | Profil, Einstellungen, Gruppen, Export, Account |
+| **Profil** | `user` | Profil, Einstellungen, Export, Account |
 
 ### 1.2 Essen-Sub-Tabs (Top-Tabs)
 
@@ -40,11 +41,12 @@ Diese Datei beschreibt das **UX-Gerüst**: Navigation, Screens, Aktionen, User-F
 |-----|-----------------|--------------|----------------|------------|
 | Home | minimal | volle Funktion | + Plan-Links | unverändert |
 | Plan | Placeholder "Bald verfügbar" | Placeholder | volle Funktion | + Auto-Planner |
+| Gruppen | ✅ Funktion (als Sub-Screen im Profil) | ✅ Funktion | ✅ Eigener Tab (P7) | unverändert |
 | Essen → Lebensmittel | Browse/Filter/Detail | + Quick-Add | unverändert | unverändert |
 | Essen → Rezepte | Placeholder | volle Funktion | + Gruppen-Filter | + Insights-Link |
 | Essen → Supplements | Placeholder | volle Funktion | + Reminder | unverändert |
 | Log | Placeholder | Placeholder | volle Funktion | + Insights-Tab |
-| Profil | Auth/Account | + Profil-Felder | + Gruppen + Export | unverändert |
+| Profil | Auth/Account | + Profil-Felder | + Export (Gruppen raus in eigenen Tab) | unverändert |
 
 ---
 

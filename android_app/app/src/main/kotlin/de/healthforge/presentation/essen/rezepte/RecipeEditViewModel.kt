@@ -46,7 +46,7 @@ data class RecipeEditUiState(
     val myGroups: List<GroupSummaryDto> = emptyList(),
     val ingredients: List<IngredientLine> = emptyList(),
     val steps: List<StepLine> = listOf(StepLine("")),
-    val imageKey: String? = null,
+    val imageKey: String = "",
     val ingredientSearchQuery: String = "",
     val ingredientSuggestions: List<IngredientDto> = emptyList(),
     val isLoading: Boolean = false,
@@ -95,7 +95,7 @@ class RecipeEditViewModel @Inject constructor(
                             slotTags = d.slot_tags.toSet(),
                             visibility = d.visibility,
                             groupId = d.group_id,
-                            imageKey = d.image_key,
+                            imageKey = d.image_key.orEmpty(),
                             ingredients = d.ingredients.sortedBy { ing -> ing.position }.map { ing ->
                                 IngredientLine(
                                     ingredientId = ing.ingredient_id,
@@ -236,6 +236,7 @@ class RecipeEditViewModel @Inject constructor(
 
     private fun validate(s: RecipeEditUiState): String? {
         if (s.title.isBlank()) return "Titel fehlt"
+        if (s.imageKey.isBlank()) return "Ein Foto ist erforderlich"
         if (s.slotTags.isEmpty()) return "Mindestens 1 Mahlzeitenslot wählen"
         if ((s.prepMinutes.toIntOrNull() ?: -1) < 0) return "Prep-Zeit ungültig"
         if (s.visibility == "GROUP" && s.groupId.isNullOrBlank()) return "Bitte Gruppe wählen"

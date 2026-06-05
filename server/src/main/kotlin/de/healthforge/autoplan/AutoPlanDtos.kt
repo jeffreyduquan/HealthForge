@@ -17,6 +17,7 @@ data class AutoPlanGenerateRequest(
     @field:Min(0) @JsonProperty("prep_minutes_max") val prepMinutesMax: Int? = null,
     @JsonProperty("more_often") val moreOften: List<UUID> = emptyList(),
     val avoid: List<UUID> = emptyList(),
+    @JsonProperty("group_ids") val groupIds: List<UUID> = emptyList(),
     @field:Min(1) @field:Max(16) @JsonProperty("beam_width") val beamWidth: Int = 4,
     @field:Min(0) val seed: Long? = null,
 )

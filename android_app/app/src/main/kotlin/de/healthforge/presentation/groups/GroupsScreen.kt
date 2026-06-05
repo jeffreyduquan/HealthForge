@@ -52,7 +52,8 @@ import de.healthforge.data.network.GroupSummaryDto
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupsScreen(
-    onBack: () -> Unit,
+    onBack: () -> Unit = {},
+    showBack: Boolean = false,
     onOpenGroup: (String) -> Unit,
     vm: GroupsViewModel = hiltViewModel(),
 ) {
@@ -73,8 +74,10 @@ fun GroupsScreen(
             TopAppBar(
                 title = { Text("Gruppen") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
+                    if (showBack) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
+                        }
                     }
                 },
             )

@@ -1,6 +1,8 @@
 package de.healthforge.presentation.essen.rezepte
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +49,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -56,6 +60,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.presentation.common.PhotoSourceDialog
+import de.healthforge.presentation.common.createCameraUri
 
 private val SLOT_OPTS = listOf("BREAKFAST" to "Frühstück", "LUNCH" to "Mittag", "DINNER" to "Abend", "SNACK" to "Snack")
 private val VISIBILITY_OPTS = listOf("PUBLIC" to "Öffentlich", "PRIVATE" to "Privat", "GROUP" to "Gruppe")
@@ -81,8 +87,16 @@ fun RecipeEditScreen(
         }
     }
 
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) vm.pickImage(ctx, uri)
+    var showPhotoDialog by remember { mutableStateOf(false) }
+    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { vm.pickImage(ctx, it) }
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraPhotoUri != null) {
+            kotlin.runCatching { vm.pickImage(ctx, cameraPhotoUri!!) }
+        }
     }
 
     Scaffold(
@@ -195,16 +209,35 @@ fun RecipeEditScreen(
                 )
             }
 
-            // Image
-            OutlinedButton(onClick = { imagePicker.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
+            // Image (Pflichtfeld) — Galerie oder Kamera
+            OutlinedButton(onClick = { showPhotoDialog = true }, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Image, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(if (state.imageKey != null) "Bild ersetzen (gespeichert)" else "Bild auswählen")
+                Text(if (state.imageKey.isNotBlank()) "Bild ersetzen (gespeichert)" else "Bild auswählen (Pflicht)")
+            }
+            if (state.imageKey.isBlank()) {
+                Text("Ein Foto ist erforderlich", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
             IngredientPicker(state = state, vm = vm)
             StepsEditor(state = state, vm = vm)
         }
+    }
+
+    // Foto-Quellen-Dialog (Galerie oder Kamera)
+    if (showPhotoDialog) {
+        PhotoSourceDialog(
+            onGalleryClick = {
+                showPhotoDialog = false
+                galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onCameraClick = { uri ->
+                showPhotoDialog = false
+                cameraPhotoUri = uri
+                try { cameraLauncher.launch(uri) } catch (_: Exception) { }
+            },
+            onDismiss = { showPhotoDialog = false },
+        )
     }
 }
 

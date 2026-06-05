@@ -26,7 +26,18 @@ class AutoPlanService(
         if (req.slots.isEmpty()) {
             throw ApiException(HttpStatus.BAD_REQUEST, "EMPTY_SLOTS", "slots must not be empty")
         }
-        val groupIds = groupService.groupIdsForUser(viewerId)
+        // Wenn groupIds explizit angefordert, nur diese Gruppen verwenden;
+        // sonst alle Gruppen des Users.
+        val userGroupIds = groupService.groupIdsForUser(viewerId)
+        val groupIds = if (req.groupIds.isNotEmpty()) {
+            // Sicherstellen, dass der User auch Member der angeforderten Gruppen ist
+            val invalid = req.groupIds.toSet() - userGroupIds.toSet()
+            if (invalid.isNotEmpty()) {
+                throw ApiException(HttpStatus.FORBIDDEN, "NOT_GROUP_MEMBER",
+                    "User is not a member of groups: $invalid")
+            }
+            req.groupIds
+        } else userGroupIds
         val vf = VisibilityFilter.PublicOrOwnOrGroup(viewerId, groupIds)
 
         // For each requested slot, fetch up to CANDIDATE_LIMIT IDs (allergen + prep-time filtered),

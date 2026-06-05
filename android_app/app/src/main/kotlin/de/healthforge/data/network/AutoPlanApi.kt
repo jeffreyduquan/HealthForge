@@ -13,6 +13,7 @@ data class AutoPlanGenerateRequest(
     val prep_minutes_max: Int? = null,
     val more_often: List<String> = emptyList(),
     val avoid: List<String> = emptyList(),
+    val group_ids: List<String> = emptyList(),
     val beam_width: Int = 4,
     val seed: Long? = null,
 )

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
@@ -44,7 +45,7 @@ import de.healthforge.presentation.profile.ExportScreen
 import de.healthforge.presentation.profile.ProfileScreen
 import de.healthforge.presentation.supplements.SupplementEditScreen
 
-/** Bottom-Navigation tab destinations. REQ-NAV-001. */
+/** Bottom-Navigation tab destinations. REQ-NAV-001 (6 Tabs: Home/Plan/Gruppen/Essen/Log/Profil). */
 private data class TabSpec(
     val route: String,
     val label: String,
@@ -94,15 +95,18 @@ object MainRoutes {
 private val TABS = listOf(
     TabSpec(MainRoutes.HOME, "Home", Icons.Filled.Home),
     TabSpec(MainRoutes.PLAN, "Plan", Icons.Filled.CalendarMonth),
+    TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.ESSEN, "Essen", Icons.Filled.Restaurant),
     TabSpec(MainRoutes.LOG, "Log", Icons.Filled.BookmarkBorder),
     TabSpec(MainRoutes.PROFIL, "Profil", Icons.Filled.Person),
 )
 
 /**
- * Shell hosting the 5-Tab Bottom-Navigation (REQ-NAV-001..004) plus sub-routes
+ * Shell hosting the 6-Tab Bottom-Navigation (REQ-NAV-001..004) plus sub-routes
  * that participate in the same nav graph (Intake-History, REQ-NAV-004).
  * Auth/Onboarding live OUTSIDE this shell.
+ *
+ * Tabs: Home | Plan | Gruppen | Essen | Log | Profil
  */
 @Composable
 fun MainShell(onRestartOnboarding: () -> Unit) {
@@ -176,7 +180,13 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
             composable(MainRoutes.PROFIL) {
                 ProfileScreen(
                     onRestartOnboarding = onRestartOnboarding,
-                    onOpenGroups = { navController.navigate(MainRoutes.GROUPS) },
+                    onOpenGroups = {
+                        navController.navigate(MainRoutes.GROUPS) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onOpenSymptomManager = { navController.navigate(MainRoutes.SYMPTOM_MANAGER) },
                     onOpenExport = { navController.navigate(MainRoutes.EXPORT) },
                     onOpenInsights = { navController.navigate(MainRoutes.INSIGHTS) },
@@ -231,7 +241,7 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
             }
             composable(MainRoutes.GROUPS) {
                 GroupsScreen(
-                    onBack = { navController.popBackStack() },
+                    showBack = false,
                     onOpenGroup = { id -> navController.navigate(MainRoutes.groupDetail(id)) },
                 )
             }

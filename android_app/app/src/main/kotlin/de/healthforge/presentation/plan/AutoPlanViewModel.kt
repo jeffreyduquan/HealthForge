@@ -7,7 +7,9 @@ import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.data.network.AutoPlanGenerateRequest
 import de.healthforge.data.network.AutoPlanGenerateResponse
+import de.healthforge.data.network.GroupSummaryDto
 import de.healthforge.data.repository.AutoPlanRepository
+import de.healthforge.data.repository.GroupRepository
 import de.healthforge.data.repository.MealPlanRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,18 +26,31 @@ data class AutoPlanUiState(
     val error: String? = null,
     val committing: Boolean = false,
     val committed: Boolean = false,
+    val myGroups: List<GroupSummaryDto> = emptyList(),
 )
 
 @HiltViewModel
 class AutoPlanViewModel @Inject constructor(
     private val autoPlanRepo: AutoPlanRepository,
     private val planRepo: MealPlanRepository,
+    private val groupRepo: GroupRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AutoPlanUiState())
     val state: StateFlow<AutoPlanUiState> = _state.asStateFlow()
 
-    fun open() { _state.update { AutoPlanUiState(visible = true) } }
+    fun open() {
+        loadMyGroups()
+        _state.update { AutoPlanUiState(visible = true) }
+    }
+
+    private fun loadMyGroups() {
+        viewModelScope.launch {
+            groupRepo.myGroups().onSuccess { list ->
+                _state.update { it.copy(myGroups = list) }
+            }
+        }
+    }
     fun dismiss() { _state.update { AutoPlanUiState() } }
 
     fun generate(req: AutoPlanGenerateRequest) {

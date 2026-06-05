@@ -66,7 +66,7 @@
 
 | REQ-ID | Phase | Status | Implementation-File |
 |---|---|:-:|---|
-| REQ-NAV-001 | P1 | ✅ | `android_app/.../presentation/main/MainShell.kt` (NavigationBar 5 Items: Home/Plan/Essen/Log/Profil) |
+| REQ-NAV-001 | P7 | ✅ | `android_app/.../presentation/main/MainShell.kt` (NavigationBar 6 Items: Home/Plan/Gruppen/Essen/Log/Profil) |
 | REQ-NAV-002 | P1 | ✅ | `android_app/.../presentation/essen/EssenScreen.kt` (TabRow 3 Sub-Tabs: Lebensmittel/Rezepte/Supplements) |
 | REQ-NAV-003 | P1 | ✅ | `presentation/common/PhasePlaceholder.kt` (zentrale Komponente: Icon + Title + Description + optional PhaseLabel); `presentation/plan/PlanScreen.kt` → P2-Label „Mahlzeiten-Wochenplaner“; `presentation/log/LogScreen.kt` → P3-Label „Symptom-Tagebuch“; `EssenScreen.SubTabPlaceholder` für Rezepte+Supplements (P1.S8 refactor) |
 | REQ-NAV-004 | P3 | ✅ | `presentation/log/LogScreen.kt` (Symptom-Tagebuch vollständig in P3.S1+P3.S4); Verlauf-Button: `HomeScreen.kt` TopAppBar action → `MainRoutes.INTAKE_HISTORY` |
@@ -123,7 +123,7 @@
 | REQ-RECIPE-002 | P2 | ✅ Backend | `RecipeEntity.authorId` FK + `RecipeService.create()` (Client P2.S3) |
 | REQ-RECIPE-003 | P2 | ✅ Backend | `RecipeEntity.visibility` enum + `groupId` CHECK constraint in `V6__recipes.sql` |
 | REQ-RECIPE-004 | P2 | ✅ Backend | `server/recipe/RecipeLikeEntity.kt` + `RecipeService.like()/unlike()` + `POST /v1/recipes/{id}/like` (Client P2.S2) |
-| REQ-RECIPE-005 | P2 | ✅ | `RecipeService.validate()` + Client `RecipeEditViewModel.validate()` (title/servings/prep/slot_tags/ingredients/steps) |
+| REQ-RECIPE-005 | P7 | ✅ | `RecipeService.validate()` + Client `RecipeEditViewModel.validate()` (title/**image**/servings/prep/slot_tags/ingredients/steps) — Foto ist Pflicht, nicht optional |
 | REQ-RECIPE-006 | P2 | ✅ | `server/media/ImageUploadService.kt` (Thumbnailator 256/800/1600) + `POST /v1/media/upload`; Client: `MediaRepository.uploadImage()` mit 1080px / JPEG Q85 / EXIF-Rotate |
 | REQ-RECIPE-007 | P2 | ✅ | `server/recipe/RecipeNutritionCompute.kt` (live aus `ingredients.per_100g`, Unit-Normalisierung, `missing_ingredients`) |
 | REQ-RECIPE-008 | P2 | ✅ | `RecipeService.update()/softDelete()` → `ApiException(FORBIDDEN, NOT_OWNER)`; Client: `RecipeDetailScreen` Edit-IconButton (Server-403 als Snackbar) |
@@ -198,7 +198,7 @@
 
 | REQ-ID | Phase | Status | Implementation-File |
 |---|---|:-:|---|
-| REQ-GROUP-001 | P3 | ✅ | Backend `V7__groups.sql` + `group/GroupEntity.kt`; Client `data/network/GroupApi.kt` + `presentation/groups/GroupsScreen.kt` (TabRow Meine|Entdecken) |
+| REQ-GROUP-001 | P7 | ✅ | Backend `V7__groups.sql` + `group/GroupEntity.kt`; Client `data/network/GroupApi.kt` + `presentation/groups/GroupsScreen.kt` (TabRow Meine|Entdecken) + **Eigener Bottom-Nav-Tab** (P7, MainShell.kt 6 Tabs) |
 | REQ-GROUP-002 | P3 | ✅ | `GroupEntity` Felder + `GroupSummaryDto`/`GroupMemberDto` mit name/description/visibility/invite_code/owner_id/member_count/my_role |
 | REQ-GROUP-003 | P3 | ✅ | Backend `GroupController.kt::create/joinByCode/joinPublic/leave`; Client `GroupsScreen.kt` FAB+Join-Code-Dialog + Discover-Beitreten + `GroupDetailScreen.kt` Leave-Button |
 | REQ-GROUP-004 | P3 | ✅ | Backend `removeMember/transferOwnership` (2-step demote→promote); Client `GroupDetailScreen.kt` Owner-IconButtons (Transfer/Remove) mit AlertDialog-Confirm |
@@ -273,7 +273,7 @@
 | REQ-FIELDPR-003 | P4 | ✅ | `AdminIngredientReviewController` (`@PreAuthorize hasRole ADMIN`) + `RejectReviewRequest.note` persistiert in `ingredient_field_pr.review_note` |
 | REQ-AUTOPLAN-001 | P4 | ✅ | `presentation/plan/PlanScreen.kt` (AutoAwesome-Button im TopBar) + `AutoPlanDialogs.kt::AutoPlanGenerateDialog` |
 | REQ-AUTOPLAN-002 | P4 | ✅ | `server/autoplan/BeamSearchPlanner.kt` + `AutoPlanService.kt` (Server-side beam search) |
-| REQ-AUTOPLAN-003 | P4 | ✅ | `server/autoplan/AutoPlanDtos.kt::AutoPlanGenerateRequest` (slots, exclude_allergens, prep_minutes_max, more_often, avoid, beam_width, seed) |
+| REQ-AUTOPLAN-003 | P7 | ✅ | `server/autoplan/AutoPlanDtos.kt::AutoPlanGenerateRequest` (slots, exclude_allergens, prep_minutes_max, more_often, avoid, **group_ids**, beam_width, seed) — Gruppen-Filter für Auto-Planner hinzugefügt |
 | REQ-AUTOPLAN-004 | P4 | ✅ | `presentation/plan/AutoPlanDialogs.kt::AutoPlanPreviewScreen` + `AutoPlanViewModel.removeSlot/commit` |
 | REQ-INSIGHT-001 | P4 | ✅ | `android_app/.../domain/insights/LiftCorrelationCalculator.kt` (`INSIGHT_MIN_LOG_DAYS=14`, Lock-Screen in `InsightsScreen.kt::LockedPane`) |
 | REQ-INSIGHT-002 | P4 | ✅ | `LiftCorrelationCalculator.kt` Thresholds `INSIGHT_MIN_LIFT=1.5`, `INSIGHT_MIN_N=3` |

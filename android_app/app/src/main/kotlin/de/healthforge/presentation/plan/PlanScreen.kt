@@ -238,6 +238,7 @@ fun PlanScreen(
         AutoPlanGenerateDialog(
             onDismiss = { autoVm.dismiss() },
             onSubmit = { req -> autoVm.generate(req) },
+            myGroups = autoState.myGroups,
         )
     }
     autoState.preview?.let { p ->

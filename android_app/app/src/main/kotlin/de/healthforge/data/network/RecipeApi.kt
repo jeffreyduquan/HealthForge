@@ -102,7 +102,7 @@ data class RecipeStepInput(
 data class RecipeUpsertRequest(
     val title: String,
     val description: String? = null,
-    val image_key: String? = null,
+    val image_key: String,
     val servings: Int = 1,
     val prep_minutes: Int,
     val cook_minutes: Int? = null,

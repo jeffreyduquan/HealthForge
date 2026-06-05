@@ -2079,6 +2079,44 @@ Diese Tasks laufen kontinuierlich, nicht in einem Sprint gebunden:
 
 ---
 
+## Phase P7 — Feedback-Umsetzung (2026-06-05)
+
+**User-Feedback vom 2026-06-05, umgesetzt in einem Durchlauf.**
+
+### Sprint P7.S1 — Foto-Pflicht, Gruppen-Tab, Plan-Gruppen-Filter, Ei in DB
+
+**Deliverables:**
+- ✅ **Server** `RecipeDtos.kt`: `imageKey` von `String?` auf `@field:NotNull String` geändert (Pflichtfeld)
+- ✅ **Android** `RecipeApi.kt`: `image_key` von `String?` auf `String` geändert
+- ✅ **Android** `RecipeEditViewModel.kt`: `imageKey` auf `String` (Default `""`), Validation `imageKey.isBlank()` → "Ein Foto ist erforderlich"
+- ✅ **Android** `RecipeCreateWizardScreen.kt`: Step 1 `canAdvance` prüft `s.imageKey.isNotBlank()`, Button-Text "(Pflicht)"
+- ✅ **Android** `RecipeEditScreen.kt`: Foto als Pflicht markiert
+- ✅ **Android** `MainShell.kt`: 6. Tab `Gruppen` (mit `Icons.Filled.Groups`) zwischen Plan und Essen eingefügt → 6-Tab-Navigation
+- ✅ **Android** `MainShell.kt`: ProfileScreen `onOpenGroups` nutzt Tab-Navigation (popUpTo+saveState+restoreState)
+- ✅ **Android** `GroupsScreen.kt`: `showBack`-Parameter (false für Tab, true für Sub-Screen)
+- ✅ **Server** `AutoPlanDtos.kt`: `groupIds: List<UUID>` zu `AutoPlanGenerateRequest` hinzugefügt
+- ✅ **Server** `AutoPlanService.kt`: groupIds-Unterstützung + Validierung (User muss Member sein)
+- ✅ **Android** `AutoPlanApi.kt`: `group_ids: List<String>` zu Request-DTO hinzugefügt
+- ✅ **Android** `AutoPlanDialogs.kt`: Gruppen-Auswahl (FilterChips) im Auto-Plan-Dialog
+- ✅ **Android** `AutoPlanViewModel.kt`: Lädt `myGroups` beim Öffnen, übergibt an Dialog
+- ✅ **Datenbank**: "Ei" (Hühnerei, ganz) mit Nährwerten (155 kcal, 13g Protein, 11g Fett) + Allergen ["EI"] + Histamin-Score 1 eingefügt – via API verifiziert
+- ✅ **Builds**: `:app:assembleDebug` + Server `compileKotlin` beide BUILD SUCCESSFUL
+
+**Akzeptanz:**
+- ✅ Rezept-Erstellung ohne Foto → Validation-Fehler
+- ✅ Rezept-Bearbeitung: Foto bleibt Pflicht (bestehende Keys bleiben erhalten)
+- ✅ Bottom-Nav zeigt 6 Tabs mit Gruppen-Tab
+- ✅ Auto-Planner: Gruppen-Filter-Chips im Dialog → group_ids im Request
+- ✅ "Ei" in DB-Suche via `/v1/ingredients?q=ei` auffindbar
+
+**REQ-IDs:**
+- REQ-NAV-001 → auf 6 Tabs aktualisiert
+- REQ-RECIPE-005 → Foto von optional auf Pflicht geändert
+- REQ-AUTOPLAN-003 → group_ids hinzugefügt
+- REQ-GROUP-001 → eigener Tab
+
+---
+
 ## 6. Workflow-Reminders
 
 Vor jedem Sprint-Start:

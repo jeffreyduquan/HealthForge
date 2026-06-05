@@ -81,7 +81,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 
 | Req | Statement |
 |---|---|
-| REQ-NAV-001 | The app SHALL use a **5-Tab Bottom-Navigation**: `Home`, `Plan`, `Essen`, `Log`, `Profil`. |
+| REQ-NAV-001 | The app SHALL use a **6-Tab Bottom-Navigation**: `Home`, `Plan`, `Gruppen`, `Essen`, `Log`, `Profil`. |
 | REQ-NAV-002 | The `Essen`-Tab SHALL contain three Top-Sub-Tabs: `Lebensmittel`, `Rezepte`, `Supplements`. |
 | REQ-NAV-003 | Tabs not yet implemented in a development phase SHALL render a "Bald verfügbar"-Placeholder. |
 | REQ-NAV-004 | The `Log`-Tab SHALL be the **Symptom-Tagebuch** (NOT intake-history). Intake-history is reached from Home via a "Verlauf"-Button. |
@@ -142,7 +142,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-RECIPE-002 | Each recipe has exactly one **owner** (the creating user). |
 | REQ-RECIPE-003 | Recipes SHALL have a `visibility` field with values `public | private | group` (when `group`, a `groupId` is required). |
 | REQ-RECIPE-004 | Liking a recipe (`H` save) SHALL NOT copy it — only add a reference in the user's "Saved" list. |
-| REQ-RECIPE-005 | Recipe authoring SHALL require: title, prep time, ≥1 slot tag (breakfast/lunch/dinner/snack), ≥1 ingredient with amount+unit, ≥1 step, optional image. |
+| REQ-RECIPE-005 | Recipe authoring SHALL require: title, **image** (mandatory, not optional), prep time, ≥1 slot tag (breakfast/lunch/dinner/snack), ≥1 ingredient with amount+unit, ≥1 step. |
 | REQ-RECIPE-006 | Recipe images SHALL be uploaded to **MinIO** (S3-compatible), max 1080×1080, WebP recommended, max 200 KB. |
 | REQ-RECIPE-007 | Recipe nutrition SHALL be computed live from its ingredients (no stored nutrition block on the recipe row). |
 | REQ-RECIPE-008 | Editing a recipe SHALL be restricted to its owner. |

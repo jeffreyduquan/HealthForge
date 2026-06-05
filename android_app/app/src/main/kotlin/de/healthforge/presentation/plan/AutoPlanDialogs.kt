@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import de.healthforge.data.network.AutoPlanGenerateRequest
 import de.healthforge.data.network.AutoPlanGenerateResponse
+import de.healthforge.data.network.GroupSummaryDto
 import java.time.LocalDate
 
 private val ALL_SLOTS = listOf("BREAKFAST", "LUNCH", "DINNER", "SNACK")
@@ -50,11 +51,13 @@ private val SLOT_LABEL_AUTO = mapOf(
 fun AutoPlanGenerateDialog(
     onDismiss: () -> Unit,
     onSubmit: (AutoPlanGenerateRequest) -> Unit,
+    myGroups: List<GroupSummaryDto> = emptyList(),
 ) {
     var days by remember { mutableStateOf("7") }
     var prepMax by remember { mutableStateOf("") }
     val selectedSlots = remember { mutableStateOf(setOf("BREAKFAST", "LUNCH", "DINNER")) }
     var allergens by remember { mutableStateOf("") }
+    val selectedGroupIds = remember { mutableStateOf(setOf<String>()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -88,6 +91,24 @@ fun AutoPlanGenerateDialog(
                         )
                     }
                 }
+                // Gruppen-Auswahl
+                if (myGroups.isNotEmpty()) {
+                    Text("Rezepte aus Gruppen:", style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        myGroups.forEach { group ->
+                            FilterChip(
+                                selected = group.id in selectedGroupIds.value,
+                                onClick = {
+                                    selectedGroupIds.value = if (group.id in selectedGroupIds.value)
+                                        selectedGroupIds.value - group.id
+                                    else
+                                        selectedGroupIds.value + group.id
+                                },
+                                label = { Text(group.name) },
+                            )
+                        }
+                    }
+                }
                 OutlinedTextField(
                     value = allergens, onValueChange = { allergens = it.uppercase() },
                     label = { Text("Allergene ausschließen (Komma-Liste, z.B. GLUTEN,LACTOSE)") },
@@ -105,6 +126,7 @@ fun AutoPlanGenerateDialog(
                         slots = selectedSlots.value.toList().sortedBy { ALL_SLOTS.indexOf(it) },
                         exclude_allergens = allergens.split(',').map { it.trim() }.filter { it.isNotEmpty() },
                         prep_minutes_max = prepMax.toIntOrNull(),
+                        group_ids = selectedGroupIds.value.toList(),
                     )
                     onSubmit(req)
                 },

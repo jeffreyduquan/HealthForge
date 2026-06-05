@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -39,9 +40,22 @@ class JwtAuthenticationFilter(
             } catch (e: JwtException) {
                 log.debug("JWT validation failed: {}", e.message)
                 SecurityContextHolder.clearContext()
+                // 401 statt 403: Der Client (TokenAuthenticator) triggert bei 401
+                // den Token-Refresh. Ohne explizites Setzen sendet Spring Security 403,
+                // weil der Request einen Authorization-Header hat (failed auth).
+                res.status = HttpServletResponse.SC_UNAUTHORIZED
+                res.contentType = MediaType.APPLICATION_JSON_VALUE
+                res.writer.write("""{"status":401,"error":"Unauthorized","message":"Invalid or expired JWT"}""")
+                res.writer.flush()
+                return
             } catch (e: Exception) {
                 log.warn("Unexpected error parsing JWT", e)
                 SecurityContextHolder.clearContext()
+                res.status = HttpServletResponse.SC_UNAUTHORIZED
+                res.contentType = MediaType.APPLICATION_JSON_VALUE
+                res.writer.write("""{"status":401,"error":"Unauthorized","message":"Authentication error"}""")
+                res.writer.flush()
+                return
             }
         }
         chain.doFilter(req, res)

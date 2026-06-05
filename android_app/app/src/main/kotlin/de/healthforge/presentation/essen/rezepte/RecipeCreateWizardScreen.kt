@@ -41,6 +41,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.healthforge.presentation.common.PhotoSourceDialog
 import de.healthforge.presentation.lebensmittel.StepDotsRow
 import de.healthforge.presentation.lebensmittel.WizardNav
 import de.healthforge.presentation.theme.AmbientBackdrop
@@ -83,9 +86,20 @@ fun RecipeCreateWizardScreen(
     val hm = LocalHmTokens.current
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val ctx = LocalContext.current
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+    var showPhotoDialog by remember { mutableStateOf(false) }
+    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Galerie-Launcher
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let { vm.pickImage(ctx, it) }
     }
+    // Kamera-Launcher
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+        if (success && cameraPhotoUri != null) {
+            kotlin.runCatching { vm.pickImage(ctx, cameraPhotoUri!!) }
+        }
+    }
+
     LaunchedEffect(s.savedId) { s.savedId?.let { onSaved(it) } }
 
     Box(
@@ -125,9 +139,7 @@ fun RecipeCreateWizardScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 when (stepIndex) {
-                    0 -> StepName(s, vm, onPickImage = {
-                        picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    })
+                    0 -> StepName(s, vm, onPickImage = { showPhotoDialog = true })
                     1 -> StepIngredients(s, vm)
                     2 -> StepPortionsTime(s, vm)
                     3 -> StepInstructions(s, vm)
@@ -140,7 +152,7 @@ fun RecipeCreateWizardScreen(
             }
 
             val canAdvance = when (stepIndex) {
-                0 -> s.title.trim().isNotEmpty()
+                0 -> s.title.trim().isNotEmpty() && s.imageKey.isNotBlank()
                 1 -> s.ingredients.isNotEmpty()
                 2 -> s.prepMinutes.isNotBlank()
                 3 -> true // Zubereitungstext optional
@@ -158,6 +170,22 @@ fun RecipeCreateWizardScreen(
             )
             Spacer(Modifier.height(8.dp).navigationBarsPadding())
         }
+    }
+
+    // Foto-Quellen-Dialog (Galerie oder Kamera)
+    if (showPhotoDialog) {
+        PhotoSourceDialog(
+            onGalleryClick = {
+                showPhotoDialog = false
+                galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onCameraClick = { uri ->
+                showPhotoDialog = false
+                cameraPhotoUri = uri
+                try { cameraLauncher.launch(uri) } catch (_: Exception) { }
+            },
+            onDismiss = { showPhotoDialog = false },
+        )
     }
 }
 
@@ -179,10 +207,12 @@ private fun StepName(s: RecipeEditUiState, vm: RecipeEditViewModel, onPickImage:
     OutlinedButton(onClick = onPickImage, modifier = Modifier.fillMaxWidth()) {
         Icon(Icons.Filled.Photo, contentDescription = null)
         Spacer(Modifier.width(8.dp))
-        Text(if (s.imageKey != null) "Foto ausgewählt — ersetzen" else "Foto auswählen (optional)")
+        Text(if (s.imageKey.isNotBlank()) "Foto ausgewählt — ersetzen" else "Foto auswählen (Pflicht)")
     }
-    if (s.imageKey != null) {
+    if (s.imageKey.isNotBlank()) {
         Text("Bild-Key: ${s.imageKey}", color = hm.fgTertiary, style = MaterialTheme.typography.bodySmall)
+    } else {
+        Text("Bitte wähle ein Foto aus", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
     }
 }
 

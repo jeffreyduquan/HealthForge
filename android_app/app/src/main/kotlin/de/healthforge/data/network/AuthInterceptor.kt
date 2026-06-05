@@ -41,29 +41,57 @@ class AuthInterceptor @Inject constructor(
 
 /**
  * On 401 responses, attempts a single refresh-token round-trip and retries the request once.
+ *
+ * Thread-safe: synchronisiert konkurrierende Refresh-Aufrufe, da der Server den
+ * Refresh-Token rotiert (REQ-AUTH-005). Nur der erste Aufruf führt das Refresh aus;
+ * alle weiteren warten und verwenden den neuen Token.
  */
 @Singleton
 class TokenAuthenticator @Inject constructor(
     private val tokenStore: SecureTokenStore,
     private val authApiProvider: Provider<AuthApi>,
 ) : Authenticator {
+    private val lock = Any()
+
     override fun authenticate(route: Route?, response: Response): Request? {
-        if (response.request.header("Authorization")?.startsWith("Bearer ") != true) return null
-        // Prevent infinite loop: only one retry
+        // Nur Requests mit Bearer-Token behandeln
+        val oldAuth = response.request.header("Authorization")
+        if (oldAuth?.startsWith("Bearer ") != true) return null
         if (responseCount(response) >= 2) return null
-        val refresh = tokenStore.refreshToken ?: return null
-        return try {
-            val newAuth = runBlocking {
-                authApiProvider.get().refresh(RefreshRequest(refresh))
-            }
-            tokenStore.accessToken = newAuth.accessToken
-            tokenStore.refreshToken = newAuth.refreshToken
-            response.request.newBuilder()
-                .header("Authorization", "Bearer ${newAuth.accessToken}")
+
+        val oldToken = oldAuth.removePrefix("Bearer ")
+
+        // Race-Condition-Guard: Wurde der Token schon von einem anderen Thread erneuert?
+        val currentAccess = tokenStore.accessToken
+        if (currentAccess != null && currentAccess != oldToken) {
+            return response.request.newBuilder()
+                .header("Authorization", "Bearer $currentAccess")
                 .build()
-        } catch (e: Exception) {
-            tokenStore.clear()
-            null
+        }
+
+        synchronized(lock) {
+            // Double-Check nach Lock-Erwerb
+            val afterLock = tokenStore.accessToken
+            if (afterLock != null && afterLock != oldToken) {
+                return response.request.newBuilder()
+                    .header("Authorization", "Bearer $afterLock")
+                    .build()
+            }
+
+            val refresh = tokenStore.refreshToken ?: return null
+            return try {
+                val newAuth = runBlocking {
+                    authApiProvider.get().refresh(RefreshRequest(refresh))
+                }
+                tokenStore.accessToken = newAuth.accessToken
+                tokenStore.refreshToken = newAuth.refreshToken
+                response.request.newBuilder()
+                    .header("Authorization", "Bearer ${newAuth.accessToken}")
+                    .build()
+            } catch (e: Exception) {
+                tokenStore.clear()
+                null
+            }
         }
     }
 

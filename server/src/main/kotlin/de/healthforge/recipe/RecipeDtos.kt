@@ -28,7 +28,7 @@ data class RecipeStepInput(
 data class RecipeUpsertRequest(
     @field:NotBlank val title: String,
     val description: String? = null,
-    @JsonProperty("image_key") val imageKey: String? = null,
+    @field:NotNull @JsonProperty("image_key") val imageKey: String,
     @field:Positive val servings: Int = 1,
     @field:PositiveOrZero @JsonProperty("prep_minutes") val prepMinutes: Int,
     @JsonProperty("cook_minutes") val cookMinutes: Int? = null,
