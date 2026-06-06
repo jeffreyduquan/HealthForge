@@ -37,4 +37,25 @@ jobs:
           path: server/build/libs/*.jar
           retention-days: 14
 
-  # docker-publish job is added in Sprint P1.S8 (Production-Deploy).
+  docker-publish:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: server
+          push: true
+          tags: |
+            ghcr.io/jeffreyduquan/healthforge-server:latest
+            ghcr.io/jeffreyduquan/healthforge-server:${{ github.sha }}

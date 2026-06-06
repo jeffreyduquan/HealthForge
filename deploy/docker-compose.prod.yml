@@ -41,7 +41,7 @@ services:
       - backend
 
   api:
-    image: ghcr.io/jawra/healthforge-server:latest
+    image: ghcr.io/jeffreyduquan/healthforge-server:latest
     container_name: healthforge-api
     restart: always
     environment:
