@@ -120,7 +120,7 @@ jobs:
           host: 159.195.151.92
           username: endgear
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: admin-ui-dist/*
+          source: admin-ui-dist/.
           target: /opt/healthforge/admin-ui-dist/
           strip_components: 1
 
