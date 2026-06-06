@@ -23,6 +23,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import GroupIcon from '@mui/icons-material/Group';
 import HistoryIcon from '@mui/icons-material/History';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../api/client';
 
@@ -44,6 +45,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/ingredients', label: 'Zutaten', icon: <RestaurantMenuIcon /> },
   { path: '/field-prs', label: 'Field-PRs', icon: <EditNoteIcon /> },
   { path: '/users', label: 'Nutzer', icon: <GroupIcon /> },
+  { path: '/releases', label: 'APK Releases', icon: <SystemUpdateAltIcon /> },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

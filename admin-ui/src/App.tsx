@@ -7,6 +7,7 @@ import InvitesPage from './pages/InvitesPage';
 import RecipeReportsPage from './pages/RecipeReportsPage';
 import SupplementsQueuePage from './pages/SupplementsQueuePage';
 import IngredientQueuePage from './pages/IngredientQueuePage';
+import ReleasesPage from './pages/ReleasesPage';
 import FieldPrPage from './pages/FieldPrPage';
 import UsersPage from './pages/UsersPage';
 import Layout from './components/Layout';
@@ -39,6 +40,7 @@ export function App() {
                 <Route path="/ingredients" element={<IngredientQueuePage />} />
                 <Route path="/field-prs" element={<FieldPrPage />} />
                 <Route path="/users" element={<UsersPage />} />
+                <Route path="/releases" element={<ReleasesPage />} />
                 <Route path="*" element={<DashboardPage />} />
               </Routes>
             </Layout>

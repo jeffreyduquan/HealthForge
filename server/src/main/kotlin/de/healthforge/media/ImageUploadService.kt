@@ -52,7 +52,7 @@ class MinioBucketInitializer(
     private val client: MinioClient,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-    private val publicBuckets = listOf("recipes", "ingredients", "supplements", "avatars")
+    private val publicBuckets = listOf("recipes", "ingredients", "supplements", "avatars", "releases")
     private val privateBuckets = listOf("exports", "backups")
 
     @PostConstruct

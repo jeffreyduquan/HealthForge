@@ -18,7 +18,7 @@ export const tokens = {
 };
 
 export const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.PROD ? 'https://api.healthforge.endgear.de' : '',
+  baseURL: import.meta.env.PROD ? 'http://api.healthforge.endgear.de:8080' : '',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -333,5 +333,44 @@ export async function listAuditLog(query: AuditQuery = {}): Promise<AuditLogEntr
   if (query.to) params.to = query.to;
   if (query.limit) params.limit = query.limit;
   const { data } = await api.get<AuditLogEntry[]>('/admin/v1/audit', { params });
+  return data;
+}
+
+// ============ APK Releases API ============
+
+export interface ApkRelease {
+  id: string;
+  version: string;
+  changelog: string | null;
+  filename: string;
+  fileSize: number;
+  uploadedBy: string | null;
+  createdAt: string;
+}
+
+export async function listReleases(): Promise<ApkRelease[]> {
+  const { data } = await api.get<ApkRelease[]>('/admin/v1/releases');
+  return data;
+}
+
+export async function uploadRelease(
+  file: File,
+  version: string,
+  changelog: string,
+): Promise<ApkRelease> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('version', version);
+  form.append('changelog', changelog);
+  const { data } = await api.post<ApkRelease>('/admin/v1/releases', form);
+  return data;
+}
+
+export async function deleteRelease(id: string): Promise<void> {
+  await api.delete(`/admin/v1/releases/${id}`);
+}
+
+export async function getReleaseDownloadUrl(id: string): Promise<{ url: string; filename: string }> {
+  const { data } = await api.get<{ url: string; filename: string }>(`/admin/v1/releases/${id}/download`);
   return data;
 }
