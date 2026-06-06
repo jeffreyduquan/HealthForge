@@ -65,6 +65,8 @@ jobs:
     needs: [docker-publish]
     if: github.ref == 'refs/heads/main'
     steps:
+      - uses: actions/checkout@v4
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -73,5 +75,17 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/healthforge
+
+            # Caddyfile aus dem Repo auf den Server kopieren
+            cat > /tmp/Caddyfile << 'CADDYEOF'
+{{ range $i, $line := .Files.Get "deploy/Caddyfile" | splitList "\n" }}{{ $line }}{{ printf "\n" }}{{ end }}
+CADDYEOF
+            mv /tmp/Caddyfile Caddyfile
+
+            # API aktualisieren
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
+
+            # Caddy neuladen (neue Konfiguration + ggf. neues Admin-UI)
+            docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile || \
+              docker compose -f docker-compose.prod.yml restart caddy

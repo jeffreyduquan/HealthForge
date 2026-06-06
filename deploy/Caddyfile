@@ -20,7 +20,7 @@ http://api.healthforge.endgear.de {
 
 # ============ Admin UI ============
 http://admin.healthforge.endgear.de {
-    root * /srv/admin
+    root * /opt/healthforge/admin-ui-dist
     try_files {path} /index.html
     file_server
 
