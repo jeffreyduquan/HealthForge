@@ -44,6 +44,26 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: Presigned MinIO-URL enthält internen Hostnamen (2026-06-06)
+
+**Scope:** Der geklickte Download-Link gab JSON mit `"url":"http://minio:9000/..."` zurück – von außen nicht auflösbar (DNS_PROBE_FINISHED_NXDOMAIN). Auch auf dem Handy unbrauchbar.
+
+**Fix:**
+- `fixMinioUrl()`-Helfer in beiden Controllern: Ersetzt den internen MinIO-Host (`minio:9000`) in Presigned-URLs durch die öffentliche CDN-Base-URL
+- `MINIO_PUBLIC_BASE_URL` in `docker-compose.prod.yml` auf `http://cdn.healthforge.endgear.de:8080` korrigiert (war fälschlich `https://cdn...`)
+- `PublicReleaseController` bekam `publicBaseUrl`-Injection (war vorher nur im `AdminReleaseController`)
+
+**Touched Docs:** Keine (reiner Bugfix)
+
+**Touched Code:**
+- MOD `AdminReleaseController.kt` — `fixMinioUrl()` angewendet in `downloadUrl()`
+- MOD `PublicReleaseController.kt` — `publicBaseUrl` injiziert + `fixMinioUrl()` angewendet in `download()`
+- MOD `deploy/docker-compose.prod.yml` — `MINIO_PUBLIC_BASE_URL` auf HTTP + Port 8080
+
+**Verifikation:** Nach Deploy wird in der Presigned-URL `cdn.healthforge.endgear.de:8080` statt `minio:9000` verwendet. APK kann von extern (auch Handy) heruntergeladen werden.
+
+---
+
 ## Production-Deploy + CI/CD + APK-Release-Feature (P1.S8 Phase 2) — 2026-06-06
 
 **Scope:** Erster Production-Deploy auf Netcup VPS (159.195.151.92). Vollständiger Stack (Postgres, MinIO, API, Caddy, Backup) live. CI/CD für Server + Admin-UI aktiviert. APK-Release-Verwaltung im Admin-UI.
