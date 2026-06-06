@@ -98,6 +98,7 @@ class PublicReleaseController(
             status = status,
             downloadUrl = downloadUrl,
             expiresAt = expiresAt,
+            inviteCode = inviteCode,
         )
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html)
     }
@@ -161,6 +162,7 @@ class PublicReleaseController(
         status: String,
         downloadUrl: String,
         expiresAt: String,
+        inviteCode: String,
     ): String = """
 <!DOCTYPE html>
 <html lang="de">
@@ -219,6 +221,18 @@ class PublicReleaseController(
   }
   .meta-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
   .meta-value{font-size:16px;font-weight:600;color:#e2e8f0}
+  .invite-box{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;padding:14px;margin-bottom:16px;text-align:center
+  }
+  .invite-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .invite-code{
+    font-family:'SF Mono','Fira Code','Courier New',monospace;
+    font-size:20px;font-weight:700;color:#a5b4fc;letter-spacing:4px;
+    user-select:all;cursor:pointer;background:rgba(255,255,255,.04);
+    padding:8px 12px;border-radius:10px;display:inline-block
+  }
+  .invite-note{font-size:12px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.4}
   .changelog{
     background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
     border-radius:14px;padding:14px;margin-bottom:16px;
@@ -284,6 +298,17 @@ class PublicReleaseController(
         <div class="meta-value">${expiresAt}</div>
       </div>
     </div>
+
+    ${if (status == "valid") """
+    <div class="invite-box">
+      <div class="invite-label">Dein Einladungscode für die App</div>
+      <div class="invite-code" onclick="navigator.clipboard?.writeText(this.textContent)">${escapeHtml(inviteCode)}</div>
+      <div class="invite-note">
+        Nach der Installation der APK kannst du dich in der HealthForge-App<br/>
+        mit diesem Code registrieren. <strong>Einmalige Verwendung.</strong>
+      </div>
+    </div>
+    """ else ""}
 
     ${if (release.changelog != null) """<div class="changelog">${escapeHtml(release.changelog)}</div>""" else ""}
 

@@ -23,6 +23,7 @@ class AuthService(
     private val refreshRepo: RefreshTokenRepository,
     private val emailVerifyRepo: EmailVerificationTokenRepository,
     private val passwordResetRepo: PasswordResetTokenRepository,
+    private val inviteRepo: InviteRepository,
     private val jwtService: JwtService,
     private val passwordEncoder: PasswordEncoder,
     private val mailService: MailService,
@@ -36,7 +37,22 @@ class AuthService(
         if (userRepo.existsByEmail(req.email.lowercase())) {
             throw ApiException(HttpStatus.CONFLICT, "EMAIL_TAKEN", "Email already registered")
         }
+        // Invite-Code prüfen (REQ-AUTH-INVITE-001)
+        val inviteCode = req.inviteCode ?: throw ApiException(HttpStatus.BAD_REQUEST, "INVITE_REQUIRED", "Einladungscode erforderlich")
+        val invite = inviteRepo.findByCode(inviteCode.trim().uppercase()).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "INVITE_NOT_FOUND", "Ungültiger Einladungscode")
+        }
+        if (invite.expiresAt.isBefore(Instant.now())) {
+            throw ApiException(HttpStatus.GONE, "INVITE_EXPIRED", "Einladungscode ist abgelaufen")
+        }
+        if (invite.usedBy != null) {
+            throw ApiException(HttpStatus.CONFLICT, "INVITE_ALREADY_USED", "Einladungscode bereits verwendet")
+        }
         val user = createUser(req)
+        // Invite als verwendet markieren
+        invite.usedBy = user.id
+        invite.usedAt = Instant.now()
+        inviteRepo.save(invite)
         issueVerificationEmail(user)
         auditService.record("AUTH_REGISTER", actorUserId = user.id, ipAddress = request.remoteAddr)
         return issueTokens(user, request)

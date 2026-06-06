@@ -16,6 +16,8 @@ data class RegisterRequest(
     val displayName: String,
     @field:NotBlank @field:Size(min = 10, max = 128)
     val password: String,
+    @field:Size(min = 6, max = 20)
+    val inviteCode: String? = null,
 )
 
 data class LoginRequest(
