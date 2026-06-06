@@ -60,7 +60,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_AUTH: "true"
       SMTP_STARTTLS: "true"
-      CORS_ORIGINS: https://admin.healthforge.endgear.de
+      API_PUBLIC_URL: http://api.healthforge.endgear.de:8080
+      CORS_ORIGINS: http://admin.healthforge.endgear.de:8080
     depends_on:
       postgres:
         condition: service_healthy

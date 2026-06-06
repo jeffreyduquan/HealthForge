@@ -5,6 +5,45 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: Admin-UI 404 — Stale Docker-Bind-Mount (2026-06-06)
+
+**Scope:** Admin-UI unter http://admin.healthforge.endgear.de:8080 zeigte leere Seite / 404. Ursache: Caddy-Container wurde gestartet, bevor `admin-ui-dist/` existierte → Docker legte leeres Root-Verzeichnis an → später erstelltes Verzeichnis hatte anderen Inode → Bind-Mount zeigte ins Leere.
+
+**Fix:**
+- Caddy-Container restartet (bind mount neu evaluiert)
+- CI/CD-Prävention in `.github/workflows/server.yml`:
+  - Neuer Step: `mkdir -p + chown` auf `admin-ui-dist/` VOR dem SCP
+  - `docker compose exec caddy reload` ersetzt durch `docker compose up -d caddy --force-recreate` (zwingt komplette Neu-Evaluierung des Bind-Mounts)
+
+**Touched Docs:** Keine (reiner Bugfix, keine Architektur-/Req-Änderung)
+
+**Touched Code:**
+- MOD `.github/workflows/server.yml` — Pre-SCP dir-ensure + Caddy force-recreate
+
+**Verifikation:** Seite lädt; Login-Formular wird angezeigt; kein 404 mehr.
+
+---
+
+## Bugfix: APK-Download-Link SSL-Fehler (2026-06-06)
+
+**Scope:** Geteilter APK-Download-Link verwendete hartkodiertes `https://` – aber der Server läuft HTTP-only (parallel zu dwight auf 80/443). Ergebnis: `ERR_SSL_PROTOCOL_ERROR` beim Öffnen des Links.
+
+**Fix:**
+- `AdminReleaseController.kt` – `"https://api.healthforge.endgear.de/..."` durch konfigurierbare Property `${healthforge.api.public-url}` ersetzt
+- `application.yml` – Neue Property `healthforge.api.public-url` mit Default `${API_PUBLIC_URL:http://localhost:8080}`
+- `docker-compose.prod.yml` – `API_PUBLIC_URL: http://api.healthforge.endgear.de:8080` hinzugefügt; `CORS_ORIGINS` auf `http://` korrigiert
+
+**Touched Docs:** Keine (reiner Bugfix, keine Architektur-/Req-Änderung)
+
+**Touched Code:**
+- MOD `AdminReleaseController.kt` — Download-URL aus Property statt hartkodiert
+- MOD `application.yml` — Neue Property `healthforge.api.public-url`
+- MOD `deploy/docker-compose.prod.yml` — `API_PUBLIC_URL` + korrigiertes `CORS_ORIGINS`
+
+**Verifikation:** API-Endpunkt liefert 200 mit Presigned-URL über HTTP; neuer Download-Link verwendet `http://api.healthforge.endgear.de:8080/...`.
+
+---
+
 ## Production-Deploy + CI/CD + APK-Release-Feature (P1.S8 Phase 2) — 2026-06-06
 
 **Scope:** Erster Production-Deploy auf Netcup VPS (159.195.151.92). Vollständiger Stack (Postgres, MinIO, API, Caddy, Backup) live. CI/CD für Server + Admin-UI aktiviert. APK-Release-Verwaltung im Admin-UI.

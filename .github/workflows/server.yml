@@ -103,6 +103,16 @@ jobs:
           name: healthforge-admin-ui-dist
           path: admin-ui-dist
 
+      - name: Ensure admin-ui-dist directory exists on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 159.195.151.92
+          username: endgear
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /opt/healthforge/admin-ui-dist
+            sudo chown endgear:endgear /opt/healthforge/admin-ui-dist || true
+
       - name: Copy Caddyfile to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -135,5 +145,4 @@ jobs:
             cp deploy/Caddyfile Caddyfile
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
-            docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile || \
-              docker compose -f docker-compose.prod.yml restart caddy
+            docker compose -f docker-compose.prod.yml up -d caddy --force-recreate

@@ -30,6 +30,7 @@ class AdminReleaseController(
     private val inviteRepo: InviteRepository,
     private val minio: MinioClient,
     @Value("\${healthforge.minio.public-base-url}") private val publicBaseUrl: String,
+    @Value("\${healthforge.api.public-url}") private val apiPublicUrl: String,
 ) {
     private val bucket = "releases"
     private val secureRandom = SecureRandom()
@@ -126,7 +127,7 @@ class AdminReleaseController(
             downloadUsed = false,
         )
         inviteRepo.save(invite)
-        val downloadUrl = "https://api.healthforge.endgear.de/v1/releases/${release.id}/download?code=${code}"
+        val downloadUrl = "${apiPublicUrl}/v1/releases/${release.id}/download?code=${code}"
         return mapOf("code" to code, "url" to downloadUrl, "filename" to release.filename)
     }
 }
