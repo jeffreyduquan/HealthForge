@@ -7,7 +7,6 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
 import io.minio.http.Method
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -15,7 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.time.Duration
+import org.springframework.beans.factory.annotation.Value
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 @RestController
@@ -66,7 +66,7 @@ class AdminReleaseController(
             filename = file.originalFilename ?: "app-release.apk",
             fileSize = bytes.size.toLong(),
             minioKey = minioKey,
-            uploadedBy = admin.id,
+            uploadedBy = admin.userId,
         ))
         return release.toDto()
     }
