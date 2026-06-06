@@ -9,6 +9,7 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
 import io.minio.http.Method
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -106,7 +107,7 @@ class AdminReleaseController(
     }
 
     @GetMapping("/{id}/download")
-    fun downloadUrl(@PathVariable id: UUID): Map<String, String> {
+    fun downloadUrl(@PathVariable id: UUID): ResponseEntity<Void> {
         val release = repo.findById(id).orElseThrow {
             ApiException(HttpStatus.NOT_FOUND, "RELEASE_NOT_FOUND", "Release nicht gefunden")
         }
@@ -118,8 +119,9 @@ class AdminReleaseController(
                 .expiry(3600)
                 .build()
         )
-        val url = fixMinioUrl(internalUrl)
-        return mapOf("url" to url, "filename" to release.filename)
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header(HttpHeaders.LOCATION, fixMinioUrl(internalUrl))
+            .build()
     }
 
     /** Generates a one-time download link for a release (used instead of invite codes). */
