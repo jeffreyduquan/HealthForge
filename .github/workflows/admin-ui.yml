@@ -60,3 +60,14 @@ jobs:
           target: /opt/healthforge/admin-ui-dist/
           strip_components: 0
           rm: true
+
+      - name: Reload Caddy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 159.195.151.92
+          username: endgear
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/healthforge
+            docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile || \
+              docker compose -f docker-compose.prod.yml restart caddy
