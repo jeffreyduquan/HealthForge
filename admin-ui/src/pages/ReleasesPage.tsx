@@ -30,7 +30,6 @@ import {
   uploadRelease,
   deleteRelease,
   getReleaseDownloadUrl,
-  type ApkRelease,
 } from '../api/client';
 
 function formatSize(bytes: number): string {
