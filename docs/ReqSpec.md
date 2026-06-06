@@ -217,8 +217,10 @@ See §10 below.
 | REQ-ADMIN-002 | Phase-1 admin functions: invite-code generation, ingredient curation (edit allergens/SIGHI/FODMAP/nutrition), user listing + ban, OFF resync trigger. |
 | REQ-ADMIN-003 | Phase-3 & Phase-4 admin functions (full peer-review queues, moderation, statistics) are specified in §7.5. |
 | REQ-ADMIN-004 | The Admin SHALL be able to upload APK releases via the Admin Web UI. Releases are stored in MinIO (`releases`-Bucket) and listed with version, changelog, file size, and upload date. |
-| REQ-ADMIN-005 | APK downloads SHALL be available via presigned MinIO URLs (expiring after 1 hour). The download endpoint is `GET /admin/v1/releases/{id}/download`. |
+| REQ-ADMIN-005 | APK downloads SHALL be available via presigned MinIO URLs (expiring after 1 hour). **Admin**: `GET /admin/v1/releases/{id}/download`. **Public (one-time via invite code)**: `GET /v1/releases/{id}/download?code={inviteCode}` — requires a valid, non-expired, unused invite code. Once downloaded, the invite SHALL be marked as `downloadUsed`. |
 | REQ-ADMIN-006 | The Admin Web UI SHALL auto-deploy on push to `main` via GitHub Actions (SCP to VPS, served by Caddy). |
+| REQ-ADMIN-007 | Public recipes submitted by non-admin users SHALL require admin review before being published. Recipe status `PENDING_REVIEW` → admin approves → `PUBLISHED`. |
+| REQ-ADMIN-008 | The Admin Web UI SHALL include a **Database Editor** (`/database`) with full CRUD on Ingredients, Supplements, and Recipes. Every mutation SHALL be preceded by a warning confirmation dialog and tracked in the audit log.
 
 ---
 
@@ -332,7 +334,7 @@ User decision (2026-05-25): Barcode-Scanning ist nicht Bestandteil des Projekts.
 
 | Req | Statement |
 |---|---|
-| REQ-ADMIN-FULL-001 | Beyond the minimal Phase-1 admin tools, the full Admin Web UI SHALL include: ingredient peer-review queue, field-PR queue, supplement peer-review queue, user moderation (ban/unban/delete), invite-code management, report queue (gemeldete Rezepte/User), statistics dashboard (User-Count, DB-Größe, Top-Rezepte, Phase-Completion-Status). |
+| REQ-ADMIN-FULL-001 | Beyond the minimal Phase-1 admin tools, the full Admin Web UI SHALL include: ingredient peer-review queue, field-PR queue, supplement peer-review queue, **recipe peer-review queue (approve/reject PUBLIC_PENDING_REVIEW recipes)**, user moderation (ban/unban/delete), invite-code management, report queue (gemeldete Rezepte/User), statistics dashboard (User-Count, DB-Größe, Top-Rezepte, Phase-Completion-Status), **full database editor with CRUD on ingredients, supplements, and recipes**. |
 | REQ-ADMIN-FULL-002 | Admin role SHALL be assignable to existing users (DB flag); never via self-service.
 
 ---

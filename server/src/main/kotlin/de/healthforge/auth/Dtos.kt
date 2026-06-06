@@ -10,8 +10,6 @@ import java.util.UUID
 // ============ Requests ============
 
 data class RegisterRequest(
-    @field:NotBlank
-    val inviteCode: String,
     @field:Email @field:NotBlank
     val email: String,
     @field:NotBlank @field:Size(min = 1, max = 50)

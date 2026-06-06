@@ -15,7 +15,6 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import FlagIcon from '@mui/icons-material/Flag';
 import ScienceIcon from '@mui/icons-material/Science';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
@@ -39,7 +38,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/audit', label: 'Audit-Log', icon: <HistoryIcon /> },
-  { path: '/invites', label: 'Einladungen', icon: <MailOutlineIcon /> },
   { path: '/reports', label: 'Reports', icon: <FlagIcon /> },
   { path: '/supplements', label: 'Supplements', icon: <ScienceIcon /> },
   { path: '/ingredients', label: 'Zutaten', icon: <RestaurantMenuIcon /> },

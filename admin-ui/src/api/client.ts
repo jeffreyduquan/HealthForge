@@ -378,6 +378,11 @@ export async function getReleaseDownloadUrl(id: string): Promise<{ url: string; 
   return data;
 }
 
+export async function createDownloadLink(id: string): Promise<{ code: string; url: string; filename: string }> {
+  const { data } = await api.post<{ code: string; url: string; filename: string }>(`/admin/v1/releases/${id}/download-link`);
+  return data;
+}
+
 // ============ Recipe Queue API (P7.S4) ============
 
 export interface RecipeQueueEntry {

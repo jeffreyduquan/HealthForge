@@ -486,20 +486,20 @@ Bottom-Sheet mit Top-Toggle (Lebensmittel / Rezept / Supplement) + Suchleiste + 
 │ HealthForge Admin       anna_admin ▾   Logout  │
 ├────────────┬───────────────────────────────────┤
 │ Dashboard  │                                   │
-│ Lebensmit. │      Content-Area                  │
-│  ├ Queue   │                                   │
-│  ├ Editor  │                                   │
-│  └ Field-PR│                                   │
+│ Audit-Log  │                                   │
+│ Einladungen│      Content-Area                  │
+│ Reports    │                                   │
 │ Supplements│                                   │
 │  └ Queue   │                                   │
+│ Zutaten    │                                   │
+│  ├ Queue   │                                   │
+│  └ Field-PR│                                   │
 │ Rezepte    │                                   │
+│  ├ Queue   │  ← Peer-Review                    │
 │  └ Reports │                                   │
-│ User       │                                   │
-│ Invites    │                                   │
-│ Jobs       │                                   │
-│  └ OFF-Sync│                                   │
-│ Audit-Log  │                                   │
-│ Statistiken│                                   │
+│ Nutzer     │                                   │
+│ APK Release│                                   │
+│ Datenbank  │  ← CRUD-Editor                     │
 └────────────┴───────────────────────────────────┘
 ```
 
@@ -507,22 +507,22 @@ Bottom-Sheet mit Top-Toggle (Lebensmittel / Rezept / Supplement) + Suchleiste + 
 
 | Seite | Inhalt |
 |-------|--------|
-| **Dashboard** | KPI-Cards: User-Count, Lebensmittel total, Pending-Queues (3), DB-Größe, Phase-Status |
-| **Lebensmittel → Queue** | Tabelle mit pending Submissions, Spalten: Name, Submitter, Datum, Aktion (Approve/Reject/Edit) |
-| **Lebensmittel → Editor** | Volltext-Suche + Inline-Edit aller Felder (Nährwerte/Allergene/Histamin/FODMAP/Bild) |
-| **Lebensmittel → Field-PR** | Tabelle pending Field-Updates: Lebensmittel, Feld, alt → neu, Submitter, Begründung, Aktion |
-| **Supplements → Queue** | analog Lebensmittel-Queue |
-| **Rezepte → Reports** | Gemeldete Rezepte, Grund, Reporter, Aktion (Approve report → Recipe verbergen/löschen, oder Reject) |
-| **User** | Suche, Filter (active/banned/admin), Detail-Drawer: Account-Info, Aktionen (Ban/Unban/Delete/Admin-Toggle) |
-| **Invites** | Liste, "Neuer Code"-Button (mit n-uses + expires), Deaktivieren |
-| **Jobs → OFF-Sync** | Last-Run-Status, Trigger-Button, Log-Tail |
+| **Dashboard** | KPI-Cards: User-Count, Lebensmittel total, Pending-Queues (3), Pending-Rezepte, DB-Größe, Phase-Status |
 | **Audit-Log** | Tabelle: Zeitstempel, Admin, Aktion, Target, Diff |
-| **Statistiken** | Charts: User-Wachstum, DB-Wachstum, Top-Rezepte, Top-Gruppen |
+| **Einladungen** | Liste, "Neuer Code"-Button (mit n-uses + expires), Deaktivieren. Der Code kann auch als einmaliger APK-Download-Link verwendet werden. |
+| **Reports** | Gemeldete Rezepte, Grund, Reporter, Aktion (Resolve/Dismiss/Recipe-Löschen) |
+| **Supplements → Queue** | Pending Supplement-Vorschläge, Approve/Reject mit Note |
+| **Zutaten → Queue** | Pending Ingredient-Submissions, Approve/Reject mit Note |
+| **Zutaten → Field-PR** | Tabelle pending Field-Updates: Lebensmittel, Feld, alt → neu, Submitter, Begründung, Aktion |
+| **Rezepte → Queue** | Pending PUBLIC-Rezepte (PENDING_REVIEW): Title, Status, Slot-Tags, Aktionen (Approve = veröffentlichen / Reject = ablehnen mit Note) |
+| **Nutzer** | Suche, Filter (active/banned/admin), Detail-Drawer: Account-Info, Aktionen (Ban/Unban/Delete) |
+| **APK Releases** | Upload APK (Version + Changelog + File), Liste vorhandener Releases mit Download/Löschen |
+| **Datenbank** | 3 Tabs: Zutaten / Supplements / Rezepte. Suche, Editieren, Neu anlegen, Löschen. Jede Änderung mit Warning-Bestätigung. |
 
 ### 9.3 Auth
 - Eigener Login-Screen (Email/Pwd)
 - Backend prüft `users.role = ADMIN`
-- Session via JWT (gleicher Endpoint wie App), Cookie für Browser (`SameSite=Strict`, `Secure`, `HttpOnly`)
+- Session via JWT (gleicher Endpoint wie App)
 
 ---
 

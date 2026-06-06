@@ -194,8 +194,10 @@
 | REQ-ADMIN-002 | P1 | 🟡 | Server-Endpoints `POST /admin/etl/run`, `GET /admin/etl/runs/{src}` ✅ (`server/etl/EtlController.kt`); Reports + Users (P3.S3) ✅ (`community/AdminReportController.kt`, `auth/AdminUserController.kt`, `admin-ui/src/pages/RecipeReportsPage.tsx`, `admin-ui/src/pages/UsersPage.tsx`). **ETL-UI (JobsPage) akzeptiert als Post-v1.0 Backlog**. 637 USDA-Zutaten per ETL importiert (2026-06-06). |
 | REQ-ADMIN-003 | P3/P4 | 🟡 | siehe REQ-ADMIN-FULL-001/002. Audit-Log, Statistik, Queues (Supplements/Ingredients/Field-PRs) ✅ |
 | REQ-ADMIN-004 | P4 | ✅ | APK-Upload via Admin-UI: `server/admin/AdminReleaseController.kt` (`POST /admin/v1/releases`), `admin-ui/src/pages/ReleasesPage.tsx`, MinIO-Bucket `releases` |
-| REQ-ADMIN-005 | P4 | ✅ | APK-Download via Presigned-URL: `GET /admin/v1/releases/{id}/download` → MinIO Presigned-URL (1h Gültigkeit) |
+| REQ-ADMIN-005 | P4 | ✅ | APK-Download via Presigned-URL: `GET /admin/v1/releases/{id}/download` → MinIO Presigned-URL (1h Gültigkeit). **Public (one-time via invite code)**: `PublicReleaseController` (`GET /v1/releases/{id}/download?code={inviteCode}`), `InviteEntity.downloadUsed`-Flag. |
 | REQ-ADMIN-006 | P4 | ✅ | Auto-Deploy Admin-UI + Server bei Push auf main via GitHub Actions (`.github/workflows/admin-ui.yml` + `server.yml` mit SSH-Deploy) |
+| REQ-ADMIN-007 | P7 | ✅ | Rezept-Review-Queue: `server/recipe/AdminRecipeController.kt` (Queue + Approve/Reject). RecipeStatus um `PENDING_REVIEW` + `REJECTED` erweitert. PUBLIC-Rezepte von Nicht-Admins erhalten `PENDING_REVIEW`. `admin-ui/src/pages/RecipeQueuePage.tsx`. |
+| REQ-ADMIN-008 | P7 | ✅ | DB-Editor: `server/admin/AdminCrudController.kt` (`/admin/v1/crud/{ingredients,supplements,recipes}` — GET/PUT/POST/DELETE). `admin-ui/src/pages/DatabasePage.tsx` mit Warning-Toast bei Änderungen. Jede Mutation via Audit-Log getrackt. |
 
 ## §6.1 Groups (P3)
 
@@ -285,7 +287,7 @@
 | REQ-BARCODE-001 | — | 🗑️ REMOVED (2026-05-25) | Scope-cut: no barcode scanner |
 | REQ-BARCODE-002 | — | 🗑️ REMOVED (2026-05-25) | Scope-cut |
 | REQ-BARCODE-003 | — | 🗑️ REMOVED (2026-05-25) | Scope-cut |
-| REQ-ADMIN-FULL-001 | P3/P4 | ✅ | Sidebar-Layout: `admin-ui/src/components/Layout.tsx`; Pages: `DashboardPage.tsx`, `StatisticsPage.tsx`, `AuditLogPage.tsx`, plus bestehende Queues (Invites/Reports/Ingredients/Field-PRs/Supplements/Users). Server: `de/healthforge/admin/AdminStatsController.kt` (`/admin/v1/stats/dashboard` + `/statistics`), `AdminAuditController.kt` (`/admin/v1/audit` mit Filter actor/action/from/to/limit). |
+| REQ-ADMIN-FULL-001 | P3/P4 | ✅ | Sidebar-Layout: `admin-ui/src/components/Layout.tsx`; Pages: `DashboardPage.tsx`, `AuditLogPage.tsx`, plus bestehende Queues (Invites/Reports/Ingredients/Field-PRs/Supplements/Users). **Erweitert P7.S4:** `RecipeQueuePage.tsx` (Rezept-Review mit Approve/Reject), `DatabasePage.tsx` (CRUD Zutaten/Supplements/Rezepte mit Warning-Toast). Server: `AdminRecipeController.kt` (`/admin/v1/recipes/queue` + approve/reject), `AdminCrudController.kt` (`/admin/v1/crud/ingredients|supplements|recipes`). Statistics-Seite entfernt (Dashboard deckt ab). |
 | REQ-ADMIN-FULL-002 | P1 | ❌ | `users.role` ENUM-Spalte; Setzen nur via DB-SQL (kein UI) |
 
 ## §10 Data Quality (P1)

@@ -72,6 +72,22 @@ ssh root@vps "sleep 10 && curl -sf https://api.healthforge.endgear.de/actuator/h
 
 Wenn Health nicht GREEN → siehe §4 Rollback.
 
+### 2.3a Datenbank-Migrationen manuell ausführen
+
+Manche Änderungen (neue Spalten auf bestehenden Tabellen) brauchen eine manuelle SQL-Migration zusätzlich zum Code-Deploy.
+
+```powershell
+ssh root@vps "docker exec -it healthforge-postgres psql -U healthforge -d healthforge"
+```
+
+Dann folgende SQL ausführen (für die P7.S4-Änderungen):
+
+```sql
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS download_used BOOLEAN DEFAULT FALSE;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS download_used_at TIMESTAMP;
+\q
+```
+
 ### 2.4 Admin-UI deployen
 
 CI rsync't das `dist/`-Verzeichnis nach `/opt/healthforge/admin-ui-dist/`.

@@ -7,8 +7,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   IconButton,
+  InputAdornment,
   Paper,
   Snackbar,
   Stack,
@@ -19,13 +21,17 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
+import LinkIcon from '@mui/icons-material/Link';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  createDownloadLink,
   listReleases,
   uploadRelease,
   deleteRelease,
@@ -49,6 +55,7 @@ export default function ReleasesPage() {
   const [changelog, setChangelog] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [downloadLink, setDownloadLink] = useState<{ url: string; filename: string } | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
 
   const q = useQuery({ queryKey: ['releases'], queryFn: listReleases });
@@ -91,6 +98,16 @@ export default function ReleasesPage() {
     onError: () => setSnack('Download fehlgeschlagen'),
   });
 
+  const downloadLinkM = useMutation({
+    mutationFn: (id: string) => createDownloadLink(id),
+    onSuccess: (data) => {
+      setDownloadLink({ url: data.url, filename: data.filename });
+      navigator.clipboard.writeText(data.url);
+      setSnack('🔗 Download-Link kopiert');
+    },
+    onError: () => setSnack('Link-Generierung fehlgeschlagen'),
+  });
+
   return (
     <Box sx={{ p: 3 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -131,10 +148,19 @@ export default function ReleasesPage() {
                       size="small"
                       color="primary"
                       onClick={() => downloadM.mutate(r.id)}
-                      title="Download"
+                      title="APK herunterladen"
                     >
                       <DownloadIcon />
                     </IconButton>
+                    <Tooltip title="Einmaligen Download-Link generieren">
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        onClick={() => downloadLinkM.mutate(r.id)}
+                      >
+                        <LinkIcon />
+                      </IconButton>
+                    </Tooltip>
                     <IconButton
                       size="small"
                       color="error"
@@ -201,6 +227,36 @@ export default function ReleasesPage() {
           >
             {uploadM.isPending ? <CircularProgress size={20} /> : 'Hochladen'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Download Link Dialog */}
+      <Dialog open={!!downloadLink} onClose={() => setDownloadLink(null)} maxWidth="md" fullWidth>
+        <DialogTitle>🔗 Einmaliger Download-Link</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Der Link wurde automatisch kopiert. Er ist <strong>7 Tage gültig</strong> und kann nur <strong>einmal</strong> verwendet werden.
+            Teile ihn mit dem Empfänger.
+          </DialogContentText>
+          {downloadLink && (
+            <TextField
+              fullWidth
+              value={downloadLink.url}
+              InputProps={{
+                readOnly: true,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => { navigator.clipboard.writeText(downloadLink.url); setSnack('🔗 Link kopiert'); }}>
+                      <ContentCopyIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDownloadLink(null)}>Schließen</Button>
         </DialogActions>
       </Dialog>
 

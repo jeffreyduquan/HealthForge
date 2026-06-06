@@ -2,7 +2,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AuditLogPage from './pages/AuditLogPage';
-import InvitesPage from './pages/InvitesPage';
 import RecipeReportsPage from './pages/RecipeReportsPage';
 import SupplementsQueuePage from './pages/SupplementsQueuePage';
 import IngredientQueuePage from './pages/IngredientQueuePage';
@@ -34,7 +33,6 @@ export function App() {
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/audit" element={<AuditLogPage />} />
-                <Route path="/invites" element={<InvitesPage />} />
                 <Route path="/reports" element={<RecipeReportsPage />} />
                 <Route path="/supplements" element={<SupplementsQueuePage />} />
                 <Route path="/ingredients" element={<IngredientQueuePage />} />

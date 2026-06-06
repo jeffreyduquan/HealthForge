@@ -2118,6 +2118,47 @@ Diese Tasks laufen kontinuierlich, nicht in einem Sprint gebunden:
 - REQ-AUTOPLAN-003 → group_ids hinzugefügt
 - REQ-GROUP-001 → eigener Tab
 
+### Sprint P7.S2 — Admin-UI: Public APK-Download, Rezept-Review, DB-Editor, Statistics-Remove
+**Status:** ✅ DONE (2026-06-06)
+
+**Auslöser:** User-Request: APK-Download soll auch für eingeladene User via Invite-Code funktionieren; Dashboard und Statistics zeigen gleiches → Statistics löschen; öffentliche Rezepte brauchen Peer-Review wie Lebensmittel; Admin braucht DB-Editor für Recipes/Supplements/Ingredients.
+
+**Deliverables (Server):**
+- ✅ `InviteEntity` — neue Felder `download_used`, `download_used_at`
+- ✅ `PublicReleaseController` (`GET /v1/releases/{id}/download?code=INVITECODE`) — prüft Invite-Gültigkeit + Einmaligkeits-Flag, gibt presigned MinIO-URL zurück
+- ✅ `GET /v1/releases/latest` — öffentlich, liefert aktuellstes Release (Metadata)
+- ✅ `SecurityConfig` — `/v1/releases/**` freigegeben
+- ✅ `ApkReleaseRepo` — neue Query `findFirstByOrderByCreatedAtDesc()`
+- ✅ `RecipeStatus` um `PENDING_REVIEW` + `REJECTED` erweitert
+- ✅ `RecipeService.create()` — PUBLIC-Rezepte von Nicht-Admins bekommen `PENDING_REVIEW` statt direkt `PUBLISHED`
+- ✅ `AdminRecipeController` — `GET /admin/v1/recipes/queue`, `POST .../{id}/approve`, `POST .../{id}/reject`
+- ✅ `RecipeRepo` — neue Queries `findAllByStatusOrderByCreatedAtAsc` + `findAllByStatusInOrderByCreatedAtAsc`
+- ✅ `AdminStatsController` / `DashboardDto` — neues Feld `pending_recipes`
+- ✅ `AdminCrudController` — Voll-CRUD für Ingredients, Supplements, Recipes unter `/admin/v1/crud/{entity}` mit Audit-Log
+
+**Deliverables (Admin-UI):**
+- ✅ `ReleasesPage.tsx` — Download via `createElement('a')` statt `window.open` (Popup-Blocker-Umgehung) + `onError`-Handler
+- ✅ `StatisticsPage.tsx` — Route `/statistics` + Nav-Eintrag entfernt (ersetzt durch Recipe Queue + Database)
+- ✅ `RecipeQueuePage.tsx` — Review-Queue mit Genehmigen/Ablehnen-Dialog
+- ✅ `DatabasePage.tsx` — Tabs für Zutaten/Supplements/Rezepte, Suche, Edit-Dialog mit Warning-Toast, Lösch-Bestätigung
+- ✅ `client.ts` — neue API-Funktionen für Recipe Queue + CRUD
+- ✅ `App.tsx` — Routen `/recipes`, `/database`; `/statistics` entfernt
+- ✅ `Layout.tsx` — Nav-Einträge "Statistik"→"Rezepte"+"Datenbank"
+- ✅ `DashboardPage.tsx` — Neues Kärtchen "Pending Rezepte"
+
+**Doc-Updates:**
+- ✅ `ReqSpec.md` — REQ-ADMIN-005 erweitert (Public Download via Invite), REQ-ADMIN-007 (Recipe Review), REQ-ADMIN-008 (DB Editor), REQ-ADMIN-FULL-001 erweitert
+- ✅ `SprintPlan.md` — dieser Sprint
+- ✅ `UsabilityMap.md` — Admin-UI-Navigation aktualisiert
+- ✅ `Runbook.md` — DB-Migration-Schritt ergänzt
+- ✅ `TraceabilityMatrix.md` — neue REQ-IDs + Status-Updates
+
+**Builds:**
+- ✅ Server `compileKotlin` BUILD SUCCESSFUL
+- ✅ Admin-UI `tsc --noEmit` + `vite build` BUILD SUCCESSFUL
+
+**REQ-IDs:** REQ-ADMIN-005 (erweitert), REQ-ADMIN-007 (neu), REQ-ADMIN-008 (neu), REQ-ADMIN-FULL-001 (erweitert)
+
 ---
 
 ## 6. Workflow-Reminders

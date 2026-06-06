@@ -1,6 +1,8 @@
 package de.healthforge.admin
 
 import de.healthforge.auth.AuthPrincipal
+import de.healthforge.auth.InviteEntity
+import de.healthforge.auth.InviteRepository
 import de.healthforge.common.ApiException
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.MinioClient
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.beans.factory.annotation.Value
 import java.io.ByteArrayInputStream
+import java.security.SecureRandom
+import java.time.Instant
 import java.util.UUID
 
 @RestController
@@ -23,10 +27,13 @@ import java.util.UUID
 @PreAuthorize("hasRole('ADMIN')")
 class AdminReleaseController(
     private val repo: ApkReleaseRepo,
+    private val inviteRepo: InviteRepository,
     private val minio: MinioClient,
     @Value("\${healthforge.minio.public-base-url}") private val publicBaseUrl: String,
 ) {
     private val bucket = "releases"
+    private val secureRandom = SecureRandom()
+    private val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
     @GetMapping
     fun list(): List<ApkReleaseDto> =
@@ -103,6 +110,24 @@ class AdminReleaseController(
                 .build()
         )
         return mapOf("url" to url, "filename" to release.filename)
+    }
+
+    /** Generates a one-time download link for a release (used instead of invite codes). */
+    @PostMapping("/{id}/download-link")
+    @Transactional
+    fun generateDownloadLink(@PathVariable id: UUID): Map<String, String> {
+        val release = repo.findById(id).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "RELEASE_NOT_FOUND", "Release nicht gefunden")
+        }
+        val code = (1..12).map { alphabet[secureRandom.nextInt(alphabet.length)] }.joinToString("")
+        val invite = InviteEntity(
+            code = code,
+            expiresAt = Instant.now().plusSeconds(7 * 86_400), // 7 days gültig
+            downloadUsed = false,
+        )
+        inviteRepo.save(invite)
+        val downloadUrl = "https://api.healthforge.endgear.de/v1/releases/${release.id}/download?code=${code}"
+        return mapOf("code" to code, "url" to downloadUrl, "filename" to release.filename)
     }
 }
 

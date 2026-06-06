@@ -20,7 +20,6 @@ import java.util.UUID
 @Service
 class AuthService(
     private val userRepo: UserRepository,
-    private val inviteRepo: InviteRepository,
     private val refreshRepo: RefreshTokenRepository,
     private val emailVerifyRepo: EmailVerificationTokenRepository,
     private val passwordResetRepo: PasswordResetTokenRepository,
@@ -28,7 +27,6 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val mailService: MailService,
     private val auditService: AuditLogService,
-    @Value("\${healthforge.invite.require-invite}") private val requireInvite: Boolean,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
     private val secureRandom = SecureRandom()
@@ -38,29 +36,10 @@ class AuthService(
         if (userRepo.existsByEmail(req.email.lowercase())) {
             throw ApiException(HttpStatus.CONFLICT, "EMAIL_TAKEN", "Email already registered")
         }
-        if (requireInvite) {
-            val invite = inviteRepo.findByCode(req.inviteCode).orElseThrow {
-                ApiException(HttpStatus.FORBIDDEN, "INVALID_INVITE", "Invite code invalid")
-            }
-            if (invite.usedAt != null) {
-                throw ApiException(HttpStatus.FORBIDDEN, "INVITE_USED", "Invite already redeemed")
-            }
-            if (invite.expiresAt.isBefore(Instant.now())) {
-                throw ApiException(HttpStatus.FORBIDDEN, "INVITE_EXPIRED", "Invite expired")
-            }
-            val user = createUser(req)
-            invite.usedAt = Instant.now()
-            invite.usedBy = user.id
-            inviteRepo.save(invite)
-            issueVerificationEmail(user)
-            auditService.record("AUTH_REGISTER", actorUserId = user.id, ipAddress = request.remoteAddr)
-            return issueTokens(user, request)
-        } else {
-            val user = createUser(req)
-            issueVerificationEmail(user)
-            auditService.record("AUTH_REGISTER", actorUserId = user.id, ipAddress = request.remoteAddr)
-            return issueTokens(user, request)
-        }
+        val user = createUser(req)
+        issueVerificationEmail(user)
+        auditService.record("AUTH_REGISTER", actorUserId = user.id, ipAddress = request.remoteAddr)
+        return issueTokens(user, request)
     }
 
     private fun createUser(req: RegisterRequest): UserEntity {
