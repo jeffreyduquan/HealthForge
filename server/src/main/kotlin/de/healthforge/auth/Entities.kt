@@ -75,6 +75,12 @@ class InviteEntity(
     @Column(name = "expires_at", nullable = false)
     var expiresAt: Instant,
 
+    @Column(name = "download_used")
+    var downloadUsed: Boolean = false,
+
+    @Column(name = "download_used_at")
+    var downloadUsedAt: Instant? = null,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: Instant = Instant.now(),
 )

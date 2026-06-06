@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.UUID
 
 enum class RecipeVisibility { PUBLIC, PRIVATE, GROUP }
-enum class RecipeStatus { PUBLISHED, REMOVED }
+enum class RecipeStatus { PENDING_REVIEW, PUBLISHED, REJECTED, REMOVED }
 enum class SlotTag { BREAKFAST, LUNCH, DINNER, SNACK }
 enum class CommunityRatingValue { RECOMMEND, NOT_RECOMMEND }
 

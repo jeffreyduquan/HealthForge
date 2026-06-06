@@ -281,6 +281,7 @@ export interface AdminDashboard {
   pending_ingredients: number;
   pending_field_prs: number;
   pending_supplements: number;
+  pending_recipes: number;
   open_recipe_reports: number;
 }
 
@@ -362,7 +363,9 @@ export async function uploadRelease(
   form.append('file', file);
   form.append('version', version);
   form.append('changelog', changelog);
-  const { data } = await api.post<ApkRelease>('/admin/v1/releases', form);
+  const { data } = await api.post<ApkRelease>('/admin/v1/releases', form, {
+    headers: { 'Content-Type': undefined as unknown as string },
+  });
   return data;
 }
 
@@ -373,4 +376,151 @@ export async function deleteRelease(id: string): Promise<void> {
 export async function getReleaseDownloadUrl(id: string): Promise<{ url: string; filename: string }> {
   const { data } = await api.get<{ url: string; filename: string }>(`/admin/v1/releases/${id}/download`);
   return data;
+}
+
+// ============ Recipe Queue API (P7.S4) ============
+
+export interface RecipeQueueEntry {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  visibility: string;
+  authorId: string;
+  slotTags: string[];
+  createdAt: string;
+}
+
+export async function listRecipeQueue(onlyPending = true): Promise<RecipeQueueEntry[]> {
+  const { data } = await api.get<RecipeQueueEntry[]>('/admin/v1/recipes/queue', { params: { onlyPending } });
+  return data;
+}
+
+export async function approveRecipe(id: string): Promise<void> {
+  await api.post(`/admin/v1/recipes/${id}/approve`);
+}
+
+export async function rejectRecipe(id: string, note?: string): Promise<void> {
+  await api.post(`/admin/v1/recipes/${id}/reject`, { note: note ?? null });
+}
+
+// ============ Admin DB CRUD API (P7.S4) ============
+
+export interface IngredientCrud {
+  id: string;
+  name_de: string;
+  brand: string | null;
+  barcode: string | null;
+  source: string;
+  status: string;
+  locked: boolean;
+  energy_kcal_per_100g: number | null;
+  protein_g_per_100g: number | null;
+  carbs_g_per_100g: number | null;
+  sugar_g_per_100g: number | null;
+  fat_g_per_100g: number | null;
+  satfat_g_per_100g: number | null;
+  fiber_g_per_100g: number | null;
+  salt_g_per_100g: number | null;
+  histamine_score: number | null;
+  allergens_json: string | null;
+  fodmap_flags_json: string | null;
+  micronutrients_json: string | null;
+  created_at: string;
+}
+
+export async function listAllIngredients(q?: string): Promise<IngredientCrud[]> {
+  const { data } = await api.get<IngredientCrud[]>('/admin/v1/crud/ingredients', { params: { q, limit: 500 } });
+  return data;
+}
+
+export async function getIngredient(id: string): Promise<IngredientCrud> {
+  const { data } = await api.get<IngredientCrud>(`/admin/v1/crud/ingredients/${id}`);
+  return data;
+}
+
+export async function updateIngredient(id: string, input: Partial<IngredientCrud>): Promise<IngredientCrud> {
+  const { data } = await api.put<IngredientCrud>(`/admin/v1/crud/ingredients/${id}`, input);
+  return data;
+}
+
+export async function createIngredient(input: Partial<IngredientCrud>): Promise<{ id: string }> {
+  const { data } = await api.post<{ id: string }>('/admin/v1/crud/ingredients', input);
+  return data;
+}
+
+export async function deleteIngredient(id: string): Promise<void> {
+  await api.delete(`/admin/v1/crud/ingredients/${id}`);
+}
+
+export interface SupplementCrud {
+  id: string;
+  name_de: string;
+  brand: string | null;
+  unit_label: string;
+  default_dose: number;
+  kcal_per_dose: number | null;
+  protein_per_dose: number | null;
+  carbs_per_dose: number | null;
+  fat_per_dose: number | null;
+  micronutrients_json: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export async function listAllSupplements(q?: string): Promise<SupplementCrud[]> {
+  const { data } = await api.get<SupplementCrud[]>('/admin/v1/crud/supplements', { params: { q } });
+  return data;
+}
+
+export async function getSupplement(id: string): Promise<SupplementCrud> {
+  const { data } = await api.get<SupplementCrud>(`/admin/v1/crud/supplements/${id}`);
+  return data;
+}
+
+export async function updateSupplement(id: string, input: Partial<SupplementCrud>): Promise<SupplementCrud> {
+  const { data } = await api.put<SupplementCrud>(`/admin/v1/crud/supplements/${id}`, input);
+  return data;
+}
+
+export async function createSupplement(input: Partial<SupplementCrud>): Promise<{ id: string }> {
+  const { data } = await api.post<{ id: string }>('/admin/v1/crud/supplements', input);
+  return data;
+}
+
+export async function deleteSupplement(id: string): Promise<void> {
+  await api.delete(`/admin/v1/crud/supplements/${id}`);
+}
+
+export interface RecipeCrud {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  visibility: string;
+  authorId: string | null;
+  servings: number;
+  prep_minutes: number;
+  cook_minutes: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function listAllRecipes(q?: string): Promise<RecipeCrud[]> {
+  const { data } = await api.get<RecipeCrud[]>('/admin/v1/crud/recipes', { params: { q } });
+  return data;
+}
+
+export async function getRecipe(id: string): Promise<RecipeCrud> {
+  const { data } = await api.get<RecipeCrud>(`/admin/v1/crud/recipes/${id}`);
+  return data;
+}
+
+export async function updateRecipe(id: string, input: Partial<RecipeCrud>): Promise<RecipeCrud> {
+  const { data } = await api.put<RecipeCrud>(`/admin/v1/crud/recipes/${id}`, input);
+  return data;
+}
+
+export async function deleteRecipeCrud(id: string): Promise<void> {
+  await api.delete(`/admin/v1/crud/recipes/${id}`);
 }

@@ -22,8 +22,9 @@ import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import GroupIcon from '@mui/icons-material/Group';
 import HistoryIcon from '@mui/icons-material/History';
-import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import StorageIcon from '@mui/icons-material/Storage';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../api/client';
 
@@ -37,15 +38,16 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: <DashboardIcon /> },
-  { path: '/statistics', label: 'Statistik', icon: <QueryStatsIcon /> },
   { path: '/audit', label: 'Audit-Log', icon: <HistoryIcon /> },
   { path: '/invites', label: 'Einladungen', icon: <MailOutlineIcon /> },
   { path: '/reports', label: 'Reports', icon: <FlagIcon /> },
   { path: '/supplements', label: 'Supplements', icon: <ScienceIcon /> },
   { path: '/ingredients', label: 'Zutaten', icon: <RestaurantMenuIcon /> },
   { path: '/field-prs', label: 'Field-PRs', icon: <EditNoteIcon /> },
+  { path: '/recipes', label: 'Rezepte', icon: <MenuBookIcon /> },
   { path: '/users', label: 'Nutzer', icon: <GroupIcon /> },
   { path: '/releases', label: 'APK Releases', icon: <SystemUpdateAltIcon /> },
+  { path: '/database', label: 'Datenbank', icon: <StorageIcon /> },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

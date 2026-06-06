@@ -5,4 +5,5 @@ import java.util.UUID
 
 interface ApkReleaseRepo : JpaRepository<ApkRelease, UUID> {
     fun findAllByOrderByCreatedAtDesc(): List<ApkRelease>
+    fun findFirstByOrderByCreatedAtDesc(): ApkRelease?
 }

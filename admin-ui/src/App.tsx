@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import StatisticsPage from './pages/StatisticsPage';
 import AuditLogPage from './pages/AuditLogPage';
 import InvitesPage from './pages/InvitesPage';
 import RecipeReportsPage from './pages/RecipeReportsPage';
@@ -10,6 +9,8 @@ import IngredientQueuePage from './pages/IngredientQueuePage';
 import ReleasesPage from './pages/ReleasesPage';
 import FieldPrPage from './pages/FieldPrPage';
 import UsersPage from './pages/UsersPage';
+import RecipeQueuePage from './pages/RecipeQueuePage';
+import DatabasePage from './pages/DatabasePage';
 import Layout from './components/Layout';
 import { tokens } from './api/client';
 
@@ -32,7 +33,6 @@ export function App() {
             <Layout>
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
-                <Route path="/statistics" element={<StatisticsPage />} />
                 <Route path="/audit" element={<AuditLogPage />} />
                 <Route path="/invites" element={<InvitesPage />} />
                 <Route path="/reports" element={<RecipeReportsPage />} />
@@ -41,6 +41,8 @@ export function App() {
                 <Route path="/field-prs" element={<FieldPrPage />} />
                 <Route path="/users" element={<UsersPage />} />
                 <Route path="/releases" element={<ReleasesPage />} />
+                <Route path="/recipes" element={<RecipeQueuePage />} />
+                <Route path="/database" element={<DatabasePage />} />
                 <Route path="*" element={<DashboardPage />} />
               </Routes>
             </Layout>

@@ -79,8 +79,16 @@ export default function ReleasesPage() {
   const downloadM = useMutation({
     mutationFn: (id: string) => getReleaseDownloadUrl(id),
     onSuccess: (data) => {
-      window.open(data.url, '_blank');
+      // Zuverlässiger Download via temporärem Anchor statt window.open (Popup-Blocker)
+      const a = document.createElement('a');
+      a.href = data.url;
+      a.download = data.filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     },
+    onError: () => setSnack('Download fehlgeschlagen'),
   });
 
   return (

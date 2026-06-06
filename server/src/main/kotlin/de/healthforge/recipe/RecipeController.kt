@@ -68,7 +68,7 @@ class RecipeController(
         @Valid @RequestBody req: RecipeUpsertRequest,
     ): ResponseEntity<Map<String, UUID>> {
         val p = require(principal)
-        val id = service.create(req, p.userId)
+        val id = service.create(req, p.userId, p.role.name)
         return ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to id))
     }
 

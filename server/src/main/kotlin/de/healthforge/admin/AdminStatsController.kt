@@ -9,6 +9,7 @@ import de.healthforge.ingredient.IngredientFieldPrRepository
 import de.healthforge.ingredient.IngredientRepository
 import de.healthforge.ingredient.IngredientStatus
 import de.healthforge.recipe.RecipeRepo
+import de.healthforge.recipe.RecipeStatus
 import de.healthforge.supplement.PublicSupplementRepository
 import de.healthforge.supplement.SupplementSuggestionRepository
 import de.healthforge.supplement.SupplementSuggestionStatus
@@ -51,6 +52,7 @@ class AdminStatsController(
             pendingIngredients = ingredients.findAllByStatusOrderByCreatedAtAsc(IngredientStatus.PENDING.name).size.toLong(),
             pendingFieldPrs = ingredientFieldPrs.findAllByStatusOrderByCreatedAtAsc(IngredientFieldPrStatusPENDING).size.toLong(),
             pendingSupplements = supplementSuggestions.findAllByStatusOrderByCreatedAtAsc(SupplementSuggestionStatus.PENDING.name).size.toLong(),
+            pendingRecipes = recipes.findAllByStatusOrderByCreatedAtAsc(RecipeStatus.PENDING_REVIEW.name).size.toLong(),
             openRecipeReports = recipeReports.countByStatus("OPEN"),
         )
     }
@@ -86,6 +88,7 @@ data class DashboardDto(
     @JsonProperty("pending_ingredients") val pendingIngredients: Long,
     @JsonProperty("pending_field_prs") val pendingFieldPrs: Long,
     @JsonProperty("pending_supplements") val pendingSupplements: Long,
+    @JsonProperty("pending_recipes") val pendingRecipes: Long,
     @JsonProperty("open_recipe_reports") val openRecipeReports: Long,
 )
 

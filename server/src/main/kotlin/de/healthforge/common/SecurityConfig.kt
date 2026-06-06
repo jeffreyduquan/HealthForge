@@ -36,6 +36,7 @@ class SecurityConfig(
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers("/v1/auth/**").permitAll()
                     .requestMatchers("/v1/ping").permitAll()
+                    .requestMatchers("/v1/releases/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }

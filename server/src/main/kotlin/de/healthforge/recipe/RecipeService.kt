@@ -1,5 +1,7 @@
 package de.healthforge.recipe
 
+import de.healthforge.auth.AuthPrincipal
+import de.healthforge.auth.UserRole
 import de.healthforge.common.ApiException
 import de.healthforge.group.GroupService
 import de.healthforge.ingredient.IngredientRepository
@@ -121,10 +123,14 @@ class RecipeService(
     // ---------- Create / Update / Delete ----------
 
     @Transactional
-    fun create(req: RecipeUpsertRequest, authorId: UUID): UUID {
+    fun create(req: RecipeUpsertRequest, authorId: UUID, principalRole: String? = null): UUID {
         validate(req)
         ensureGroupMembership(req, authorId)
         val now = Instant.now()
+        // Öffentliche Rezepte von Nicht-Admin-Usern brauchen Review
+        val isPublic = req.visibility == RecipeVisibility.PUBLIC
+        val isAdmin = principalRole == UserRole.ADMIN.name
+        val status = if (isPublic && !isAdmin) RecipeStatus.PENDING_REVIEW.name else RecipeStatus.PUBLISHED.name
         val recipe = RecipeEntity(
             id = UUID.randomUUID(),
             authorId = authorId,
@@ -135,7 +141,7 @@ class RecipeService(
             prepMinutes = req.prepMinutes,
             cookMinutes = req.cookMinutes,
             slotTags = req.slotTags.map { it.name }.toTypedArray(),
-            status = RecipeStatus.PUBLISHED.name,
+            status = status,
             visibility = req.visibility.name,
             groupId = if (req.visibility == RecipeVisibility.GROUP) req.groupId else null,
             isOfficial = false,

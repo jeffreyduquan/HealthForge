@@ -42,6 +42,9 @@ export default function DashboardPage() {
             <Metric label="Pending Supplements" value={q.data.pending_supplements} highlight={q.data.pending_supplements > 0} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
+            <Metric label="Pending Rezepte" value={q.data.pending_recipes} highlight={q.data.pending_recipes > 0} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
             <Metric label="Offene Reports" value={q.data.open_recipe_reports} highlight={q.data.open_recipe_reports > 0} />
           </Grid>
         </Grid>
