@@ -47,6 +47,26 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleString('de-DE');
 }
 
+function copyToClipboard(text: string) {
+  // Modern approach (works on HTTPS or with user gesture)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text: string) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch { /* ignore */ }
+  document.body.removeChild(ta);
+}
+
 export default function ReleasesPage() {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -102,8 +122,6 @@ export default function ReleasesPage() {
     mutationFn: (id: string) => createDownloadLink(id),
     onSuccess: (data) => {
       setDownloadLink({ url: data.url, filename: data.filename });
-      navigator.clipboard.writeText(data.url);
-      setSnack('🔗 Download-Link kopiert');
     },
     onError: () => setSnack('Link-Generierung fehlgeschlagen'),
   });
@@ -235,8 +253,8 @@ export default function ReleasesPage() {
         <DialogTitle>🔗 Einmaliger Download-Link</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            Der Link wurde automatisch kopiert. Er ist <strong>7 Tage gültig</strong> und kann nur <strong>einmal</strong> verwendet werden.
-            Teile ihn mit dem Empfänger.
+            Der Link ist <strong>7 Tage gültig</strong> und kann nur <strong>einmal</strong> verwendet werden.
+            Klicke auf das Kopier-Icon, um ihn in die Zwischenablage zu kopieren.
           </DialogContentText>
           {downloadLink && (
             <TextField
@@ -246,7 +264,7 @@ export default function ReleasesPage() {
                 readOnly: true,
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => { navigator.clipboard.writeText(downloadLink.url); setSnack('🔗 Link kopiert'); }}>
+                    <IconButton onClick={() => { copyToClipboard(downloadLink.url); setSnack('🔗 Link kopiert'); }}>
                       <ContentCopyIcon />
                     </IconButton>
                   </InputAdornment>
