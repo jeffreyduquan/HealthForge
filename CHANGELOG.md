@@ -64,6 +64,26 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Feature: Download-GUI für geteilte APK-Links (2026-06-06)
+
+**Scope:** Der geteilte Download-Link (`/v1/releases/{id}?code=...`) zeigt jetzt eine mobile-freundliche HTML-Seite mit Versionsinfo, Changelog und Download-Button. Nach dem Download wird der Button ausgegraut ("Bereits heruntergeladen").
+
+**Neu:**
+- `PublicReleaseController.sharePage()` — neuer Endpoint `GET /v1/releases/{id}?code=...` serviert HTML-Seite
+- Drei Status: `valid` → Download-Button blau | `used` → Button ausgegraut | `expired` → Button rot
+- Responsive Design (CSS), optimiert für Handy-Browser
+- Generierte Share-URL zeigt jetzt auf die neue GUI-Seite (statt direktem Download)
+
+**Touched Docs:** Keine
+
+**Touched Code:**
+- NEW `PublicReleaseController.kt` — `sharePage()` + `buildSharePage()` + `formatFileSize()` + `formatDateTime()` + `escapeHtml()`
+- MOD `AdminReleaseController.kt` — Share-URL auf `.../{id}?code=...` geändert
+
+**Verifikation:** `curl http://api.../v1/releases/{id}?code=...` liefert HTML 200; bei verwendetem Code erscheint "✓ Bereits heruntergeladen" mit deaktiviertem Button.
+
+---
+
 ## Production-Deploy + CI/CD + APK-Release-Feature (P1.S8 Phase 2) — 2026-06-06
 
 **Scope:** Erster Production-Deploy auf Netcup VPS (159.195.151.92). Vollständiger Stack (Postgres, MinIO, API, Caddy, Backup) live. CI/CD für Server + Admin-UI aktiviert. APK-Release-Verwaltung im Admin-UI.

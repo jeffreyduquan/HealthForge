@@ -138,7 +138,7 @@ class AdminReleaseController(
             downloadUsed = false,
         )
         inviteRepo.save(invite)
-        val downloadUrl = "${apiPublicUrl}/v1/releases/${release.id}/download?code=${code}"
+        val downloadUrl = "${apiPublicUrl}/v1/releases/${release.id}?code=${code}"
         return mapOf("code" to code, "url" to downloadUrl, "filename" to release.filename)
     }
 }
