@@ -36,6 +36,14 @@ class AdminReleaseController(
     private val secureRandom = SecureRandom()
     private val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
+    /**
+     * Ersetzt den internen MinIO-Host (z.B. minio:9000) in einer Presigned-URL
+     * durch den öffentlich erreichbaren CDN-Host.
+     */
+    private fun fixMinioUrl(rawUrl: String): String {
+        return rawUrl.replace(Regex("https?://[^/]+"), publicBaseUrl.trimEnd('/'))
+    }
+
     @GetMapping
     fun list(): List<ApkReleaseDto> =
         repo.findAllByOrderByCreatedAtDesc().map { it.toDto() }
@@ -102,7 +110,7 @@ class AdminReleaseController(
         val release = repo.findById(id).orElseThrow {
             ApiException(HttpStatus.NOT_FOUND, "RELEASE_NOT_FOUND", "Release nicht gefunden")
         }
-        val url = minio.getPresignedObjectUrl(
+        val internalUrl = minio.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder()
                 .bucket(bucket)
                 .`object`(release.minioKey)
@@ -110,6 +118,7 @@ class AdminReleaseController(
                 .expiry(3600)
                 .build()
         )
+        val url = fixMinioUrl(internalUrl)
         return mapOf("url" to url, "filename" to release.filename)
     }
 

@@ -5,6 +5,7 @@ import de.healthforge.common.ApiException
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.MinioClient
 import io.minio.http.Method
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,8 +25,17 @@ class PublicReleaseController(
     private val releaseRepo: ApkReleaseRepo,
     private val inviteRepo: InviteRepository,
     private val minio: MinioClient,
+    @Value("\${healthforge.minio.public-base-url}") private val publicBaseUrl: String,
 ) {
     private val bucket = "releases"
+
+    /**
+     * Ersetzt den internen MinIO-Host (z.B. minio:9000) in einer Presigned-URL
+     * durch den öffentlich erreichbaren CDN-Host.
+     */
+    private fun fixMinioUrl(rawUrl: String): String {
+        return rawUrl.replace(Regex("https?://[^/]+"), publicBaseUrl.trimEnd('/'))
+    }
 
     @GetMapping("/latest")
     fun latest(): Map<String, Any?> {
@@ -66,7 +76,7 @@ class PublicReleaseController(
         inviteRepo.save(invite)
 
         // Presigned URL generieren (1h gültig)
-        val url = minio.getPresignedObjectUrl(
+        val internalUrl = minio.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder()
                 .bucket(bucket)
                 .`object`(release.minioKey)
@@ -74,6 +84,7 @@ class PublicReleaseController(
                 .expiry(3600)
                 .build()
         )
+        val url = fixMinioUrl(internalUrl)
         return mapOf("url" to url, "filename" to release.filename)
     }
 }
