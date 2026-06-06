@@ -216,6 +216,9 @@ See §10 below.
 | REQ-ADMIN-001 | A **Admin Web UI** SHALL be reachable at `/admin` with admin-role JWT only. |
 | REQ-ADMIN-002 | Phase-1 admin functions: invite-code generation, ingredient curation (edit allergens/SIGHI/FODMAP/nutrition), user listing + ban, OFF resync trigger. |
 | REQ-ADMIN-003 | Phase-3 & Phase-4 admin functions (full peer-review queues, moderation, statistics) are specified in §7.5. |
+| REQ-ADMIN-004 | The Admin SHALL be able to upload APK releases via the Admin Web UI. Releases are stored in MinIO (`releases`-Bucket) and listed with version, changelog, file size, and upload date. |
+| REQ-ADMIN-005 | APK downloads SHALL be available via presigned MinIO URLs (expiring after 1 hour). The download endpoint is `GET /admin/v1/releases/{id}/download`. |
+| REQ-ADMIN-006 | The Admin Web UI SHALL auto-deploy on push to `main` via GitHub Actions (SCP to VPS, served by Caddy). |
 
 ---
 

@@ -11,13 +11,14 @@
 
 ## 1. Servers & Service-Map
 
-| Komponente | Hostname (prod) | Port intern | Container |
-|---|---|---:|---|
-| API | `api.healthforge.endgear.de` | 8080 | `healthforge-api` |
+| Komponente | Hostname (prod) | Port intern/extern | Container |
+|---|---:|---|
+| API | `api.healthforge.endgear.de` | 8080 intern | `healthforge-api` |
 | Admin-UI | `admin.healthforge.endgear.de` | static via Caddy | `healthforge-caddy` |
-| MinIO (objects) | `cdn.healthforge.endgear.de` | 9000 / 9001 (console) | `healthforge-minio` |
+| Caddy (HealthForge) | — | :8080 (HTTP) / :8443 (HTTPS) extern | `healthforge-caddy` |
+| Caddy (Dwight) | dwight.endgear.de | :80 / :443 extern | `dwight-caddy-1` |
+| MinIO (objects) | `cdn.healthforge.endgear.de` | 9000 | `healthforge-minio` |
 | Postgres | (intern) | 5432 | `healthforge-postgres` |
-| Caddy | 80/443 öffentlich | 80/443 | `healthforge-caddy` |
 | Backup-Cron | (intern) | — | `healthforge-backup` |
 
 Compose-File: [deploy/docker-compose.prod.yml](../deploy/docker-compose.prod.yml).
@@ -251,9 +252,10 @@ Bei Auffälligkeiten → siehe §5.
 
 ## 7. Update-Strategie
 
-- **Server (API):** Push to `main` → CI → GHCR → deploy script. Kleine atomare Commits.
-- **Admin-UI:** Push to `main` → Vite-Build → rsync. Hot.
-- **Android:** Git-Tag `v*` → CI signed APK. Manuelle Verteilung an Beta-User.
+- **Server (API):** Push to `main` → CI (gradle bootJar) → Docker-Publish (GHCR) → SSH-Deploy (docker compose pull + up -d). ~3-5 min Gesamtzeit.
+- **Admin-UI:** Push to `main` → CI (npm build) → SCP to VPS (`/opt/healthforge/admin-ui-dist/`). Caddy serviert sofort (kein Restart). ~1 min.
+- **Android:** Git-Tag `v*` → CI signed APK. Manuelle Verteilung an Beta-User. Alternativ APK via Admin-UI → Releases-Seite hochladen.
+- **APK Release (Admin-UI):** APK lokal bauen (`./gradlew assembleRelease`) → Im Admin-UI unter "APK Releases" hochladen → in MinIO gespeichert → Download-Link via Presigned-URL.
 - **Dependencies:** monatlicher Sweep — `gradle dependencyUpdates` (server+android),
   `npm outdated` (admin-ui). Vor Major-Updates: Backup + manueller Smoke.
 

@@ -190,9 +190,12 @@
 
 | REQ-ID | Phase | Status | Implementation-File |
 |---|---|:-:|---|
-| REQ-ADMIN-001 | P1 | ❌ | `admin-ui/` Vite-Setup + `server/admin/AdminAuthFilter.kt` + Caddy `admin.healthforge.endgear.de` |
-| REQ-ADMIN-002 | P1 | 🟡 | Server-Endpoints `POST /admin/etl/run`, `GET /admin/etl/runs/{src}` ✅ (`server/etl/EtlController.kt`); Reports + Users (P3.S3) ✅ (`community/AdminReportController.kt`, `auth/AdminUserController.kt`, `admin-ui/src/pages/RecipeReportsPage.tsx`, `admin-ui/src/pages/UsersPage.tsx`). **ETL-UI (JobsPage) akzeptiert als Post-v1.0 Backlog** (Final-Review 2026-05-26): ETL bleibt manuell via Postman/curl testbar; explizit Drift #1 in P4.S4 dokumentiert. |
-| REQ-ADMIN-003 | P3/P4 | ❌ | siehe REQ-ADMIN-FULL-001/002 |
+| REQ-ADMIN-001 | P1 | ✅ | `admin-ui/` Vite-Setup + Caddy `admin.healthforge.endgear.de` + Admin-Login unter `http://admin.healthforge.endgear.de:8080` |
+| REQ-ADMIN-002 | P1 | 🟡 | Server-Endpoints `POST /admin/etl/run`, `GET /admin/etl/runs/{src}` ✅ (`server/etl/EtlController.kt`); Reports + Users (P3.S3) ✅ (`community/AdminReportController.kt`, `auth/AdminUserController.kt`, `admin-ui/src/pages/RecipeReportsPage.tsx`, `admin-ui/src/pages/UsersPage.tsx`). **ETL-UI (JobsPage) akzeptiert als Post-v1.0 Backlog**. 637 USDA-Zutaten per ETL importiert (2026-06-06). |
+| REQ-ADMIN-003 | P3/P4 | 🟡 | siehe REQ-ADMIN-FULL-001/002. Audit-Log, Statistik, Queues (Supplements/Ingredients/Field-PRs) ✅ |
+| REQ-ADMIN-004 | P4 | ✅ | APK-Upload via Admin-UI: `server/admin/AdminReleaseController.kt` (`POST /admin/v1/releases`), `admin-ui/src/pages/ReleasesPage.tsx`, MinIO-Bucket `releases` |
+| REQ-ADMIN-005 | P4 | ✅ | APK-Download via Presigned-URL: `GET /admin/v1/releases/{id}/download` → MinIO Presigned-URL (1h Gültigkeit) |
+| REQ-ADMIN-006 | P4 | ✅ | Auto-Deploy Admin-UI + Server bei Push auf main via GitHub Actions (`.github/workflows/admin-ui.yml` + `server.yml` mit SSH-Deploy) |
 
 ## §6.1 Groups (P3)
 

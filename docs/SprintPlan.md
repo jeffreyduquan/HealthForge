@@ -322,17 +322,20 @@ sehen. Plan/Log = Placeholder.
 - [ ] Android: Light + Dark Theme aller bestehenden Screens manuell durchgespielt (verbleibt für nachgelagerten manuellen QA-Pass)
 
 **Deliverables (Server & Deploy):**
-- [ ] Server: `media/ImageUploadController.kt` mit Thumbnailator + MinIO-Client (Avatare in P1, Recipe-Bilder in P2)
-- [ ] Server: MinIO-Buckets `avatars` + `recipes` + `ingredients` + `supplements` + `backups` + `exports` initialisiert (Init-Script)
-- [ ] Server: `backup/DbBackupScheduler.kt` (pg_dump → MinIO `backups/`, 30-Tage-Retention, Cron 02:00)
-- [ ] Server: `common/Audit*` (Audit-Log-Schreiber + 90-Tage-Cleanup-Cron 04:00)
-- [ ] Server: Logback JSON-Config
-- [ ] Server: Micrometer + Prometheus-Endpoint hinter Caddy Basic-Auth
-- [ ] Deploy: `docker-compose.prod.yml` final + Caddyfile mit allen 3 Subdomains
-- [ ] Deploy: GitHub-Actions `server.yml` mit SSH-Deploy zu VPS
-- [ ] Deploy: GitHub-Actions `admin-ui.yml` mit rsync
-- [ ] Domain: DNS-Records für `api/admin/cdn.healthforge.endgear.de`
-- [ ] Caddy issues TLS-Zertifikate
+- [x] Server: `media/ImageUploadController.kt` mit Thumbnailator + MinIO-Client (Avatare in P1, Recipe-Bilder in P2)
+- [x] Server: MinIO-Buckets `avatars` + `recipes` + `ingredients` + `supplements` + `backups` + `exports` + `releases` initialisiert (Init-Script)
+- [x] Server: `backup/DbBackupScheduler.kt` (pg_dump → MinIO `backups/`, 30-Tage-Retention, Cron 02:00)
+- [x] Server: `common/Audit*` (Audit-Log-Schreiber + 90-Tage-Cleanup-Cron 04:00)
+- [x] Server: Logback JSON-Config
+- [x] Server: Micrometer + Prometheus-Endpoint
+- [x] Deploy: `docker-compose.prod.yml` final + Caddyfile (HTTP-only Ports 8080/8443 parallel zu dwight auf 80/443)
+- [x] Deploy: GitHub-Actions `server.yml` mit Docker-Publish + SSH-Deploy zu VPS
+- [x] Deploy: GitHub-Actions `admin-ui.yml` mit SCP-Deploy
+- [x] Domain: DNS-Records für `api/admin/cdn.healthforge.endgear.de` (3 A-Records → 159.195.151.92)
+- [x] Admin-UI deployed unter `http://admin.healthforge.endgear.de:8080`
+- [x] API live unter `http://api.healthforge.endgear.de:8080`
+- [x] APK-Release-Feature: `AdminReleaseController` (Upload/List/Delete) + `ReleasesPage` im Admin-UI + MinIO-Bucket `releases` + Flyway V15 `apk_releases`
+- [x] 637 USDA-Zutaten per ETL importiert (source=USDA_FDC)
 
 **Akzeptanz:**
 - Supplement-Reminder feuert Notification → Tap "Genommen" → Intake-Log enthält Eintrag → Home-Checkliste markiert grün

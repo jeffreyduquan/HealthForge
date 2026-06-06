@@ -5,6 +5,47 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Production-Deploy + CI/CD + APK-Release-Feature (P1.S8 Phase 2) — 2026-06-06
+
+**Scope:** Erster Production-Deploy auf Netcup VPS (159.195.151.92). Vollständiger Stack (Postgres, MinIO, API, Caddy, Backup) live. CI/CD für Server + Admin-UI aktiviert. APK-Release-Verwaltung im Admin-UI.
+
+**Touched Code:**
+- NEW `server/src/main/kotlin/de/healthforge/admin/AdminReleaseController.kt` — APK-Upload/List/Delete/Download-Endpoints
+- NEW `server/src/main/kotlin/de/healthforge/admin/ApkRelease.kt` — JPA-Entity für `apk_releases`
+- NEW `server/src/main/kotlin/de/healthforge/admin/ApkReleaseRepo.kt` — Spring-Data-Repository
+- NEW `server/src/main/resources/db/migration/V15__apk_releases.sql` — Flyway-Migration
+- NEW `admin-ui/src/pages/ReleasesPage.tsx` — APK-Release-UI (Upload-Dialog, Tabelle, Download)
+- MOD `admin-ui/src/App.tsx` — Route `/releases` hinzugefügt
+- MOD `admin-ui/src/components/Layout.tsx` — Nav-Eintrag "APK Releases"
+- MOD `admin-ui/src/api/client.ts` — API-Funktionen für Releases + Multipart-Fix
+- MOD `deploy/docker-compose.prod.yml` — Image `jawra`→`jeffreyduquan`; Caddy-Ports 80/443→8080/8443; CORS auf HTTP
+- MOD `deploy/Caddyfile` — HTTP-only (parallel zu dwight); Request-Body-Limit 100MB
+- MOD `.github/workflows/server.yml` — Docker-Publish + SSH-Deploy-Job
+- MOD `.github/workflows/admin-ui.yml` — SCP-Deploy-Job
+- MOD `server/src/main/resources/application.yml` — Mail-Health-Check deaktiviert; Multipart-Limit 100MB
+- MOD `server/src/main/kotlin/de/healthforge/media/ImageUploadService.kt` — Bucket `releases` hinzugefügt
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — REQ-ADMIN-004/005/006 hinzugefügt (APK Release, Download, Auto-Deploy)
+- `docs/Runbook.md` — Ports aktualisiert (8080/8443); CI/CD-Workflow beschrieben; APK-Release-Management ergänzt
+- `docs/SprintPlan.md` — P1.S8 Deploy-Items auf ✅; APK-Release ergänzt; 637 USDA-Zutaten importiert vermerkt
+- `docs/TraceabilityMatrix.md` — REQ-ADMIN-001→✅, REQ-ADMIN-003→🟡, REQ-ADMIN-004/005/006→✅
+- `docs/Architecture.md` — Caddy parallel dwight dokumentiert; APK-Release erwähnt
+- `CHANGELOG.md` — dieser Eintrag
+
+**Untouched (begründet):**
+- `GUI.md` / `UsabilityMap.md` — APK-Release ist Admin-Feature ohne GUI-Spec (dev-internal tool)
+- `TestStrategy.md` / `BattleTestPlan.md` — kein neues Testverfahren, nur Feature-Erweiterung
+- `HistamindDesignReference.md` / `IngredientDbAudit-2026-05-31.md` — nicht betroffen
+
+**Verifikation:**
+- API: `GET http://api.healthforge.endgear.de:8080/actuator/health` → `{"status":"UP"}`
+- Admin-UI: `http://admin.healthforge.endgear.de:8080` → Login → Dashboard + Alle Seiten erreichbar
+- APK-Upload: APK v0.1.0 (45 MB) erfolgreich hochgeladen, in DB (`apk_releases`) + MinIO gespeichert
+- ETL: 637 USDA-Zutaten importiert (source=USDA_FDC)
+- CI/CD: server-ci #13 ✅ + admin-ui-ci #5 ✅ (build→docker-publish→deploy)
+- Flyway: V15 sauber auf VPS-DB migriert
+
 ## Magermilch-Bugfix + Fluid-Variante (P7.S3 Slice 1 Hotfix-7) — 2026-05-31
 
 **Scope:** Smoketest-Befund: „Magermilch" hatte 362 kcal/100g — entspricht Magermilchpulver (FDC 172195 = „Milk, dry, nonfat"), nicht der flüssigen Form. Klassischer Translation-Bug der gleichen Klasse wie Hotfix-2. Da Pulverform (Smoothies/Backen) real nützlich ist: Rename + parallele Aufnahme der fluid-Variante.

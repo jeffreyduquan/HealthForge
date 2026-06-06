@@ -73,9 +73,10 @@ Deployment für v1.0). Orchestrierung via **docker-compose**.
 | Server Metrics | Micrometer + Prometheus | — | scrape via Caddy-protected endpoint |
 | Server Logs | Logback + Logstash-encoder | — | JSON structured logs |
 | Push | ~~Firebase Cloud Messaging~~ ENTFERNT | — | In-App-Badge + optional Email-Digest |
-| Admin UI | React 18 + Vite + TypeScript + MUI | latest | Schnelles Setup, robuste Components |
-| Reverse Proxy | Caddy | 2.8+ | auto-TLS via Let's Encrypt |
-| CI/CD | GitHub Actions | — | SSH-Deploy + Container-Build |
+| Admin UI | React 18 + Vite + TypeScript + MUI | latest | Schnelles Setup, robuste Components. Enthält APK-Release-Management |
+| Reverse Proxy | Caddy (HealthForge) | 2.8+ | Läuft parallel zu Caddy (Dwight) auf Ports 8080/8443 (HTTP-only). HTTPS nicht möglich da dwight Port 80/443 blockiert |
+| Reverse Proxy | Caddy (Dwight) | 2-alpine | Bestehendes Projekt auf Ports 80/443 — läuft unverändert |
+| CI/CD | GitHub Actions | — | SSH-Deploy + Container-Build + SCP-Frontend-Deploy |
 
 ---
 
