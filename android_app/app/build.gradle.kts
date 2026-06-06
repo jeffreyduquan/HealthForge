@@ -25,8 +25,8 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080/\"")
-            buildConfigField("String", "MEDIA_BASE_URL", "\"http://10.0.2.2:9000/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://api.healthforge.endgear.de:8080/\"")
+            buildConfigField("String", "MEDIA_BASE_URL", "\"http://cdn.healthforge.endgear.de:8080/\"")
         }
         release {
             isMinifyEnabled = true
@@ -35,8 +35,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            buildConfigField("String", "API_BASE_URL", "\"https://api.healthforge.endgear.de/\"")
-            buildConfigField("String", "MEDIA_BASE_URL", "\"https://cdn.healthforge.endgear.de/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://api.healthforge.endgear.de:8080/\"")
+            buildConfigField("String", "MEDIA_BASE_URL", "\"http://cdn.healthforge.endgear.de:8080/\"")
         }
     }
 
