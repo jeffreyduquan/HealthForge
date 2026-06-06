@@ -85,6 +85,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/healthforge
+            # Caddyfile liegt jetzt unter deploy/Caddyfile, aber docker-compose erwartet es im Root
+            cp deploy/Caddyfile Caddyfile
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
             docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile || \
