@@ -58,7 +58,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: dist/*
           target: /opt/healthforge/admin-ui-dist/
-          strip_components: 0
+          strip_components: 1
           rm: true
 
       - name: Reload Caddy
