@@ -166,86 +166,142 @@ class PublicReleaseController(
 <html lang="de">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0f172a"/>
 <title>HealthForge · ${release.version}</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f0f2f5; color: #1a1a2e; min-height: 100vh;
-    display: flex; align-items: center; justify-content: center; padding: 16px;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#0f172a;color:#e2e8f0;min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    padding:16px;
+    -webkit-font-smoothing:antialiased
   }
-  .card {
-    background: #fff; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-    max-width: 420px; width: 100%; padding: 32px 24px; text-align: center;
+  .card{
+    background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:32px;max-width:400px;width:100%;
+    padding:0;overflow:hidden;position:relative
   }
-  .icon {
-    width: 72px; height: 72px; background: #e8f0fe; border-radius: 18px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 16px; font-size: 36px;
+  .card-header{
+    background:linear-gradient(135deg,#1e40af 0%,#312e81 50%,#581c87 100%);
+    padding:40px 24px 32px;text-align:center;position:relative
   }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .version { color: #4a5568; font-size: 14px; margin-bottom: 20px; }
-  .meta { display: flex; justify-content: center; gap: 24px; margin-bottom: 24px; }
-  .meta-item { text-align: center; }
-  .meta-item .label { font-size: 11px; color: #a0aec0; text-transform: uppercase; letter-spacing: .5px; }
-  .meta-item .value { font-size: 15px; font-weight: 600; margin-top: 2px; }
-  .changelog {
-    background: #f7fafc; border-radius: 12px; padding: 16px;
-    text-align: left; font-size: 14px; line-height: 1.6; margin-bottom: 24px;
-    color: #2d3748; max-height: 200px; overflow-y: auto; white-space: pre-wrap;
+  .card-header::after{
+    content:'';position:absolute;bottom:-24px;left:0;right:0;
+    height:48px;background:linear-gradient(180deg,#1e293b00 0%,#1e293b 100%)
   }
-  .changelog:empty { display: none; }
-  .btn {
-    display: block; width: 100%; padding: 16px; border: none; border-radius: 12px;
-    font-size: 17px; font-weight: 600; cursor: pointer; text-decoration: none;
-    transition: background .15s, opacity .15s;
+  .app-icon{
+    width:80px;height:80px;margin:0 auto 16px;
+    background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+    border-radius:22px;display:flex;align-items:center;justify-content:center;
+    font-size:40px;border:1px solid rgba(255,255,255,.1)
   }
-  .btn-primary { background: #2563eb; color: #fff; }
-  .btn-primary:hover { background: #1d4ed8; }
-  .btn-primary:active { background: #1e40af; }
-  .btn-disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
-  .status-badge {
-    display: inline-block; padding: 6px 14px; border-radius: 20px;
-    font-size: 13px; font-weight: 600; margin-bottom: 16px;
+  .app-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+  .app-version{font-size:24px;font-weight:700;color:#fff;margin-bottom:4px}
+  .app-filename{font-size:14px;color:rgba(255,255,255,.5);word-break:break-all}
+  .card-body{padding:16px 20px 24px}
+  .status-row{text-align:center;margin-bottom:16px}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600
   }
-  .status-valid { background: #dcfce7; color: #166534; }
-  .status-used { background: #fef3c7; color: #92400e; }
-  .status-expired { background: #fee2e2; color: #991b1b; }
-  .footer { margin-top: 20px; font-size: 12px; color: #a0aec0; }
-  a { color: #2563eb; text-decoration: none; }
+  .badge-valid{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+  .badge-used{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.2)}
+  .badge-expired,.badge-invalid{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+  .meta-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px
+  }
+  .meta-item{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;padding:14px;text-align:center
+  }
+  .meta-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .meta-value{font-size:16px;font-weight:600;color:#e2e8f0}
+  .changelog{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;padding:14px;margin-bottom:16px;
+    font-size:13px;line-height:1.6;color:rgba(255,255,255,.7);
+    max-height:160px;overflow-y:auto;white-space:pre-wrap
+  }
+  .changelog:empty{display:none}
+  .changelog::-webkit-scrollbar{width:4px}
+  .changelog::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;padding:18px;border:none;border-radius:16px;
+    font-size:17px;font-weight:600;cursor:pointer;text-decoration:none;
+    transition:transform .12s,box-shadow .12s
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    color:#fff;box-shadow:0 4px 20px rgba(59,130,246,.35)
+  }
+  .btn-primary:hover{box-shadow:0 6px 28px rgba(59,130,246,.5)}
+  .btn-disabled{
+    background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);
+    cursor:not-allowed;border:1px solid rgba(255,255,255,.06)
+  }
+  .footer{
+    text-align:center;padding:16px 20px 20px;
+    border-top:1px solid rgba(255,255,255,.06);
+    font-size:12px;color:rgba(255,255,255,.25)
+  }
+  .footer a{color:rgba(255,255,255,.4);text-decoration:none}
+  .spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .btn-loading .spinner{display:block}
+  .btn-loading .btn-text{display:none}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="icon">📦</div>
-  <h1>${escapeHtml(release.filename)}</h1>
-  <div class="version">Version ${escapeHtml(release.version)}</div>
-
-  ${when(status) {
-    "valid" -> ""
-    "used" -> """<div class="status-badge status-used">✓ Bereits heruntergeladen</div>"""
-    "expired" -> """<div class="status-badge status-expired">✗ Download-Link abgelaufen</div>"""
-    else -> """<div class="status-badge status-expired">✗ Ungültiger Download-Link</div>"""
-  }}
-
-  <div class="meta">
-    <div class="meta-item"><div class="label">Größe</div><div class="value">${sizeStr}</div></div>
-    <div class="meta-item"><div class="label">Gültig bis</div><div class="value">${expiresAt}</div></div>
+  <div class="card-header">
+    <div class="app-icon">📦</div>
+    <div class="app-name">HealthForge</div>
+    <div class="app-version">${escapeHtml(release.version)}</div>
+    <div class="app-filename">${escapeHtml(release.filename)}</div>
   </div>
+  <div class="card-body">
+    <div class="status-row">
+      ${when(status) {
+        "valid" -> """<span class="badge badge-valid">● Bereit zum Download</span>"""
+        "used" -> """<span class="badge badge-used">✓ Bereits heruntergeladen</span>"""
+        "expired" -> """<span class="badge badge-expired">✗ Link abgelaufen</span>"""
+        else -> """<span class="badge badge-invalid">✗ Ungültiger Link</span>"""
+      }}
+    </div>
 
-  ${if (release.changelog != null) """<div class="changelog">${escapeHtml(release.changelog)}</div>""" else ""}
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Größe</div>
+        <div class="meta-value">${sizeStr}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Gültig bis</div>
+        <div class="meta-value">${expiresAt}</div>
+      </div>
+    </div>
 
-  ${if (status == "valid") """
-    <a href="${downloadUrl}" class="btn btn-primary" id="downloadBtn">⬇ APK herunterladen</a>
-  """ else """
-    <button class="btn btn-disabled" disabled>${when(status) {
-      "used" -> "✓ Bereits heruntergeladen"
-      "expired" -> "✗ Abgelaufen"
-      else -> "✗ Ungültig"
-    }}</button>
-  """}
+    ${if (release.changelog != null) """<div class="changelog">${escapeHtml(release.changelog)}</div>""" else ""}
 
+    ${if (status == "valid") """
+    <a href="${downloadUrl}" class="btn btn-primary" id="downloadBtn" onclick="this.classList.add('btn-loading')">
+      <span class="spinner"></span>
+      <span class="btn-text">⬇ APK herunterladen</span>
+    </a>
+    """ else """
+    <button class="btn btn-disabled" disabled>
+      ${when(status) {
+        "used" -> "✓ Bereits heruntergeladen"
+        "expired" -> "✗ Abgelaufen"
+        else -> "✗ Ungültig"
+      }}
+    </button>
+    """}
+  </div>
   <div class="footer">
     Bereitgestellt von <a href="http://admin.healthforge.endgear.de:8080">HealthForge</a>
   </div>
