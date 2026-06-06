@@ -8,7 +8,6 @@ on:
       - 'admin-ui/**'
       - 'deploy/**'
       - '.github/workflows/server.yml'
-      - '.github/workflows/admin-ui.yml'
   pull_request:
     paths:
       - 'server/**'
