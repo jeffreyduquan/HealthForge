@@ -528,10 +528,6 @@ function IngredientDetailDialog({
   const [micronutrientsStr, setMicronutrientsStr] = useState(ingredient.micronutrients_json ?? '{}');
   const [warningAccepted, setWarningAccepted] = useState(false);
 
-  const parseJson = (s: string): string => {
-    try { return JSON.stringify(JSON.parse(s), null, 2); } catch { return s; }
-  };
-
   const handleSave = () => {
     if (!warningAccepted) return;
     onSave(ingredient.id, {
