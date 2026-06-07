@@ -68,8 +68,9 @@ class SupplementsListViewModel @Inject constructor(
         viewModelScope.launch {
             repo.fetchPublicCatalog().onSuccess { publicList ->
                 publicCache = publicList
-                // Get current local list to re-emit
-                val currentLocal = repo.observeAll() // Will trigger collect above
+                // Re-emit merged list with updated public cache
+                val localList = repo.listAll()
+                emitMerged(localList)
             }
         }
     }

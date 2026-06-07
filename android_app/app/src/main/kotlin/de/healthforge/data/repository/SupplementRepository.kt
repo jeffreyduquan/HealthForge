@@ -19,6 +19,7 @@ class SupplementRepository @Inject constructor(
     private val api: SupplementApi,
 ) {
     fun observeAll(): Flow<List<SupplementEntity>> = supplementDao.observeAll()
+    suspend fun listAll(): List<SupplementEntity> = supplementDao.listAll()
     suspend fun byId(id: Long): SupplementEntity? = supplementDao.byId(id)
 
     suspend fun upsert(s: SupplementEntity): Long {
