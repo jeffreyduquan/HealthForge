@@ -35,3 +35,5 @@ http://cdn.healthforge.endgear.de {
 
     encode gzip
 }
+
+# CI-Trigger 2026-06-07 - server-ci deploy test
