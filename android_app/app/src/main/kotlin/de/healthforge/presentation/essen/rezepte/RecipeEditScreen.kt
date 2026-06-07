@@ -95,7 +95,7 @@ fun RecipeEditScreen(
     }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success && cameraPhotoUri != null) {
-            kotlin.runCatching { vm.pickImage(ctx, cameraPhotoUri!!) }
+            vm.pickImage(ctx, cameraPhotoUri!!)
         }
     }
 

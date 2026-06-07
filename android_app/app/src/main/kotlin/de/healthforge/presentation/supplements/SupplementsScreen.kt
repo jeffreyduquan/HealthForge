@@ -5,15 +5,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,11 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import de.healthforge.data.db.entities.SupplementEntity
 
 /**
- * Supplements-Liste. Eingebettet als Sub-Tab unter Essen (REQ-NAV-002, REQ-SUPP-006).
- * REQ-SUPP-001/002.
+ * Supplements-Liste. Zeigt lokale + öffentliche Supplements (REQ-SUPP-001/002/004).
+ * Öffentliche Supplements werden vom Server geladen und können lokal übernommen werden.
  */
 @Composable
 fun SupplementsScreen(
@@ -49,7 +55,16 @@ fun SupplementsScreen(
             )
         },
     ) { padding ->
-        if (s.items.isEmpty()) {
+        if (s.loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (s.items.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -77,8 +92,15 @@ fun SupplementsScreen(
                 items(items = s.items, key = { it.id }) { sup ->
                     SupplementRow(
                         sup = sup,
-                        onClick = { onOpenEdit(sup.id) },
-                        onDelete = { vm.delete(sup.id) },
+                        onClick = {
+                            if (sup.isLocal) onOpenEdit(sup.localId)
+                        },
+                        onDelete = {
+                            if (sup.isLocal) vm.delete(sup.localId)
+                        },
+                        onAdopt = {
+                            sup.publicServerId?.let { vm.adoptPublic(it) }
+                        },
                     )
                 }
             }
@@ -88,9 +110,10 @@ fun SupplementsScreen(
 
 @Composable
 private fun SupplementRow(
-    sup: SupplementEntity,
+    sup: SupplementDisplayItem,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    onAdopt: () -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -100,7 +123,19 @@ private fun SupplementRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(sup.nameDe, style = MaterialTheme.typography.titleSmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(sup.nameDe, style = MaterialTheme.typography.titleSmall)
+                    Spacer(Modifier.width(8.dp))
+                    if (!sup.isLocal) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("Öffentlich", style = MaterialTheme.typography.labelSmall) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            ),
+                        )
+                    }
+                }
                 sup.brand?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall)
                 }
@@ -110,11 +145,21 @@ private fun SupplementRow(
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            IconButton(onClick = onClick) {
-                Text("Bearb.", style = MaterialTheme.typography.labelSmall)
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = "Löschen")
+            if (sup.isLocal) {
+                IconButton(onClick = onClick) {
+                    Text("Bearb.", style = MaterialTheme.typography.labelSmall)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Löschen")
+                }
+            } else {
+                IconButton(onClick = onAdopt) {
+                    Icon(
+                        Icons.Filled.CloudDownload,
+                        contentDescription = "Übernehmen",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
         }
     }

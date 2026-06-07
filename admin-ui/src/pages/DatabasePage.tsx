@@ -31,6 +31,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   listAllIngredients,
   updateIngredient,
@@ -60,6 +61,7 @@ export default function DatabasePage() {
   const [tab, setTab] = useState<TabValue>('ingredients');
   const [search, setSearch] = useState('');
   const [editDialog, setEditDialog] = useState<EditDialog | null>(null);
+  const [detailIngredient, setDetailIngredient] = useState<IngredientCrud | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ tab: TabValue; id: string; label: string } | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const [warningAccepted, setWarningAccepted] = useState(false);
@@ -183,23 +185,26 @@ export default function DatabasePage() {
                     <TableCell>Status</TableCell>
                     <TableCell>kcal/100g</TableCell>
                     <TableCell>Histamin</TableCell>
-                    <TableCell>Quelle</TableCell>
                     <TableCell align="right">Aktionen</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredIngredients.map((r) => (
-                    <TableRow key={r.id} hover>
+                    <TableRow
+                      key={r.id}
+                      hover
+                      onClick={() => setDetailIngredient(r)}
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <TableCell>{r.name_de}</TableCell>
                       <TableCell>{r.brand ?? '—'}</TableCell>
                       <TableCell>{r.barcode ?? '—'}</TableCell>
                       <TableCell><Chip size="small" label={r.status} color={r.status === 'APPROVED' ? 'success' : r.status === 'PENDING' ? 'warning' : 'error'} /></TableCell>
                       <TableCell>{r.energy_kcal_per_100g ?? '—'}</TableCell>
                       <TableCell>{r.histamine_score ?? '—'}</TableCell>
-                      <TableCell>{r.source}</TableCell>
                       <TableCell align="right">
-                        <Tooltip title="Bearbeiten"><IconButton size="small" color="primary" onClick={() => handleEdit('ingredients', r)}><EditIcon fontSize="small" /></IconButton></Tooltip>
-                        <Tooltip title="Löschen"><IconButton size="small" color="error" onClick={() => setDeleteConfirm({ tab: 'ingredients', id: r.id, label: r.name_de })}><DeleteIcon fontSize="small" /></IconButton></Tooltip>
+                        <Tooltip title="Details"><IconButton size="small" color="info" onClick={(e) => { e.stopPropagation(); setDetailIngredient(r); }}><VisibilityIcon fontSize="small" /></IconButton></Tooltip>
+                        <Tooltip title="Löschen"><IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ tab: 'ingredients', id: r.id, label: r.name_de }); }}><DeleteIcon fontSize="small" /></IconButton></Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -347,6 +352,16 @@ export default function DatabasePage() {
       </Dialog>
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} message={snack ?? ''} />
+
+      {/* === Ingredient Detail Dialog (full overview) === */}
+      <IngredientDetailDialog
+        ingredient={detailIngredient}
+        onClose={() => setDetailIngredient(null)}
+        onSave={(id, data) => {
+          setSnack('⏳ Speichere…');
+          updateIngM.mutate({ id, data });
+        }}
+      />
     </Box>
   );
 }
@@ -476,6 +491,176 @@ function EditDialogComponent({ dialog, warningAccepted, onWarningAccept, onClose
         <Button onClick={onClose}>Abbrechen</Button>
         <Button onClick={handleSave} variant="contained" color="warning" disabled={!warningAccepted || (isIngredient && !nameDe.trim()) || (isSupplement && (!nameDe.trim() || !unitLabel.trim())) || (isRecipe && !title.trim())}>
           {isNew ? 'Erstellen' : 'Speichern'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// === Ingredient Detail Dialog (full overview, click on row) ===
+
+function IngredientDetailDialog({
+  ingredient,
+  onClose,
+  onSave,
+}: {
+  ingredient: IngredientCrud | null;
+  onClose: () => void;
+  onSave: (id: string, data: Record<string, unknown>) => void;
+}) {
+  if (!ingredient) return null;
+
+  const [nameDe, setNameDe] = useState(ingredient.name_de);
+  const [brand, setBrand] = useState(ingredient.brand ?? '');
+  const [barcode, setBarcode] = useState(ingredient.barcode ?? '');
+  const [status, setStatus] = useState(ingredient.status);
+  const [kcal, setKcal] = useState(String(ingredient.energy_kcal_per_100g ?? ''));
+  const [protein, setProtein] = useState(String(ingredient.protein_g_per_100g ?? ''));
+  const [carbs, setCarbs] = useState(String(ingredient.carbs_g_per_100g ?? ''));
+  const [sugar, setSugar] = useState(String(ingredient.sugar_g_per_100g ?? ''));
+  const [fat, setFat] = useState(String(ingredient.fat_g_per_100g ?? ''));
+  const [satfat, setSatfat] = useState(String(ingredient.satfat_g_per_100g ?? ''));
+  const [fiber, setFiber] = useState(String(ingredient.fiber_g_per_100g ?? ''));
+  const [salt, setSalt] = useState(String(ingredient.salt_g_per_100g ?? ''));
+  const [histScore, setHistScore] = useState(String(ingredient.histamine_score ?? ''));
+  const [allergensStr, setAllergensStr] = useState(ingredient.allergens_json ?? '[]');
+  const [fodmapStr, setFodmapStr] = useState(ingredient.fodmap_flags_json ?? '[]');
+  const [micronutrientsStr, setMicronutrientsStr] = useState(ingredient.micronutrients_json ?? '{}');
+  const [warningAccepted, setWarningAccepted] = useState(false);
+
+  const parseJson = (s: string): string => {
+    try { return JSON.stringify(JSON.parse(s), null, 2); } catch { return s; }
+  };
+
+  const handleSave = () => {
+    if (!warningAccepted) return;
+    onSave(ingredient.id, {
+      name_de: nameDe,
+      brand: brand || null,
+      barcode: barcode || null,
+      energy_kcal_per_100g: kcal ? Number(kcal) : null,
+      protein_g_per_100g: protein ? Number(protein) : null,
+      carbs_g_per_100g: carbs ? Number(carbs) : null,
+      sugar_g_per_100g: sugar ? Number(sugar) : null,
+      fat_g_per_100g: fat ? Number(fat) : null,
+      satfat_g_per_100g: satfat ? Number(satfat) : null,
+      fiber_g_per_100g: fiber ? Number(fiber) : null,
+      salt_g_per_100g: salt ? Number(salt) : null,
+      histamine_score: histScore ? Number(histScore) : null,
+      allergens_json: allergensStr,
+      fodmap_flags_json: fodmapStr,
+      micronutrients_json: micronutrientsStr,
+    });
+  };
+
+  return (
+    <Dialog open={!!ingredient} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <WarningAmberIcon color="warning" />
+        Detail-Ansicht: {ingredient.name_de}
+      </DialogTitle>
+      <DialogContent dividers>
+        {!warningAccepted && (
+          <Alert severity="warning" sx={{ mb: 2 }} action={
+            <Button size="small" color="warning" variant="outlined" onClick={() => setWarningAccepted(true)}>Verstanden</Button>
+          }>
+            <strong>Achtung:</strong> Du bearbeitest direkt die Datenbank! Bitte bestätigen.
+          </Alert>
+        )}
+
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          {/* Basic Info */}
+          <Typography variant="subtitle1" fontWeight={600}>Basisdaten</Typography>
+          <Stack direction="row" spacing={2}>
+            <TextField label="Name (DE)" value={nameDe} onChange={(e) => setNameDe(e.target.value)} fullWidth size="small" />
+            <TextField label="Marke" value={brand} onChange={(e) => setBrand(e.target.value)} fullWidth size="small" />
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <TextField label="Barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} fullWidth size="small" />
+            <TextField label="Status" value={status} onChange={(e) => setStatus(e.target.value)} fullWidth size="small" />
+          </Stack>
+
+          {/* Macros */}
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Makronährstoffe (pro 100g)</Typography>
+          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+            <TextField label="kcal" value={kcal} onChange={(e) => setKcal(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Protein (g)" value={protein} onChange={(e) => setProtein(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Carbs (g)" value={carbs} onChange={(e) => setCarbs(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Zucker (g)" value={sugar} onChange={(e) => setSugar(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Fett (g)" value={fat} onChange={(e) => setFat(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="ges. Fett (g)" value={satfat} onChange={(e) => setSatfat(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Ballaststoffe (g)" value={fiber} onChange={(e) => setFiber(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+            <TextField label="Salz (g)" value={salt} onChange={(e) => setSalt(e.target.value)} type="number" size="small" sx={{ minWidth: 100 }} />
+          </Stack>
+
+          {/* Histamine */}
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Histamin</Typography>
+          <TextField label="Histamin Score" value={histScore} onChange={(e) => setHistScore(e.target.value)} type="number" size="small" sx={{ minWidth: 100, maxWidth: 200 }} />
+
+          {/* Allergens */}
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Allergene (JSON)</Typography>
+          <TextField
+            value={allergensStr}
+            onChange={(e) => setAllergensStr(e.target.value)}
+            multiline
+            minRows={3}
+            maxRows={8}
+            fullWidth
+            size="small"
+            fontFamily="monospace"
+            helperText={(() => {
+              try {
+                const arr = JSON.parse(allergensStr);
+                if (Array.isArray(arr)) return `Enthält ${arr.length} Allergen-Einträge: ${arr.join(', ')}`;
+              } catch { return 'Ungültiges JSON';
+              }
+            })()}
+          />
+
+          {/* FODMAP */}
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>FODMAP Flags (JSON)</Typography>
+          <TextField
+            value={fodmapStr}
+            onChange={(e) => setFodmapStr(e.target.value)}
+            multiline
+            minRows={3}
+            maxRows={8}
+            fullWidth
+            size="small"
+            fontFamily="monospace"
+            helperText={(() => {
+              try {
+                const arr = JSON.parse(fodmapStr);
+                if (Array.isArray(arr)) return `Enthält ${arr.length} FODMAP-Flags: ${arr.join(', ')}`;
+              } catch { return 'Ungültiges JSON'; }
+            })()}
+          />
+
+          {/* Micronutrients */}
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Mikronährstoffe / Mineralstoffe (JSON)</Typography>
+          <TextField
+            value={micronutrientsStr}
+            onChange={(e) => setMicronutrientsStr(e.target.value)}
+            multiline
+            minRows={4}
+            maxRows={12}
+            fullWidth
+            size="small"
+            fontFamily="monospace"
+            helperText={(() => {
+              try {
+                const obj = JSON.parse(micronutrientsStr);
+                const keys = Object.keys(obj);
+                return `${keys.length} Nährstoffe: ${keys.join(', ')}`;
+              } catch { return 'Ungültiges JSON'; }
+            })()}
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Schließen</Button>
+        <Button onClick={handleSave} variant="contained" color="warning" disabled={!warningAccepted || !nameDe.trim()}>
+          Speichern
         </Button>
       </DialogActions>
     </Dialog>

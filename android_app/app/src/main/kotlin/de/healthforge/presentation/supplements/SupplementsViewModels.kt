@@ -6,19 +6,41 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.ReminderFrequency
 import de.healthforge.data.db.entities.SupplementEntity
 import de.healthforge.data.db.entities.SupplementReminderEntity
+import de.healthforge.data.network.PublicSupplementDto
 import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.notification.AlarmScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * UI representation of a supplement row — either a local (Room) or public (server) supplement.
+ */
+data class SupplementDisplayItem(
+    val id: String,                     // unique key for Compose: "local_$roomId" or "public_$serverId"
+    val nameDe: String,
+    val brand: String?,
+    val unitLabel: String,
+    val defaultDose: Double,
+    val kcalPerDose: Double?,
+    val proteinPerDose: Double?,
+    val carbsPerDose: Double?,
+    val fatPerDose: Double?,
+    val notes: String?,
+    val isLocal: Boolean,
+    val localId: Long = 0L,             // Room ID if local, 0 if public
+    val publicServerId: String? = null, // server UUID if public
+)
+
 data class SupplementsListState(
-    val items: List<SupplementEntity> = emptyList(),
+    val items: List<SupplementDisplayItem> = emptyList(),
+    val loading: Boolean = false,
+    val error: String? = null,
 )
 
 @HiltViewModel
@@ -26,15 +48,102 @@ class SupplementsListViewModel @Inject constructor(
     private val repo: SupplementRepository,
 ) : ViewModel() {
 
-    val state: StateFlow<SupplementsListState> =
-        repo.observeAll()
-            .map { SupplementsListState(items = it) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), SupplementsListState())
+    private val _state = MutableStateFlow(SupplementsListState(loading = true))
+    val state: StateFlow<SupplementsListState> = _state.asStateFlow()
+
+    private var publicCache: List<PublicSupplementDto> = emptyList()
+
+    init {
+        // Observe local supplements and merge with cached public list
+        viewModelScope.launch {
+            repo.observeAll().collect { local ->
+                emitMerged(local)
+            }
+        }
+        // Fetch public supplements on init
+        refreshPublic()
+    }
+
+    fun refreshPublic() {
+        viewModelScope.launch {
+            repo.fetchPublicCatalog().onSuccess { publicList ->
+                publicCache = publicList
+                // Get current local list to re-emit
+                val currentLocal = repo.observeAll() // Will trigger collect above
+            }
+        }
+    }
+
+    private fun emitMerged(local: List<SupplementEntity>) {
+        val localKeys = local.map { it.nameDe.lowercase() to (it.brand?.lowercase() ?: "") }.toSet()
+        val combined = local.map { it.toDisplayItem() } +
+            publicCache
+                .filter { pub ->
+                    val key = pub.name_de.lowercase() to (pub.brand?.lowercase() ?: "")
+                    key !in localKeys
+                }
+                .map { it.toDisplayItem() }
+        _state.value = SupplementsListState(
+            items = combined.sortedBy { it.nameDe },
+            loading = false,
+        )
+    }
+
+    /** Adopt a public supplement as a local one (copy into Room). */
+    fun adoptPublic(publicId: String) {
+        val pub = publicCache.find { it.id == publicId } ?: return
+        viewModelScope.launch {
+            val entity = SupplementEntity(
+                nameDe = pub.name_de,
+                brand = pub.brand,
+                unitLabel = pub.unit_label,
+                defaultDose = pub.default_dose,
+                kcalPerDose = pub.kcal_per_dose,
+                proteinPerDose = pub.protein_per_dose,
+                carbsPerDose = pub.carbs_per_dose,
+                fatPerDose = pub.fat_per_dose,
+                notes = pub.notes,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+            )
+            repo.upsert(entity)
+        }
+    }
 
     fun delete(id: Long) {
         viewModelScope.launch { repo.delete(id) }
     }
 }
+
+private fun SupplementEntity.toDisplayItem() = SupplementDisplayItem(
+    id = "local_$id",
+    nameDe = nameDe,
+    brand = brand,
+    unitLabel = unitLabel,
+    defaultDose = defaultDose,
+    kcalPerDose = kcalPerDose,
+    proteinPerDose = proteinPerDose,
+    carbsPerDose = carbsPerDose,
+    fatPerDose = fatPerDose,
+    notes = notes,
+    isLocal = true,
+    localId = id,
+)
+
+private fun PublicSupplementDto.toDisplayItem() = SupplementDisplayItem(
+    id = "public_$id",
+    nameDe = name_de,
+    brand = brand,
+    unitLabel = unit_label,
+    defaultDose = default_dose,
+    kcalPerDose = kcal_per_dose,
+    proteinPerDose = protein_per_dose,
+    carbsPerDose = carbs_per_dose,
+    fatPerDose = fat_per_dose,
+    notes = notes,
+    isLocal = false,
+    publicServerId = id,
+)
 
 data class SupplementEditState(
     val id: Long = 0L,

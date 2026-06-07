@@ -96,7 +96,7 @@ fun RecipeCreateWizardScreen(
     // Kamera-Launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
         if (success && cameraPhotoUri != null) {
-            kotlin.runCatching { vm.pickImage(ctx, cameraPhotoUri!!) }
+            vm.pickImage(ctx, cameraPhotoUri!!)
         }
     }
 
