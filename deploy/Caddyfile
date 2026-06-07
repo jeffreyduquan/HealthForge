@@ -5,6 +5,21 @@
 
 # ============ API ============
 http://api.healthforge.endgear.de {
+    @cors_preflight {
+        method OPTIONS
+    }
+    handle @cors_preflight {
+        header Access-Control-Allow-Origin "http://admin.healthforge.endgear.de:8080"
+        header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "*"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Max-Age "3600"
+        respond 204
+    }
+
+    header Access-Control-Allow-Origin "http://admin.healthforge.endgear.de:8080"
+    header Access-Control-Allow-Credentials "true"
+
     reverse_proxy api:8080 {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -36,4 +51,3 @@ http://cdn.healthforge.endgear.de {
     encode gzip
 }
 
-# CI-Trigger 2026-06-07 - server-ci deploy test
