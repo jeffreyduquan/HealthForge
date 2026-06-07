@@ -28,7 +28,6 @@ data class UpdateCheckState(
     val isUpToDate: Boolean = false,
     val updateAvailable: LatestReleaseDto? = null,
     val error: String? = null,
-    val downloadId: Long? = null,
     val downloading: Boolean = false,
 )
 
@@ -85,13 +84,22 @@ class ProfileViewModel @Inject constructor(
     fun downloadUpdate(ctx: android.content.Context) {
         val release = _updateState.value.updateAvailable ?: return
         _updateState.value = _updateState.value.copy(downloading = true)
-        try {
-            val downloadId = updateRepo.downloadAndInstall(ctx, release)
-            _updateState.value = _updateState.value.copy(downloadId = downloadId, downloading = false)
-        } catch (e: Exception) {
-            _updateState.value = _updateState.value.copy(
-                downloading = false,
-                error = e.message ?: "Download fehlgeschlagen",
+        viewModelScope.launch {
+            // Download & install in background
+            updateRepo.downloadAndInstall(ctx, release).fold(
+                onSuccess = {
+                    _updateState.value = _updateState.value.copy(
+                        downloading = false,
+                        isUpToDate = true,
+                        updateAvailable = null,
+                    )
+                },
+                onFailure = { e ->
+                    _updateState.value = _updateState.value.copy(
+                        downloading = false,
+                        error = e.message ?: "Download/Install fehlgeschlagen",
+                    )
+                },
             )
         }
     }

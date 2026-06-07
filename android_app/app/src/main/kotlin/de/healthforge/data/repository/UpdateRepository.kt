@@ -1,28 +1,37 @@
 package de.healthforge.data.repository
 
-import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import androidx.core.content.FileProvider
 import de.healthforge.BuildConfig
 import de.healthforge.data.network.LatestReleaseDto
 import de.healthforge.data.network.ReleaseApi
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Handles checking for APK updates and triggering the download.
+ * Handles checking for APK updates, downloading, and installing.
  *
  * Flow:
- *  1. [checkForUpdate] → calls GET /v1/releases/latest → compares with BuildConfig.VERSION_NAME
- *  2. If newer → [downloadAndInstall] → DownloadManager → Notification → Intent.ACTION_VIEW
+ *  1. [checkForUpdate] → calls GET /v1/releases/latest → compares version numbers
+ *  2. If newer → [downloadAndInstall] → download APK directly → install immediately
  */
 @Singleton
 class UpdateRepository @Inject constructor(
     private val api: ReleaseApi,
 ) {
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .followRedirects(true)
+        .build()
 
     /**
      * Checks the server for the latest release.
@@ -30,62 +39,74 @@ class UpdateRepository @Inject constructor(
      */
     suspend fun checkForUpdate(): Result<LatestReleaseDto?> = runCatching {
         val latest = api.latest()
-        val currentVersion = BuildConfig.VERSION_NAME
-        // Simple version comparison (string compare works for semver-like "1.0.0" < "1.0.1")
-        if (compareVersions(latest.version, currentVersion) > 0) latest else null
+        val currentVersion = stripSuffix(BuildConfig.VERSION_NAME)
+        val latestVersion = stripSuffix(latest.version)
+        if (compareVersions(latestVersion, currentVersion) > 0) latest else null
     }
 
     /**
-     * Triggers Android's DownloadManager to download the APK.
-     * After download completes (handled by a BroadcastReceiver), the APK can be installed.
+     * Downloads the APK directly and immediately opens the Package Installer.
      *
-     * @return downloadId from DownloadManager (can be used to observe progress)
+     * @return the APK file (already saved to cache)
      */
-    fun downloadAndInstall(ctx: Context, release: LatestReleaseDto): Long {
+    fun downloadAndInstall(ctx: Context, release: LatestReleaseDto): Result<File> = runCatching {
         val downloadUrl = release.downloadUrl
             ?: throw IllegalStateException("No downloadUrl in release $release.version")
-        val downloadManager = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
-        val request = DownloadManager.Request(Uri.parse(downloadUrl))
-            .setTitle("HealthForge ${release.version}")
-            .setDescription("Update wird heruntergeladen…")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(
-                Environment.DIRECTORY_DOWNLOADS,
-                "HealthForge-${release.version}.apk",
-            )
-            .setMimeType("application/vnd.android.package-archive")
+        // Download to cache dir (camera/ subdir already registered in file_paths.xml)
+        val updateDir = File(ctx.cacheDir, "camera")
+        updateDir.mkdirs()
+        val apkFile = File(updateDir, "HealthForge-${release.version}.apk")
 
-        return downloadManager.enqueue(request)
+        val request = Request.Builder().url(downloadUrl).build()
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) throw RuntimeException("Download failed: HTTP ${response.code}")
+
+        response.body?.byteStream()?.use { input ->
+            FileOutputStream(apkFile).use { output ->
+                input.copyTo(output)
+            }
+        } ?: throw RuntimeException("Empty response body")
+
+        // Install immediately
+        installApk(ctx, apkFile)
+        apkFile
     }
 
     /**
-     * Sends an Intent to open the Package Installer for the downloaded APK.
-     * Call this after the DownloadManager reports success.
+     * Opens the Package Installer for the given APK file.
      */
-    fun installApk(ctx: Context, downloadId: Long): Boolean {
-        val downloadManager = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val uri = downloadManager.getUriForDownloadedFile(downloadId) ?: return false
+    private fun installApk(ctx: Context, apkFile: File) {
+        val uri: Uri = FileProvider.getUriForFile(
+            ctx,
+            "${ctx.packageName}.fileprovider",
+            apkFile,
+        )
 
-        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
-            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
-        // Android 14+ requires explicit user consent for installs
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ctx.startActivity(intent)
-        } else {
-            @Suppress("DEPRECATION")
-            ctx.startActivity(intent)
-        }
-        return true
+        ctx.startActivity(intent)
     }
 
     /**
-     * Simple semantic version comparison (e.g. "1.2.3" > "1.2.2").
-     * Supports up to 3 segments.
+     * Strips non-numeric suffix from a version string.
+     * "0.1.0-debug" → "0.1.0"
+     * "0.1.0-ci.23.abc" → "0.1.0"
+     */
+    private fun stripSuffix(v: String): String {
+        return v.split(".").takeWhile { it.all { c -> c.isDigit() } }.joinToString(".")
+    }
+
+    /**
+     * Compares two semantic version strings (numeric parts only).
+     * "0.1.0" == "0.1.0"
+     * "0.1.5" > "0.1.0"
+     * "1.0.0" > "0.9.9"
      */
     private fun compareVersions(v1: String, v2: String): Int {
         val parts1 = v1.split(".").map { it.toIntOrNull() ?: 0 }
