@@ -133,6 +133,19 @@ jobs:
           target: /opt/healthforge/admin-ui-dist/
           strip_components: 1
 
+      - name: Repair DB (clean up failed V17 migration)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 159.195.151.92
+          username: endgear
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/healthforge
+            source .env 2>/dev/null || true
+            docker compose -f docker-compose.prod.yml exec -T postgres \
+              psql -U "${POSTGRES_USER:-endgear}" -d "${POSTGRES_DB:-healthforge}" \
+              -c "DELETE FROM flyway_schema_history WHERE version = '17' AND success = false;"
+
       - name: Deploy API + reload Caddy
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -141,7 +154,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/healthforge
-            # Caddyfile liegt jetzt unter deploy/Caddyfile, aber docker-compose erwartet es im Root
             cp deploy/Caddyfile Caddyfile
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
