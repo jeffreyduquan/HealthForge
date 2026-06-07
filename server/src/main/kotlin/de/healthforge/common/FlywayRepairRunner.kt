@@ -1,38 +1,37 @@
 package de.healthforge.common
 
+import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
 import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
 
 /**
- * Repariert vor Flyway-Migrationen die Datenbank, falls die vorherige
+ * Repariert VOR Flyway-Migrationen die Datenbank, falls die vorherige
  * V17-Migration fehlgeschlagen ist (FK-Constraint auf dev-* Zutaten).
  *
- * Läuft VOR Flyway durch @Order(HIGHEST_PRECEDENCE).
+ * Nutzt FlywayMigrationStrategy — läuft VOR Flyway, nicht danach (wie ApplicationRunner).
  */
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE)
-class FlywayRepairRunner(dataSource: DataSource) : ApplicationRunner {
+class FlywayRepairConfig(dataSource: DataSource) {
 
     private val log = LoggerFactory.getLogger(javaClass)
     private val jdbc = JdbcTemplate(dataSource)
 
-    override fun run(args: ApplicationArguments) {
+    @Bean
+    fun flywayMigrationStrategy(): FlywayMigrationStrategy = FlywayMigrationStrategy { flyway: Flyway ->
         try {
             val deleted = jdbc.update(
                 "DELETE FROM flyway_schema_history WHERE version = '17' AND success = false"
             )
             if (deleted > 0) {
-                log.warn("🧹 Repaired: deleted {} failed V17 migration entry(ies) from flyway_schema_history", deleted)
+                log.warn("🧹 Flyway repair: deleted {} failed V17 entry(ies)", deleted)
             }
         } catch (e: Exception) {
-            // table may not exist yet (first startup)
-            log.debug("FlywayRepairRunner: {}", e.message)
+            log.debug("Flyway repair skipped: {}", e.message)
         }
+        flyway.migrate()
     }
 }
