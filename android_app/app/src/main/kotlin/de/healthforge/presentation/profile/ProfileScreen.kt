@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,11 +24,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.healthforge.BuildConfig
 import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
@@ -54,6 +62,8 @@ fun ProfileScreen(
 ) {
     val full by vm.profile.collectAsStateWithLifecycle()
     val theme by vm.theme.collectAsStateWithLifecycle()
+    val updateState by vm.updateState.collectAsStateWithLifecycle()
+    val ctx = LocalContext.current
     val hm = LocalHmTokens.current
 
     Box(
@@ -242,6 +252,68 @@ fun ProfileScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) { Text("Onboarding wiederholen") }
+
+                    // === In-App Update ===
+                    when {
+                        updateState.checking -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                Text("Suche nach Updates…", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        updateState.isUpToDate -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            ) {
+                                Text("✅ App ist aktuell (${BuildConfig.VERSION_NAME})",
+                                    style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        updateState.updateAvailable != null -> {
+                            val rel = updateState.updateAvailable!!
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    "📦 ${rel.version} verfügbar (${formatFileSize(rel.fileSize)})",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                if (!rel.changelog.isNullOrBlank()) {
+                                    Text(rel.changelog, style = MaterialTheme.typography.bodySmall,
+                                        color = hm.fgTertiary, modifier = Modifier.padding(top = 2.dp, bottom = 6.dp))
+                                }
+                                Button(
+                                    onClick = { vm.downloadUpdate(ctx) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = !updateState.downloading,
+                                ) {
+                                    if (updateState.downloading) {
+                                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                        Spacer(Modifier.width(8.dp))
+                                    }
+                                    Text(if (updateState.downloading) "Lädt herunter…" else "Update herunterladen")
+                                }
+                            }
+                        }
+                        updateState.error != null -> {
+                            Text("❌ ${updateState.error}",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    if (updateState.updateAvailable == null && !updateState.checking && !updateState.isUpToDate && updateState.error == null) {
+                        OutlinedButton(
+                            onClick = { vm.checkForUpdate() },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Nach Updates suchen")
+                        }
+                    }
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -272,4 +344,10 @@ private fun categoryLabel(c: de.healthforge.domain.nutrition.NutrientCatalog.Cat
     de.healthforge.domain.nutrition.NutrientCatalog.Category.VITAMIN -> "Vitamine"
     de.healthforge.domain.nutrition.NutrientCatalog.Category.MINERAL -> "Mineralstoffe"
     de.healthforge.domain.nutrition.NutrientCatalog.Category.WATER -> "Wasser"
+}
+
+private fun formatFileSize(bytes: Long): String = when {
+    bytes >= 1_000_000 -> "${"%.1f".format(bytes / 1_000_000.0)} MB"
+    bytes >= 1_000 -> "${"%.0f".format(bytes / 1_000.0)} KB"
+    else -> "$bytes B"
 }

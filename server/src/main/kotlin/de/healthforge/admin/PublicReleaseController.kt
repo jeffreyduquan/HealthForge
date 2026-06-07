@@ -1,5 +1,6 @@
 package de.healthforge.admin
 
+import de.healthforge.auth.AuthPrincipal
 import de.healthforge.auth.InviteRepository
 import de.healthforge.common.ApiException
 import io.minio.GetPresignedObjectUrlArgs
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import java.net.URI
 import java.time.Instant
 import java.time.ZoneId
@@ -48,14 +50,49 @@ class PublicReleaseController(
     fun latest(): Map<String, Any?> {
         val latest = releaseRepo.findFirstByOrderByCreatedAtDesc()
             ?: throw ApiException(HttpStatus.NOT_FOUND, "NO_RELEASES", "Keine Releases vorhanden")
+        val internalUrl = minio.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder()
+                .bucket(bucket)
+                .`object`(latest.minioKey)
+                .method(Method.GET)
+                .expiry(86_400) // 24h gültig
+                .build()
+        )
         return mapOf(
             "id" to latest.id,
             "version" to latest.version,
             "filename" to latest.filename,
             "fileSize" to latest.fileSize,
             "changelog" to latest.changelog,
+            "downloadUrl" to fixMinioUrl(internalUrl),
             "createdAt" to latest.createdAt.toString(),
         )
+    }
+
+    /**
+     * Authenticated download for in-app updates — no invite code required.
+     * Returns a redirect to a presigned MinIO URL (1h expiry).
+     */
+    @GetMapping("/{id}/download-app")
+    fun downloadApp(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+    ): ResponseEntity<Void> {
+        principal ?: throw ApiException(HttpStatus.UNAUTHORIZED, "NO_PRINCIPAL", "authentication required")
+        val release = releaseRepo.findById(id).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "RELEASE_NOT_FOUND", "Release nicht gefunden")
+        }
+        val internalUrl = minio.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder()
+                .bucket(bucket)
+                .`object`(release.minioKey)
+                .method(Method.GET)
+                .expiry(3600)
+                .build()
+        )
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header(HttpHeaders.LOCATION, fixMinioUrl(internalUrl))
+            .build()
     }
 
     @GetMapping("/{id}")

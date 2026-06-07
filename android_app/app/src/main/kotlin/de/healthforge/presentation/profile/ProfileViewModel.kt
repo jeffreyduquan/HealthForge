@@ -5,25 +5,39 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.prefs.SettingsDataStore
 import de.healthforge.data.repository.FullProfile
+import de.healthforge.data.network.LatestReleaseDto
 import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.data.repository.UpdateRepository
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.db.entities.UserProfileEntity
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
 import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.ThemePreference
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class UpdateCheckState(
+    val checking: Boolean = false,
+    val isUpToDate: Boolean = false,
+    val updateAvailable: LatestReleaseDto? = null,
+    val error: String? = null,
+    val downloadId: Long? = null,
+    val downloading: Boolean = false,
+)
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repo: ProfileRepository,
     private val settings: SettingsDataStore,
     private val computeTargets: ComputeNutrientTargetsUseCase,
+    private val updateRepo: UpdateRepository,
 ) : ViewModel() {
 
     val profile: StateFlow<FullProfile?> =
@@ -44,6 +58,47 @@ class ProfileViewModel @Inject constructor(
     fun setTheme(t: ThemePreference) = viewModelScope.launch { settings.setThemePreference(t) }
 
     fun restartOnboarding() = viewModelScope.launch { settings.setOnboardingCompleted(false) }
+
+    // ==================== In-App Update ====================
+
+    private val _updateState = MutableStateFlow(UpdateCheckState())
+    val updateState: StateFlow<UpdateCheckState> = _updateState.asStateFlow()
+
+    fun checkForUpdate() {
+        _updateState.value = UpdateCheckState(checking = true)
+        viewModelScope.launch {
+            updateRepo.checkForUpdate().fold(
+                onSuccess = { latest ->
+                    if (latest != null) {
+                        _updateState.value = UpdateCheckState(updateAvailable = latest)
+                    } else {
+                        _updateState.value = UpdateCheckState(isUpToDate = true)
+                    }
+                },
+                onFailure = { e ->
+                    _updateState.value = UpdateCheckState(error = e.message ?: "Fehler")
+                },
+            )
+        }
+    }
+
+    fun downloadUpdate(ctx: android.content.Context) {
+        val release = _updateState.value.updateAvailable ?: return
+        _updateState.value = _updateState.value.copy(downloading = true)
+        try {
+            val downloadId = updateRepo.downloadAndInstall(ctx, release)
+            _updateState.value = _updateState.value.copy(downloadId = downloadId, downloading = false)
+        } catch (e: Exception) {
+            _updateState.value = _updateState.value.copy(
+                downloading = false,
+                error = e.message ?: "Download fehlgeschlagen",
+            )
+        }
+    }
+
+    fun clearUpdateState() {
+        _updateState.value = UpdateCheckState()
+    }
 
     /** REQ-WATER-003: persist daily water goal (clamped to a sane range). */
     fun setWaterGoalMl(ml: Int) {

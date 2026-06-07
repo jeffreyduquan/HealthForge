@@ -13,6 +13,7 @@ import de.healthforge.data.network.GroupApi
 import de.healthforge.data.network.IngredientApi
 import de.healthforge.data.network.MediaApi
 import de.healthforge.data.network.RecipeApi
+import de.healthforge.data.network.ReleaseApi
 import de.healthforge.data.network.SupplementApi
 import de.healthforge.data.network.ExportApi
 import de.healthforge.data.network.TokenAuthenticator
@@ -87,6 +88,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideExportApi(retrofit: Retrofit): ExportApi = retrofit.create(ExportApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReleaseApi(retrofit: Retrofit): ReleaseApi = retrofit.create(ReleaseApi::class.java)
 
     @Provides
     @Singleton
