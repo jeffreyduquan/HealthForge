@@ -46,6 +46,14 @@ SELECT * FROM (VALUES
   ('Schnittlauch',        NULL, 'MANUAL', 'seed-schnittlauch',       30,  3.3,   4.4,  1.9,   0.7,  0.2, 2.5, 0.01, 0, '[]',                    '[]',             true),
   ('Zimt gemahlen',       NULL, 'MANUAL', 'seed-zimt',              247,  3.9,  80.0,  2.2,   1.2,  0.3, 50.0, 0.01, 0, '[]',                    '[]',             true),
   ('Vanilleextrakt',      NULL, 'MANUAL', 'seed-vanille',           288,  0.1,  12.0, 12.0,   0.1,  0.0, 0.0, 0.01, 0, '[]',                    '[]',             true),
+  ('Weizenmehl Type 405', NULL, 'MANUAL', 'seed-weizen-405',        348, 10.6,  71.0,  0.7,   1.0,  0.2, 4.0, 0.01, 0, '["GLUTEN"]',            '["FRUCTANS"]',   true),
+  ('Vollmilch 3,5%',      NULL, 'MANUAL', 'seed-vm-35',             64,  3.4,   4.8,  4.8,   3.5,  2.2, 0.0, 0.10, 0, '["MILCH"]',             '["LACTOSE"]',    true),
+  ('Hühnerei',            NULL, 'MANUAL', 'seed-ei',               155, 13.0,   1.1,  1.1,  11.0,  3.3, 0.0, 0.30, 1, '["EIER"]',              '[]',             true),
+  ('Naturjoghurt',        NULL, 'MANUAL', 'seed-joghurt',           61,  3.5,   4.7,  4.7,   3.2,  2.0, 0.0, 0.10, 2, '["MILCH"]',             '["LACTOSE"]',    true),
+  ('Tomate',              NULL, 'MANUAL', 'seed-tomate',            18,  0.9,   3.9,  2.6,   0.2,  0.0, 1.2, 0.01, 2, '[]',                    '[]',             true),
+  ('Zwiebel',             NULL, 'MANUAL', 'seed-zwiebel',           40,  1.1,   9.3,  4.2,   0.1,  0.0, 1.7, 0.00, 0, '[]',                    '["FRUCTANS"]',   true),
+  ('Knoblauch',           NULL, 'MANUAL', 'seed-knoblauch',        149,  6.4,  33.0,  1.0,   0.5,  0.1, 2.1, 0.02, 1, '[]',                    '["FRUCTANS"]',   true),
+  ('Vollkornbrot',        NULL, 'MANUAL', 'seed-vk-brot',          247,  8.4,  41.0,  3.5,   3.3,  0.5, 7.4, 1.30, 1, '["GLUTEN"]',            '["FRUCTANS"]',   true),
   ('Kartoffelmehl',       NULL, 'MANUAL', 'seed-kartoffelmehl',     357,  0.1,  83.0,  0.0,   0.1,  0.0, 3.0, 0.01, 0, '[]',                    '[]',             true),
   ('Sauerkraut',          NULL, 'MANUAL', 'seed-sauerkraut',         19,  0.9,   4.3,  1.0,   0.1,  0.0, 3.0, 0.80, 2, '[]',                    '[]',             true),
   ('Kümmel gemahlen',    NULL, 'MANUAL', 'seed-kuemmel',            333, 20.0,  44.0,  0.6,  15.0,  1.0, 10.0, 0.01, 0, '[]',                    '[]',             true),
@@ -82,9 +90,9 @@ BEGIN
     RETURNING id INTO recipe_id;
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
-        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-weizen-405' OR source_id = 'dev-weizen-405' LIMIT 1), 250, 'g'),
-        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' OR source_id = 'dev-vm-35' LIMIT 1), 500, 'ml'),
-        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'dev-ei' LIMIT 1), 3, 'Stück'),
+        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-weizen-405' LIMIT 1), 250, 'g'),
+        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' LIMIT 1), 500, 'ml'),
+        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-ei' LIMIT 1), 3, 'Stück'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'Prise'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-zucker' LIMIT 1), 30, 'g'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-butter' LIMIT 1), 20, 'g');
@@ -105,8 +113,8 @@ BEGIN
     RETURNING id INTO recipe_id;
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
-        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'dev-ei' LIMIT 1), 4, 'Stück'),
-        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' OR source_id = 'dev-vm-35' LIMIT 1), 50, 'ml'),
+        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-ei' LIMIT 1), 4, 'Stück'),
+        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' LIMIT 1), 50, 'ml'),
         (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-butter' LIMIT 1), 10, 'g'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'Prise'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-pfeffer' LIMIT 1), 1, 'Prise'),
@@ -129,7 +137,7 @@ BEGIN
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
         (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-spaghetti' LIMIT 1), 250, 'g'),
         (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-olivenoel' LIMIT 1), 60, 'ml'),
-        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'dev-knoblauch' LIMIT 1), 4, 'Zehen'),
+        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-knoblauch' LIMIT 1), 4, 'Zehen'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'EL'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-pfeffer' LIMIT 1), 1, 'Prise'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-parmesan' LIMIT 1), 30, 'g');
@@ -152,7 +160,7 @@ BEGIN
         (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-kartoffel' LIMIT 1), 800, 'g'),
         (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-moehre' LIMIT 1), 200, 'g'),
         (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-sellerie' LIMIT 1), 100, 'g'),
-        (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'dev-zwiebel' LIMIT 1), 1, 'Stück'),
+        (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-zwiebel' LIMIT 1), 1, 'Stück'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-huehnerbruehe' LIMIT 1), 800, 'ml'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-sahne' LIMIT 1), 100, 'ml'),
         (recipe_id, 6, (SELECT id FROM ingredients WHERE source_id = 'seed-butter' LIMIT 1), 20, 'g'),
@@ -202,7 +210,7 @@ BEGIN
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
         (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-haferflocken' LIMIT 1), 100, 'g'),
-        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' OR source_id = 'dev-vm-35' LIMIT 1), 300, 'ml'),
+        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-vm-35' LIMIT 1), 300, 'ml'),
         (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-beeren' LIMIT 1), 100, 'g'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-honig' LIMIT 1), 20, 'g'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-zimt' LIMIT 1), 1, 'Prise'),
@@ -223,8 +231,8 @@ BEGIN
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
         (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-kartoffel' LIMIT 1), 600, 'g'),
-        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'dev-ei' LIMIT 1), 4, 'Stück'),
-        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'dev-zwiebel' LIMIT 1), 1, 'Stück'),
+        (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-ei' LIMIT 1), 4, 'Stück'),
+        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-zwiebel' LIMIT 1), 1, 'Stück'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-olivenoel' LIMIT 1), 30, 'ml'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-butter' LIMIT 1), 10, 'g'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'TL'),
@@ -247,7 +255,7 @@ BEGIN
     RETURNING id INTO recipe_id;
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
-        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'dev-joghurt' LIMIT 1), 200, 'g'),
+        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-joghurt' LIMIT 1), 200, 'g'),
         (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-beeren' LIMIT 1), 75, 'g'),
         (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-honig' LIMIT 1), 15, 'g'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-haferflocken' LIMIT 1), 15, 'g');
@@ -266,9 +274,9 @@ BEGIN
     RETURNING id INTO recipe_id;
 
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
-        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'dev-vk-brot' LIMIT 1), 4, 'Scheiben'),
+        (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-vk-brot' LIMIT 1), 4, 'Scheiben'),
         (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-avocado' LIMIT 1), 1, 'Stück'),
-        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'dev-ei' LIMIT 1), 2, 'Stück'),
+        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-ei' LIMIT 1), 2, 'Stück'),
         (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-zitronensaft' LIMIT 1), 10, 'ml'),
         (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'Prise'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-pfeffer' LIMIT 1), 1, 'Prise');
@@ -290,9 +298,9 @@ BEGIN
     INSERT INTO recipe_ingredients (recipe_id, position, ingredient_id, quantity, unit) VALUES
         (recipe_id, 0, (SELECT id FROM ingredients WHERE source_id = 'seed-zucchini' LIMIT 1), 300, 'g'),
         (recipe_id, 1, (SELECT id FROM ingredients WHERE source_id = 'seed-paprika' LIMIT 1), 2, 'Stück'),
-        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'dev-tomate' LIMIT 1), 200, 'g'),
-        (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'dev-zwiebel' LIMIT 1), 1, 'Stück'),
-        (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'dev-knoblauch' LIMIT 1), 2, 'Zehen'),
+        (recipe_id, 2, (SELECT id FROM ingredients WHERE source_id = 'seed-tomate' LIMIT 1), 200, 'g'),
+        (recipe_id, 3, (SELECT id FROM ingredients WHERE source_id = 'seed-zwiebel' LIMIT 1), 1, 'Stück'),
+        (recipe_id, 4, (SELECT id FROM ingredients WHERE source_id = 'seed-knoblauch' LIMIT 1), 2, 'Zehen'),
         (recipe_id, 5, (SELECT id FROM ingredients WHERE source_id = 'seed-olivenoel' LIMIT 1), 30, 'ml'),
         (recipe_id, 6, (SELECT id FROM ingredients WHERE source_id = 'seed-kraeuter-provence' LIMIT 1), 1, 'TL'),
         (recipe_id, 7, (SELECT id FROM ingredients WHERE source_id = 'seed-salz' LIMIT 1), 1, 'TL'),
