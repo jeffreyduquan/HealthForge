@@ -607,7 +607,7 @@ function IngredientDetailDialog({
             maxRows={8}
             fullWidth
             size="small"
-            fontFamily="monospace"
+            sx={{ fontFamily: 'monospace' }}
             helperText={(() => {
               try {
                 const arr = JSON.parse(allergensStr);
@@ -627,7 +627,7 @@ function IngredientDetailDialog({
             maxRows={8}
             fullWidth
             size="small"
-            fontFamily="monospace"
+            sx={{ fontFamily: 'monospace' }}
             helperText={(() => {
               try {
                 const arr = JSON.parse(fodmapStr);
@@ -646,7 +646,7 @@ function IngredientDetailDialog({
             maxRows={12}
             fullWidth
             size="small"
-            fontFamily="monospace"
+            sx={{ fontFamily: 'monospace' }}
             helperText={(() => {
               try {
                 const obj = JSON.parse(micronutrientsStr);
