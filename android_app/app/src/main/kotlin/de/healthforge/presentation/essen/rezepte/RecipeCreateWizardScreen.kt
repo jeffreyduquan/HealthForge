@@ -54,6 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import de.healthforge.data.repository.MediaRepository
 import de.healthforge.presentation.common.PhotoSourceDialog
 import de.healthforge.presentation.lebensmittel.StepDotsRow
 import de.healthforge.presentation.lebensmittel.WizardNav
@@ -64,17 +66,18 @@ import de.healthforge.presentation.theme.LocalHmTokens
 import kotlin.math.roundToInt
 
 /**
- * REQ-RECIPE-CREATE-WIZARD-001 (P6.S5) — 5-Step Wizard zum Erstellen eines Rezepts.
+ * REQ-RECIPE-CREATE-WIZARD-001 (P6.S5) — 6-Step Wizard zum Erstellen eines Rezepts.
  *
  * Reutilises [RecipeEditViewModel] (create-mode → `id == null`). Forward-only mit
  * Validation pro Step. Schritte:
- * 1. Name + optional Foto
+ * 0. Name + Foto (mit Vorschau)
+ * 1. Mahlzeit wählen (Frühstück/Mittag/Abend/Snack) ← NEU
  * 2. Zutaten-Liste (Search aus ingredients + Mengen/Einheit pro Zutat)
  * 3. Portionen + Zubereitungszeit (Slider)
  * 4. Zubereitungstext (multiline, Schritt für Schritt empfohlen)
- * 5. Vorschau + Speichern
+ * 5. Vorschau + Speichern (mit Foto)
  */
-private const val RECIPE_WIZARD_STEPS = 5
+private const val RECIPE_WIZARD_STEPS = 6
 
 @Composable
 fun RecipeCreateWizardScreen(
@@ -93,7 +96,7 @@ fun RecipeCreateWizardScreen(
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let { vm.pickImage(ctx, it) }
     }
-    // Kamera-Launcher
+    // Kamera-Launcher (kein silent try-catch mehr)
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
         if (success && cameraPhotoUri != null) {
             vm.pickImage(ctx, cameraPhotoUri!!)
@@ -140,10 +143,11 @@ fun RecipeCreateWizardScreen(
             ) {
                 when (stepIndex) {
                     0 -> StepName(s, vm, onPickImage = { showPhotoDialog = true })
-                    1 -> StepIngredients(s, vm)
-                    2 -> StepPortionsTime(s, vm)
-                    3 -> StepInstructions(s, vm)
-                    4 -> StepRecipePreview(s)
+                    1 -> StepSlots(s, vm)
+                    2 -> StepIngredients(s, vm)
+                    3 -> StepPortionsTime(s, vm)
+                    4 -> StepInstructions(s, vm)
+                    5 -> StepRecipePreview(s)
                 }
                 s.error?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -152,10 +156,11 @@ fun RecipeCreateWizardScreen(
             }
 
             val canAdvance = when (stepIndex) {
-                0 -> s.title.trim().isNotEmpty() && s.imageKey.isNotBlank()
-                1 -> s.ingredients.isNotEmpty()
-                2 -> s.prepMinutes.isNotBlank()
-                3 -> true // Zubereitungstext optional
+                0 -> s.title.trim().isNotEmpty()
+                1 -> s.slotTags.isNotEmpty()
+                2 -> s.ingredients.isNotEmpty()
+                3 -> s.prepMinutes.isNotBlank()
+                4 -> true // Zubereitungstext optional
                 else -> true
             }
             WizardNav(
@@ -182,7 +187,7 @@ fun RecipeCreateWizardScreen(
             onCameraClick = { uri ->
                 showPhotoDialog = false
                 cameraPhotoUri = uri
-                try { cameraLauncher.launch(uri) } catch (_: Exception) { }
+                cameraLauncher.launch(uri)
             },
             onDismiss = { showPhotoDialog = false },
         )
@@ -209,10 +214,66 @@ private fun StepName(s: RecipeEditUiState, vm: RecipeEditViewModel, onPickImage:
         Spacer(Modifier.width(8.dp))
         Text(if (s.imageKey.isNotBlank()) "Foto ausgewählt — ersetzen" else "Foto auswählen (Pflicht)")
     }
-    if (s.imageKey.isNotBlank()) {
-        Text("Bild-Key: ${s.imageKey}", color = hm.fgTertiary, style = MaterialTheme.typography.bodySmall)
+    // Foto-Vorschau
+    val imgUrl = MediaRepository.imageUrl("recipes", s.imageKey.takeIf { it.isNotBlank() }, variant = "medium")
+    if (imgUrl != null) {
+        AsyncImage(
+            model = imgUrl,
+            contentDescription = "Rezeptfoto",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp)),
+        )
+    } else if (s.imageKey.isNotBlank()) {
+        // Falls imageKey keine URL ist, trotzdem anzeigen
+        Text("📷 Bild hochgeladen (Key: ${s.imageKey})",
+            color = hm.fgSecondary, style = MaterialTheme.typography.bodySmall)
     } else {
-        Text("Bitte wähle ein Foto aus", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        Text("Bitte wähle ein Foto aus", color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+// ===== NEU: Schritt 1 – Mahlzeit wählen =====
+
+@Composable
+private fun StepSlots(s: RecipeEditUiState, vm: RecipeEditViewModel) {
+    val hm = LocalHmTokens.current
+    GradientText("Für welche Mahlzeit?", style = MaterialTheme.typography.headlineSmall)
+    Text("Wähle mindestens eine Mahlzeit aus.", color = hm.fgSecondary, style = MaterialTheme.typography.bodySmall)
+
+    val allSlots = listOf(
+        "BREAKFAST" to "🌅 Frühstück",
+        "LUNCH" to "☀️ Mittagessen",
+        "DINNER" to "🌙 Abendessen",
+        "SNACK" to "🍿 Snack",
+    )
+
+    Spacer(Modifier.height(8.dp))
+    allSlots.forEach { (key, label) ->
+        val selected = key in s.slotTags
+        GlassCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { vm.toggleSlot(key) },
+            padding = PaddingValues(14.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.Checkbox(
+                    checked = selected,
+                    onCheckedChange = { vm.toggleSlot(key) },
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(label, color = hm.fgPrimary, fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+    }
+    if (s.slotTags.isEmpty()) {
+        Text("Bitte wähle mindestens eine Mahlzeit", color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -376,10 +437,45 @@ private fun StepInstructions(s: RecipeEditUiState, vm: RecipeEditViewModel) {
 private fun StepRecipePreview(s: RecipeEditUiState) {
     val hm = LocalHmTokens.current
     GradientText("Vorschau", style = MaterialTheme.typography.headlineSmall)
+
+    // Foto
+    val imgUrl = MediaRepository.imageUrl("recipes", s.imageKey.takeIf { it.isNotBlank() }, variant = "medium")
+    if (imgUrl != null) {
+        AsyncImage(
+            model = imgUrl,
+            contentDescription = "Rezeptfoto",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp)),
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+
     GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(s.title.ifBlank { "(kein Name)" }, color = hm.fgPrimary, fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleLarge)
+
+            // Slot-Tags
+            if (s.slotTags.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    s.slotTags.sorted().forEach { tag ->
+                        val label = when (tag) {
+                            "BREAKFAST" -> "🌅 Frühstück"
+                            "LUNCH" -> "☀️ Mittag"
+                            "DINNER" -> "🌙 Abend"
+                            "SNACK" -> "🍿 Snack"
+                            else -> tag
+                        }
+                        androidx.compose.material3.SuggestionChip(
+                            onClick = {},
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                        )
+                    }
+                }
+            }
+
             Row {
                 Text("${s.servings} Portion(en)", color = hm.fgSecondary,
                     style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
