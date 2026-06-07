@@ -9,26 +9,28 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 /**
  * Security config — Sprint P1.S2: JWT stateless.
- * Public: actuator/health, swagger, /v1/auth/...
- * Admin endpoints require ROLE_ADMIN via @PreAuthorize.
+ * CORS: Single source of truth via corsConfigurationSource() bean.
+ * No WebMvcConfigurer — avoids duplicate CORS headers.
  */
 @Configuration
 @EnableMethodSecurity
 class SecurityConfig(
     private val jwtFilter: JwtAuthenticationFilter,
     private val rateLimitFilter: RateLimitFilter,
+    @Value("\${healthforge.cors.allowed-origins}") private val corsAllowedOrigins: String = "",
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .cors { /* see CorsConfig below */ }
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
@@ -46,18 +48,19 @@ class SecurityConfig(
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
-}
 
-@Configuration
-class CorsConfig(
-    @Value("\${healthforge.cors.allowed-origins}") private val allowedOrigins: String,
-) : WebMvcConfigurer {
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-            .allowedOrigins(*allowedOrigins.split(",").toTypedArray())
-            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-            .allowedHeaders("*")
-            .allowCredentials(true)
-            .maxAge(3600)
+    /** Single source of truth for CORS — Spring Security filter level. No WebMvcConfigurer. */
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration().apply {
+            allowedOrigins = corsAllowedOrigins.split(",")
+            allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+            maxAge = 3600L
+        }
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", config)
+        return source
     }
 }
