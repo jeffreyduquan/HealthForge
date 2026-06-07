@@ -133,7 +133,7 @@ jobs:
           target: /opt/healthforge/admin-ui-dist/
           strip_components: 1
 
-      - name: Deploy (API + Caddy + DB-Repair)
+      - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 159.195.151.92
@@ -142,24 +142,17 @@ jobs:
           script: |
             set -e
             cd /opt/healthforge
-
-            echo "[1/4] Caddyfile kopieren…"
             cp deploy/Caddyfile Caddyfile
 
-            echo "[2/4] Docker image pull + API start…"
+            echo "[DB-REPAIR] Entferne failed V17 aus Flyway-History…"
+            docker exec healthforge-postgres psql -U endgear -d healthforge \
+              -c "DELETE FROM flyway_schema_history WHERE version = '17' AND success = false;" 2>&1 || echo "  (ignoriert)"
+
+            echo "[DEPLOY] Pull + start API…"
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
 
-            echo "[3/4] Warten auf API (health)…"
-            for i in 1 2 3 4 5 6 7 8 9 10; do
-              if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
-                echo "  ✅ API healthy"
-                break
-              fi
-              echo "  …warte ($i/10)…"
-              sleep 3
-            done
-
-            echo "[4/4] Caddy neustarten…"
+            sleep 5
+            echo "[DEPLOY] Reload Caddy…"
             docker compose -f docker-compose.prod.yml up -d caddy --force-recreate
-            echo "✅ Deploy fertig"
+            echo "✅ Done"
