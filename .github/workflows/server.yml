@@ -133,28 +133,33 @@ jobs:
           target: /opt/healthforge/admin-ui-dist/
           strip_components: 1
 
-      - name: Repair DB (clean up failed V17 migration)
+      - name: Deploy (API + Caddy + DB-Repair)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 159.195.151.92
           username: endgear
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd /opt/healthforge
-            source .env 2>/dev/null || true
-            docker compose -f docker-compose.prod.yml exec -T postgres \
-              psql -U "${POSTGRES_USER:-endgear}" -d "${POSTGRES_DB:-healthforge}" \
-              -c "DELETE FROM flyway_schema_history WHERE version = '17' AND success = false;"
 
-      - name: Deploy API + reload Caddy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 159.195.151.92
-          username: endgear
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /opt/healthforge
+            echo "[1/4] Caddyfile kopieren…"
             cp deploy/Caddyfile Caddyfile
+
+            echo "[2/4] Docker image pull + API start…"
             docker compose -f docker-compose.prod.yml pull api
             docker compose -f docker-compose.prod.yml up -d api
+
+            echo "[3/4] Warten auf API (health)…"
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
+                echo "  ✅ API healthy"
+                break
+              fi
+              echo "  …warte ($i/10)…"
+              sleep 3
+            done
+
+            echo "[4/4] Caddy neustarten…"
             docker compose -f docker-compose.prod.yml up -d caddy --force-recreate
+            echo "✅ Deploy fertig"
