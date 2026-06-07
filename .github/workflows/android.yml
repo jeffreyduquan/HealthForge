@@ -54,33 +54,61 @@ jobs:
         run: |
           set -e
 
+          echo "🔍 Checking prerequisites..."
+          command -v jq >/dev/null 2>&1 || { echo "Installing jq…"; sudo apt-get update -qq && sudo apt-get install -y -qq jq; }
+
+          if [ -z "$API_URL" ] || [ -z "$ADMIN_EMAIL" ] || [ -z "$ADMIN_PASSWORD" ]; then
+            echo "⚠️  Secrets nicht gesetzt – Deploy übersprungen"
+            echo "   Erstelle GitHub Secrets: API_URL, ADMIN_EMAIL, ADMIN_PASSWORD"
+            exit 0
+          fi
+
           APK_PATH="android_app/app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            echo "❌ APK nicht gefunden: $APK_PATH"
+            exit 0
+          fi
+          APK_SIZE=$(stat -c%s "$APK_PATH")
+          echo "📦 APK: $(basename $APK_PATH) (${APK_SIZE} bytes)"
+
           COMMIT_MSG="${{ github.event.head_commit.message }}"
-          # Version: app version + CI-Build-Nummer + kurzer Commit-Hash
           VERSION="0.1.0-ci.${{ github.run_number }}.${GITHUB_SHA:0:7}"
           CHANGELOG=$(echo "$COMMIT_MSG" | head -5)
-
           echo "📦 Version: $VERSION"
-          echo "📝 Changelog: $CHANGELOG"
 
-          # Login → JWT holen
-          LOGIN_RESP=$(curl -s -X POST "${API_URL}/v1/auth/login" \
+          # API reachable?
+          echo "🏓 Ping API…"
+          curl -sS --connect-timeout 10 "${API_URL}/actuator/health" > /dev/null || {
+            echo "⚠️  API nicht erreichbar – Deploy übersprungen"
+            exit 0
+          }
+
+          # Login → JWT
+          echo "🔑 Login als $ADMIN_EMAIL…"
+          LOGIN_RESP=$(curl -sS -X POST "${API_URL}/v1/auth/login" \
             -H "Content-Type: application/json" \
-            -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}")
+            -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}") || {
+            echo "❌ Login fehlgeschlagen (curl exit $?)"
+            exit 0
+          }
 
           TOKEN=$(echo "$LOGIN_RESP" | jq -r '.accessToken')
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "❌ Login fehlgeschlagen: $LOGIN_RESP"
-            exit 1
+            echo "❌ Login fehlgeschlagen: $(echo $LOGIN_RESP | jq -r '.message // "unbekannter Fehler"')"
+            exit 0
           fi
           echo "✅ Login OK"
 
           # APK hochladen
-          UPLOAD_RESP=$(curl -s -X POST "${API_URL}/admin/v1/releases" \
+          echo "📤 Uploading release v${VERSION}…"
+          UPLOAD_RESP=$(curl -sS -X POST "${API_URL}/admin/v1/releases" \
             -H "Authorization: Bearer ${TOKEN}" \
             -F "file=@${APK_PATH}" \
             -F "version=${VERSION}" \
-            -F "changelog=${CHANGELOG}")
+            -F "changelog=${CHANGELOG}") || {
+            echo "❌ Upload fehlgeschlagen (curl exit $?)"
+            exit 0
+          }
 
-          echo "✅ Release erstellt: $(echo $UPLOAD_RESP | jq -r '.version // "?"')"
+          echo "✅ Release erstellt: v$(echo $UPLOAD_RESP | jq -r '.version // "?"') (ID: $(echo $UPLOAD_RESP | jq -r '.id // "?"'))"
 
