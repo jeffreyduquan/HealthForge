@@ -68,8 +68,14 @@ class RecipeService(
 
     @Transactional(readOnly = true)
     fun detail(id: UUID, viewerId: UUID): RecipeDetailDto {
-        val r = recipeRepo.findByIdAndStatus(id, RecipeStatus.PUBLISHED.name)
+        // Allow viewing own recipes even if PENDING_REVIEW/REJECTED (owner must see what they submitted)
+        val r = recipeRepo.findById(id).orElse(null)
             ?: throw ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $id not found")
+        // Only published recipes are visible to non-owners (except admins)
+        val isOwner = r.authorId == viewerId
+        if (!isOwner && r.status != RecipeStatus.PUBLISHED.name) {
+            throw ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $id not found")
+        }
         when (RecipeVisibility.valueOf(r.visibility)) {
             RecipeVisibility.PUBLIC -> { /* ok */ }
             RecipeVisibility.PRIVATE -> if (r.authorId != viewerId) throw ApiException(HttpStatus.FORBIDDEN, "PRIVATE_RECIPE", "private recipe")
