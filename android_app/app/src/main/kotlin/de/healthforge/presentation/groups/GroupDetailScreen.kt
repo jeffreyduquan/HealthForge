@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.network.GroupMemberDto
 import de.healthforge.data.network.GroupUpdateRequest
+import de.healthforge.presentation.essen.rezepte.RecipeCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,17 +186,7 @@ fun GroupDetailScreen(
                         } else {
                             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                                 items(state.recipes, key = { it.id }) { r ->
-                                    Card(modifier = Modifier.fillMaxWidth().clickable { onOpenRecipe(r.id) }) {
-                                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                            Column(Modifier.weight(1f)) {
-                                                Text(r.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                                                Text(
-                                                    r.slot_tags.joinToString(", ") + " · ${r.author_id.take(8)}…",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                )
-                                            }
-                                        }
-                                    }
+                                    RecipeCard(recipe = r, onClick = { onOpenRecipe(r.id) })
                                 }
                             }
                         }

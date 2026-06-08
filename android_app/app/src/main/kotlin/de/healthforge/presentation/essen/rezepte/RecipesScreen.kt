@@ -108,7 +108,7 @@ fun RecipesScreen(
 }
 
 @Composable
-private fun RecipeCard(recipe: RecipeListItemDto, onClick: () -> Unit) {
+fun RecipeCard(recipe: RecipeListItemDto, onClick: () -> Unit) {
     ElevatedCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
