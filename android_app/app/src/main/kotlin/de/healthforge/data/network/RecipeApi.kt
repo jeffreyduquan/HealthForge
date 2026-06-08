@@ -143,6 +143,9 @@ interface RecipeApi {
         @Query("offset") offset: Int = 0,
     ): List<RecipeListItemDto>
 
+    @GET("v1/recipes/batch")
+    suspend fun batch(@Query("ids") ids: List<String>): List<RecipeListItemDto>
+
     @GET("v1/recipes/{id}")
     suspend fun detail(@Path("id") id: String): RecipeDetailDto
 

@@ -195,6 +195,25 @@ class RecipeService(
         recipeRepo.save(existing)
     }
 
+    /** Batch: Rezepte anhand von IDs als ListItemDtos zurückgeben (für Plan/Home). */
+    @Transactional(readOnly = true)
+    fun batchItems(ids: List<UUID>, viewerId: UUID): List<RecipeListItemDto> {
+        if (ids.isEmpty()) return emptyList()
+        val recipes = recipeRepo.findAllById(ids)
+        return recipes.filter { it.status == RecipeStatus.PUBLISHED.name || it.authorId == viewerId }.map { r ->
+            RecipeListItemDto(
+                id = r.id, title = r.title, description = r.description,
+                imageKey = r.imageKey, servings = r.servings, prepMinutes = r.prepMinutes,
+                slotTags = r.slotTags.mapNotNull { runCatching { SlotTag.valueOf(it) }.getOrNull() },
+                visibility = RecipeVisibility.valueOf(r.visibility), authorId = r.authorId,
+                createdAt = r.createdAt,
+                likeCount = likeRepo.countByRecipeId(r.id),
+                communityRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.RECOMMEND.name),
+                communityNotRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.NOT_RECOMMEND.name),
+            )
+        }
+    }
+
     /** Weißt ein Rezept einer Gruppe zu (via group_recipes Join-Tabelle, V21).
      *  Erlaubt fuer: Rezept-Owner ODER Gruppen-Mitglieder mit OWNER/ADMIN/CONTRIBUTOR.
      *  Das Rezept behaelt seine visibility (PUBLIC/PRIVATE) bei. */

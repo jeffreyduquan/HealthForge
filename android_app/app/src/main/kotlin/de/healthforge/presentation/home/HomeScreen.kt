@@ -182,6 +182,7 @@ fun HomeScreen(
                     s.entries.take(5).forEach { e ->
                         IntakeRow(
                             entry = e,
+                            recipeDtos = s.recipeDtos,
                             editable = editableUseCase(e.loggedAt),
                             onDelete = { vm.deleteEntry(e.id) },
                         )
@@ -240,12 +241,14 @@ fun HomeScreen(
 @Composable
 private fun IntakeRow(
     entry: IntakeEntryEntity,
+    recipeDtos: Map<String, RecipeListItemDto>,
     editable: Boolean,
     onDelete: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
+    val dto = recipeDtos[entry.sourceId] ?: entry.toRecipeListItemDto()
     RecipeCard(
-        recipe = entry.toRecipeListItemDto(),
+        recipe = dto,
         onClick = { },
         trailingActions = {
             if (editable) {

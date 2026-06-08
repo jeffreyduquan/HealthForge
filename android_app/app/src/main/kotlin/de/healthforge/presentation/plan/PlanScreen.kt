@@ -177,6 +177,7 @@ fun PlanScreen(
                             slotType = sw.slot.slotType,
                             consumed = sw.slot.consumed,
                             items = sw.items,
+                            recipeDtos = state.recipeDtos,
                             onAddItem = { pickerForSlot = sw.slot.id },
                             onMarkConsumed = { vm.markConsumed(sw.slot.id) },
                             onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
@@ -462,6 +463,7 @@ private fun SlotCard(
     slotType: String,
     consumed: Boolean,
     items: List<MealPlanItemEntity>,
+    recipeDtos: Map<String, RecipeListItemDto>,
     onAddItem: () -> Unit,
     onMarkConsumed: () -> Unit,
     onDeleteSlot: () -> Unit,
@@ -532,8 +534,9 @@ private fun SlotCard(
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 items.forEach { item ->
+                    val dto = recipeDtos[item.sourceId] ?: item.toRecipeListItemDto(slotType)
                     RecipeCard(
-                        recipe = item.toRecipeListItemDto(slotType),
+                        recipe = dto,
                         onClick = { },
                         trailingActions = {
                             IconButton(onClick = { onDeleteItem(item.id) }) {

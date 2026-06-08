@@ -10,10 +10,12 @@ import de.healthforge.data.db.entities.SupplementEntity
 import de.healthforge.data.db.entities.SupplementReminderEntity
 import de.healthforge.data.db.entities.isDueToday
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.DayNutrientTotals
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.IntakeRepository
 import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.data.repository.RecipeRepository
 import de.healthforge.data.repository.SupplementRepository
 import de.healthforge.data.repository.WaterIntakeRepository
 import de.healthforge.domain.ComputeNutrientTargetsUseCase
@@ -85,6 +87,7 @@ data class HomeState(
     val quickAddPortion: String = "100",
     val waterReminderEnabled: Boolean = false,
     val error: String? = null,
+    val recipeDtos: Map<String, RecipeListItemDto> = emptyMap(),
 )
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -94,6 +97,7 @@ class HomeViewModel @Inject constructor(
     private val waterRepo: WaterIntakeRepository,
     private val ingredientRepo: IngredientRepository,
     private val supplementRepo: SupplementRepository,
+    private val recipeRepo: RecipeRepository,
     private val waterReminderPrefs: WaterReminderPrefs,
     private val waterReminderScheduler: WaterReminderScheduler,
     private val profileRepo: ProfileRepository,
@@ -131,6 +135,21 @@ class HomeViewModel @Inject constructor(
                     waterMl = water,
                     waterGhostMl = computeWaterGhostMl(_state.value.targets.waterMl, _state.value.date),
                 )
+            }
+            .launchIn(viewModelScope)
+
+        // Fetch real RecipeListItemDtos from server for recipe-type entries
+        dateFlow
+            .flatMapLatest { day -> intakeRepo.observeForDay(day) }
+            .onEach { entries ->
+                val recipeIds = entries.filter { it.sourceType == IntakeSourceType.RECIPE }.map { it.sourceId }.distinct()
+                if (recipeIds.isNotEmpty()) {
+                    recipeRepo.batch(recipeIds).onSuccess { list ->
+                        _state.value = _state.value.copy(recipeDtos = list.associateBy { it.id })
+                    }
+                } else {
+                    _state.value = _state.value.copy(recipeDtos = emptyMap())
+                }
             }
             .launchIn(viewModelScope)
 

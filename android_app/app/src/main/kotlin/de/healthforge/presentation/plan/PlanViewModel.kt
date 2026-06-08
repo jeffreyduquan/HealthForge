@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,6 +41,7 @@ data class PlanUiState(
     val selectedDay: LocalDate = LocalDate.now(),
     val slots: List<SlotWithItems> = emptyList(),
     val message: String? = null,
+    val recipeDtos: Map<String, RecipeListItemDto> = emptyMap(),
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -51,6 +54,7 @@ class PlanViewModel @Inject constructor(
 
     private val _day = MutableStateFlow(LocalDate.now())
     private val _message = MutableStateFlow<String?>(null)
+    private val _recipeDtos = MutableStateFlow<Map<String, RecipeListItemDto>>(emptyMap())
 
     val state: StateFlow<PlanUiState> = combine(
         _day.flatMapLatest { d ->
@@ -63,8 +67,28 @@ class PlanViewModel @Inject constructor(
         },
         _day,
         _message,
-    ) { slots, day, msg -> PlanUiState(selectedDay = day, slots = slots, message = msg) }
+        _recipeDtos,
+    ) { slots, day, msg, dtos -> PlanUiState(selectedDay = day, slots = slots, message = msg, recipeDtos = dtos) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanUiState())
+
+    init {
+        // Fetch real RecipeListItemDtos from server whenever items change
+        _day.flatMapLatest { d ->
+            planRepo.observeSlotsForDay(d).flatMapLatest { slots ->
+                if (slots.isEmpty()) flowOf(emptyList())
+                else planRepo.observeItemsForSlots(slots.map { it.id })
+            }
+        }.onEach { items ->
+            val recipeIds = items.filter { it.sourceType == IntakeSourceType.RECIPE }.map { it.sourceId }.distinct()
+            if (recipeIds.isNotEmpty()) {
+                recipeRepo.batch(recipeIds).onSuccess { list ->
+                    _recipeDtos.value = list.associateBy { it.id }
+                }
+            } else {
+                _recipeDtos.value = emptyMap()
+            }
+        }.launchIn(viewModelScope)
+    }
 
     fun selectDay(day: LocalDate) { _day.value = day }
 

@@ -64,6 +64,16 @@ class RecipeController(
         return service.detail(id, p.userId)
     }
 
+    /** Batch-Abruf: Rezept-IDs → ListItems (für Plan/Home-Darstellung mit Originaldaten). */
+    @GetMapping("/batch")
+    fun batch(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @RequestParam("ids") ids: List<UUID>,
+    ): List<RecipeListItemDto> {
+        val p = require(principal)
+        return service.batchItems(ids, p.userId)
+    }
+
     /** Rezept einer Gruppe zuweisen via group_recipes Join-Table (V21). */
     @PostMapping("/{id}/assign-group")
     fun assignToGroup(

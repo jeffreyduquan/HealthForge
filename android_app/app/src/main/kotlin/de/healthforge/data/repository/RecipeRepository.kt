@@ -45,6 +45,10 @@ class RecipeRepository @Inject constructor(
 
     suspend fun detail(id: String): Result<RecipeDetailDto> = runCatching { api.detail(id) }
 
+    suspend fun batch(ids: List<String>): Result<List<RecipeListItemDto>> = runCatching {
+        if (ids.isEmpty()) emptyList() else api.batch(ids)
+    }
+
     suspend fun create(req: RecipeUpsertRequest): Result<String> = runCatching { api.create(req).id }
 
     suspend fun update(id: String, req: RecipeUpsertRequest): Result<Unit> = runCatching { api.update(id, req) }
