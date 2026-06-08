@@ -11,6 +11,13 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- Android 11+ (API 30+) Package-Visibility: Kamera-App finden für isCameraAvailable() -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".HealthForgeApp"
         android:allowBackup="false"

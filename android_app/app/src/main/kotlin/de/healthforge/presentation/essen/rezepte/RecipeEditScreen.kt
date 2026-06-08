@@ -51,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +89,7 @@ fun RecipeEditScreen(
     }
 
     var showPhotoDialog by remember { mutableStateOf(false) }
-    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         uri?.let { vm.pickImage(ctx, it) }
@@ -96,6 +97,8 @@ fun RecipeEditScreen(
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success && cameraPhotoUri != null) {
             vm.pickImage(ctx, cameraPhotoUri!!)
+        } else if (!success) {
+            vm.setError("Kamera wurde abgebrochen oder Foto konnte nicht gespeichert werden")
         }
     }
 
@@ -234,7 +237,7 @@ fun RecipeEditScreen(
             onCameraClick = { uri ->
                 showPhotoDialog = false
                 cameraPhotoUri = uri
-                try { cameraLauncher.launch(uri) } catch (_: Exception) { }
+                cameraLauncher.launch(uri)
             },
             onDismiss = { showPhotoDialog = false },
         )

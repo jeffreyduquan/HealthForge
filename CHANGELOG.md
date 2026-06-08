@@ -5,6 +5,33 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: Kamera-Button für Rezept-Fotos ausgegraut (2026-06-08)
+
+**Scope:** Der "Foto aufnehmen"-Button in der PhotoSourceDialog war auf dem Handy ausgegraut (disabled). Ursache: Auf Android 11+ (API 30+) unterliegt `resolveActivity()` den Package-Visibility-Restrictions. Die App hatte kein `<queries>`-Element im Manifest, das den `ACTION_IMAGE_CAPTURE`-Intent deklariert → `isCameraAvailable()` gab `false` zurück, obwohl eine Kamera-App installiert war.
+
+**Zusätzlich gefundene und behobene Schwachstellen:**
+- `cameraPhotoUri` verwendete `remember` statt `rememberSaveable` → bei Activity-Neuerstellung (z.B. wenig RAM während Kamera-App läuft) ging die URI verloren
+- `RecipeEditScreen.kt` hatte silent `try { … } catch (_: Exception) { }` um `cameraLauncher.launch(uri)` → Fehler wurden verschluckt
+
+**Fix:**
+- `AndroidManifest.xml`: `<queries>`-Element mit `ACTION_IMAGE_CAPTURE`-Intent hinzugefügt (Hauptursache)
+- `RecipeEditScreen.kt` + `RecipeCreateWizardScreen.kt`: `cameraPhotoUri` auf `rememberSaveable` umgestellt
+- `RecipeEditScreen.kt`: Silent try-cache entfernt
+- `RecipeEditViewModel.kt`: Neue `fun setError(msg: String)` für konsistente Fehleranzeige
+- Beide Screens: Kamera-Abbruch liefert Feedback "Kamera wurde abgebrochen…"
+
+**Touched Docs:** Keine (reiner Bugfix, keine Architektur-/Req-Änderung)
+
+**Touched Code:**
+- MOD `AndroidManifest.xml` — `<queries>` für Kamera-Package-Visibility hinzugefügt
+- MOD `RecipeEditScreen.kt` — `remember`→`rememberSaveable`; silent try-catch entfernt; Camera-Abbruch-Feedback
+- MOD `RecipeCreateWizardScreen.kt` — `remember`→`rememberSaveable`; Camera-Abbruch-Feedback
+- MOD `RecipeEditViewModel.kt` — Neue `fun setError()` hinzugefügt
+
+**Verifikation:** `:app:assembleDebug` BUILD SUCCESSFUL.
+
+---
+
 ## Bugfix: Admin-UI 404 — Stale Docker-Bind-Mount (2026-06-06)
 
 **Scope:** Admin-UI unter http://admin.healthforge.endgear.de:8080 zeigte leere Seite / 404. Ursache: Caddy-Container wurde gestartet, bevor `admin-ui-dist/` existierte → Docker legte leeres Root-Verzeichnis an → später erstelltes Verzeichnis hatte anderen Inode → Bind-Mount zeigte ins Leere.

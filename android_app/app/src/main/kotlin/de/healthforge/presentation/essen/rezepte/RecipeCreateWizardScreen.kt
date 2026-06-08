@@ -90,16 +90,18 @@ fun RecipeCreateWizardScreen(
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     val ctx = LocalContext.current
     var showPhotoDialog by remember { mutableStateOf(false) }
-    var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     // Galerie-Launcher
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         uri?.let { vm.pickImage(ctx, it) }
     }
-    // Kamera-Launcher (kein silent try-catch mehr)
+    // Kamera-Launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
         if (success && cameraPhotoUri != null) {
             vm.pickImage(ctx, cameraPhotoUri!!)
+        } else if (!success) {
+            vm.setError("Kamera wurde abgebrochen oder Foto konnte nicht gespeichert werden")
         }
     }
 

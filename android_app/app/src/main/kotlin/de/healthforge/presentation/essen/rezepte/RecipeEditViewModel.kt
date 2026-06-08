@@ -246,5 +246,7 @@ class RecipeEditViewModel @Inject constructor(
         return null
     }
 
+    fun setError(msg: String) = _state.update { it.copy(error = msg) }
+
     fun clearError() = _state.update { it.copy(error = null) }
 }
