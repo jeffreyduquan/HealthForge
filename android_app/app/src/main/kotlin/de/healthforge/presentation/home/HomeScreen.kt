@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,9 +28,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -56,9 +61,9 @@ import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.GradientText
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
+import de.healthforge.presentation.theme.StatusOverUl
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -162,19 +167,23 @@ fun HomeScreen(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Planned meals with GEGESSEN button
+                    // Both planned meals and eaten entries as full RecipeCards
                     s.plannedMeals.forEach { planned ->
-                        PlannedMealCard(
+                        HomeRecipeCard(
                             planned = planned,
                             recipeDtos = s.recipeDtos,
-                            onMarkEaten = { vm.markAsEaten(planned.slotId) },
+                            onToggleEaten = {
+                                if (planned.slotConsumed) vm.markAsNotEaten(planned.slotId)
+                                else vm.markAsEaten(planned.slotId)
+                            },
+                            onDelete = { vm.deletePlannedSlot(planned.slotId) },
                         )
                     }
-                    // Already eaten entries (informational, no delete)
                     s.entries.take(5).forEach { e ->
-                        EatenEntryRow(
-                            entry = e,
+                        HomeRecipeCard(
+                            intakeEntry = e,
                             recipeDtos = s.recipeDtos,
+                            onDelete = { vm.deleteIntakeEntry(e.id) },
                         )
                     }
                 }
@@ -231,89 +240,115 @@ fun HomeScreen(
 }
 
 @Composable
-private fun PlannedMealCard(
-    planned: PlannedMealInfo,
+private fun HomeRecipeCard(
+    planned: PlannedMealInfo? = null,
+    intakeEntry: IntakeEntryEntity? = null,
     recipeDtos: Map<String, RecipeListItemDto>,
-    onMarkEaten: () -> Unit,
+    onToggleEaten: (() -> Unit)? = null,
+    onDelete: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    val item = planned.item
-    val dto = if (item.sourceType == IntakeSourceType.RECIPE) {
-        recipeDtos[item.sourceId]
-    } else null
-    val fallback = RecipeListItemDto(
-        id = item.sourceId,
-        title = item.snapshotName,
-        description = if (item.sourceType == IntakeSourceType.RECIPE) "%.0f Portion(en)".format(item.amount) else "%.0f g".format(item.amount),
-        image_key = null,
-        servings = 1,
-        prep_minutes = 0,
-        slot_tags = emptyList(),
-        visibility = "",
-        author_id = "",
-        created_at = "",
-        like_count = 0,
-        community_recommend_count = 0,
-        community_not_recommend_count = 0,
+
+    // Build the RecipeListItemDto from either planned item or intake entry
+    val dto: RecipeListItemDto
+    val isConsumed: Boolean
+    val showToggle: Boolean
+    val timeLabel: String?
+
+    if (planned != null) {
+        val item = planned.item
+        isConsumed = planned.slotConsumed
+        showToggle = true
+        timeLabel = null
+        val serverDto = if (item.sourceType == IntakeSourceType.RECIPE) recipeDtos[item.sourceId] else null
+        dto = serverDto ?: RecipeListItemDto(
+            id = item.sourceId,
+            title = item.snapshotName,
+            description = buildString {
+                if (item.sourceType == IntakeSourceType.RECIPE) append("%.0f Portion(en)".format(item.amount))
+                else append("%.0f g".format(item.amount))
+                item.snapshotKcalPer100g?.let { kcal ->
+                    val total = (kcal * item.amount / 100.0).toInt()
+                    append(" · $total kcal")
+                }
+            },
+            image_key = null,
+            servings = 1,
+            prep_minutes = 0,
+            slot_tags = emptyList(),
+            visibility = "",
+            author_id = "",
+            created_at = "",
+            like_count = 0,
+            community_recommend_count = 0,
+            community_not_recommend_count = 0,
+        )
+    } else if (intakeEntry != null) {
+        val entry = intakeEntry
+        isConsumed = true
+        showToggle = false
+        timeLabel = entry.loggedAt.let { ts ->
+            val cal = java.util.Calendar.getInstance().apply { timeInMillis = ts }
+            "%02d:%02d".format(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
+        }
+        val serverDto = if (entry.sourceType == IntakeSourceType.RECIPE) recipeDtos[entry.sourceId] else null
+        dto = serverDto ?: entry.toRecipeListItemDto()
+    } else return
+
+    // Swipe-to-delete
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.StartToEnd) {
+                onDelete()
+                true
+            } else false
+        }
     )
 
-    if (planned.slotConsumed) {
-        // Already eaten — informational
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = de.healthforge.presentation.theme.StatusOverUl, modifier = Modifier.size(24.dp))
+            }
+        },
+        enableDismissFromEndToStart = false,
+        enableDismissFromStartToEnd = true,
+    ) {
         RecipeCard(
-            recipe = dto ?: fallback,
+            recipe = dto,
             onClick = { },
             trailingActions = {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = "Gegessen",
-                    tint = de.healthforge.presentation.theme.LocalSemanticColors.current.statusGood,
-                    modifier = Modifier.size(20.dp).padding(end = 8.dp),
-                )
-            },
-        )
-    } else {
-        // Not yet eaten — show GEGESSEN button
-        RecipeCard(
-            recipe = dto ?: fallback,
-            onClick = { },
-            trailingActions = {
-                GradientFab(
-                    onClick = onMarkEaten,
-                    size = 40.dp,
-                ) {
-                    Icon(Icons.Filled.Check, contentDescription = "Als gegessen markieren", tint = Color.White, modifier = Modifier.size(18.dp))
+                if (showToggle && onToggleEaten != null) {
+                    if (isConsumed) {
+                        IconButton(onClick = onToggleEaten) {
+                            Icon(Icons.Filled.Close, contentDescription = "Nicht gegessen", tint = hm.fgSecondary)
+                        }
+                    } else {
+                        GradientFab(
+                            onClick = onToggleEaten,
+                            size = 40.dp,
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = "Als gegessen markieren", tint = Color.White, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                }
+                if (timeLabel != null) {
+                    Text(
+                        timeLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = hm.fgTertiary,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
                 }
             },
         )
     }
-}
-
-@Composable
-private fun EatenEntryRow(
-    entry: IntakeEntryEntity,
-    recipeDtos: Map<String, RecipeListItemDto>,
-) {
-    val hm = LocalHmTokens.current
-    val dto = if (entry.sourceType == IntakeSourceType.RECIPE) {
-        recipeDtos[entry.sourceId]
-    } else null
-    val fallback = entry.toRecipeListItemDto()
-
-    RecipeCard(
-        recipe = dto ?: fallback,
-        onClick = { },
-        trailingActions = {
-            Text(
-                entry.loggedAt.let { ts ->
-                    val cal = java.util.Calendar.getInstance().apply { timeInMillis = ts }
-                    "%02d:%02d".format(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = hm.fgTertiary,
-                modifier = Modifier.padding(end = 8.dp),
-            )
-        },
-    )
 }
 
 /** Extract nutrient value for sparkline trend from DayNutrientTotals. */

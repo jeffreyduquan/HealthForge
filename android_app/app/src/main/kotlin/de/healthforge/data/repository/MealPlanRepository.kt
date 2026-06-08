@@ -73,4 +73,10 @@ class MealPlanRepository @Inject constructor(
         dao.updateSlot(slot.copy(consumed = true, consumedAt = nowMs))
         return items.size
     }
+
+    /** Undo "GEGESSEN" — sets slot.consumed=false. */
+    suspend fun resetConsumed(slotId: Long) {
+        val slot = dao.slotById(slotId) ?: return
+        dao.updateSlot(slot.copy(consumed = false, consumedAt = null))
+    }
 }

@@ -379,6 +379,43 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Undo "GEGESSEN": removes the intake entries created by markConsumed
+     * for this slot, then sets slot.consumed=false.
+     */
+    fun markAsNotEaten(slotId: Long) {
+        viewModelScope.launch {
+            val slot = planRepo.observeSlotsForDay(_state.value.date).first()
+                .firstOrNull { it.id == slotId } ?: return@launch
+            if (!slot.consumed) return@launch
+            // Find and delete intake entries created by this slot's consumption
+            val items = planRepo.observeItemsForSlots(listOf(slotId)).first()
+            val entries = intakeRepo.observeForDay(_state.value.date).first()
+            val now = slot.consumedAt ?: System.currentTimeMillis()
+            // Match entries created within 5 seconds of the slot's consumedAt
+            for (entry in entries) {
+                if (entry.sourceType == IntakeSourceType.RECIPE || entry.sourceType == IntakeSourceType.INGREDIENT) {
+                    val match = items.any { it.sourceId == entry.sourceId && kotlin.math.abs(entry.loggedAt - now) < 5000 }
+                    if (match) intakeRepo.deleteById(entry.id)
+                }
+            }
+            // Reset slot to unconsumed
+            planRepo.resetConsumed(slotId)
+        }
+    }
+
+    /** Delete an item from intake log (and from plan if it has a slot). */
+    fun deleteIntakeEntry(id: Long) {
+        viewModelScope.launch { intakeRepo.deleteById(id) }
+    }
+
+    /** Delete a planned slot + all its items + associated intake entries. */
+    fun deletePlannedSlot(slotId: Long) {
+        viewModelScope.launch {
+            planRepo.deleteSlot(slotId)
+        }
+    }
+
     private fun runSearch(q: String) {
         searchJob?.cancel()
         if (q.isBlank()) {
