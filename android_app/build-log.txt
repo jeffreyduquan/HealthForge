@@ -1,13 +1,10 @@
-To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
-Daemon will be stopped at the end of the build 
-Reusing configuration cache.
-> Task :app:preBuild UP-TO-DATE
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :app:preDebugBuild UP-TO-DATE
-> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:generateDebugResValues UP-TO-DATE
-> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:writeDebugAppMetadata UP-TO-DATE
+=== Build: Camera Bugfixes + Auto-Release (2026-06-08) ===
+Siehe CHANGELOG.md:
+- Fix: Kamera-Button war ausgegraut (<queries> im Manifest)
+- Fix: App-Crash bei Kamera (try-catch um launch())
+- Fix: Foto nicht übernommen (rememberSaveable statt remember)
+- Fix: Server löscht jetzt alten APK-Release beim Upload (Reihenfolge: oldRelease VOR repo.save())
+=== Build: Camera Bugfixes + Auto-Release (2026-06-08) ===
 > Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
