@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -108,7 +109,11 @@ fun RecipesScreen(
 }
 
 @Composable
-fun RecipeCard(recipe: RecipeListItemDto, onClick: () -> Unit) {
+fun RecipeCard(
+    recipe: RecipeListItemDto,
+    onClick: () -> Unit,
+    trailingActions: @Composable RowScope.() -> Unit = {},
+) {
     ElevatedCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -124,37 +129,38 @@ fun RecipeCard(recipe: RecipeListItemDto, onClick: () -> Unit) {
                 Spacer(Modifier.width(12.dp))
             }
             Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = recipe.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            recipe.description?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2)
-            }
-            Spacer(Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text("${recipe.prep_minutes} min", style = MaterialTheme.typography.labelMedium)
-                Spacer(Modifier.width(16.dp))
-                recipe.slot_tags.firstOrNull()?.let {
-                    Text(
-                        text = humanSlot(it),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+                Text(
+                    text = recipe.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                recipe.description?.takeIf { it.isNotBlank() }?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2)
                 }
-                Spacer(Modifier.weight(1f))
-                Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(recipe.like_count.toString(), style = MaterialTheme.typography.labelMedium)
-                Spacer(Modifier.width(12.dp))
-                Icon(Icons.Filled.ThumbUp, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(recipe.community_recommend_count.toString(), style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("${recipe.prep_minutes} min", style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.width(16.dp))
+                    recipe.slot_tags.firstOrNull()?.let {
+                        Text(
+                            text = humanSlot(it),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(recipe.like_count.toString(), style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.width(12.dp))
+                    Icon(Icons.Filled.ThumbUp, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(recipe.community_recommend_count.toString(), style = MaterialTheme.typography.labelMedium)
+                }
             }
-            }
+            trailingActions()
         }
     }
 }

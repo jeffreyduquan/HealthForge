@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.db.entities.MealPlanItemEntity
+import de.healthforge.data.network.RecipeListItemDto
+import de.healthforge.presentation.essen.rezepte.RecipeCard
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
@@ -528,23 +530,17 @@ private fun SlotCard(
                     Icon(Icons.Filled.Close, contentDescription = "Slot löschen", tint = hm.fgSecondary)
                 }
             }
-            items.forEach { item ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(item.snapshotName, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = hm.fgPrimary)
-                        val unit = if (item.sourceType.name == "RECIPE") "Portion(en)" else "g"
-                        Text(
-                            "${"%g".format(item.amount)} $unit",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                            color = hm.fgSecondary,
-                        )
-                    }
-                    IconButton(onClick = { onDeleteItem(item.id) }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Item löschen", tint = hm.fgSecondary)
-                    }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                items.forEach { item ->
+                    RecipeCard(
+                        recipe = item.toRecipeListItemDto(slotType),
+                        onClick = { },
+                        trailingActions = {
+                            IconButton(onClick = { onDeleteItem(item.id) }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Item löschen", tint = hm.fgSecondary)
+                            }
+                        },
+                    )
                 }
             }
             Row(modifier = Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -565,6 +561,31 @@ private fun SlotCard(
             }
         }
     }
+}
+
+private fun MealPlanItemEntity.toRecipeListItemDto(slotType: String): RecipeListItemDto {
+    val unit = if (sourceType.name == "RECIPE") "Portion(en)" else "g"
+    val kcal = snapshotKcalPer100g?.let { (it * amount / 100.0).toInt() }
+    val desc = buildString {
+        append("%.0f".format(amount))
+        append(" $unit")
+        if (kcal != null) append(" · $kcal kcal")
+    }
+    return RecipeListItemDto(
+        id = sourceId,
+        title = snapshotName,
+        description = desc,
+        image_key = null,
+        servings = 1,
+        prep_minutes = 0,
+        slot_tags = listOf(slotType),
+        visibility = "",
+        author_id = "",
+        created_at = "",
+        like_count = 0,
+        community_recommend_count = 0,
+        community_not_recommend_count = 0,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

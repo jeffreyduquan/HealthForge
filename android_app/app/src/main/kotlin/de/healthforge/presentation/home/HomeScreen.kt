@@ -36,7 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.IntakeEntryEntity
+import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.domain.IsIntakeEditableUseCase
+import de.healthforge.presentation.essen.rezepte.RecipeCard
 import de.healthforge.presentation.home.components.DateNavigator
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
@@ -242,42 +244,44 @@ private fun IntakeRow(
     onDelete: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    GlassCard(
-        modifier = Modifier.fillMaxWidth(),
-        padding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    entry.snapshotName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = hm.fgPrimary,
-                )
-                val portion = "${entry.portionGrams.toInt()} g"
-                val kcal = entry.snapshotKcalPer100g?.let {
-                    " \u00b7 ${(it * entry.portionGrams / 100.0).toInt()} kcal"
-                } ?: ""
-                Text(
-                    "$portion$kcal",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                )
-            }
+    RecipeCard(
+        recipe = entry.toRecipeListItemDto(),
+        onClick = { },
+        trailingActions = {
             if (editable) {
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "L\u00f6schen", tint = hm.fgSecondary)
+                    Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = hm.fgSecondary)
                 }
             } else {
                 Text(
-                    "\u00fcber 7 Tage",
+                    "über 7 Tage",
                     style = MaterialTheme.typography.labelSmall,
                     color = hm.fgTertiary,
                 )
             }
-        }
+        },
+    )
+}
+
+private fun IntakeEntryEntity.toRecipeListItemDto(): RecipeListItemDto {
+    val kcal = snapshotKcalPer100g?.let { (it * portionGrams / 100.0).toInt() }
+    val desc = buildString {
+        append("${portionGrams.toInt()} g")
+        if (kcal != null) append(" · $kcal kcal")
     }
+    return RecipeListItemDto(
+        id = sourceId,
+        title = snapshotName,
+        description = desc,
+        image_key = null,
+        servings = 1,
+        prep_minutes = 0,
+        slot_tags = emptyList(),
+        visibility = "",
+        author_id = "",
+        created_at = "",
+        like_count = 0,
+        community_recommend_count = 0,
+        community_not_recommend_count = 0,
+    )
 }
