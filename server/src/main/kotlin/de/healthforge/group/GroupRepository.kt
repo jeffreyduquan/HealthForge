@@ -20,6 +20,18 @@ interface GroupMemberRepo : JpaRepository<GroupMemberEntity, GroupMemberKey> {
 
     @Query("SELECT m.groupId FROM GroupMemberEntity m WHERE m.userId = :userId")
     fun groupIdsForUser(@Param("userId") userId: UUID): List<UUID>
+
+    /** Gibt Mitglieder mit Display-Namen aus der users-Tabelle zurück. */
+    @Query("""
+        SELECT new de.healthforge.group.MemberWithDisplay(
+            m.userId, COALESCE(u.displayName, u.email, 'Anonym'), m.role, m.joinedAt
+        )
+        FROM GroupMemberEntity m
+        LEFT JOIN UserEntity u ON u.id = m.userId
+        WHERE m.groupId = :groupId
+        ORDER BY m.joinedAt ASC
+    """)
+    fun findByGroupIdWithDisplayNames(@Param("groupId") groupId: UUID): List<MemberWithDisplay>
 }
 
 @Repository

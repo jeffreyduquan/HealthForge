@@ -190,8 +190,8 @@ class GroupService(
         if (GroupVisibility.valueOf(g.visibility) == GroupVisibility.PRIVATE && viewerRole == null) {
             throw ApiException(HttpStatus.FORBIDDEN, "PRIVATE_GROUP", "join group first")
         }
-        return memberRepo.findByGroupId(groupId).map {
-            GroupMemberDto(it.userId, GroupRole.valueOf(it.role), it.joinedAt)
+        return memberRepo.findByGroupIdWithDisplayNames(groupId).map {
+            GroupMemberDto(it.userId, it.displayName, GroupRole.valueOf(it.role), it.joinedAt)
         }
     }
 
@@ -199,6 +199,48 @@ class GroupService(
     @Transactional(readOnly = true)
     fun isMember(userId: UUID, groupId: UUID): Boolean =
         memberRepo.existsByGroupIdAndUserId(groupId, userId)
+
+    /** OWNER/ADMIN duerfen die Gruppe aktualisieren (Name, Beschreibung, Sichtbarkeit). */
+    @Transactional
+    fun update(groupId: UUID, req: GroupUpdateRequest, callerId: UUID): GroupSummaryDto {
+        val g = groupRepo.findById(groupId).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "GROUP_NOT_FOUND", "Group $groupId not found")
+        }
+        val callerRole = memberRepo.findByGroupIdAndUserId(groupId, callerId)?.role
+        if (callerRole != GroupRole.OWNER.name && callerRole != GroupRole.ADMIN.name) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER_OR_ADMIN", "only group owner/admin may update")
+        }
+        g.name = req.name.trim()
+        g.description = req.description?.trim()?.ifEmpty { null }
+        if (req.visibility != null) {
+            g.visibility = req.visibility.name
+            // Wenn von PRIVATE auf PUBLIC, invite_code entfernen
+            if (req.visibility == GroupVisibility.PUBLIC) g.inviteCode = null
+        }
+        g.updatedAt = Instant.now()
+        groupRepo.save(g)
+        val role = GroupRole.valueOf(callerRole)
+        return toSummary(g, role)
+    }
+
+    /** OWNER: Neuen Invite-Code generieren. */
+    @Transactional
+    fun regenerateInviteCode(groupId: UUID, callerId: UUID): String {
+        val g = groupRepo.findById(groupId).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "GROUP_NOT_FOUND", "Group $groupId not found")
+        }
+        if (g.ownerId != callerId) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER", "only group owner may regenerate invite code")
+        }
+        if (GroupVisibility.valueOf(g.visibility) == GroupVisibility.PUBLIC) {
+            throw ApiException(HttpStatus.BAD_REQUEST, "PUBLIC_GROUP", "public groups don't use invite codes")
+        }
+        val code = generateInviteCode()
+        g.inviteCode = code
+        g.updatedAt = Instant.now()
+        groupRepo.save(g)
+        return code
+    }
 
     /** Nur der OWNER darf die gesamte Gruppe löschen. */
     @Transactional

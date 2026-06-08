@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -94,6 +96,28 @@ class GroupController(
         val p = require(principal)
         service.leave(id, p.userId)
         return ResponseEntity.noContent().build()
+    }
+
+    /** OWNER/ADMIN: Gruppe aktualisieren (Name, Beschreibung, Sichtbarkeit). */
+    @PutMapping("/{id}")
+    fun updateGroup(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+        @Valid @RequestBody req: GroupUpdateRequest,
+    ): GroupSummaryDto {
+        val p = require(principal)
+        return service.update(id, req, p.userId)
+    }
+
+    /** OWNER: Neuen Invite-Code generieren. */
+    @PostMapping("/{id}/regenerate-invite")
+    fun regenerateInvite(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+    ): Map<String, String> {
+        val p = require(principal)
+        val code = service.regenerateInviteCode(id, p.userId)
+        return mapOf("invite_code" to code)
     }
 
     @DeleteMapping("/{id}/members/{userId}")

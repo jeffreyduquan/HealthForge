@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -30,9 +31,17 @@ data class GroupSummaryDto(
 @JsonClass(generateAdapter = true)
 data class GroupMemberDto(
     @Json(name = "user_id") val userId: String,
-    /** OWNER | ADMIN | MEMBER */
+    @Json(name = "display_name") val displayName: String?,
+    /** OWNER | ADMIN | MEMBER | CONTRIBUTOR */
     val role: String,
     @Json(name = "joined_at") val joinedAt: String,
+)
+
+@JsonClass(generateAdapter = true)
+data class GroupUpdateRequest(
+    val name: String,
+    val description: String? = null,
+    val visibility: String? = null,
 )
 
 @JsonClass(generateAdapter = true)
@@ -98,4 +107,10 @@ interface GroupApi {
 
     @DELETE("v1/groups/{id}")
     suspend fun deleteGroup(@Path("id") id: String)
+
+    @PUT("v1/groups/{id}")
+    suspend fun updateGroup(@Path("id") id: String, @Body req: GroupUpdateRequest): GroupSummaryDto
+
+    @POST("v1/groups/{id}/regenerate-invite")
+    suspend fun regenerateInvite(@Path("id") id: String): Map<String, String>
 }

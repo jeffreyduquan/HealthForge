@@ -16,6 +16,7 @@ data class GroupCreateRequest(
 data class GroupUpdateRequest(
     @field:NotBlank @field:Size(max = 120) val name: String,
     @field:Size(max = 1000) val description: String? = null,
+    val visibility: GroupVisibility? = null,
 )
 
 data class GroupJoinByCodeRequest(
@@ -36,6 +37,15 @@ data class GroupSummaryDto(
 
 data class GroupMemberDto(
     @JsonProperty("user_id") val userId: UUID,
+    @JsonProperty("display_name") val displayName: String?,
     val role: GroupRole,
     @JsonProperty("joined_at") val joinedAt: Instant,
+)
+
+/** Hilfs-DTO für die Member-Abfrage mit JOIN über users.display_name. */
+data class MemberWithDisplay(
+    val userId: UUID,
+    val displayName: String?,
+    val role: String,
+    val joinedAt: Instant,
 )

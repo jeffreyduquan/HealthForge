@@ -5,6 +5,7 @@ import de.healthforge.data.network.GroupCreateRequest
 import de.healthforge.data.network.GroupJoinByCodeRequest
 import de.healthforge.data.network.GroupMemberDto
 import de.healthforge.data.network.GroupSummaryDto
+import de.healthforge.data.network.GroupUpdateRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,5 +62,13 @@ class GroupRepository @Inject constructor(
 
     suspend fun deleteGroup(id: String): Result<Unit> = runCatching {
         api.deleteGroup(id)
+    }
+
+    suspend fun updateGroup(id: String, req: GroupUpdateRequest): Result<GroupSummaryDto> = runCatching {
+        api.updateGroup(id, req)
+    }
+
+    suspend fun regenerateInvite(id: String): Result<String> = runCatching {
+        api.regenerateInvite(id)["invite_code"] ?: throw RuntimeException("no code returned")
     }
 }

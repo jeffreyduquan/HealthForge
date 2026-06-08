@@ -94,6 +94,29 @@ class GroupDetailViewModel @Inject constructor(
         }
     }
 
+    fun updateGroup(req: de.healthforge.data.network.GroupUpdateRequest) {
+        viewModelScope.launch {
+            repo.updateGroup(groupId, req).fold(
+                onSuccess = { g ->
+                    _state.update { it.copy(group = g, message = "Gruppe aktualisiert") }
+                },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Update fehlgeschlagen") } },
+            )
+        }
+    }
+
+    fun regenerateInvite() {
+        viewModelScope.launch {
+            repo.regenerateInvite(groupId).fold(
+                onSuccess = { code ->
+                    _state.update { it.copy(message = "Neuer Code: $code") }
+                    load()
+                },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Fehler") } },
+            )
+        }
+    }
+
     /** OWNER/ADMIN: Setzt die Rolle eines Mitglieds (z.B. CONTRIBUTOR ↔ MEMBER). */
     fun setMemberRole(userId: String, role: String) {
         viewModelScope.launch {
