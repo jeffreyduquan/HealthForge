@@ -5,6 +5,42 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Feature: Auto-Replace alter APK-Releases beim Upload (2026-06-08)
+
+**Scope:** Bisher sammelten sich beim CI-Upload oder manuellen Upload alte APK-Releases an – es gab kein automatisches Aufräumen. Neu: Beim Hochladen einer neuen APK wird die vorherige automatisch aus MinIO + DB gelöscht. Es existiert immer nur **ein** aktueller Release.
+
+**Änderungen:**
+
+**Server (`AdminReleaseController.kt`):**
+- `POST /admin/v1/releases` löscht nach erfolgreichem Upload den vorherigen (ältesten) Release
+- Alte MinIO-Datei wird via `RemoveObject` entfernt, DB-Eintrag via `repo.delete()`
+- Fehler beim Löschen der alten Datei sind nicht fatal (`runCatching`) – nur DB-Eintrag wird entfernt
+
+**Admin-UI (`ReleasesPage.tsx`):**
+- Table-Ansicht durch einzelne Card ersetzt (da nur noch 1 Release existiert)
+- Changelog als eigene Box unterhalb des Cards
+- Hinweis-Banner: "Es ist immer nur ein Release aktiv"
+- Buttons: Download / Einmal-Link / Löschen
+
+**CI (`android.yml`):**
+- Unverändert – der bestehende `POST /admin/v1/releases`-Step macht jetzt automatisch Platz
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — REQ-ADMIN-004 erweitert: Single-Release-Invariante spezifiziert
+- `CHANGELOG.md` — dieser Eintrag
+
+**Untouched (begründet):**
+- `SprintPlan.md` / `TraceabilityMatrix.md` — REQ-ADMIN-004 war bereits ✅; Erweiterung ist keine neue REQ-ID
+- `Architecture.md` / `GUI.md` / `UsabilityMap.md` — keine Architektur-/Design-Änderung
+- `TestStrategy.md` / `BattleTestPlan.md` — kein neues Testverfahren
+
+**Verifikation:**
+- `server`: `bootJar` BUILD SUCCESSFUL
+- `admin-ui`: `npm run build` ✅ 612.85 kB (189 kB gzip)
+- CI-Logik unverändert – der Deploy-Step läuft wie zuvor.
+
+---
+
 ## Bugfix: Kamera-Button für Rezept-Fotos ausgegraut (2026-06-08)
 
 **Scope:** Der "Foto aufnehmen"-Button in der PhotoSourceDialog war auf dem Handy ausgegraut (disabled). Ursache: Auf Android 11+ (API 30+) unterliegt `resolveActivity()` den Package-Visibility-Restrictions. Die App hatte kein `<queries>`-Element im Manifest, das den `ACTION_IMAGE_CAPTURE`-Intent deklariert → `isCameraAvailable()` gab `false` zurück, obwohl eine Kamera-App installiert war.

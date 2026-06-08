@@ -66,6 +66,7 @@ class AdminReleaseController(
         val minioKey = "v${version}/${file.originalFilename}"
         val bytes = file.bytes
 
+        // 1. Neue APK nach MinIO hochladen
         ByteArrayInputStream(bytes).use { input ->
             minio.putObject(
                 PutObjectArgs.builder()
@@ -77,6 +78,7 @@ class AdminReleaseController(
             )
         }
 
+        // 2. Neuen Release in DB speichern
         val release = repo.save(ApkRelease(
             version = version,
             changelog = changelog?.takeIf { it.isNotBlank() },
@@ -85,6 +87,21 @@ class AdminReleaseController(
             minioKey = minioKey,
             uploadedBy = admin.userId,
         ))
+
+        // 3. Vorherigen (alten) Release löschen – es soll immer nur EIN Release existieren
+        val previous = repo.findFirstByOrderByCreatedAtDesc()
+        if (previous != null && previous.id != release.id) {
+            runCatching {
+                minio.removeObject(
+                    RemoveObjectArgs.builder()
+                        .bucket(bucket)
+                        .`object`(previous.minioKey)
+                        .build()
+                )
+            }
+            repo.delete(previous)
+        }
+
         return release.toDto()
     }
 

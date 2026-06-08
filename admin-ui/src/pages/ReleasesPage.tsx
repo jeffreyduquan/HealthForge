@@ -3,6 +3,9 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardActions,
+  CardContent,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -11,24 +14,16 @@ import {
   DialogTitle,
   IconButton,
   InputAdornment,
-  Paper,
   Snackbar,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import LinkIcon from '@mui/icons-material/Link';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createDownloadLink,
@@ -141,58 +136,69 @@ export default function ReleasesPage() {
         <Alert severity="info">Noch keine Releases. Lade deine erste APK hoch!</Alert>
       )}
       {q.data && q.data.length > 0 && (
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Version</TableCell>
-                <TableCell>Dateiname</TableCell>
-                <TableCell>Größe</TableCell>
-                <TableCell>Changelog</TableCell>
-                <TableCell>Hochgeladen</TableCell>
-                <TableCell align="right">Aktionen</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {q.data.map((r) => (
-                <TableRow key={r.id} hover>
-                  <TableCell><strong>{r.version}</strong></TableCell>
-                  <TableCell>{r.filename}</TableCell>
-                  <TableCell>{formatSize(r.fileSize)}</TableCell>
-                  <TableCell sx={{ maxWidth: 300, whiteSpace: 'pre-wrap' }}>{r.changelog ?? '—'}</TableCell>
-                  <TableCell>{formatDate(r.createdAt)}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => downloadM.mutate(r.id)}
-                      title="APK herunterladen"
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                    <Tooltip title="Einmaligen Download-Link generieren">
-                      <IconButton
-                        size="small"
-                        color="secondary"
-                        onClick={() => downloadLinkM.mutate(r.id)}
-                      >
-                        <LinkIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => setDeleteConfirm(r.id)}
-                      title="Löschen"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Stack spacing={2}>
+          <Alert severity="info" sx={{ mb: 1 }}>
+            Es ist immer nur <strong>ein</strong> Release aktiv. Beim Hochladen einer neuen APK wird die vorherige automatisch ersetzt.
+          </Alert>
+          {q.data.map((r) => (
+            <Card key={r.id} variant="outlined" sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                  <Box>
+                    <Typography variant="h5" fontWeight={700} gutterBottom>
+                      {r.version}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {r.filename} · {formatSize(r.fileSize)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Hochgeladen: {formatDate(r.createdAt)}
+                    </Typography>
+                  </Box>
+                </Stack>
+                {r.changelog && (
+                  <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 2, whiteSpace: 'pre-wrap' }}>
+                    <Typography variant="body2" fontWeight={600} gutterBottom>
+                      Changelog
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {r.changelog}
+                    </Typography>
+                  </Box>
+                )}
+              </CardContent>
+              <CardActions sx={{ px: 2, pb: 2, gap: 1 }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => downloadM.mutate(r.id)}
+                  disabled={downloadM.isPending}
+                >
+                  APK herunterladen
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<LinkIcon />}
+                  onClick={() => downloadLinkM.mutate(r.id)}
+                  disabled={downloadLinkM.isPending}
+                >
+                  Einmal-Link
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setDeleteConfirm(r.id)}
+                >
+                  Löschen
+                </Button>
+              </CardActions>
+            </Card>
+          ))}
+        </Stack>
       )}
 
       {/* Upload Dialog */}

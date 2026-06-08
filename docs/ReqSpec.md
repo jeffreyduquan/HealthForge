@@ -216,7 +216,7 @@ See §10 below.
 | REQ-ADMIN-001 | A **Admin Web UI** SHALL be reachable at `/admin` with admin-role JWT only. |
 | REQ-ADMIN-002 | Phase-1 admin functions: invite-code generation, ingredient curation (edit allergens/SIGHI/FODMAP/nutrition), user listing + ban, OFF resync trigger. |
 | REQ-ADMIN-003 | Phase-3 & Phase-4 admin functions (full peer-review queues, moderation, statistics) are specified in §7.5. |
-| REQ-ADMIN-004 | The Admin SHALL be able to upload APK releases via the Admin Web UI. Releases are stored in MinIO (`releases`-Bucket) and listed with version, changelog, file size, and upload date. |
+| REQ-ADMIN-004 | The Admin SHALL be able to upload APK releases via the Admin Web UI. Releases are stored in MinIO (`releases`-Bucket) and listed with version, changelog, file size, and upload date. **There SHALL be at most one active release at any time** — uploading a new release automatically replaces (deletes) the previous one. This ensures the public `GET /v1/releases/latest` endpoint always returns the newest APK. |
 | REQ-ADMIN-005 | APK downloads SHALL be available via presigned MinIO URLs (expiring after 1 hour). **Admin**: `GET /admin/v1/releases/{id}/download`. **Public (one-time via invite code)**: `GET /v1/releases/{id}/download?code={inviteCode}` — requires a valid, non-expired, unused invite code. Once downloaded, the invite SHALL be marked as `downloadUsed`. |
 | REQ-ADMIN-006 | The Admin Web UI SHALL auto-deploy on push to `main` via GitHub Actions (SCP to VPS, served by Caddy). |
 | REQ-ADMIN-007 | Public recipes submitted by non-admin users SHALL require admin review before being published. Recipe status `PENDING_REVIEW` → admin approves → `PUBLISHED`. |
