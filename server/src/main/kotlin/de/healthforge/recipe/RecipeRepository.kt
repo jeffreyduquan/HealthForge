@@ -84,7 +84,7 @@ class RecipeBrowseRepo(
                 } else {
                     where.append(
                         " AND (r.visibility = 'PUBLIC' OR r.author_id = :viewerForPrivate" +
-                            " OR r.id IN (SELECT gr.recipeId FROM de.healthforge.group.GroupRecipeEntity gr WHERE gr.groupId IN (:viewerGroupIds)))"
+                            " OR r.id IN (SELECT gr.recipe_id FROM group_recipes gr WHERE gr.group_id IN (:viewerGroupIds)))"
                     )
                     params["viewerForPrivate"] = visibilityFilter.userId
                     params["viewerGroupIds"] = visibilityFilter.groupIds
@@ -94,7 +94,7 @@ class RecipeBrowseRepo(
 
         // Filter by specific groupId via group_recipes join table (V21)
         if (groupId != null) {
-            where.append(" AND r.id IN (SELECT gr.recipeId FROM de.healthforge.group.GroupRecipeEntity gr WHERE gr.groupId = :groupId)")
+            where.append(" AND r.id IN (SELECT gr.recipe_id FROM group_recipes gr WHERE gr.group_id = :groupId)")
             params["groupId"] = groupId
         }
 
