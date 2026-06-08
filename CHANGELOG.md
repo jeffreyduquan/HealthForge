@@ -5,7 +5,53 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## Feature: Plan/Home nutzen echte Server-Rezept-DTOs statt lokaler Snapshots (2026-06-08)
+## Feature: Home-Neugestaltung — Plan-Links, GEGESSEN, 7d-Sparklines, Quick-Add-Plan-Sync (2026-06-08)
+
+**Scope:** Home wurde grundlegend überarbeitet: Header vereinfacht, geplante Mahlzeiten aus dem Plan-Tab mit GEGESSEN-Button, 7-Tage-Sparkline-Trend in der PinnedNutrientCard, Quick-Add erzeugt auch Plan-Einträge.
+
+**Änderungen:**
+
+**Data Layer:**
+- `IntakeDaos.kt`: Neue `observeForDateRange(start, end)` — Query für 7-Tage-Totals
+- `IntakeRepository.kt`: Neue `observeTotalsForDateRange()` — berechnet DayNutrientTotals pro Tag für Datumsbereich, füllt fehlende Tage mit ZERO
+- `MealPlanDao.kt`: Neue `observeItemsForDay(day)` — JOIN-Query über slots+items
+- `MealPlanRepository.kt`: Neue `observeItemsForDay(day)` — delegiert an DAO
+
+**ViewModel:**
+- `HomeViewModel.kt`:
+  - `MealPlanRepository` injected
+  - `PlannedMealInfo` data class (item + slotConsumed + slotId)
+  - `HomeState`: `plannedMeals`, `trendTotals` hinzugefügt
+  - Init: Plan-Items + 7d-Trend-Observer via `flatMapLatest`
+  - `markAsEaten(slotId)` → ruft `planRepo.markConsumed()`
+  - `confirmQuickAdd()` erzeugt jetzt auch `MealPlanItemEntity` (Slot "QUICK" find-or-create)
+
+**UI — HomeScreen:**
+- Header: "Hallo!" + Verlauf entfernt → nur `DateNavigator` (REQ-HOME-HEADER-001)
+- `PlannedMealCard`: RecipeCard mit GEGESSEN-Button (✓, via `GradientFab`)
+- `EatenEntryRow`: bereits erfasste Einträge informativ mit Uhrzeit (kein Delete)
+- PinnedNutrientEntrys erhalten `trendValues` aus `s.trendTotals`
+- Neue Helfer: `extractTrendValue(key, totals)`
+
+**UI — PinnedNutrientCard:**
+- `PinnedNutrientEntry.trendValues: List<Double>` — 7-Tage-Werte (REQ-HOME-TREND-001)
+- `Sparkline` Composable: Canvas-Linienzug mit Transparenz-Füllung, Y-Achse automatisch skaliert
+- Jeder Pin zeigt unter der Progress-Bar eine 16dp hohe Sparkline
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — NEU: REQ-HOME-PLAN-001, REQ-HOME-TREND-001, REQ-HOME-HEADER-001, REQ-PLAN-QUICK-001; MOD: REQ-HOME-004, REQ-NAV-004
+- `docs/UsabilityMap.md` — §3 Home komplett überarbeitet (Layout + Aktionen)
+- `CHANGELOG.md` — dieser Eintrag
+
+**Untouched (begründet):**
+- `docs/Architecture.md` — keine Architekturänderung (bestehende Patterns)
+- `docs/GUI.md` — keine visuellen Design-Änderungen
+- `docs/SprintPlan.md` / `docs/TraceabilityMatrix.md` — neue REQ-IDs sind Sub-Items bestehender Phasen
+- `docs/TestStrategy.md` / `docs/BattleTestPlan.md` — kein neues Testverfahren
+
+**Verifikation:**
+- `:app:assembleDebug` BUILD SUCCESSFUL
+- CI-Push via GitHub Actions
 
 **Scope:** Bisher zeigten PlanScreen und HomeScreen RecipeCards mit selbstgebauten DTOs aus lokalen Room-Snapshots — ohne Bild, ohne Prep-Zeit, ohne Community-Stats. Neu: Beide Screens laden Rezept-Daten via `GET /v1/recipes/batch?ids=...` vom Server und rendern die echten `RecipeListItemDto` in `RecipeCard` — identisch zur Rezepte-Ansicht.
 
