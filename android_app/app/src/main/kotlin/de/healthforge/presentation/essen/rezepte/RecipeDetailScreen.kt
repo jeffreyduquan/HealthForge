@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -127,6 +128,7 @@ fun RecipeDetailScreen(
                     likeBusy = state.likeBusy,
                     onToggleLike = vm::toggleLike,
                     onRate = vm::rate,
+                    onAddToGroup = vm::openAddToGroupDialog,
                 )
             }
         }
@@ -142,16 +144,16 @@ fun RecipeDetailScreen(
         )
     }
     // Group-Picker-Dialog: Rezept zu Gruppe hinzufügen
-    if (state.myGroups != null) {
+    state.myGroups?.let { groups ->
         AlertDialog(
             onDismissRequest = { vm.closeAddToGroupDialog() },
-            title = { Text("Zu Gruppe hinzufügen") },
+            title = { Text("Zu welcher Gruppe?") },
             text = {
-                if (state.myGroups!!.isEmpty()) {
+                if (groups.isEmpty()) {
                     Text("Du bist in keiner Gruppe mit Verwaltungs-Rechten.")
                 } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                        items(state.myGroups!!, key = { it.id }) { g ->
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        groups.forEach { g ->
                             OutlinedButton(
                                 onClick = { vm.assignToGroup(g.id) },
                                 modifier = Modifier.fillMaxWidth(),
@@ -208,6 +210,7 @@ private fun DetailContent(
     likeBusy: Boolean,
     onToggleLike: () -> Unit,
     onRate: (String?) -> Unit,
+    onAddToGroup: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -276,6 +279,17 @@ private fun DetailContent(
         NutritionCard(recipe.nutrition, recipe.servings)
         IngredientsCard(recipe.ingredients)
         StepsCard(recipe.steps)
+
+        // Prominenter "Zu Gruppe"-Button
+        OutlinedButton(
+            onClick = onAddToGroup,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+        ) {
+            Icon(Icons.Filled.GroupAdd, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Zu Gruppe hinzufügen")
+        }
     }
 }
 

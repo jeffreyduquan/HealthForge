@@ -23,12 +23,13 @@ import de.healthforge.presentation.theme.SegmentedTabs
  */
 @Composable
 fun EssenScreen(
+    preselectedTab: Int? = null,
     onOpenSupplementEdit: (id: Long) -> Unit = {},
     onOpenRecipeDetail: (String) -> Unit = {},
     onCreateRecipe: () -> Unit = {},
     onSuggestIngredient: (initialName: String) -> Unit = {},
 ) {
-    var selected by remember { mutableIntStateOf(0) }
+    var selected by remember(preselectedTab) { mutableIntStateOf(preselectedTab ?: 0) }
     val tabs = listOf("Lebensmittel", "Rezepte", "Supplements")
 
     Box(modifier = Modifier.fillMaxSize()) {
