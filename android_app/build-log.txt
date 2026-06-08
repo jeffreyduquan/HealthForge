@@ -1,11 +1,9 @@
-=== Build: Versionierte APK-Filename + Auto-Release (2026-06-08) ===
+=== Build: CI-Version + Camera-Permission + Versionsvergleich (2026-06-08) ===
 Siehe CHANGELOG.md:
-- Fix: Kamera-Button war ausgegraut (<queries> im Manifest)
-- Fix: App-Crash bei Kamera (try-catch um launch())
-- Fix: Foto nicht übernommen (rememberSaveable statt remember)
-- Fix: Server löscht jetzt alten APK-Release beim Upload (Reihenfolge: oldRelease VOR repo.save())
-- Fix: APK-Filename enthält jetzt Version (HealthForge-{version}.apk statt app-debug.apk)
-=== Build: Versionierte APK-Filename + Auto-Release (2026-06-08) ===
+- Fix: App zeigt jetzt CI-Version (0.1.0-ci.{run}.{sha}) statt 0.1.0-debug
+- Fix: stripSuffix() funktioniert jetzt korrekt (vergleicht CI-Nummern)
+- Fix: Kamera-Runtime-Permission wird jetzt angefragt (Android 6+)
+=== Build: CI-Version + Camera-Permission + Versionsvergleich (2026-06-08) ===
 > Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE

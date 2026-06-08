@@ -91,6 +91,7 @@ fun RecipeCreateWizardScreen(
     val ctx = LocalContext.current
     var showPhotoDialog by remember { mutableStateOf(false) }
     var cameraPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
 
     // Galerie-Launcher
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
@@ -103,6 +104,26 @@ fun RecipeCreateWizardScreen(
         } else {
             vm.setError("Kamera wurde abgebrochen oder Foto konnte nicht gespeichert werden")
         }
+    }
+    // Kamera-Runtime-Permission (Android 6+)
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            pendingCameraUri?.let { uri ->
+                cameraPhotoUri = uri
+                try {
+                    cameraLauncher.launch(uri)
+                } catch (e: android.content.ActivityNotFoundException) {
+                    vm.setError("Keine Kamera-App gefunden")
+                } catch (e: Exception) {
+                    vm.setError("Kamera konnte nicht gestartet werden: ${e.message}")
+                }
+            }
+        } else {
+            vm.setError("Kamerazugriff verweigert – bitte Berechtigung in den Einstellungen erlauben")
+        }
+        pendingCameraUri = null
     }
 
     LaunchedEffect(s.savedId) { s.savedId?.let { onSaved(it) } }
@@ -188,15 +209,22 @@ fun RecipeCreateWizardScreen(
             },
             onCameraClick = { uri ->
                 showPhotoDialog = false
-                cameraPhotoUri = uri
-                try {
-                    cameraLauncher.launch(uri)
-                } catch (e: android.content.ActivityNotFoundException) {
-                    vm.setError("Keine Kamera-App gefunden")
-                } catch (e: SecurityException) {
-                    vm.setError("Kamerazugriff verweigert – bitte Berechtigung in den Einstellungen erlauben")
-                } catch (e: Exception) {
-                    vm.setError("Kamera konnte nicht gestartet werden: ${e.message}")
+                pendingCameraUri = uri
+                if (android.content.pm.PackageManager.PERMISSION_GRANTED ==
+                    androidx.core.content.ContextCompat.checkSelfPermission(
+                        ctx, android.Manifest.permission.CAMERA
+                    )
+                ) {
+                    cameraPhotoUri = uri
+                    try {
+                        cameraLauncher.launch(uri)
+                    } catch (e: android.content.ActivityNotFoundException) {
+                        vm.setError("Keine Kamera-App gefunden")
+                    } catch (e: Exception) {
+                        vm.setError("Kamera konnte nicht gestartet werden: ${e.message}")
+                    }
+                } else {
+                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                 }
             },
             onDismiss = { showPhotoDialog = false },

@@ -94,18 +94,22 @@ class UpdateRepository @Inject constructor(
     }
 
     /**
-     * Strips non-numeric suffix from a version string.
+     * Strips non-numeric suffix from each version segment.
      * "0.1.0-debug" → "0.1.0"
-     * "0.1.0-ci.23.abc" → "0.1.0"
+     * "0.1.0-ci.30.abc" → "0.1.0.30"
+     * @return version string with only numeric segments, for direct comparison.
      */
     private fun stripSuffix(v: String): String {
-        return v.split(".").takeWhile { it.all { c -> c.isDigit() } }.joinToString(".")
+        return v.split(".")
+            .map { seg -> seg.takeWhile { c -> c.isDigit() } }
+            .filter { it.isNotBlank() }
+            .joinToString(".")
     }
 
     /**
-     * Compares two semantic version strings (numeric parts only).
+     * Compares two version strings (numeric segments only).
      * "0.1.0" == "0.1.0"
-     * "0.1.5" > "0.1.0"
+     * "0.1.0.30" > "0.1.0.29"
      * "1.0.0" > "0.9.9"
      */
     private fun compareVersions(v1: String, v2: String): Int {

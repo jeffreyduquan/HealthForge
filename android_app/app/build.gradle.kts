@@ -15,7 +15,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = project.findProperty("versionName")?.toString() ?: "0.1.0"
 
         resourceConfigurations += setOf("de")
     }
@@ -24,7 +24,10 @@ android {
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
+            // Nur versionNameSuffix setzen wenn kein CI-versionName übergeben wurde
+            if (!project.hasProperty("versionName")) {
+                versionNameSuffix = "-debug"
+            }
             buildConfigField("String", "API_BASE_URL", "\"http://api.healthforge.endgear.de:8080/\"")
             buildConfigField("String", "MEDIA_BASE_URL", "\"http://cdn.healthforge.endgear.de:8080/\"")
         }
