@@ -81,6 +81,7 @@ private const val RECIPE_WIZARD_STEPS = 6
 
 @Composable
 fun RecipeCreateWizardScreen(
+    preselectedGroupId: String? = null,
     onBack: () -> Unit,
     onSaved: (id: String) -> Unit,
     vm: RecipeEditViewModel = hiltViewModel(),
@@ -92,6 +93,14 @@ fun RecipeCreateWizardScreen(
     var showPhotoDialog by remember { mutableStateOf(false) }
     var cameraPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Vorausgewählte Gruppe setzen (wenn aus Gruppen-Detail aufgerufen)
+    LaunchedEffect(preselectedGroupId) {
+        if (!preselectedGroupId.isNullOrBlank()) {
+            vm.setVisibility("GROUP")
+            vm.setGroupId(preselectedGroupId)
+        }
+    }
 
     // Galerie-Launcher
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->

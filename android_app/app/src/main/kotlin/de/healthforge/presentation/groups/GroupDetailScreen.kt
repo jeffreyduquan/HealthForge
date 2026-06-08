@@ -65,7 +65,6 @@ fun GroupDetailScreen(
     onBack: () -> Unit,
     onAddRecipe: () -> Unit = {},
     onOpenRecipe: (String) -> Unit = {},
-    onInvite: () -> Unit = {},
     vm: GroupDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -215,7 +214,6 @@ fun GroupDetailScreen(
                                 style = MaterialTheme.typography.labelSmall,
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                                OutlinedButton(onClick = onInvite, modifier = Modifier.weight(1f)) { Text("Einladen") }
                                 OutlinedButton(
                                     onClick = { confirmDelete = true },
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),

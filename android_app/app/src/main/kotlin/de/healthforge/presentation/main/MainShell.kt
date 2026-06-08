@@ -90,6 +90,10 @@ object MainRoutes {
         else "$INGREDIENT_SUGGEST_WIZARD?$INGREDIENT_SUGGEST_WIZARD_ARG=${java.net.URLEncoder.encode(initialName, "UTF-8")}"
     /** REQ-RECIPE-CREATE-WIZARD-001 — 5-Step Wizard. */
     const val RECIPE_CREATE_WIZARD = "main/recipe-create-wizard"
+    const val RECIPE_CREATE_WIZARD_GROUP_ARG = "groupId"
+    fun recipeCreateWizard(groupId: String? = null): String =
+        if (groupId.isNullOrBlank()) RECIPE_CREATE_WIZARD
+        else "$RECIPE_CREATE_WIZARD?$RECIPE_CREATE_WIZARD_GROUP_ARG=$groupId"
 }
 
 private val TABS = listOf(
@@ -251,7 +255,16 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     navArgument(MainRoutes.GROUP_DETAIL_ARG) { type = NavType.StringType },
                 ),
             ) {
-                GroupDetailScreen(onBack = { navController.popBackStack() })
+                GroupDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onAddRecipe = {
+                        // groupId aus der aktuellen Route extrahieren
+                        val groupId = navController.currentBackStackEntry
+                            ?.arguments?.getString(MainRoutes.GROUP_DETAIL_ARG)
+                        navController.navigate(MainRoutes.recipeCreateWizard(groupId))
+                    },
+                    onOpenRecipe = { id -> navController.navigate(MainRoutes.recipeDetail(id)) },
+                )
             }
             composable(MainRoutes.LOG_CHARTS) {
                 LogChartsScreen(onBack = { navController.popBackStack() })
@@ -300,8 +313,19 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 )
             }
             // P6.S5: 5-Step Wizard zum Erstellen eines Rezepts.
-            composable(MainRoutes.RECIPE_CREATE_WIZARD) {
+            composable(
+                route = "${MainRoutes.RECIPE_CREATE_WIZARD}?${MainRoutes.RECIPE_CREATE_WIZARD_GROUP_ARG}={${MainRoutes.RECIPE_CREATE_WIZARD_GROUP_ARG}}",
+                arguments = listOf(
+                    navArgument(MainRoutes.RECIPE_CREATE_WIZARD_GROUP_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+            ) { entry ->
+                val groupId = entry.arguments?.getString(MainRoutes.RECIPE_CREATE_WIZARD_GROUP_ARG)
                 RecipeCreateWizardScreen(
+                    preselectedGroupId = groupId,
                     onBack = { navController.popBackStack() },
                     onSaved = { id ->
                         navController.popBackStack()
