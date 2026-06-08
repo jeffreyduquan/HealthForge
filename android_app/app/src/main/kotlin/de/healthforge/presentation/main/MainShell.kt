@@ -258,10 +258,12 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 GroupDetailScreen(
                     onBack = { navController.popBackStack() },
                     onAddRecipe = {
-                        // groupId aus der aktuellen Route extrahieren
-                        val groupId = navController.currentBackStackEntry
-                            ?.arguments?.getString(MainRoutes.GROUP_DETAIL_ARG)
-                        navController.navigate(MainRoutes.recipeCreateWizard(groupId))
+                        // Navigate to recipe browse (Essen tab with Rezepte sub-tab preselected)
+                        navController.navigate(MainRoutes.ESSEN) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onOpenRecipe = { id -> navController.navigate(MainRoutes.recipeDetail(id)) },
                 )

@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,6 +22,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
@@ -27,6 +31,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +42,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -98,6 +105,10 @@ fun RecipeDetailScreen(
                                 Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
                             }
                         }
+                        // Rezept zu Gruppe hinzufügen
+                        IconButton(onClick = { vm.openAddToGroupDialog() }) {
+                            Icon(Icons.Filled.GroupAdd, contentDescription = "Zu Gruppe hinzufügen")
+                        }
                     }
                 },
             )
@@ -128,6 +139,30 @@ fun RecipeDetailScreen(
                 reportOpen = false
             },
             onDismiss = { reportOpen = false },
+        )
+    }
+    // Group-Picker-Dialog: Rezept zu Gruppe hinzufügen
+    if (state.myGroups != null) {
+        AlertDialog(
+            onDismissRequest = { vm.closeAddToGroupDialog() },
+            title = { Text("Zu Gruppe hinzufügen") },
+            text = {
+                if (state.myGroups!!.isEmpty()) {
+                    Text("Du bist in keiner Gruppe mit Verwaltungs-Rechten.")
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                        items(state.myGroups!!, key = { it.id }) { g ->
+                            OutlinedButton(
+                                onClick = { vm.assignToGroup(g.id) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(g.name)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { vm.closeAddToGroupDialog() }) { Text("Abbrechen") } },
         )
     }
 }

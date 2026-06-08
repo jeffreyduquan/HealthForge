@@ -174,10 +174,7 @@ fun GroupDetailScreen(
                         ) {
                             Text("Rezepte der Gruppe", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             if (isMember) {
-                                OutlinedButton(onClick = {
-                                    vm.openAddRecipeDialog()
-                                    showAddRecipeDialog = true
-                                }) { Text("+ Rezept") }
+                                OutlinedButton(onClick = onAddRecipe) { Text("+ Rezept") }
                             }
                         }
                         if (state.recipes.isEmpty()) {

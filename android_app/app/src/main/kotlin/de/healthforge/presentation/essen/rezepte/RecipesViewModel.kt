@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.network.RecipeDetailDto
 import de.healthforge.data.network.RecipeListItemDto
+import de.healthforge.data.network.GroupSummaryDto
+import de.healthforge.data.repository.GroupRepository
 import de.healthforge.data.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,11 +85,13 @@ data class RecipeDetailUiState(
     val reportBusy: Boolean = false,
     val reportSubmitted: Boolean = false,
     val message: String? = null,
+    val myGroups: List<GroupSummaryDto>? = null, // null = dialog closed
 )
 
 @HiltViewModel
 class RecipeDetailViewModel @Inject constructor(
     private val repo: RecipeRepository,
+    private val groupRepo: GroupRepository,
     private val tokenStore: de.healthforge.data.prefs.SecureTokenStore,
     savedState: SavedStateHandle,
 ) : ViewModel() {
@@ -166,4 +170,28 @@ class RecipeDetailViewModel @Inject constructor(
     }
 
     fun clearMessage() { _state.update { it.copy(message = null) } }
+
+    /** OPEN: Zeigt Dialog mit Gruppen, in denen User Admin/Owner/Contributor ist. */
+    fun openAddToGroupDialog() {
+        viewModelScope.launch {
+            groupRepo.myGroups().onSuccess { groups ->
+                val manageable = groups.filter { g ->
+                    g.myRole in listOf("OWNER", "ADMIN", "CONTRIBUTOR")
+                }
+                _state.update { it.copy(myGroups = manageable) }
+            }
+        }
+    }
+
+    /** Weist das Rezept einer Gruppe zu. */
+    fun assignToGroup(groupId: String) {
+        viewModelScope.launch {
+            repo.assignToGroup(recipeId, groupId).fold(
+                onSuccess = { _state.update { it.copy(message = "Rezept zur Gruppe hinzugefügt", myGroups = null) } },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Fehler", myGroups = null) } },
+            )
+        }
+    }
+
+    fun closeAddToGroupDialog() { _state.update { it.copy(myGroups = null) } }
 }
