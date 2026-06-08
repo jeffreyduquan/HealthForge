@@ -58,4 +58,8 @@ class GroupRepository @Inject constructor(
     suspend fun setMemberRole(id: String, userId: String, role: String): Result<Unit> = runCatching {
         api.setMemberRole(id, userId, role)
     }
+
+    suspend fun deleteGroup(id: String): Result<Unit> = runCatching {
+        api.deleteGroup(id)
+    }
 }

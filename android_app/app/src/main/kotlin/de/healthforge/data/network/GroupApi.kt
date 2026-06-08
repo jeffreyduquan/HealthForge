@@ -95,4 +95,7 @@ interface GroupApi {
         @Path("userId") userId: String,
         @Query("role") role: String,
     )
+
+    @DELETE("v1/groups/{id}")
+    suspend fun deleteGroup(@Path("id") id: String)
 }

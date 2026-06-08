@@ -99,4 +99,17 @@ class GroupDetailViewModel @Inject constructor(
             )
         }
     }
+
+    /** Nur OWNER: löscht die gesamte Gruppe. */
+    fun deleteGroup(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            repo.deleteGroup(groupId).fold(
+                onSuccess = {
+                    _state.update { it.copy(leftOrRemoved = true, message = "Gruppe gelöscht") }
+                    onDeleted()
+                },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Löschen fehlgeschlagen") } },
+            )
+        }
+    }
 }

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,6 +63,7 @@ fun GroupDetailScreen(
     val ctx = LocalContext.current
     var memberAction by remember { mutableStateOf<MemberActionTarget?>(null) }
     var confirmLeave by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -143,6 +145,15 @@ fun GroupDetailScreen(
                     )
                 }
             }
+            if (isOwner) {
+                OutlinedButton(
+                    onClick = { confirmDelete = true },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Gruppe löschen")
+                }
+            }
 
             HorizontalDivider()
             Text("Mitglieder", style = MaterialTheme.typography.titleMedium)
@@ -170,6 +181,23 @@ fun GroupDetailScreen(
                 TextButton(onClick = { confirmLeave = false; vm.leave() }) { Text("Verlassen") }
             },
             dismissButton = { TextButton(onClick = { confirmLeave = false }) { Text("Abbrechen") } },
+        )
+    }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Gruppe wirklich löschen?") },
+            text = { Text("Das löscht die Gruppe und alle Mitgliedschaften endgültig. Rezepte der Gruppe bleiben erhalten.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmDelete = false
+                        vm.deleteGroup(onDeleted = onBack)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Löschen") }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Abbrechen") } },
         )
     }
     memberAction?.let { target ->

@@ -200,6 +200,19 @@ class GroupService(
     fun isMember(userId: UUID, groupId: UUID): Boolean =
         memberRepo.existsByGroupIdAndUserId(groupId, userId)
 
+    /** Nur der OWNER darf die gesamte Gruppe löschen. */
+    @Transactional
+    fun deleteGroup(groupId: UUID, callerId: UUID) {
+        val g = groupRepo.findById(groupId).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "GROUP_NOT_FOUND", "Group $groupId not found")
+        }
+        if (g.ownerId != callerId) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER", "only group owner may delete the group")
+        }
+        // ON DELETE CASCADE in der DB löscht group_members, Rezepte bleiben aber erhalten (Soft-Delete)
+        groupRepo.delete(g)
+    }
+
     /** OWNER/ADMIN dürfen die Rolle eines Mitglieds ändern (CONTRIBUTOR, ADMIN, MEMBER). */
     @Transactional
     fun setMemberRole(groupId: UUID, targetUserId: UUID, newRole: GroupRole, callerId: UUID) {

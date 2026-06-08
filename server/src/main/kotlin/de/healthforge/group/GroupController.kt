@@ -107,6 +107,16 @@ class GroupController(
         return ResponseEntity.noContent().build()
     }
 
+    @DeleteMapping("/{id}")
+    fun deleteGroup(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+    ): ResponseEntity<Void> {
+        val p = require(principal)
+        service.deleteGroup(id, p.userId)
+        return ResponseEntity.noContent().build()
+    }
+
     @PostMapping("/{id}/transfer-ownership")
     fun transferOwnership(
         @AuthenticationPrincipal principal: AuthPrincipal?,
