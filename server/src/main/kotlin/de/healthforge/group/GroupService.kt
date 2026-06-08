@@ -200,6 +200,11 @@ class GroupService(
     fun isMember(userId: UUID, groupId: UUID): Boolean =
         memberRepo.existsByGroupIdAndUserId(groupId, userId)
 
+    /** Gibt die Rolle eines Mitglieds zurück (für RecipeService.assignToGroup). */
+    @Transactional(readOnly = true)
+    fun getMemberRole(userId: UUID, groupId: UUID): String? =
+        memberRepo.findByGroupIdAndUserId(groupId, userId)?.role
+
     /** OWNER/ADMIN duerfen die Gruppe aktualisieren (Name, Beschreibung, Sichtbarkeit). */
     @Transactional
     fun update(groupId: UUID, req: GroupUpdateRequest, callerId: UUID): GroupSummaryDto {
