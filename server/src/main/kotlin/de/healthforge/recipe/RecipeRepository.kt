@@ -84,7 +84,7 @@ class RecipeBrowseRepo(
                 } else {
                     where.append(
                         " AND (r.visibility = 'PUBLIC' OR r.author_id = :viewerForPrivate" +
-                            " OR (r.visibility = 'GROUP' AND r.group_id IN (:viewerGroupIds)))"
+                            " OR r.id IN (SELECT gr.recipeId FROM GroupRecipeEntity gr WHERE gr.groupId IN (:viewerGroupIds)))"
                     )
                     params["viewerForPrivate"] = visibilityFilter.userId
                     params["viewerGroupIds"] = visibilityFilter.groupIds
@@ -92,9 +92,9 @@ class RecipeBrowseRepo(
             }
         }
 
-        // Filter by specific groupId (if provided and user is member)
+        // Filter by specific groupId via group_recipes join table (V21)
         if (groupId != null) {
-            where.append(" AND r.group_id = :groupId")
+            where.append(" AND r.id IN (SELECT gr.recipeId FROM GroupRecipeEntity gr WHERE gr.groupId = :groupId)")
             params["groupId"] = groupId
         }
 

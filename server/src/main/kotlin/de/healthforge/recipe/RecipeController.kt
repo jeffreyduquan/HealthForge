@@ -64,7 +64,7 @@ class RecipeController(
         return service.detail(id, p.userId)
     }
 
-    /** Rezept einer Gruppe zuweisen (only owner). */
+    /** Rezept einer Gruppe zuweisen via group_recipes Join-Table (V21). */
     @PostMapping("/{id}/assign-group")
     fun assignToGroup(
         @AuthenticationPrincipal principal: AuthPrincipal?,
@@ -73,6 +73,18 @@ class RecipeController(
     ): ResponseEntity<Void> {
         val p = require(principal)
         service.assignToGroup(id, groupId, p.userId)
+        return ResponseEntity.noContent().build()
+    }
+
+    /** Rezept aus einer Gruppe entfernen (nur Admin/Owner/Contributor). */
+    @DeleteMapping("/{id}/assign-group")
+    fun removeFromGroup(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+        @RequestParam("groupId") groupId: UUID,
+    ): ResponseEntity<Void> {
+        val p = require(principal)
+        service.removeFromGroup(id, groupId, p.userId)
         return ResponseEntity.noContent().build()
     }
 

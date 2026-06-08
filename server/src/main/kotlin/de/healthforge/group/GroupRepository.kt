@@ -10,6 +10,18 @@ interface GroupRepo : JpaRepository<GroupEntity, UUID> {
     fun findByInviteCode(inviteCode: String): GroupEntity?
 }
 
+interface GroupRecipeRepo : JpaRepository<GroupRecipeEntity, GroupRecipeKey> {
+    fun findByGroupId(groupId: UUID): List<GroupRecipeEntity>
+    fun existsByGroupIdAndRecipeId(groupId: UUID, recipeId: UUID): Boolean
+    fun deleteByGroupIdAndRecipeId(groupId: UUID, recipeId: UUID)
+
+    @Query("SELECT gr.recipeId FROM GroupRecipeEntity gr WHERE gr.groupId = :groupId")
+    fun recipeIdsForGroup(@Param("groupId") groupId: UUID): List<UUID>
+
+    @Query("SELECT gr.groupId FROM GroupRecipeEntity gr WHERE gr.recipeId = :recipeId")
+    fun groupIdsForRecipe(@Param("recipeId") recipeId: UUID): List<UUID>
+}
+
 interface GroupMemberRepo : JpaRepository<GroupMemberEntity, GroupMemberKey> {
     fun findByGroupId(groupId: UUID): List<GroupMemberEntity>
     fun findByUserId(userId: UUID): List<GroupMemberEntity>

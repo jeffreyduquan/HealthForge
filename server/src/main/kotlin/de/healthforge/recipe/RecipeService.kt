@@ -3,6 +3,8 @@ package de.healthforge.recipe
 import de.healthforge.auth.AuthPrincipal
 import de.healthforge.auth.UserRole
 import de.healthforge.common.ApiException
+import de.healthforge.group.GroupRecipeRepo
+import de.healthforge.group.GroupRecipeEntity
 import de.healthforge.group.GroupService
 import de.healthforge.ingredient.IngredientRepository
 import org.springframework.http.HttpStatus
@@ -22,6 +24,7 @@ class RecipeService(
     private val nutritionCompute: RecipeNutritionCompute,
     private val ingredientRepo: IngredientRepository,
     private val groupService: GroupService,
+    private val groupRecipeRepo: GroupRecipeRepo,
 ) {
 
     // ---------- Browse / Detail ----------
@@ -77,14 +80,9 @@ class RecipeService(
         if (!isOwner && r.status != RecipeStatus.PUBLISHED.name) {
             throw ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $id not found")
         }
-        when (RecipeVisibility.valueOf(r.visibility)) {
-            RecipeVisibility.PUBLIC -> { /* ok */ }
-            RecipeVisibility.PRIVATE -> if (r.authorId != viewerId) throw ApiException(HttpStatus.FORBIDDEN, "PRIVATE_RECIPE", "private recipe")
-            RecipeVisibility.GROUP -> {
-                val gid = r.groupId
-                val allowed = r.authorId == viewerId || (gid != null && groupService.isMember(viewerId, gid))
-                if (!allowed) throw ApiException(HttpStatus.FORBIDDEN, "GROUP_RECIPE_FORBIDDEN", "not a member of recipe's group")
-            }
+        // Check PRIVATE visibility (owner-only)
+        if (RecipeVisibility.valueOf(r.visibility) == RecipeVisibility.PRIVATE && !isOwner) {
+            throw ApiException(HttpStatus.FORBIDDEN, "PRIVATE_RECIPE", "private recipe")
         }
         val items = ingredientRowRepo.findByRecipeIdOrderByPositionAsc(id)
         val steps = stepRowRepo.findByRecipeIdOrderByPositionAsc(id)
@@ -197,25 +195,42 @@ class RecipeService(
         recipeRepo.save(existing)
     }
 
-    /** Assign an existing recipe to a group (sets visibility=GROUP + groupId).
-     *  Allowed callers:
-     *  - recipe owner (always)
-     *  - group members with OWNER/ADMIN/CONTRIBUTOR role */
+    /** Weißt ein Rezept einer Gruppe zu (via group_recipes Join-Tabelle, V21).
+     *  Erlaubt fuer: Rezept-Owner ODER Gruppen-Mitglieder mit OWNER/ADMIN/CONTRIBUTOR.
+     *  Das Rezept behaelt seine visibility (PUBLIC/PRIVATE) bei. */
     @Transactional
-    fun assignToGroup(id: UUID, groupId: UUID, callerId: UUID) {
-        val existing = recipeRepo.findById(id).orElseThrow {
-            ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $id not found")
+    fun assignToGroup(recipeId: UUID, groupId: UUID, callerId: UUID) {
+        val recipe = recipeRepo.findById(recipeId).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $recipeId not found")
         }
-        val isOwner = existing.authorId == callerId
-        val callerRole = try { groupService.getMemberRole(callerId, groupId) } catch (_: Exception) { null }
-        val canManageGroups = callerRole in listOf("OWNER", "ADMIN", "CONTRIBUTOR")
-        if (!isOwner && !canManageGroups) {
-            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER_OR_GROUP_MANAGER",
-                "you must be the recipe owner or a group admin/contributor to assign recipes")
+        val isOwner = recipe.authorId == callerId
+        val callerRole = groupService.getMemberRole(callerId, groupId)
+        val canManage = callerRole in listOf("OWNER", "ADMIN", "CONTRIBUTOR")
+        if (!isOwner && !canManage) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_AUTHORIZED",
+                "must be recipe owner or group admin/contributor")
         }
-        existing.visibility = RecipeVisibility.GROUP.name
-        existing.groupId = groupId
-        recipeRepo.save(existing)
+        if (groupRecipeRepo.existsByGroupIdAndRecipeId(groupId, recipeId)) {
+            return // already assigned, idempotent
+        }
+        groupRecipeRepo.save(GroupRecipeEntity(
+            groupId = groupId,
+            recipeId = recipeId,
+            addedBy = callerId,
+        ))
+    }
+
+    /** Entfernt ein Rezept aus einer Gruppe (via Join-Table). */
+    @Transactional
+    fun removeFromGroup(recipeId: UUID, groupId: UUID, callerId: UUID) {
+        val callerRole = groupService.getMemberRole(callerId, groupId)
+        val canManage = callerRole in listOf("OWNER", "ADMIN", "CONTRIBUTOR")
+        val isOwner = recipeRepo.findById(recipeId).orElse(null)?.authorId == callerId
+        if (!canManage && !isOwner) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_AUTHORIZED",
+                "must be group admin/contributor or recipe owner")
+        }
+        groupRecipeRepo.deleteByGroupIdAndRecipeId(groupId, recipeId)
     }
 
     // ---------- Likes ----------
