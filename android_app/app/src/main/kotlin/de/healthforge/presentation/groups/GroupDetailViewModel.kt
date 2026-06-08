@@ -21,6 +21,7 @@ data class GroupDetailUiState(
     val members: List<GroupMemberDto> = emptyList(),
     val recipes: List<RecipeListItemDto> = emptyList(),
     val availableRecipes: List<RecipeListItemDto>? = null, // null = dialog closed
+    val recipeSearchQuery: String = "",
     val isLoading: Boolean = true,
     val message: String? = null,
     val leftOrRemoved: Boolean = false,
@@ -118,11 +119,22 @@ class GroupDetailViewModel @Inject constructor(
         }
     }
 
-    /** Dialog oeffnen: eigene Rezepte laden, die der Gruppe hinzugefuegt werden koennen. */
+    /** Dialog oeffnen: Rezepte laden, die der Gruppe hinzugefuegt werden koennen. */
     fun openAddRecipeDialog() {
+        searchRecipes("")
+        _state.update { it.copy(availableRecipes = emptyList(), recipeSearchQuery = "") }
+    }
+
+    /** Rezepte durchsuchen (fuer den Hinzufuegen-Dialog). */
+    fun searchRecipes(q: String) {
+        _state.update { it.copy(recipeSearchQuery = q) }
         viewModelScope.launch {
-            val res = recipeRepo.browse(scope = "MINE", limit = 50)
             val existingIds = _state.value.recipes.map { it.id }.toSet()
+            val res = recipeRepo.browse(
+                q = q.takeIf { it.isNotBlank() },
+                scope = "PUBLIC_OR_MINE",
+                limit = 30,
+            )
             _state.update {
                 it.copy(
                     availableRecipes = res.getOrNull()?.filter { r -> r.id !in existingIds && r.visibility != "GROUP" }

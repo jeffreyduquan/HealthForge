@@ -305,20 +305,40 @@ fun GroupDetailScreen(
         )
     }
 
-    // Add-Recipe-Dialog: existierende Rezepte zur Gruppe hinzufügen
+    // Add-Recipe-Dialog: nach Rezepten suchen und zur Gruppe hinzufügen
     if (state.availableRecipes != null) {
         AlertDialog(
             onDismissRequest = { vm.closeAddRecipeDialog() },
-            title = { Text("Rezept zur Gruppe hinzufügen") },
+            title = { Text("Rezept auswählen") },
             text = {
-                if (state.availableRecipes!!.isEmpty()) {
-                    Text("Du hast keine weiteren Rezepte, die du dieser Gruppe hinzufügen könntest.",
-                        style = MaterialTheme.typography.bodyMedium)
-                } else {
-                    LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(state.availableRecipes!!, key = { it.id }) { r ->
-                            Card(modifier = Modifier.fillMaxWidth().clickable { vm.addRecipeToGroup(r.id) }) {
-                                Text(r.title, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = state.recipeSearchQuery,
+                        onValueChange = vm::searchRecipes,
+                        label = { Text("Rezepte durchsuchen…") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    if (state.availableRecipes!!.isEmpty()) {
+                        Text("Keine passenden Rezepte gefunden.",
+                            style = MaterialTheme.typography.bodySmall)
+                    } else {
+                        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 350.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            items(state.availableRecipes!!, key = { it.id }) { r ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Column(Modifier.weight(1f)) {
+                                            Text(r.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                            Text(r.slot_tags.joinToString(", "), style = MaterialTheme.typography.labelSmall)
+                                        }
+                                        OutlinedButton(onClick = { vm.addRecipeToGroup(r.id) }) {
+                                            Text("+ Gruppe")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
