@@ -1,9 +1,7 @@
-=== Build: CI-Version + Camera-Permission + Versionsvergleich (2026-06-08) ===
-Siehe CHANGELOG.md:
-- Fix: App zeigt jetzt CI-Version (0.1.0-ci.{run}.{sha}) statt 0.1.0-debug
-- Fix: stripSuffix() funktioniert jetzt korrekt (vergleicht CI-Nummern)
-- Fix: Kamera-Runtime-Permission wird jetzt angefragt (Android 6+)
-=== Build: CI-Version + Camera-Permission + Versionsvergleich (2026-06-08) ===
+=== Build: group_recipes Join-Table Architektur (2026-06-08) ===
+- V21 group_recipes Join-Table (M:N) statt visibility=GROUP
+- Rezepte bleiben PUBLIC -> kein Review-Bypass
+=== Build: group_recipes Join-Table Architektur (2026-06-08) ===
 > Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
