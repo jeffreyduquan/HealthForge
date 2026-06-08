@@ -141,8 +141,10 @@ class GroupService(
         val g = groupRepo.findById(groupId).orElseThrow {
             ApiException(HttpStatus.NOT_FOUND, "GROUP_NOT_FOUND", "Group $groupId not found")
         }
-        if (g.ownerId != callerId) {
-            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER", "only group owner may remove members")
+        // OWNER und ADMIN dürfen Mitglieder entfernen
+        val callerRole = memberRepo.findByGroupIdAndUserId(groupId, callerId)?.role
+        if (callerRole != GroupRole.OWNER.name && callerRole != GroupRole.ADMIN.name) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER_OR_ADMIN", "only group owner/admin may remove members")
         }
         if (targetUserId == callerId) {
             throw ApiException(HttpStatus.CONFLICT, "OWNER_CANNOT_LEAVE", "transfer ownership first")
@@ -197,6 +199,25 @@ class GroupService(
     @Transactional(readOnly = true)
     fun isMember(userId: UUID, groupId: UUID): Boolean =
         memberRepo.existsByGroupIdAndUserId(groupId, userId)
+
+    /** OWNER/ADMIN dürfen die Rolle eines Mitglieds ändern (CONTRIBUTOR, ADMIN, MEMBER). */
+    @Transactional
+    fun setMemberRole(groupId: UUID, targetUserId: UUID, newRole: GroupRole, callerId: UUID) {
+        val callerRole = memberRepo.findByGroupIdAndUserId(groupId, callerId)?.role
+        if (callerRole != GroupRole.OWNER.name && callerRole != GroupRole.ADMIN.name) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER_OR_ADMIN", "only group owner/admin may change roles")
+        }
+        if (newRole == GroupRole.OWNER) {
+            throw ApiException(HttpStatus.BAD_REQUEST, "CANNOT_ASSIGN_OWNER", "use transfer-ownership instead")
+        }
+        val target = memberRepo.findByGroupIdAndUserId(groupId, targetUserId)
+            ?: throw ApiException(HttpStatus.NOT_FOUND, "NOT_A_MEMBER", "user is not a member")
+        if (target.role == GroupRole.OWNER.name) {
+            throw ApiException(HttpStatus.FORBIDDEN, "CANNOT_CHANGE_OWNER", "cannot change owner role directly")
+        }
+        target.role = newRole.name
+        memberRepo.save(target)
+    }
 
     /** Returns all group ids that the user is a member of (used by recipe browse). */
     @Transactional(readOnly = true)

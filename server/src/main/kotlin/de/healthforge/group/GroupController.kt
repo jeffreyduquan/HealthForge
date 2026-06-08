@@ -117,4 +117,17 @@ class GroupController(
         service.transferOwnership(id, newOwnerId, p.userId)
         return service.get(id, p.userId)
     }
+
+    /** Setzt die Rolle eines Mitglieds (OWNER/ADMIN dürfen zu MEMBER/CONTRIBUTOR/ADMIN ändern). */
+    @PostMapping("/{id}/members/{userId}/role")
+    fun setMemberRole(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+        @PathVariable userId: UUID,
+        @RequestParam("role") role: String,
+    ): ResponseEntity<Void> {
+        val p = require(principal)
+        service.setMemberRole(id, userId, GroupRole.valueOf(role.uppercase()), p.userId)
+        return ResponseEntity.noContent().build()
+    }
 }

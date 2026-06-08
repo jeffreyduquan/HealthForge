@@ -88,4 +88,11 @@ interface GroupApi {
         @Path("id") id: String,
         @Query("new_owner_id") newOwnerId: String,
     ): GroupSummaryDto
+
+    @POST("v1/groups/{id}/members/{userId}/role")
+    suspend fun setMemberRole(
+        @Path("id") id: String,
+        @Path("userId") userId: String,
+        @Query("role") role: String,
+    )
 }

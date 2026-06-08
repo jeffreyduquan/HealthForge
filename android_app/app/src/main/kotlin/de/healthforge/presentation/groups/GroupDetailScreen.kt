@@ -94,6 +94,7 @@ fun GroupDetailScreen(
             return@Scaffold
         }
         val isOwner = g.myRole == "OWNER"
+        val canManage = g.myRole == "OWNER" || g.myRole == "ADMIN"
         val isMember = g.myRole != null
 
         Column(
@@ -151,6 +152,7 @@ fun GroupDetailScreen(
                     MemberRow(
                         member = m,
                         isOwnerViewer = isOwner,
+                        canManageViewer = canManage,
                         onAction = { action -> memberAction = MemberActionTarget(m, action) },
                     )
                 }
@@ -174,6 +176,10 @@ fun GroupDetailScreen(
         val text = when (target.action) {
             MemberAction.REMOVE -> "Mitglied wirklich entfernen?"
             MemberAction.TRANSFER -> "Ownership wirklich übertragen? Du wirst danach Mitglied."
+            MemberAction.TOGGLE_ROLE -> {
+                val newRole = if (target.member.role == "CONTRIBUTOR") "MEMBER" else "CONTRIBUTOR"
+                "Rolle von ${target.member.userId.take(8)}… auf ${roleLabel(newRole)} ändern?"
+            }
         }
         AlertDialog(
             onDismissRequest = { memberAction = null },
@@ -183,6 +189,10 @@ fun GroupDetailScreen(
                     when (target.action) {
                         MemberAction.REMOVE -> vm.removeMember(target.member.userId)
                         MemberAction.TRANSFER -> vm.transferOwnership(target.member.userId)
+                        MemberAction.TOGGLE_ROLE -> {
+                            val newRole = if (target.member.role == "CONTRIBUTOR") "MEMBER" else "CONTRIBUTOR"
+                            vm.setMemberRole(target.member.userId, newRole)
+                        }
                     }
                     memberAction = null
                 }) { Text("Bestätigen") }
@@ -192,13 +202,14 @@ fun GroupDetailScreen(
     }
 }
 
-private enum class MemberAction { REMOVE, TRANSFER }
+private enum class MemberAction { REMOVE, TRANSFER, TOGGLE_ROLE }
 private data class MemberActionTarget(val member: GroupMemberDto, val action: MemberAction)
 
 @Composable
 private fun MemberRow(
     member: GroupMemberDto,
     isOwnerViewer: Boolean,
+    canManageViewer: Boolean,
     onAction: (MemberAction) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(1.dp)) {
@@ -210,9 +221,17 @@ private fun MemberRow(
                 Text(member.userId.take(8) + "…", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Text(roleLabel(member.role), style = MaterialTheme.typography.labelSmall)
             }
-            if (isOwnerViewer && member.role != "OWNER") {
-                IconButton(onClick = { onAction(MemberAction.TRANSFER) }) {
-                    Icon(Icons.Filled.SwapHoriz, contentDescription = "Ownership übertragen")
+            if (canManageViewer && member.role != "OWNER") {
+                // Toggle zwischen MEMBER und CONTRIBUTOR
+                val toggleLabel = if (member.role == "CONTRIBUTOR") "Zum Mitglied" else "Zum Beitragenden"
+                IconButton(onClick = { onAction(MemberAction.TOGGLE_ROLE) }) {
+                    Icon(Icons.Filled.SwapHoriz, contentDescription = toggleLabel)
+                }
+                // Nur OWNER darf Ownership übertragen
+                if (isOwnerViewer) {
+                    IconButton(onClick = { onAction(MemberAction.TRANSFER) }) {
+                        Icon(Icons.Filled.SwapHoriz, contentDescription = "Ownership übertragen")
+                    }
                 }
                 IconButton(onClick = { onAction(MemberAction.REMOVE) }) {
                     Icon(Icons.Filled.PersonRemove, contentDescription = "Entfernen")

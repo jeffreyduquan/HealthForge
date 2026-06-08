@@ -253,6 +253,7 @@ internal fun roleLabel(role: String): String = when (role) {
     "OWNER" -> "Eigentümer"
     "ADMIN" -> "Admin"
     "MEMBER" -> "Mitglied"
+    "CONTRIBUTOR" -> "Beitragender"
     else -> role
 }
 

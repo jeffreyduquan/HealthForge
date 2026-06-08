@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.UUID
 
 enum class GroupVisibility { PUBLIC, PRIVATE }
-enum class GroupRole { OWNER, ADMIN, MEMBER }
+enum class GroupRole { OWNER, ADMIN, MEMBER, CONTRIBUTOR }
 
 @Entity
 @Table(name = "groups")

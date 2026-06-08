@@ -54,4 +54,8 @@ class GroupRepository @Inject constructor(
     suspend fun transferOwnership(id: String, newOwnerId: String): Result<GroupSummaryDto> = runCatching {
         api.transferOwnership(id, newOwnerId)
     }
+
+    suspend fun setMemberRole(id: String, userId: String, role: String): Result<Unit> = runCatching {
+        api.setMemberRole(id, userId, role)
+    }
 }

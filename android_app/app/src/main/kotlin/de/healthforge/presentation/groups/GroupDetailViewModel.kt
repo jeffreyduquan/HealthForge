@@ -86,4 +86,17 @@ class GroupDetailViewModel @Inject constructor(
             )
         }
     }
+
+    /** OWNER/ADMIN: Setzt die Rolle eines Mitglieds (z.B. CONTRIBUTOR ↔ MEMBER). */
+    fun setMemberRole(userId: String, role: String) {
+        viewModelScope.launch {
+            repo.setMemberRole(groupId, userId, role).fold(
+                onSuccess = {
+                    _state.update { it.copy(message = "Rolle geändert") }
+                    load()
+                },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Rollenänderung fehlgeschlagen") } },
+            )
+        }
+    }
 }
