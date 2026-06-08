@@ -34,12 +34,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,6 +59,8 @@ import de.healthforge.data.network.GroupMemberDto
 @Composable
 fun GroupDetailScreen(
     onBack: () -> Unit,
+    onAddRecipe: () -> Unit = {},
+    onInvite: () -> Unit = {},
     vm: GroupDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -64,6 +69,7 @@ fun GroupDetailScreen(
     var memberAction by remember { mutableStateOf<MemberActionTarget?>(null) }
     var confirmLeave by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var tabIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -133,45 +139,76 @@ fun GroupDetailScreen(
                 }
             }
 
-            // Actions
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (isMember && !isOwner) {
-                    OutlinedButton(onClick = { confirmLeave = true }) { Text("Verlassen") }
-                }
-                if (isOwner) {
-                    Text(
-                        "Als Eigentümer musst du Ownership übertragen, bevor du verlassen kannst.",
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
-            if (isOwner) {
-                OutlinedButton(
-                    onClick = { confirmDelete = true },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Gruppe löschen")
-                }
+            // Tab-Navigation: Rezepte | Mitglieder
+            TabRow(selectedTabIndex = tabIndex) {
+                Tab(selected = tabIndex == 0, onClick = { tabIndex = 0 }, text = { Text("Rezepte") })
+                Tab(selected = tabIndex == 1, onClick = { tabIndex = 1 }, text = { Text("Mitglieder") })
             }
 
-            HorizontalDivider()
-            Text("Mitglieder", style = MaterialTheme.typography.titleMedium)
+            when (tabIndex) {
+                0 -> {
+                    // ───── Rezepte-Tab ─────
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text("Rezepte der Gruppe", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            if (isMember) {
+                                OutlinedButton(onClick = onAddRecipe) { Text("+ Rezept") }
+                            }
+                        }
+                        Text(
+                            "Hier erscheinen die Rezepte, die für diese Gruppe sichtbar sind.",
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                1 -> {
+                    // ───── Mitglieder-Tab ─────
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Management-Buttons
+                        if (isMember && !isOwner) {
+                            OutlinedButton(onClick = { confirmLeave = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Gruppe verlassen")
+                            }
+                        }
+                        if (isOwner) {
+                            Text(
+                                "Als Eigentümer musst du Ownership übertragen, bevor du verlassen kannst.",
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                OutlinedButton(onClick = onInvite, modifier = Modifier.weight(1f)) { Text("Einladen") }
+                                OutlinedButton(
+                                    onClick = { confirmDelete = true },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                    modifier = Modifier.weight(1f),
+                                ) { Text("Gruppe löschen") }
+                            }
+                        }
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
-                items(state.members, key = { it.userId }) { m ->
-                    MemberRow(
-                        member = m,
-                        isOwnerViewer = isOwner,
-                        canManageViewer = canManage,
-                        onAction = { action -> memberAction = MemberActionTarget(m, action) },
-                    )
+                        HorizontalDivider()
+                        Text("Mitglieder", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                            items(state.members, key = { it.userId }) { m ->
+                                MemberRow(
+                                    member = m,
+                                    isOwnerViewer = isOwner,
+                                    canManageViewer = canManage,
+                                    onAction = { action -> memberAction = MemberActionTarget(m, action) },
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    // Confirmation dialogs
+    // Leave confirm dialog
     if (confirmLeave) {
         AlertDialog(
             onDismissRequest = { confirmLeave = false },

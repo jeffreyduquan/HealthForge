@@ -66,6 +66,7 @@ fun RecipeDetailScreen(
     vm: RecipeDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
+    val currentUserId = vm.currentUserId
     var reportOpen by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(state.message) {
@@ -91,8 +92,11 @@ fun RecipeDetailScreen(
                                 Icon(Icons.Filled.Flag, contentDescription = "Melden")
                             }
                         }
-                        IconButton(onClick = { onEdit(r.id) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
+                        // Nur der Owner darf bearbeiten (REQ-RECIPE-008)
+                        if (currentUserId != null && r.author_id == currentUserId) {
+                            IconButton(onClick = { onEdit(r.id) }) {
+                                Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
+                            }
                         }
                     }
                 },

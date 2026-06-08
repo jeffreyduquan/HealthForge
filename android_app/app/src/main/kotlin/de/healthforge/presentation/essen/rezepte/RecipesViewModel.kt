@@ -88,6 +88,7 @@ data class RecipeDetailUiState(
 @HiltViewModel
 class RecipeDetailViewModel @Inject constructor(
     private val repo: RecipeRepository,
+    private val tokenStore: de.healthforge.data.prefs.SecureTokenStore,
     savedState: SavedStateHandle,
 ) : ViewModel() {
 
@@ -95,6 +96,8 @@ class RecipeDetailViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(RecipeDetailUiState())
     val state: StateFlow<RecipeDetailUiState> = _state.asStateFlow()
+
+    val currentUserId: String? = tokenStore.userId
 
     init { load() }
 
