@@ -78,7 +78,10 @@ class AdminReleaseController(
             )
         }
 
-        // 2. Neuen Release in DB speichern
+        // 2. Vor dem Speichern: alten Release merken (wird nach neuem Upload gelöscht)
+        val oldRelease = repo.findFirstByOrderByCreatedAtDesc()
+
+        // 3. Neuen Release in DB speichern
         val release = repo.save(ApkRelease(
             version = version,
             changelog = changelog?.takeIf { it.isNotBlank() },
@@ -88,18 +91,17 @@ class AdminReleaseController(
             uploadedBy = admin.userId,
         ))
 
-        // 3. Vorherigen (alten) Release löschen – es soll immer nur EIN Release existieren
-        val previous = repo.findFirstByOrderByCreatedAtDesc()
-        if (previous != null && previous.id != release.id) {
+        // 4. Alten Release aus MinIO + DB löschen – es soll immer nur EIN Release existieren
+        if (oldRelease != null) {
             runCatching {
                 minio.removeObject(
                     RemoveObjectArgs.builder()
                         .bucket(bucket)
-                        .`object`(previous.minioKey)
+                        .`object`(oldRelease.minioKey)
                         .build()
                 )
             }
-            repo.delete(previous)
+            repo.delete(oldRelease)
         }
 
         return release.toDto()

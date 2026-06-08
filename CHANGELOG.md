@@ -35,6 +35,7 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 - `POST /admin/v1/releases` löscht nach erfolgreichem Upload den vorherigen (ältesten) Release
 - Alte MinIO-Datei wird via `RemoveObject` entfernt, DB-Eintrag via `repo.delete()`
 - Fehler beim Löschen der alten Datei sind nicht fatal (`runCatching`) – nur DB-Eintrag wird entfernt
+- ⚠️ **Hotfix 2026-06-08:** `oldRelease` wurde NACH `repo.save()` abgefragt → `findFirstByOrderByCreatedAtDesc()` gab den NEUEN Release zurück → alter Release wurde nie gelöscht. Fix: Abfrage VOR `repo.save()` verschieben.
 
 **Admin-UI (`ReleasesPage.tsx`):**
 - Table-Ansicht durch einzelne Card ersetzt (da nur noch 1 Release existiert)
