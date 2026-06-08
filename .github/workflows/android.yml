@@ -35,8 +35,10 @@ jobs:
         run: |
           CI_VERSION="0.1.0-ci.${{ github.run_number }}.${GITHUB_SHA:0:7}"
           echo "CI_VERSION=$CI_VERSION" >> $GITHUB_ENV
-          echo "📦 Building APK with version: $CI_VERSION"
-          ./gradlew :app:assembleDebug --no-daemon -PversionName="$CI_VERSION"
+          echo "Building APK with version: $CI_VERSION  versionCode: ${{ github.run_number }}"
+          ./gradlew :app:assembleDebug --no-daemon \
+            -PversionName="$CI_VERSION" \
+            -PversionCode="${{ github.run_number }}"
 
       - name: Upload APK (Artifact)
         uses: actions/upload-artifact@v4

@@ -31,6 +31,7 @@ local.properties
 *.apk
 *.aab
 *.keystore
+!android_app/app/debug.keystore
 release/
 android_app/app/release/
 android_app/local.properties

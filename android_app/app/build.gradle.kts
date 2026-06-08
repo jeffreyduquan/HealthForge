@@ -14,14 +14,25 @@ android {
         applicationId = "de.healthforge"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
+        versionCode = (project.findProperty("versionCode")?.toString()?.toIntOrNull() ?: 1)
         versionName = project.findProperty("versionName")?.toString() ?: "0.1.0"
 
         resourceConfigurations += setOf("de")
     }
 
+    // Feste Debug-Keystore damit CI und lokale Rechner die gleiche Signatur nutzen
+    signingConfigs {
+        create("fixedDebug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         debug {
+            signingConfig = signingConfigs.getByName("fixedDebug")
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             // Nur versionNameSuffix setzen wenn kein CI-versionName übergeben wurde
