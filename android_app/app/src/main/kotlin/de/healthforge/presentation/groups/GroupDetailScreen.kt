@@ -27,11 +27,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -55,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.network.GroupMemberDto
+import de.healthforge.data.network.GroupUpdateRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +75,11 @@ fun GroupDetailScreen(
     var confirmLeave by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var tabIndex by remember { mutableIntStateOf(0) }
+    var showShareDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var editName by remember { mutableStateOf("") }
+    var editDesc by remember { mutableStateOf("") }
+    var editVisibility by remember { mutableStateOf("PRIVATE") }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -129,12 +137,19 @@ fun GroupDetailScreen(
                             (g.myRole?.let { roleLabel(it) } ?: "kein Mitglied"),
                         style = MaterialTheme.typography.labelMedium,
                     )
-                    // Invite-Code for PRIVATE group members
-                    if (g.visibility == "PRIVATE" && isMember && !g.inviteCode.isNullOrBlank()) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Code: ${g.inviteCode}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                            IconButton(onClick = { copyToClipboard(ctx, g.inviteCode) }) {
-                                Icon(Icons.Filled.ContentCopy, contentDescription = "Code kopieren")
+                    // Actions
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        if (isMember) {
+                            OutlinedButton(onClick = { showShareDialog = true }, modifier = Modifier.weight(1f)) {
+                                Text("Gruppe teilen")
+                            }
+                        }
+                        if (canManage) {
+                            OutlinedButton(onClick = {
+                                editName = g.name; editDesc = g.description ?: ""; editVisibility = g.visibility
+                                showSettingsDialog = true
+                            }, modifier = Modifier.weight(1f)) {
+                                Text("Einstellungen")
                             }
                         }
                     }
@@ -228,6 +243,65 @@ fun GroupDetailScreen(
         }
     }
 
+    // Share dialog
+    if (showShareDialog) {
+        AlertDialog(
+            onDismissRequest = { showShareDialog = false },
+            title = { Text("Gruppe teilen") },
+            text = {
+                Column {
+                    val sg = state.group ?: return@Column
+                    if (sg.visibility == "PRIVATE") {
+                        Text("Einladungscode:", style = MaterialTheme.typography.labelSmall)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(sg.inviteCode ?: "-", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                            IconButton(onClick = {
+                                copyToClipboard(ctx, sg.inviteCode ?: "")
+                                vm.clearMessage()
+                            }) { Icon(Icons.Filled.ContentCopy, contentDescription = "Kopieren") }
+                        }
+                        Text("Teile diesen Code mit Freunden, damit sie der Gruppe beitreten können.",
+                            style = MaterialTheme.typography.bodySmall)
+                        if (sg.myRole == "OWNER") {
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedButton(onClick = { vm.regenerateInvite() }) { Text("Neuen Code generieren") }
+                        }
+                    } else {
+                        Text("Diese Gruppe ist öffentlich – jeder kann beitreten.",
+                            style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showShareDialog = false }) { Text("Schließen") } },
+        )
+    }
+
+    // Settings dialog
+    if (showSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showSettingsDialog = false },
+            title = { Text("Gruppen-Einstellungen") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = editName, onValueChange = { editName = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = editDesc, onValueChange = { editDesc = it }, label = { Text("Beschreibung") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+                    Text("Sichtbarkeit", style = MaterialTheme.typography.labelSmall)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(selected = editVisibility == "PUBLIC", onClick = { editVisibility = "PUBLIC" }, label = { Text("Öffentlich") })
+                        FilterChip(selected = editVisibility == "PRIVATE", onClick = { editVisibility = "PRIVATE" }, label = { Text("Privat") })
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.updateGroup(GroupUpdateRequest(name = editName.trim(), description = editDesc.trim().ifEmpty { null }, visibility = editVisibility))
+                    showSettingsDialog = false
+                }) { Text("Speichern") }
+            },
+            dismissButton = { TextButton(onClick = { showSettingsDialog = false }) { Text("Abbrechen") } },
+        )
+    }
+
     // Leave confirm dialog
     if (confirmLeave) {
         AlertDialog(
@@ -303,7 +377,8 @@ private fun MemberRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(member.userId.take(8) + "…", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                val displayName = member.displayName ?: (member.userId.take(8) + "…")
+                Text(displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Text(roleLabel(member.role), style = MaterialTheme.typography.labelSmall)
             }
             if (canManageViewer && member.role != "OWNER") {
