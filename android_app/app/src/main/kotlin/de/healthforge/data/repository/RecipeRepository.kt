@@ -26,6 +26,7 @@ class RecipeRepository @Inject constructor(
         excludeAllergens: List<String>? = null,
         scope: String = "PUBLIC_OR_MINE",
         author: String? = null,
+        groupId: String? = null,
         limit: Int = 30,
         offset: Int = 0,
     ): Result<List<RecipeListItemDto>> = runCatching {
@@ -36,6 +37,7 @@ class RecipeRepository @Inject constructor(
             excludeAllergens = excludeAllergens?.takeIf { it.isNotEmpty() },
             scope = scope,
             author = author,
+            groupId = groupId,
             limit = limit,
             offset = offset,
         )

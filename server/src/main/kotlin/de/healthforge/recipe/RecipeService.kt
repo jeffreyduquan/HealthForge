@@ -35,6 +35,7 @@ class RecipeService(
         scope: BrowseScope,
         viewerId: UUID,
         authorId: UUID?,
+        groupId: UUID? = null,
         limit: Int,
         offset: Int,
     ): List<RecipeListItemDto> {
@@ -44,7 +45,7 @@ class RecipeService(
             BrowseScope.MINE -> VisibilityFilter.OwnOnly(viewerId)
             BrowseScope.PUBLIC_OR_MINE -> VisibilityFilter.PublicOrOwnOrGroup(viewerId, viewerGroupIds)
         }
-        val ids = browse.browseIds(q, slotTags, prepMinutesMax, excludeAllergens, vf, authorId, limit, offset)
+        val ids = browse.browseIds(q, slotTags, prepMinutesMax, excludeAllergens, vf, authorId, groupId, limit, offset)
         if (ids.isEmpty()) return emptyList()
         val byId = recipeRepo.findAllById(ids).associateBy { it.id }
         return ids.mapNotNull { byId[it] }.map { r ->

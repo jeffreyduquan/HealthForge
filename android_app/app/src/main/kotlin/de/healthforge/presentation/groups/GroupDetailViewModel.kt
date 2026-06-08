@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.network.GroupMemberDto
 import de.healthforge.data.network.GroupSummaryDto
+import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.GroupRepository
+import de.healthforge.data.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +19,7 @@ import javax.inject.Inject
 data class GroupDetailUiState(
     val group: GroupSummaryDto? = null,
     val members: List<GroupMemberDto> = emptyList(),
+    val recipes: List<RecipeListItemDto> = emptyList(),
     val isLoading: Boolean = true,
     val message: String? = null,
     val leftOrRemoved: Boolean = false,
@@ -25,6 +28,7 @@ data class GroupDetailUiState(
 @HiltViewModel
 class GroupDetailViewModel @Inject constructor(
     private val repo: GroupRepository,
+    private val recipeRepo: RecipeRepository,
     savedState: SavedStateHandle,
 ) : ViewModel() {
 
@@ -42,12 +46,15 @@ class GroupDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val gRes = repo.detail(groupId)
             val mRes = repo.members(groupId)
+            val rRes = recipeRepo.browse(scope = "PUBLIC_OR_MINE", groupId = groupId)
             _state.update {
                 it.copy(
                     isLoading = false,
                     group = gRes.getOrNull() ?: it.group,
                     members = mRes.getOrNull() ?: emptyList(),
-                    message = gRes.exceptionOrNull()?.message ?: mRes.exceptionOrNull()?.message,
+                    recipes = rRes.getOrNull() ?: emptyList(),
+                    message = gRes.exceptionOrNull()?.message
+                        ?: mRes.exceptionOrNull()?.message,
                 )
             }
         }

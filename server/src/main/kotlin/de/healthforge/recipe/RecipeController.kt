@@ -35,6 +35,7 @@ class RecipeController(
         @RequestParam("excludeAllergens", required = false) excludeAllergens: List<String>? = null,
         @RequestParam("scope", required = false, defaultValue = "PUBLIC_OR_MINE") scope: BrowseScope,
         @RequestParam("author", required = false) author: UUID? = null,
+        @RequestParam("groupId", required = false) groupId: UUID? = null,
         @RequestParam("limit", required = false, defaultValue = "20") limit: Int,
         @RequestParam("offset", required = false, defaultValue = "0") offset: Int,
     ): List<RecipeListItemDto> {
@@ -48,6 +49,7 @@ class RecipeController(
             scope = scope,
             viewerId = p.userId,
             authorId = author,
+            groupId = groupId,
             limit = limit,
             offset = offset,
         )

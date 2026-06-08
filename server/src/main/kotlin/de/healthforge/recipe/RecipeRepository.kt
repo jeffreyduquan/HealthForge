@@ -58,6 +58,7 @@ class RecipeBrowseRepo(
         excludeAllergens: List<String>,
         visibilityFilter: VisibilityFilter,
         authorId: UUID?,
+        groupId: UUID? = null,
         limit: Int,
         offset: Int,
     ): List<UUID> {
@@ -89,6 +90,12 @@ class RecipeBrowseRepo(
                     params["viewerGroupIds"] = visibilityFilter.groupIds
                 }
             }
+        }
+
+        // Filter by specific groupId (if provided and user is member)
+        if (groupId != null) {
+            where.append(" AND r.group_id = :groupId")
+            params["groupId"] = groupId
         }
 
         if (!q.isNullOrBlank()) {

@@ -138,6 +138,7 @@ interface RecipeApi {
         @Query("excludeAllergens") excludeAllergens: List<String>? = null,
         @Query("scope") scope: String = "PUBLIC",
         @Query("author") author: String? = null,
+        @Query("groupId") groupId: String? = null,
         @Query("limit") limit: Int = 30,
         @Query("offset") offset: Int = 0,
     ): List<RecipeListItemDto>

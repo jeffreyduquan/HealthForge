@@ -3,6 +3,7 @@ package de.healthforge.presentation.groups
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,7 @@ import de.healthforge.data.network.GroupMemberDto
 fun GroupDetailScreen(
     onBack: () -> Unit,
     onAddRecipe: () -> Unit = {},
+    onOpenRecipe: (String) -> Unit = {},
     onInvite: () -> Unit = {},
     vm: GroupDetailViewModel = hiltViewModel(),
 ) {
@@ -159,10 +161,28 @@ fun GroupDetailScreen(
                                 OutlinedButton(onClick = onAddRecipe) { Text("+ Rezept") }
                             }
                         }
-                        Text(
-                            "Hier erscheinen die Rezepte, die für diese Gruppe sichtbar sind.",
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        if (state.recipes.isEmpty()) {
+                            Text(
+                                "Noch keine Rezepte in dieser Gruppe.",
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                                items(state.recipes, key = { it.id }) { r ->
+                                    Card(modifier = Modifier.fillMaxWidth().clickable { onOpenRecipe(r.id) }) {
+                                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Column(Modifier.weight(1f)) {
+                                                Text(r.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                                                Text(
+                                                    r.slot_tags.joinToString(", ") + " · ${r.author_id.take(8)}…",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 1 -> {
