@@ -23,6 +23,9 @@ class MealPlanRepository @Inject constructor(
     fun observeItemsForSlots(slotIds: List<Long>): Flow<List<MealPlanItemEntity>> =
         dao.observeItemsForSlots(slotIds)
 
+    fun observeItemsForDay(day: LocalDate): Flow<List<MealPlanItemEntity>> =
+        dao.observeItemsForDay(day.toString())
+
     suspend fun addSlot(day: LocalDate, slotType: String, time: Int? = null): Long {
         return dao.insertSlot(
             MealPlanSlotEntity(

@@ -41,6 +41,35 @@ class IntakeRepository @Inject constructor(
             }
         }
 
+    /**
+     * Returns a map of ISO-date to DayNutrientTotals for all days in start..end.
+     * ZERO for days with no entries. Used for 7-day sparklines (REQ-HOME-TREND-001).
+     */
+    fun observeTotalsForDateRange(start: LocalDate, end: LocalDate): Flow<Map<String, DayNutrientTotals>> =
+        dao.observeForDateRange(start.toString(), end.toString()).map { entries ->
+            val dates = java.util.HashSet<String>()
+            val map = java.util.LinkedHashMap<String, DayNutrientTotals>()
+            for (e in entries) {
+                dates.add(e.dayDateIso)
+                val f = e.portionGrams / 100.0
+                val prev = map.getOrDefault(e.dayDateIso, DayNutrientTotals.ZERO)
+                map[e.dayDateIso] = DayNutrientTotals(
+                    kcal = prev.kcal + (e.snapshotKcalPer100g ?: 0.0) * f,
+                    proteinG = prev.proteinG + (e.snapshotProteinPer100g ?: 0.0) * f,
+                    carbsG = prev.carbsG + (e.snapshotCarbsPer100g ?: 0.0) * f,
+                    fatG = prev.fatG + (e.snapshotFatPer100g ?: 0.0) * f,
+                )
+            }
+            // Ensure all dates in range are present (missing = ZERO)
+            var d = start
+            while (!d.isAfter(end)) {
+                val iso = d.toString()
+                if (iso !in map) map[iso] = DayNutrientTotals.ZERO
+                d = d.plusDays(1)
+            }
+            map.toSortedMap()
+        }
+
     fun observeRecent(limit: Int = 200): Flow<List<IntakeEntryEntity>> =
         dao.observeRecent(limit = limit)
 

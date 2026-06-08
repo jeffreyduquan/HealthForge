@@ -84,7 +84,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-NAV-001 | The app SHALL use a **6-Tab Bottom-Navigation**: `Home`, `Plan`, `Gruppen`, `Essen`, `Log`, `Profil`. |
 | REQ-NAV-002 | The `Essen`-Tab SHALL contain three Top-Sub-Tabs: `Lebensmittel`, `Rezepte`, `Supplements`. |
 | REQ-NAV-003 | Tabs not yet implemented in a development phase SHALL render a "Bald verfügbar"-Placeholder. |
-| REQ-NAV-004 | The `Log`-Tab SHALL be the **Symptom-Tagebuch** (NOT intake-history). Intake-history is reached from Home via a "Verlauf"-Button. |
+| REQ-NAV-004 | The `Log`-Tab SHALL be the **Symptom-Tagebuch** (NOT intake-history). Intake-history is accessible via Date-Navigation in Home (kein separater "Verlauf"-Button mehr). |
 
 ---
 
@@ -184,8 +184,11 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-HOME-001 | The Home tab SHALL show the current day's nutrient totals (kcal + macros + selected micronutrients) computed from the local Intake-Log. |
 | REQ-HOME-002 | Nutrient targets SHALL be derived from the user's profile (BMR via Mifflin–St Jeor × activity multiplier). |
 | REQ-HOME-003 | The user SHALL be able to add a quick intake entry from the Home tab. |
-| REQ-HOME-004 | The Home tab SHALL include: heutige Makros (Ringe/Bars), heutige Einträge (Kurzliste max 5), Quick-Add (letzte 6 Refs), Supplement-Checkliste, Wasser-Tracker, Datum-Navigation (gestern/heute/morgen), "Verlauf"-Button → Intake-History-Screen. |
+| REQ-HOME-004 | The Home tab SHALL include: heutige Makros (Bars mit 7-Tage-Sparkline-Trend), heutige geplante Mahlzeiten (aus Plan-Tab, als "GEGESSEN"-Karten), bereits erfasste Einträge (Kurzliste), Supplement-Checkliste, Wasser-Tracker, Datum-Navigation (gestern/heute/morgen). |
 | REQ-HOME-005 | The Home tab SHALL be the entry point to the Intake-History (full chronological list with date picker). |
+| REQ-HOME-PLAN-001 | Home SHALL display today's planned meals (from MealPlanRepo) as RecipeCards with a "GEGESSEN" action. Tapping "GEGESSEN" SHALL create an IntakeEntry (snapshot) and mark the slot as consumed (slot stays visible with checkmark). |
+| REQ-HOME-TREND-001 | The PinnedNutrientCard SHALL show a 7-day mini sparkline (line chart) below each pinned nutrient's progress bar, showing the daily consumed value for the last 7 days (including today). The sparkline SHALL always be visible (not expandable) and cover all pinned nutrients simultaneously. |
+| REQ-HOME-HEADER-001 | The Home header SHALL contain only the DateNavigator (left/right arrows + date label). No greeting text ("Hallo!") and no "Verlauf"-button SHALL be rendered. |
 
 ### 5.12 Ratings
 
@@ -247,6 +250,7 @@ See §10 below.
 | REQ-PLAN-003 | Plan data SHALL be stored locally. |
 | REQ-PLAN-004 | A "Habe gegessen"-Button on a slot SHALL copy that slot's content into the Intake-Log. |
 | REQ-PLAN-005 | Per-slot Reminders SHALL be configurable (local AlarmManager). |
+| REQ-PLAN-QUICK-001 | Quick-Add entries from the Home tab SHALL also create a MealPlanItemEntity (in addition to IntakeEntryEntity) so they appear in the Plan view. The item SHALL be placed in a generic slot for the current day and marked as consumed immediately. |
 
 ### 6.3 Shopping List
 

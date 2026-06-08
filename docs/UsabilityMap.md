@@ -84,46 +84,47 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ```
 ┌─────────────────────────────────┐
-│ ← Mo, 25.05.2026 →              │ Datum-Nav
+│ ← Mo, 08.06.2026 →              │ DateNavigator (clean, kein Hallo/Verlauf)
 ├─────────────────────────────────┤
-│ ANGEHEFTETE NÄHRSTOFFE           │ SectionPill
+│ ERNÄHRUNG                        │ SectionPill
 │ ┌──────────────────────────────┐ │ PinnedNutrientCard
-│ │ kcal      1450 / 2100  -650 │ │  (groesser, Linear-Bar + Delta)
-│ │ █████████████░░░░░░░░ 70 % │ │
+│ │ kcal      1450 / 2100  -650 │ │  Progress-Bar + Stage-Badge
+│ │ █████████████░░░░░░ 70 %   │ │
+│ │ ╱▔▔╲   ▁▃▄█▃▄▅             │ │  7-Tage-Linien-Sparkline (immer sichtbar)
+│ │ Protein    80 / 150g  -70   │ │
+│ │ ███████░░░░░░░░ 53 %       │ │
+│ │ ╱▔╲   ▁▂▃▄▃▄▅             │ │  Sparkline pro Pin
+│ │ … weitere Pins              │ │
+│ │ Wasser  700 / 2000 ml  35%  │ │ WaterStageSlider (letzte Pin-Zeile)
+│ │ ╱▔╲   ▁▂▃▃▄▅▆             │ │
 │ └──────────────────────────────┘ │
-│  … weitere Pins (Protein/Carbs/Fett) …
-│ ┌────────────────────────────┐ │ WaterStageSlider (letzte Pin-Zeile)
-│ │ Wasser  ×2   700 / 2000 ml  35 %  ὑ4│ │  Label · Stufen-Badge · Wert/Ziel ·
-│ │ ███████████▌▒▒▒▒▒▒▒▒▒▒▒▒▒●│ │  Prozent · Reminder-Bell
-│ └────────────────────────────┘ │  Bar = Slider, Thumb = Position in Stufe
+│ [▾ Nährstoffe verwalten]         │ Chevron → Expanded-Pin-Manager
 ├─────────────────────────────────┤
-│ [▾ Alle Nährstoffe anzeigen]    │ Expander
-│  ◍ Vitamin C   65 / 110 mg    │ NutrientRow (Mini-Bar + Pin-Icon)
-│  ◍ Eisen        8 / 15  mg    │   Pin-Tap toggelt sofort
-│  …                                │
-├─────────────────────────────────┤
-│ GEPLANTE MAHLZEITEN HEUTE       │ SectionPill
-│  ☐ 12:00 Linsensuppe (Plan)    │ PlannedMealRow
-│  ☑ 08:00 Müsli (gegessen)      │ Undo-Snackbar 60s
-│  …                                │
-├─────────────────────────────────┤
-│         [+ Eintrag]              │ Großer Button
+│ HEUTE                            │ SectionPill
+│   Fr  Müsli + Beeren         ✓  │ PlannedMealCard mit GEGESSEN-Button
+│   Fr  Linsensuppe            ✓  │ (aus Plan-Tab, RecipeCard-Stil)
+│   ☑ Kaffee (08:00 erfasst)      │ Already eaten (informativ, keine Aktion)
+│   ☑ Apfel  (09:30 erfasst)      │
+│ [+ Eintrag]                     │ Quick-Add (erzeugt auch Plan-Eintrag)
 └─────────────────────────────────┘
+                            [FAB +]
 ```
 
 ### 3.2 Aktionen
-- **Datum-Nav:** Pfeile + Tap auf Datum → Date-Picker.
+- **Datum-Nav:** Pfeile + Tap auf Datum → Date-Picker. Kein Hallo-Gruß, kein Verlauf-Button.
 - **PinnedNutrientCard Tap:** Detail-Sheet (geplant vs. tatsächlich, Restmenge, Quellen-Aufschlüsselung pro Mahlzeit).
+- **7-Tage-Sparkline:** Unter jeder Pin-Progress-Bar eine kompakte Linien-Sparkline (letzte 7 Tage). Y-Achse = konsumierter Wert, X-Achse = Tage (heute rechts). Immer sichtbar, alle gepinnten Nährstoffe gleichzeitig.
 - **Pinned-Bars Stufen-Anzeige (P7.S3.b, einheitlich mit Wasser):** Alle Pin-Bars (kcal/Protein/Carbs/Fett/Wasser) zeigen den Konsum als Stufen-Bar. Stufe N = `N×goal..(N+1)×goal`. Bar-Füllung = Prozent **innerhalb der aktuellen Stufe** (0–100 %). Farbe = `waterStageGradient(stage)` (10-Stufen-Cycle, ab Stufe 9 endless). Track = Akzent der **Vorgängerstufe × 0.25 Alpha** (Stufe 0 → neutraler `barTrack`). Ab Stufe ≥ 1 erscheint rechts ein Lv-Badge. Überkonsum (> 100 % Tagesziel) führt zu Stufen-Roll-over mit neuer Farbe — analog Wasser.
 - **WaterStageSlider drag (Stufen-Logik, v2.3):** Wasser ist die letzte Zeile in der `PinnedNutrientCard`, optisch identisch zu den anderen Pin-Bars. Range = 0..goal (0–100 % der aktuellen Stufe). 50-ml-Steps. Stufe N umfasst `N×goal..(N+1)×goal`. **In-Drag Stage-Up**: erreicht der Slider 100 %, schaltet die Bar in die nächste Stufe (Bar 0 %, neue Farbe, Thumb am linken Rand). **In-Drag Stage-Down (Drag-Through-Zero)**: erreicht der Slider in einer Stufe > 0 das untere Ende, schaltet die Bar eine Stufe zurück (Bar 100 %, Thumb am rechten Rand). **Touch-Disconnect bei Stufenwechsel**: Sobald während eines Drags ein Stage-Up/Down ausgelöst wird, wird die aktive Geste per `key`-Remount des Sliders abgebrochen. Für weitere Stufenwechsel muss der User loslassen und neu tippen. Cascade-Effekt konstruktionsbedingt unmöglich. Beim Loslassen genau an einer Stufengrenze rückt der State zusätzlich noch eine Stufe weiter (oben) bzw. zurück (unten). Stufen 0..9 haben je eine eigene Farbe aus der Histamind-Palette; ab Stufe 10+ bleibt die Farbe gleich. Stufen sind endlos. **Ghost-Soll-Marker**: feine weiße vertikale Linie an der Soll-Position innerhalb der gerade angezeigten Stufe. **Defizit-Rotanteil**: Bereich zwischen aktueller Füllung und Soll wird rot (StatusOverUl) gefärbt, wenn current < Soll und beide in derselben Stufe. Persistenz via `WaterIntakeRepository.setDayTotal` (Day-Aggregate).
 - **Reminder-Bell-Toggle:** Trailing-Icon der Wasser-Zeile (statt eigener Card-Header). Stoppt nur Defizit-Notifications. Persistiert in `WaterReminderPrefs`.
-- **Pin-Card Header (P7.S4 Slice 4e, Revision 2026-05-28):** Card-Titel + **ein** Chevron-IconButton rechts. Titel zeigt "Angepinnt" wenn collapsed, "Nährstoffe verwalten" wenn expanded. Stift-Edit-Modus und separates Picker-BottomSheet wurden in der Revision entfernt — alle Pin-Aktionen laufen jetzt direkt in der Card.
-- **Collapsed (default):** zeigt nur die gepinnten Nährstoffe als Progress-Rows + Wasser-Slider als letzte Zeile. Steady-State der Home-Ansicht.
+- **Pin-Card Header (P7.S4 Slice 4e, Revision 2026-05-28):** Card-Titel + **ein** Chevron-IconButton rechts. Titel zeigt "Angepinnt" wenn collapsed, "Nährstoffe verwalten" wenn expanded.
+- **Collapsed (default):** zeigt nur die gepinnten Nährstoffe als Progress-Rows + 7-Tage-Sparkline + Wasser-Slider als letzte Zeile. Steady-State der Home-Ansicht.
 - **Expanded (Tap auf Chevron):** zeigt **alle** Nährstoffe gruppiert in vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges). Pro Eintrag: Name + DGE-Default-Hinweis ("X mg/Tag") + trailing PushPin-Icon. **Filled** = gepinnt, **Outlined** = nicht gepinnt. Tap auf das Icon **pinnt/entpinnt sofort** und persistiert in `UserProfileEntity.pinnedNutrientsJson`.
 - **Min-1-Pin-Invariant:** Der letzte verbleibende Pin kann nicht entfernt werden (Tap = no-op).
 - **Wasser:** keine UI-Sonderbehandlung — gehört zu Sektion "Sonstiges", per Default in `NutrientCatalog.defaultPinnedKeys` gepinnt, aber im Expanded-View normal entpinnbar wie jeder andere Nährstoff. Solange Wasser gepinnt ist, erscheint der `WaterStageSlider` im Collapsed-View als letzte Zeile.
-- **Geplante-Mahlzeiten-Checkbox:** ☑ → `intake_entries`-Insert mit Snapshot der Nutrient-Werte; ☐-Undo binnen 60 s per Snackbar.
-- **+ Eintrag:** Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement — Wasser ist nicht mehr hier, weil im Home-Card direkt steuerbar).
+- **Geplante-Mahlzeiten-Karten:** Jede geplante Mahlzeit wird als RecipeCard mit server-seitigem DTO dargestellt (Bild, Titel, Prep-Zeit, Kategorie). Trailing = ✓-GEGESSEN-Button. Tap auf ✓ → `markConsumed(slotId)` erzeugt IntakeEntry + Slot-Checkmark. Slot bleibt sichtbar, kein Delete in Home (Delete nur im Plan-Tab).
+- **Bereits erfasste Einträge:** Zeigen Name + Uhrzeit + Portion, informativ ohne Aktion (kein Delete, kein Edit).
+- **+ Eintrag:** Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement). Erzeugt sowohl IntakeEntry (lokal) als auch MealPlanItem (für Plan-Sync, REQ-PLAN-QUICK-001).
 
 ### 3.3 Pin-Verwaltung
 - **Default-Pins** (nach Onboarding): `kcal, protein, carbs, fat, water` (5 Stück).

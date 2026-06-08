@@ -17,6 +17,15 @@ interface MealPlanDao {
     @Query("SELECT * FROM meal_plan_slot WHERE dayDateIso = :day ORDER BY position ASC, id ASC")
     fun observeSlotsForDay(day: String): Flow<List<MealPlanSlotEntity>>
 
+    /** Returns ALL items across all slots for a given day (used by Home, REQ-HOME-PLAN-001). */
+    @Query(
+        "SELECT item.* FROM meal_plan_item item " +
+            "INNER JOIN meal_plan_slot slot ON slot.id = item.slotId " +
+            "WHERE slot.dayDateIso = :day " +
+            "ORDER BY slot.position ASC, slot.id ASC, item.id ASC"
+    )
+    fun observeItemsForDay(day: String): Flow<List<MealPlanItemEntity>>
+
     @Query("SELECT * FROM meal_plan_slot WHERE dayDateIso BETWEEN :start AND :end ORDER BY dayDateIso ASC, position ASC, id ASC")
     suspend fun slotsBetween(start: String, end: String): List<MealPlanSlotEntity>
 

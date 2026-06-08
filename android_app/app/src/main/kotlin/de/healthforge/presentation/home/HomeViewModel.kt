@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
+import de.healthforge.data.db.entities.MealPlanItemEntity
+import de.healthforge.data.db.entities.MealPlanSlotEntity
 import de.healthforge.data.db.entities.ReminderFrequency
 import de.healthforge.data.db.entities.SupplementEntity
 import de.healthforge.data.db.entities.SupplementReminderEntity
@@ -14,6 +16,7 @@ import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.DayNutrientTotals
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.IntakeRepository
+import de.healthforge.data.repository.MealPlanRepository
 import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.data.repository.RecipeRepository
 import de.healthforge.data.repository.SupplementRepository
@@ -52,11 +55,20 @@ data class SupplementChecklistItem(
     val taken: Boolean,
 )
 
+/** A planned meal item with its slot's consumed state (REQ-HOME-PLAN-001). */
+data class PlannedMealInfo(
+    val item: MealPlanItemEntity,
+    val slotConsumed: Boolean,
+    val slotId: Long,
+)
+
 data class HomeState(
     val date: LocalDate = LocalDate.now(),
     val targets: DailyTargets = DailyTargets.FALLBACK,
     val totals: DayNutrientTotals = DayNutrientTotals.ZERO,
     val entries: List<IntakeEntryEntity> = emptyList(),
+    val plannedMeals: List<PlannedMealInfo> = emptyList(),
+    val trendTotals: Map<String, DayNutrientTotals> = emptyMap(),
     val waterMl: Int = 0,
     /**
      * P7.S3 / REQ-HOME-WATER-BAR-001 — lineares Tages-Soll bis zur aktuellen
@@ -98,6 +110,7 @@ class HomeViewModel @Inject constructor(
     private val ingredientRepo: IngredientRepository,
     private val supplementRepo: SupplementRepository,
     private val recipeRepo: RecipeRepository,
+    private val planRepo: MealPlanRepository,
     private val waterReminderPrefs: WaterReminderPrefs,
     private val waterReminderScheduler: WaterReminderScheduler,
     private val profileRepo: ProfileRepository,
@@ -138,7 +151,7 @@ class HomeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        // Fetch real RecipeListItemDtos from server for recipe-type entries
+        // Fetch real RecipeListItemDtos from server for recipe-type entries + planned items
         dateFlow
             .flatMapLatest { day -> intakeRepo.observeForDay(day) }
             .onEach { entries ->
@@ -151,6 +164,34 @@ class HomeViewModel @Inject constructor(
                     _state.value = _state.value.copy(recipeDtos = emptyMap())
                 }
             }
+            .launchIn(viewModelScope)
+
+        // REQ-HOME-PLAN-001: Observe planned meals for today (from Plan tab)
+        dateFlow
+            .flatMapLatest { day ->
+                combine(
+                    planRepo.observeItemsForDay(day),
+                    planRepo.observeSlotsForDay(day),
+                ) { items, slots ->
+                    val slotMap = slots.associateBy { it.id }
+                    items.map { item ->
+                        PlannedMealInfo(
+                            item = item,
+                            slotConsumed = slotMap[item.slotId]?.consumed ?: false,
+                            slotId = item.slotId,
+                        )
+                    }
+                }
+            }
+            .onEach { planned -> _state.value = _state.value.copy(plannedMeals = planned) }
+            .launchIn(viewModelScope)
+
+        // REQ-HOME-TREND-001: 7-day sparkline data
+        dateFlow
+            .flatMapLatest { day ->
+                intakeRepo.observeTotalsForDateRange(day.minusDays(6), day)
+            }
+            .onEach { trend -> _state.value = _state.value.copy(trendTotals = trend) }
             .launchIn(viewModelScope)
 
         // Supplement-Checklist: today's enabled reminders + which were taken already.
@@ -240,6 +281,7 @@ class HomeViewModel @Inject constructor(
         val grams = s.quickAddPortion.toDoubleOrNull() ?: return
         if (grams <= 0) return
         viewModelScope.launch {
+            // REQ-PLAN-QUICK-001: Create both IntakeEntry + MealPlanItem (for Plan sync)
             intakeRepo.add(
                 IntakeEntryEntity(
                     loggedAt = System.currentTimeMillis(),
@@ -249,6 +291,24 @@ class HomeViewModel @Inject constructor(
                     portionGrams = grams,
                     snapshotName = dto.name_de,
                     snapshotBrand = dto.brand,
+                    snapshotKcalPer100g = dto.energy_kcal_per_100g,
+                    snapshotProteinPer100g = dto.protein_g_per_100g,
+                    snapshotCarbsPer100g = dto.carbs_g_per_100g,
+                    snapshotFatPer100g = dto.fat_g_per_100g,
+                )
+            )
+            // Also create a MealPlanItem so it appears in Plan (REQ-PLAN-QUICK-001)
+            // We need a slot for today. Find or create a QUICK slot.
+            val daySlots = planRepo.observeSlotsForDay(s.date).first()
+            val quickSlot = daySlots.firstOrNull { it.slotType == "QUICK" }?.id
+                ?: planRepo.addSlot(s.date, "QUICK")
+            planRepo.addItem(
+                de.healthforge.data.db.entities.MealPlanItemEntity(
+                    slotId = quickSlot,
+                    sourceType = IntakeSourceType.INGREDIENT,
+                    sourceId = dto.id.toString(),
+                    amount = grams,
+                    snapshotName = dto.name_de,
                     snapshotKcalPer100g = dto.energy_kcal_per_100g,
                     snapshotProteinPer100g = dto.protein_g_per_100g,
                     snapshotCarbsPer100g = dto.carbs_g_per_100g,
@@ -306,6 +366,16 @@ class HomeViewModel @Inject constructor(
                     snapshotFatPer100g = item.supplement.fatPerDose,
                 )
             )
+        }
+    }
+
+    /**
+     * REQ-HOME-PLAN-001: "GEGESSEN" — marks a plan slot as consumed (creates
+     * IntakeEntry from all slot items + sets slot.consumed=true).
+     */
+    fun markAsEaten(slotId: Long) {
+        viewModelScope.launch {
+            planRepo.markConsumed(slotId)
         }
     }
 

@@ -17,6 +17,9 @@ interface IntakeEntryDao {
     @Query("SELECT * FROM intake_entry WHERE dayDateIso = :day ORDER BY loggedAt DESC")
     fun observeForDay(day: String): Flow<List<IntakeEntryEntity>>
 
+    @Query("SELECT * FROM intake_entry WHERE dayDateIso BETWEEN :start AND :end ORDER BY dayDateIso ASC, loggedAt DESC")
+    fun observeForDateRange(start: String, end: String): Flow<List<IntakeEntryEntity>>
+
     @Query("SELECT * FROM intake_entry ORDER BY loggedAt DESC LIMIT :limit OFFSET :offset")
     fun observeRecent(limit: Int = 200, offset: Int = 0): Flow<List<IntakeEntryEntity>>
 

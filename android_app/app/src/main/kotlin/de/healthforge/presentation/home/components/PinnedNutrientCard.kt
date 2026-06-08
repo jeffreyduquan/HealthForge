@@ -324,6 +324,57 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
                 )
             }
         }
+        // REQ-HOME-TREND-001: 7-day mini sparkline
+        if (entry.trendValues.size >= 2) {
+            Sparkline(
+                values = entry.trendValues,
+                accent = accent,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .height(16.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun Sparkline(
+    values: List<Double>,
+    accent: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+) {
+    val lineColor = accent
+    val gridColor = lineColor.copy(alpha = 0.12f)
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val max = values.maxOrNull()?.coerceAtLeast(1.0) ?: return@Canvas
+        val min = values.minOrNull() ?: 0.0
+        val range = (max - min).coerceAtLeast(1.0)
+        val stepX = w / (values.size - 1).coerceAtLeast(1).toFloat()
+
+        // Grid line at y=0 (baseline)
+        val y0 = h - ((0.0 - min) / range * h).toFloat().coerceIn(0f, h)
+        drawLine(color = gridColor, start = androidx.compose.ui.geometry.Offset(0f, y0), end = androidx.compose.ui.geometry.Offset(w, y0), strokeWidth = 1f)
+
+        // Data line
+        val path = androidx.compose.ui.graphics.Path()
+        values.forEachIndexed { i, v ->
+            val x = i * stepX
+            val y = h - ((v - min) / range * h).toFloat().coerceIn(0f, h)
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        drawPath(path, color = lineColor, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+
+        // Fill under the line
+        val fillPath = androidx.compose.ui.graphics.Path()
+        fillPath.addPath(path)
+        val lastX = (values.size - 1) * stepX
+        fillPath.lineTo(lastX, h)
+        fillPath.lineTo(0f, h)
+        fillPath.close()
+        drawPath(fillPath, color = lineColor.copy(alpha = 0.10f))
     }
 }
 
@@ -360,6 +411,8 @@ data class PinnedNutrientEntry(
     val key: String,
     val current: Double,
     val targetPerDay: Double,
+    /** 7-day trend values for mini sparkline (REQ-HOME-TREND-001), newest last. */
+    val trendValues: List<Double> = emptyList(),
 )
 
 /** Formatiert klein/groß abhängig vom Range — kompakte Anzeige im Header. */

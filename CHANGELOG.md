@@ -5,7 +5,37 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## Bugfix: App-Crash beim Aufnehmen von Rezept-Fotos (2026-06-08)
+## Feature: Plan/Home nutzen echte Server-Rezept-DTOs statt lokaler Snapshots (2026-06-08)
+
+**Scope:** Bisher zeigten PlanScreen und HomeScreen RecipeCards mit selbstgebauten DTOs aus lokalen Room-Snapshots — ohne Bild, ohne Prep-Zeit, ohne Community-Stats. Neu: Beide Screens laden Rezept-Daten via `GET /v1/recipes/batch?ids=...` vom Server und rendern die echten `RecipeListItemDto` in `RecipeCard` — identisch zur Rezepte-Ansicht.
+
+**Backend:**
+- `RecipeService.kt`: Neue `batchItems(ids: List<String>)` — fetched `RecipeListItemDto` per UUID-Liste
+- `RecipeController.kt`: `GET /v1/recipes/batch?ids=...`
+- `RecipeRepository.kt`: BrowseRepo `browseIds()` — native SQL mit `group_recipes`-Tabellenname
+
+**Android:**
+- `RecipeApi.kt`: `@GET("v1/recipes/batch") suspend fun batch(@Query("ids") ids: List<String>)`
+- `RecipeRepository.kt`: Neue `suspend fun batch(ids)` — leer-Shortcut + API-Call
+- `PlanViewModel.kt`: `_recipeDtos`-Flow, batch-fetch via `flatMapLatest` bei Item-Änderung
+- `PlanScreen.kt`: `SlotCard` bekommt `recipeDtos: Map` — Lookup Server-DTO → Fallback Snapshot
+- `HomeViewModel.kt`: `RecipeRepository` injected, batch-fetch via `flatMapLatest` bei Entry-Änderung
+- `HomeScreen.kt`: `IntakeRow` bekommt `recipeDtos: Map` — Lookup Server-DTO → Fallback Snapshot
+
+**Touched Docs:**
+- `CHANGELOG.md` — dieser Eintrag
+
+**Untouched (begründet):**
+- `docs/Architecture.md` — Batch-Endpunkt ist REST-Optimierung, kein Architekturwechsel. `RecipeCard`-Reuse folgt bestehender Component-Architektur.
+- `docs/ReqSpec.md` — REQ-INTAKE-003 (Snapshot-Resilienz) bleibt intakt: Snapshots werden weiterhin geschrieben, Server-DTOs nur für Display-Fallback. REQ-PLAN-003 (lokale Plan-Daten) unverändert. REQ-HOME-004 (heutige Einträge) unverändert.
+- `docs/UsabilityMap.md` — Richer-Cards innerhalb bestehender §3 (Home) / §4 (Plan) Specs.
+- `docs/GUI.md` — Keine visuellen Design-Änderungen.
+- `docs/SprintPlan.md` / `docs/TraceabilityMatrix.md` — Implementation-Detail, kein neues REQ-ID.
+- `docs/TestStrategy.md` / `docs/BattleTestPlan.md` — Kein neues Testverfahren.
+
+**Verifikation:**
+- Server: `bootJar` BUILD SUCCESSFUL
+- Android: `assembleDebug` BUILD SUCCESSFUL
 
 **Scope:** Nachdem der Kamera-Button durch das `<queries>`-Fix wieder sichtbar war, crashte die App beim Antippen von "Foto aufnehmen". Ursache: `cameraLauncher.launch(uri)` warf auf manchen Geräten `ActivityNotFoundException` oder `SecurityException` – der zuvor entfernte silent try-catch fehlte, und ohne Fehlerbehandlung stürzte die App ab.
 
