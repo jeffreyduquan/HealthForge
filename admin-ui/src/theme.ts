@@ -122,13 +122,25 @@ export const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,0.08)' },
-          '&.Mui-focused': { backgroundColor: 'rgba(255,255,255,0.08)' },
+          backgroundColor: '#141A26',
+          '&:hover': { backgroundColor: '#1A2235' },
+          '&.Mui-focused': {
+            backgroundColor: '#1A2235',
+            // focus border on notchedOutline handled below
+          },
+          // Focus border color for outlined variant
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#4DD0E1',
+            borderWidth: 2,
+          } as any,
         },
         input: {
           color: '#F5F7FA',
           '&::placeholder': { color: 'rgba(245,247,250,0.40)', opacity: 1 },
+          '&:-webkit-autofill': {
+            WebkitBoxShadow: '0 0 0 100px #141A26 inset',
+            WebkitTextFillColor: '#F5F7FA',
+          },
         },
         notchedOutline: {
           borderColor: 'rgba(255,255,255,0.15)',
@@ -159,6 +171,21 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           color: '#F5F7FA',
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          background: '#141A26',
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiDialogContentText: {
+      styleOverrides: {
+        root: {
+          color: 'rgba(245,247,250,0.80)',
         },
       },
     },

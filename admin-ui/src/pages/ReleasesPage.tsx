@@ -151,7 +151,7 @@ export default function ReleasesPage() {
                   </Box>
                 </Stack>
                 {r.changelog && (
-                  <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 2, whiteSpace: 'pre-wrap' }}>
+                  <Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, whiteSpace: 'pre-wrap' }}>
                     <Typography variant="body2" fontWeight={600} gutterBottom>
                       Changelog
                     </Typography>
