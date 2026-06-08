@@ -126,7 +126,7 @@ class AdminReleaseController(
     }
 
     @GetMapping("/{id}/download")
-    fun downloadUrl(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun downloadUrl(@PathVariable id: UUID): Map<String, String> {
         val release = repo.findById(id).orElseThrow {
             ApiException(HttpStatus.NOT_FOUND, "RELEASE_NOT_FOUND", "Release nicht gefunden")
         }
@@ -138,9 +138,10 @@ class AdminReleaseController(
                 .expiry(3600)
                 .build()
         )
-        return ResponseEntity.status(HttpStatus.FOUND)
-            .header(HttpHeaders.LOCATION, fixMinioUrl(internalUrl))
-            .build()
+        return mapOf(
+            "url" to fixMinioUrl(internalUrl),
+            "filename" to release.filename,
+        )
     }
 
     /** Generates a one-time download link for a release (used instead of invite codes). */

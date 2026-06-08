@@ -101,14 +101,8 @@ export default function ReleasesPage() {
   const downloadM = useMutation({
     mutationFn: (id: string) => getReleaseDownloadUrl(id),
     onSuccess: (data) => {
-      // Zuverlässiger Download via temporärem Anchor statt window.open (Popup-Blocker)
-      const a = document.createElement('a');
-      a.href = data.url;
-      a.download = data.filename;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      // Presigned-URL im neuen Tab öffnen – der Browser lädt die APK direkt
+      window.open(data.url, '_blank');
     },
     onError: () => setSnack('Download fehlgeschlagen'),
   });
