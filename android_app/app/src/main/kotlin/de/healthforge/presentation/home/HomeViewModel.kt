@@ -69,6 +69,7 @@ data class HomeState(
     val entries: List<IntakeEntryEntity> = emptyList(),
     val plannedMeals: List<PlannedMealInfo> = emptyList(),
     val trendTotals: Map<String, DayNutrientTotals> = emptyMap(),
+    val waterTrend: Map<String, Int> = emptyMap(),
     val waterMl: Int = 0,
     /**
      * P7.S3 / REQ-HOME-WATER-BAR-001 — lineares Tages-Soll bis zur aktuellen
@@ -192,6 +193,14 @@ class HomeViewModel @Inject constructor(
                 intakeRepo.observeTotalsForDateRange(day.minusDays(6), day)
             }
             .onEach { trend -> _state.value = _state.value.copy(trendTotals = trend) }
+            .launchIn(viewModelScope)
+
+        // REQ-HOME-TREND-001: 7-day water sparkline
+        dateFlow
+            .flatMapLatest { day ->
+                waterRepo.observeSumForDateRange(day.minusDays(6), day)
+            }
+            .onEach { wTrend -> _state.value = _state.value.copy(waterTrend = wTrend) }
             .launchIn(viewModelScope)
 
         // Supplement-Checklist: today's enabled reminders + which were taken already.

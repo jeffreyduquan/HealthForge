@@ -54,6 +54,7 @@ import de.healthforge.presentation.home.components.DateNavigator
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
 import de.healthforge.presentation.home.components.QuickAddDialog
+import de.healthforge.presentation.home.components.Sparkline
 import de.healthforge.presentation.home.components.SupplementChecklist
 import de.healthforge.presentation.home.components.WaterStageSlider
 import de.healthforge.presentation.theme.AmbientBackdrop
@@ -123,18 +124,26 @@ fun HomeScreen(
                     },
                     trailingSlot = if (s.pinnedKeys.contains("water")) {
                         {
-                            // P7.S3a v2 / REQ-HOME-WATER-BAR-001 \u2014 Stufen-Slider als
-                            // letzte Pin-Zeile. Range 0..goal (0\u2013100\u00a0% der aktuellen
-                            // Stufe), 50-ml-Steps, eigene Farbe pro Stufe 0..9,
-                            // Drag-Through-Zero entlocked Stufe-1.
-                            WaterStageSlider(
-                                currentMl = s.waterMl,
-                                ghostMl = s.waterGhostMl,
-                                goalMl = s.targets.waterMl,
-                                reminderEnabled = s.waterReminderEnabled,
-                                onCommit = vm::setWaterMl,
-                                onToggleReminder = vm::setWaterReminderEnabled,
-                            )
+                            val waterTrendVals = s.waterTrend.entries.sortedBy { it.key }.map { it.value.toDouble() }
+                            Column {
+                                // P7.S3a v2 / REQ-HOME-WATER-BAR-001 — Stufen-Slider
+                                WaterStageSlider(
+                                    currentMl = s.waterMl,
+                                    ghostMl = s.waterGhostMl,
+                                    goalMl = s.targets.waterMl,
+                                    reminderEnabled = s.waterReminderEnabled,
+                                    onCommit = vm::setWaterMl,
+                                    onToggleReminder = vm::setWaterReminderEnabled,
+                                )
+                                // REQ-HOME-TREND-001: 7-day water sparkline
+                                if (waterTrendVals.size >= 2) {
+                                    Sparkline(
+                                        values = waterTrendVals,
+                                        accent = hm.ambientCyan,
+                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(14.dp),
+                                    )
+                                }
+                            }
                         }
                     } else null,
                     pinnedKeys = s.pinnedKeys,

@@ -339,7 +339,7 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
 }
 
 @Composable
-private fun Sparkline(
+fun Sparkline(
     values: List<Double>,
     accent: androidx.compose.ui.graphics.Color,
     modifier: Modifier = Modifier,
