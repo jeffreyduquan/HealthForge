@@ -119,6 +119,49 @@ export const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.08)' },
+          '&.Mui-focused': { backgroundColor: 'rgba(255,255,255,0.08)' },
+        },
+        input: {
+          color: '#F5F7FA',
+          '&::placeholder': { color: 'rgba(245,247,250,0.40)', opacity: 1 },
+        },
+        notchedOutline: {
+          borderColor: 'rgba(255,255,255,0.15)',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: 'rgba(245,247,250,0.60)',
+          '&.Mui-focused': { color: '#4DD0E1' },
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          color: '#F5F7FA',
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: { color: 'rgba(245,247,250,0.60)' },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: '#F5F7FA',
+        },
+      },
+    },
   },
 });
 
