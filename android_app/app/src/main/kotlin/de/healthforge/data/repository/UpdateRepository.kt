@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.core.content.FileProvider
 import de.healthforge.BuildConfig
 import de.healthforge.data.network.LatestReleaseDto
 import de.healthforge.data.network.ReleaseApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -45,36 +48,40 @@ class UpdateRepository @Inject constructor(
     }
 
     /**
-     * Downloads the APK directly and immediately opens the Package Installer.
+     * Downloads the APK on IO dispatcher and opens the Package Installer.
      *
      * @return the APK file (already saved to cache)
      */
-    fun downloadAndInstall(ctx: Context, release: LatestReleaseDto): Result<File> = runCatching {
-        val downloadUrl = release.downloadUrl
-            ?: throw IllegalStateException("No downloadUrl in release $release.version")
+    suspend fun downloadAndInstall(ctx: Context, release: LatestReleaseDto): Result<File> = withContext(Dispatchers.IO) {
+        runCatching {
+            val downloadUrl = release.downloadUrl
+                ?: throw IllegalStateException("No downloadUrl in release $release.version")
 
-        // Download to cache dir (camera/ subdir already registered in file_paths.xml)
-        val updateDir = File(ctx.cacheDir, "camera")
-        updateDir.mkdirs()
-        val apkFile = File(updateDir, "HealthForge-${release.version}.apk")
+            // Download to cache dir
+            val updateDir = File(ctx.cacheDir, "camera")
+            updateDir.mkdirs()
+            val apkFile = File(updateDir, "HealthForge-${release.version}.apk")
 
-        val request = Request.Builder().url(downloadUrl).build()
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) throw RuntimeException("Download failed: HTTP ${response.code}")
+            val request = Request.Builder().url(downloadUrl).build()
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) throw RuntimeException("Download failed: HTTP ${response.code}")
 
-        response.body?.byteStream()?.use { input ->
-            FileOutputStream(apkFile).use { output ->
-                input.copyTo(output)
+            response.body?.byteStream()?.use { input ->
+                FileOutputStream(apkFile).use { output ->
+                    input.copyTo(output)
+                }
+            } ?: throw RuntimeException("Empty response body")
+
+            // Install on main thread
+            withContext(Dispatchers.Main) {
+                installApk(ctx, apkFile)
             }
-        } ?: throw RuntimeException("Empty response body")
-
-        // Install immediately
-        installApk(ctx, apkFile)
-        apkFile
+            apkFile
+        }
     }
 
     /**
-     * Opens the Package Installer for the given APK file.
+     * Opens the Package Installer for the given APK file via FileProvider URI.
      */
     private fun installApk(ctx: Context, apkFile: File) {
         val uri: Uri = FileProvider.getUriForFile(
@@ -87,7 +94,6 @@ class UpdateRepository @Inject constructor(
             setDataAndType(uri, "application/vnd.android.package-archive")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
         ctx.startActivity(intent)
