@@ -98,9 +98,9 @@ fun RecipeCreateWizardScreen(
     }
     // Kamera-Launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
-        if (success && cameraPhotoUri != null) {
-            vm.pickImage(ctx, cameraPhotoUri!!)
-        } else if (!success) {
+        if (success) {
+            cameraPhotoUri?.let { uri -> vm.pickImage(ctx, uri) }
+        } else {
             vm.setError("Kamera wurde abgebrochen oder Foto konnte nicht gespeichert werden")
         }
     }
@@ -189,7 +189,15 @@ fun RecipeCreateWizardScreen(
             onCameraClick = { uri ->
                 showPhotoDialog = false
                 cameraPhotoUri = uri
-                cameraLauncher.launch(uri)
+                try {
+                    cameraLauncher.launch(uri)
+                } catch (e: android.content.ActivityNotFoundException) {
+                    vm.setError("Keine Kamera-App gefunden")
+                } catch (e: SecurityException) {
+                    vm.setError("Kamerazugriff verweigert – bitte Berechtigung in den Einstellungen erlauben")
+                } catch (e: Exception) {
+                    vm.setError("Kamera konnte nicht gestartet werden: ${e.message}")
+                }
             },
             onDismiss = { showPhotoDialog = false },
         )

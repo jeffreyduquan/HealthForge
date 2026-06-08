@@ -5,6 +5,26 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: App-Crash beim Aufnehmen von Rezept-Fotos (2026-06-08)
+
+**Scope:** Nachdem der Kamera-Button durch das `<queries>`-Fix wieder sichtbar war, crashte die App beim Antippen von "Foto aufnehmen". Ursache: `cameraLauncher.launch(uri)` warf auf manchen Geräten `ActivityNotFoundException` oder `SecurityException` – der zuvor entfernte silent try-catch fehlte, und ohne Fehlerbehandlung stürzte die App ab.
+
+**Fix:**
+- `RecipeEditScreen.kt` + `RecipeCreateWizardScreen.kt`:
+  - `cameraLauncher.launch(uri)` mit try-catch umschlossen: `ActivityNotFoundException` → "Keine Kamera-App gefunden", `SecurityException` → "Kamerazugriff verweigert", alle anderen → Fehlermeldung mit `e.message`
+  - `cameraPhotoUri!!` durch `cameraPhotoUri?.let { uri -> … }` ersetzt – vermeidet NPE bei `rememberSaveable`-Wiederherstellung
+  - Erfolgs-Check vereinfacht: `if (success)` statt `if (success && cameraPhotoUri != null)` – die `?.let`-Kette deckt beides ab
+
+**Touched Docs:** Keine (reiner Bugfix, keine Architektur-/Req-Änderung)
+
+**Touched Code:**
+- MOD `RecipeEditScreen.kt` — try-catch um `launch()` + `?.let` statt `!!`
+- MOD `RecipeCreateWizardScreen.kt` — try-catch um `launch()` + `?.let` statt `!!`
+
+**Verifikation:** `:app:assembleDebug` BUILD SUCCESSFUL.
+
+---
+
 ## Feature: Auto-Replace alter APK-Releases beim Upload (2026-06-08)
 
 **Scope:** Bisher sammelten sich beim CI-Upload oder manuellen Upload alte APK-Releases an – es gab kein automatisches Aufräumen. Neu: Beim Hochladen einer neuen APK wird die vorherige automatisch aus MinIO + DB gelöscht. Es existiert immer nur **ein** aktueller Release.
