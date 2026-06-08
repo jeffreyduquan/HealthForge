@@ -64,6 +64,18 @@ class RecipeController(
         return service.detail(id, p.userId)
     }
 
+    /** Rezept einer Gruppe zuweisen (only owner). */
+    @PostMapping("/{id}/assign-group")
+    fun assignToGroup(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @PathVariable id: UUID,
+        @RequestParam("groupId") groupId: UUID,
+    ): ResponseEntity<Void> {
+        val p = require(principal)
+        service.assignToGroup(id, groupId, p.userId)
+        return ResponseEntity.noContent().build()
+    }
+
     @PostMapping
     fun create(
         @AuthenticationPrincipal principal: AuthPrincipal?,

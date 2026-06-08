@@ -155,6 +155,9 @@ interface RecipeApi {
     @DELETE("v1/recipes/{id}")
     suspend fun delete(@Path("id") id: String)
 
+    @POST("v1/recipes/{id}/assign-group")
+    suspend fun assignToGroup(@Path("id") id: String, @Query("groupId") groupId: String)
+
     @POST("v1/recipes/{id}/like")
     suspend fun like(@Path("id") id: String)
 

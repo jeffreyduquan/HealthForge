@@ -51,6 +51,10 @@ class RecipeRepository @Inject constructor(
 
     suspend fun delete(id: String): Result<Unit> = runCatching { api.delete(id) }
 
+    suspend fun assignToGroup(id: String, groupId: String): Result<Unit> = runCatching {
+        api.assignToGroup(id, groupId)
+    }
+
     suspend fun like(id: String): Result<Unit> = runCatching { api.like(id) }
 
     suspend fun unlike(id: String): Result<Unit> = runCatching { api.unlike(id) }

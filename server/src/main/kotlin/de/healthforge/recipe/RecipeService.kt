@@ -197,6 +197,23 @@ class RecipeService(
         recipeRepo.save(existing)
     }
 
+    /** Assign an existing recipe to a group (sets visibility=GROUP + groupId). Only the recipe owner may do this. */
+    @Transactional
+    fun assignToGroup(id: UUID, groupId: UUID, callerId: UUID) {
+        val existing = recipeRepo.findById(id).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND, "RECIPE_NOT_FOUND", "Recipe $id not found")
+        }
+        if (existing.authorId != callerId) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_OWNER", "not the recipe owner")
+        }
+        if (!groupService.isMember(callerId, groupId)) {
+            throw ApiException(HttpStatus.FORBIDDEN, "NOT_GROUP_MEMBER", "caller is not a member of the target group")
+        }
+        existing.visibility = RecipeVisibility.GROUP.name
+        existing.groupId = groupId
+        recipeRepo.save(existing)
+    }
+
     // ---------- Likes ----------
 
     @Transactional

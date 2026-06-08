@@ -20,6 +20,7 @@ data class GroupDetailUiState(
     val group: GroupSummaryDto? = null,
     val members: List<GroupMemberDto> = emptyList(),
     val recipes: List<RecipeListItemDto> = emptyList(),
+    val availableRecipes: List<RecipeListItemDto>? = null, // null = dialog closed
     val isLoading: Boolean = true,
     val message: String? = null,
     val leftOrRemoved: Boolean = false,
@@ -116,6 +117,35 @@ class GroupDetailViewModel @Inject constructor(
             )
         }
     }
+
+    /** Dialog oeffnen: eigene Rezepte laden, die der Gruppe hinzugefuegt werden koennen. */
+    fun openAddRecipeDialog() {
+        viewModelScope.launch {
+            val res = recipeRepo.browse(scope = "MINE", limit = 50)
+            val existingIds = _state.value.recipes.map { it.id }.toSet()
+            _state.update {
+                it.copy(
+                    availableRecipes = res.getOrNull()?.filter { r -> r.id !in existingIds && r.visibility != "GROUP" }
+                        ?: emptyList(),
+                )
+            }
+        }
+    }
+
+    /** Ein Rezept der Gruppe zuweisen (visibility=GROUP + groupId setzen). */
+    fun addRecipeToGroup(recipeId: String) {
+        viewModelScope.launch {
+            recipeRepo.assignToGroup(recipeId, groupId).fold(
+                onSuccess = {
+                    _state.update { it.copy(message = "Rezept zur Gruppe hinzugefügt") }
+                    load()
+                },
+                onFailure = { e -> _state.update { it.copy(message = e.message ?: "Fehler") } },
+            )
+        }
+    }
+
+    fun closeAddRecipeDialog() { _state.update { it.copy(availableRecipes = null) } }
 
     /** OWNER/ADMIN: Setzt die Rolle eines Mitglieds (z.B. CONTRIBUTOR ↔ MEMBER). */
     fun setMemberRole(userId: String, role: String) {
