@@ -412,7 +412,8 @@ class HomeViewModel @Inject constructor(
     /** Delete a planned slot + all its items + associated intake entries. */
     fun deletePlannedSlot(slotId: Long) {
         viewModelScope.launch {
-            planRepo.deleteSlot(slotId)
+            runCatching { planRepo.deleteSlot(slotId) }
+                .onFailure { _state.value = _state.value.copy(error = "Fehler beim Löschen: ${it.message}") }
         }
     }
 

@@ -167,7 +167,13 @@ fun HomeScreen(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Both planned meals and eaten entries as full RecipeCards
+                    // Build set of source keys already shown as consumed planned items
+                    val consumedKeys = remember(s.plannedMeals) {
+                        s.plannedMeals.filter { it.slotConsumed }
+                            .map { it.item.sourceType to it.item.sourceId }
+                            .toSet()
+                    }
+                    // Planned meals with toggle (consumed + not consumed)
                     s.plannedMeals.forEach { planned ->
                         HomeRecipeCard(
                             planned = planned,
@@ -179,7 +185,8 @@ fun HomeScreen(
                             onDelete = { vm.deletePlannedSlot(planned.slotId) },
                         )
                     }
-                    s.entries.take(5).forEach { e ->
+                    // Intake entries not already shown by planned meals
+                    s.entries.take(5).filter { (it.sourceType to it.sourceId) !in consumedKeys }.forEach { e ->
                         HomeRecipeCard(
                             intakeEntry = e,
                             recipeDtos = s.recipeDtos,
@@ -299,7 +306,7 @@ private fun HomeRecipeCard(
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.StartToEnd) {
-                onDelete()
+                try { onDelete() } catch (_: Exception) { }
                 true
             } else false
         }
