@@ -17,14 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -357,27 +355,28 @@ private fun GegessenToggle(isConsumed: Boolean, onToggle: () -> Unit) {
     val hm = LocalHmTokens.current
     val sem = LocalSemanticColors.current
     val shape = RoundedCornerShape(10.dp)
-    val fixedWidth = Modifier.widthIn(min = 72.dp)
+    // EXACT fixed width prevents SwipeToDismissBox reset on recomposition
+    val fixedMod = Modifier.width(80.dp).clip(shape).clickable(onClick = onToggle)
+    val labelMod = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+
     if (isConsumed) {
         Row(
-            modifier = fixedWidth.clip(shape).background(sem.statusGood.copy(alpha = 0.15f))
-                .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape).clickable(onClick = onToggle),
+            modifier = fixedMod.background(sem.statusGood.copy(alpha = 0.15f))
+                .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(Icons.Filled.Check, "Nicht gegessen", tint = sem.statusGood,
-                modifier = Modifier.padding(start = 6.dp, top = 4.dp, bottom = 4.dp).size(14.dp))
-            Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = sem.statusGood, modifier = Modifier.padding(start = 1.dp, end = 6.dp, top = 4.dp, bottom = 4.dp))
+            Text("✓ Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = sem.statusGood, modifier = labelMod)
         }
     } else {
         Row(
-            modifier = fixedWidth.clip(shape).border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
-                .clickable(onClick = onToggle),
+            modifier = fixedMod.border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                color = hm.fgSecondary, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
+                color = hm.fgSecondary, modifier = labelMod)
         }
     }
 }

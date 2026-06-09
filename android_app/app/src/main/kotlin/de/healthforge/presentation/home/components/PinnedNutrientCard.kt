@@ -28,8 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -343,19 +348,17 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
 }
 
 /**
- * 7-day mini sparkline for a nutrient trend.
+ * 7-day mini sparkline with optional dotted level lines.
  *
- * P7.S4 4b — Level lines: When [stage] ≥ 1, dotted horizontal lines are drawn
- * at each stage boundary (1×[stageTarget], 2×[stageTarget], …) so the user can
- * see how daily values relate to the progress-bar levels.
+ * Y-axis always starts at 0. The top is `max(dataMax, stage * stageTarget)`
+ * so level lines for Lv 1..N are always visible. Dotted lines use the
+ * accent color at 35 % alpha with 2.5 px stroke and 8 px dash pattern.
  *
- * @param values 7 daily values (oldest first, newest last).
- * @param accent Color for the data line and fill.
- * @param stageTarget The goal value per day (e.g. 2100 kcal). Used to position
- *   level lines. `null` or ≤ 0 disables level lines.
- * @param stage Current stage (0-based). Level lines for Lv 1..stage are drawn,
- *   and the Y-axis extends to accommodate them so that higher-level lines are
- *   never clipped off-canvas.
+ * @param values Daily values (oldest first, newest last).
+ * @param accent Base color for line, fill, and level lines.
+ * @param stageTarget Daily goal value. Level lines spaced at multiples of this.
+ * @param stage Current consumption stage (0-based). Ensures Y-axis extends to
+ *   at least `stage * stageTarget`.
  */
 @Composable
 fun Sparkline(
@@ -366,64 +369,68 @@ fun Sparkline(
     stage: Int = 0,
 ) {
     val lineColor = accent
-    val gridColor = lineColor.copy(alpha = 0.12f)
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val dataMax = values.maxOrNull()?.coerceAtLeast(1.0) ?: return@Canvas
-        // P7.S4 4b rev5: Y-axis ALWAYS anchored at 0 so level lines are
-        // correctly positioned regardless of data range.
-        val min = 0.0
+        if (values.isEmpty()) return@Canvas
 
-        // Y-axis extends to the highest stage boundary so dotted level lines
-        // (Lv 1..stage) are never clipped off-canvas.
-        val effectiveTarget = stageTarget?.takeIf { it > 0.0 }
-        val effectiveStage = stage.coerceAtLeast(0)
-        val topBound = effectiveTarget?.let { t -> effectiveStage * t } ?: 0.0
-        val max = maxOf(dataMax, topBound)
-
-        val range = (max - min).coerceAtLeast(1.0)
+        // ── Scale ──
+        val dataMax = values.max()
+        val goal = stageTarget?.takeIf { it > 0.0 }
+        val stageBound = goal?.let { stage.coerceAtLeast(0) * it } ?: 0.0
+        val top = maxOf(dataMax, stageBound).coerceAtLeast(1.0)
+        val range = top // min is always 0
         val stepX = w / (values.size - 1).coerceAtLeast(1).toFloat()
 
-        // Grid line at y=0 (baseline)
-        val y0 = h - ((0.0 - min) / range * h).toFloat().coerceIn(0f, h)
-        drawLine(color = gridColor, start = androidx.compose.ui.geometry.Offset(0f, y0), end = androidx.compose.ui.geometry.Offset(w, y0), strokeWidth = 1f)
+        // Helper: value → canvas Y (0 = top, h = bottom)
+        fun y(v: Double) = (h * (1f - (v / range).toFloat().coerceIn(0f, 1f)))
 
-        // P7.S4 4b rev5: level lines drawn from 0 up to the actual Y-axis max,
-        // so they always match the visible range regardless of `stage` param.
-        if (effectiveTarget != null && max >= effectiveTarget) {
-            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 5f), 0f)
-            val numLevels = (max / effectiveTarget).toInt()
-            for (lv in 1..numLevels) {
-                val lvY = h - ((lv * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
-                if (kotlin.math.abs(lvY - y0) < 2f) continue
+        // ── Baseline ──
+        drawLine(
+            color = lineColor.copy(alpha = 0.12f),
+            start = Offset(0f, h),
+            end = Offset(w, h),
+            strokeWidth = 1f,
+        )
+
+        // ── Dotted level lines at Lv 1, Lv 2, … N ──
+        if (goal != null) {
+            val dash = PathEffect.dashPathEffect(floatArrayOf(8f, 5f), 0f)
+            val n = (top / goal).toInt()
+            for (lv in 1..n) {
+                val lvY = y(lv * goal)
+                if (lvY <= 0f || lvY >= h) continue
                 drawLine(
                     color = lineColor.copy(alpha = 0.35f),
-                    start = androidx.compose.ui.geometry.Offset(0f, lvY),
-                    end = androidx.compose.ui.geometry.Offset(w, lvY),
+                    start = Offset(0f, lvY),
+                    end = Offset(w, lvY),
                     strokeWidth = 2.5f,
-                    pathEffect = dashEffect,
+                    pathEffect = dash,
                 )
             }
         }
 
-        // Data line
-        val path = androidx.compose.ui.graphics.Path()
+        // ── Data line ──
+        val path = Path()
         values.forEachIndexed { i, v ->
-            val x = i * stepX
-            val y = h - ((v - min) / range * h).toFloat().coerceIn(0f, h)
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            val px = i * stepX
+            val py = y(v)
+            if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
         }
-        drawPath(path, color = lineColor, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+        drawPath(
+            path,
+            color = lineColor,
+            style = Stroke(width = 2f, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
 
-        // Fill under the line
-        val fillPath = androidx.compose.ui.graphics.Path()
-        fillPath.addPath(path)
-        val lastX = (values.size - 1) * stepX
-        fillPath.lineTo(lastX, h)
-        fillPath.lineTo(0f, h)
-        fillPath.close()
-        drawPath(fillPath, color = lineColor.copy(alpha = 0.10f))
+        // ── Fill ──
+        val fill = Path().apply {
+            addPath(path)
+            lineTo((values.size - 1) * stepX, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(fill, lineColor.copy(alpha = 0.10f))
     }
 }
 
