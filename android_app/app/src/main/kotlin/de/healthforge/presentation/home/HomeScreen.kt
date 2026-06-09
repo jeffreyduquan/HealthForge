@@ -142,13 +142,14 @@ fun HomeScreen(
                                 )
                                 // REQ-HOME-TREND-001: 7-day water sparkline — 18dp for level-line visibility
                                 if (waterTrendVals.size >= 2) {
-                                    val waterStage = kotlin.math.floor(s.waterMl.toDouble() / s.targets.waterMl.coerceAtLeast(1).toDouble()).toInt().coerceAtLeast(0)
+                                    val trendMax = waterTrendVals.max()
+                                    val waterStageByTrend = kotlin.math.floor(trendMax / s.targets.waterMl.coerceAtLeast(1).toDouble()).toInt().coerceAtLeast(0)
                                     Sparkline(
                                         values = waterTrendVals,
                                         accent = hm.ambientCyan,
                                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(18.dp),
                                         stageTarget = s.targets.waterMl.toDouble(),
-                                        stage = waterStage,
+                                        stage = waterStageByTrend,
                                     )
                                 }
                             }
