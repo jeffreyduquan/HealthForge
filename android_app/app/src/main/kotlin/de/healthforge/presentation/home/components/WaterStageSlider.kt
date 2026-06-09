@@ -158,7 +158,7 @@ fun WaterStageSlider(
             if (displayedStage >= 1) {
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "×${displayedStage + 1}",
+                    text = "Lv $displayedStage",
                     style = MaterialTheme.typography.labelSmall,
                     color = accent,
                     fontWeight = FontWeight.Bold,
