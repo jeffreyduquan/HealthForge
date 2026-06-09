@@ -140,16 +140,15 @@ fun HomeScreen(
                                     onCommit = vm::setWaterMl,
                                     onToggleReminder = vm::setWaterReminderEnabled,
                                 )
-                                // REQ-HOME-TREND-001: 7-day water sparkline — 18dp for level-line visibility
+                                // REQ-HOME-TREND-001: 7-day water sparkline — 22dp for level-line visibility
                                 if (waterTrendVals.size >= 2) {
-                                    val trendMax = waterTrendVals.max()
-                                    val waterStageByTrend = kotlin.math.floor(trendMax / s.targets.waterMl.coerceAtLeast(1).toDouble()).toInt().coerceAtLeast(0)
+                                    val waterStage = kotlin.math.floor(s.waterMl.toDouble() / s.targets.waterMl.coerceAtLeast(1).toDouble()).toInt().coerceAtLeast(0)
                                     Sparkline(
                                         values = waterTrendVals,
                                         accent = hm.ambientCyan,
-                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(18.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(22.dp),
                                         stageTarget = s.targets.waterMl.toDouble(),
-                                        stage = waterStageByTrend,
+                                        stage = waterStage,
                                     )
                                 }
                             }
