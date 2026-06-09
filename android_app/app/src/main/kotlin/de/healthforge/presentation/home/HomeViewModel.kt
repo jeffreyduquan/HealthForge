@@ -152,11 +152,19 @@ class HomeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        // Fetch real RecipeListItemDtos from server for recipe-type entries + planned items
+        // Fetch RecipeListItemDtos from server for BOTH intake entries AND planned items
         dateFlow
-            .flatMapLatest { day -> intakeRepo.observeForDay(day) }
-            .onEach { entries ->
-                val recipeIds = entries.filter { it.sourceType == IntakeSourceType.RECIPE }.map { it.sourceId }.distinct()
+            .flatMapLatest { day ->
+                combine(
+                    intakeRepo.observeForDay(day),
+                    planRepo.observeItemsForDay(day),
+                ) { entries, planItems ->
+                    val entryIds = entries.filter { it.sourceType == IntakeSourceType.RECIPE }.map { it.sourceId }
+                    val planIds = planItems.filter { it.sourceType == IntakeSourceType.RECIPE }.map { it.sourceId }
+                    (entryIds + planIds).distinct()
+                }
+            }
+            .onEach { recipeIds ->
                 if (recipeIds.isNotEmpty()) {
                     recipeRepo.batch(recipeIds).onSuccess { list ->
                         _state.value = _state.value.copy(recipeDtos = list.associateBy { it.id })

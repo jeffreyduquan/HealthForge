@@ -371,10 +371,12 @@ fun Sparkline(
         val w = size.width
         val h = size.height
         val dataMax = values.maxOrNull()?.coerceAtLeast(1.0) ?: return@Canvas
-        val min = values.minOrNull() ?: 0.0
+        // P7.S4 4b rev5: Y-axis ALWAYS anchored at 0 so level lines are
+        // correctly positioned regardless of data range.
+        val min = 0.0
 
-        // P7.S4 4b rev2: Y-axis extends to stage boundaries so level lines
-        // are never clipped, even when all data values are below the goal.
+        // Y-axis extends to the highest stage boundary so dotted level lines
+        // (Lv 1..stage) are never clipped off-canvas.
         val effectiveTarget = stageTarget?.takeIf { it > 0.0 }
         val effectiveStage = stage.coerceAtLeast(0)
         val topBound = effectiveTarget?.let { t -> effectiveStage * t } ?: 0.0
