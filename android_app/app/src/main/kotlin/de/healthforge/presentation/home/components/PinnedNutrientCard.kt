@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -324,7 +325,7 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
                 )
             }
         }
-        // REQ-HOME-TREND-001: 7-day mini sparkline
+        // REQ-HOME-TREND-001: 7-day mini sparkline with P7.S4 4b level lines
         if (entry.trendValues.size >= 2) {
             Sparkline(
                 values = entry.trendValues,
@@ -333,16 +334,33 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
                     .fillMaxWidth()
                     .padding(top = 4.dp)
                     .height(16.dp),
+                stageTarget = target,
+                stage = stage,
             )
         }
     }
 }
 
+/**
+ * 7-day mini sparkline for a nutrient trend.
+ *
+ * P7.S4 4b — Level lines: When [stage] ≥ 1, dotted horizontal lines are drawn
+ * at each stage boundary (1×[stageTarget], 2×[stageTarget], …) so the user can
+ * see how daily values relate to the progress-bar levels.
+ *
+ * @param values 7 daily values (oldest first, newest last).
+ * @param accent Color for the data line and fill.
+ * @param stageTarget The goal value per day (e.g. 2100 kcal). Used to position
+ *   level lines. `null` or ≤ 0 disables level lines.
+ * @param stage Current stage (0-based). Level lines 1..stage are drawn.
+ */
 @Composable
 fun Sparkline(
     values: List<Double>,
     accent: androidx.compose.ui.graphics.Color,
     modifier: Modifier = Modifier,
+    stageTarget: Double? = null,
+    stage: Int = 0,
 ) {
     val lineColor = accent
     val gridColor = lineColor.copy(alpha = 0.12f)
@@ -357,6 +375,25 @@ fun Sparkline(
         // Grid line at y=0 (baseline)
         val y0 = h - ((0.0 - min) / range * h).toFloat().coerceIn(0f, h)
         drawLine(color = gridColor, start = androidx.compose.ui.geometry.Offset(0f, y0), end = androidx.compose.ui.geometry.Offset(w, y0), strokeWidth = 1f)
+
+        // P7.S4 4b — dotted level lines at stage boundaries
+        val effectiveTarget = stageTarget?.takeIf { it > 0.0 }
+        val effectiveStage = stage.coerceAtLeast(0)
+        if (effectiveTarget != null && effectiveStage >= 1) {
+            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
+            for (lvl in 1..effectiveStage) {
+                val lvlY = h - ((lvl * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
+                // Skip if the level line would overlap with the baseline
+                if (kotlin.math.abs(lvlY - y0) < 2f) continue
+                drawLine(
+                    color = lineColor.copy(alpha = 0.18f),
+                    start = androidx.compose.ui.geometry.Offset(0f, lvlY),
+                    end = androidx.compose.ui.geometry.Offset(w, lvlY),
+                    strokeWidth = 0.8f,
+                    pathEffect = dashEffect,
+                )
+            }
+        }
 
         // Data line
         val path = androidx.compose.ui.graphics.Path()

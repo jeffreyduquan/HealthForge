@@ -5,6 +5,48 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Feature: P7.S4 4b — Sparkline-Level-Lines & Recipe-Card-Unification (2026-06-09)
+
+**Scope:** Sparklines zeigen jetzt gestrichelte Level-Linien pro Progress-Bar-Stufe. RecipeCards werden nur noch mit gecachten Server-DTOs gerendert — ohne Fallback-DTOs ohne Bild/Beschreibung. GEGESSEN-Toggle ist ein integrierter Inline-Chip statt GradientFab. Quick-Add-FAB von 56dp auf 44dp verkleinert.
+
+**Änderungen:**
+
+**UI — PinnedNutrientCard (Sparkline):**
+- `Sparkline`: Neue Parameter `stageTarget: Double?` und `stage: Int`
+- Bei `stage ≥ 1`: gestrichelte horizontale Linien (`PathEffect.dashPathEffect`) an jedem Stufen-Übergang (1×goal, 2×goal, …)
+- `PinnedNutrientRow`: übergibt `target` und `stage` an `Sparkline`
+- Wasser-Sparkline in `HomeScreen`: berechnet Wasser-Stufe und übergibt `stageTarget` + `stage`
+
+**UI — HomeScreen (Recipe Cards):**
+- `HomeRecipeCard`: Aufgesplittet in drei Pfade:
+  - Server-DTO verfügbar → `SwipeableRecipeCard` mit echter `RecipeCard`
+  - Kein DTO (geplant) → `CompactPlannedRow` (nur Text, kein Fallback-RecipeCard)
+  - Kein DTO (Intake) → `CompactIntakeRow` (nur Text + Zeit)
+- NEU: `SwipeableRecipeCard` — Wrapper für RecipeCard mit Swipe-to-Delete
+- NEU: `InlineToggleChip` — ersetzt GradientFab für GEGESSEN-Toggle:
+  - Nicht gegessen: accent-gradient pill mit "✓ Gegessen"-Label
+  - Gegessen: outlined ✗ IconButton (Undo)
+- NEU: `CompactPlannedRow` / `CompactIntakeRow` — schlanke Text-Zeilen für Einträge ohne Server-DTO
+- `GradientFab` Quick-Add: Größe von 56dp → 44dp, Icon auf 20dp
+- ENTFERNT: `IntakeEntryEntity.toRecipeListItemDto()` — nicht mehr benötigt
+- ENTFERNT: Fallback-`RecipeListItemDto`-Konstruktion mit `image_key = null`
+
+**Touched Docs:**
+- `docs/ReqSpec.md` — MOD: REQ-HOME-TREND-001 (Level-Linien), REQ-HOME-PLAN-001 (Keine Fallback-Cards)
+- `CHANGELOG.md` — dieser Eintrag
+
+**Untouched (begründet):**
+- `docs/Architecture.md` — keine Architekturänderung (rein Presentation-Layer)
+- `docs/GUI.md` — keine neuen Design-Tokens; InlineToggleChip nutzt bestehende Tokens
+- `docs/UsabilityMap.md` — Layout-Struktur unverändert; neue Components sind Drop-in-Replacements
+- `docs/SprintPlan.md` / `docs/TraceabilityMatrix.md` — keine neuen REQ-IDs
+- `docs/TestStrategy.md` / `docs/BattleTestPlan.md` — kein neues Testverfahren
+
+**Verifikation:**
+- `:app:assembleDebug` BUILD SUCCESSFUL
+
+---
+
 ## Feature: Home-Neugestaltung — Plan-Links, GEGESSEN, 7d-Sparklines, Quick-Add-Plan-Sync (2026-06-08)
 
 **Scope:** Home wurde grundlegend überarbeitet: Header vereinfacht, geplante Mahlzeiten aus dem Plan-Tab mit GEGESSEN-Button, 7-Tage-Sparkline-Trend in der PinnedNutrientCard, Quick-Add erzeugt auch Plan-Einträge.
