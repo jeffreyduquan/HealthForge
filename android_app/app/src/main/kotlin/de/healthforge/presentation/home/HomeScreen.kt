@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -185,11 +186,10 @@ fun HomeScreen(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Build set of source keys already shown as consumed planned items
-                    val consumedKeys = remember(s.plannedMeals) {
-                        s.plannedMeals.filter { it.slotConsumed }
-                            .map { it.item.sourceType to it.item.sourceId }
-                            .toSet()
+                    // Build set of ALL planned meal source keys (consumed + not consumed)
+                    // to prevent any duplicate display when an intake entry also exists.
+                    val allPlannedKeys = remember(s.plannedMeals) {
+                        s.plannedMeals.map { it.item.sourceType to it.item.sourceId }.toSet()
                     }
                     // Planned meals with toggle (consumed + not consumed)
                     s.plannedMeals.forEach { planned ->
@@ -204,8 +204,8 @@ fun HomeScreen(
                             onDelete = { vm.deletePlannedSlot(planned.slotId) },
                         )
                     }
-                    // Intake entries not already shown by planned meals
-                    s.entries.take(5).filter { (it.sourceType to it.sourceId) !in consumedKeys }.forEach { e ->
+                    // Intake entries not already shown by any planned meal (prevents duplicate flash)
+                    s.entries.take(5).filter { (it.sourceType to it.sourceId) !in allPlannedKeys }.forEach { e ->
                         HomeRecipeCard(
                             intakeEntry = e,
                             recipeDtos = s.recipeDtos,
@@ -357,9 +357,10 @@ private fun GegessenToggle(isConsumed: Boolean, onToggle: () -> Unit) {
     val hm = LocalHmTokens.current
     val sem = LocalSemanticColors.current
     val shape = RoundedCornerShape(10.dp)
+    val fixedWidth = Modifier.widthIn(min = 72.dp)
     if (isConsumed) {
         Row(
-            modifier = Modifier.clip(shape).background(sem.statusGood.copy(alpha = 0.15f))
+            modifier = fixedWidth.clip(shape).background(sem.statusGood.copy(alpha = 0.15f))
                 .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape).clickable(onClick = onToggle),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -369,10 +370,15 @@ private fun GegessenToggle(isConsumed: Boolean, onToggle: () -> Unit) {
                 color = sem.statusGood, modifier = Modifier.padding(start = 1.dp, end = 6.dp, top = 4.dp, bottom = 4.dp))
         }
     } else {
-        Box(
-            modifier = Modifier.clip(shape).border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
-                .clickable(onClick = onToggle).padding(horizontal = 10.dp, vertical = 6.dp),
-        ) { Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = hm.fgSecondary) }
+        Row(
+            modifier = fixedWidth.clip(shape).border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
+                .clickable(onClick = onToggle),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = hm.fgSecondary, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
+        }
     }
 }
 

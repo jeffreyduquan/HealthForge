@@ -389,10 +389,12 @@ fun Sparkline(
         val y0 = h - ((0.0 - min) / range * h).toFloat().coerceIn(0f, h)
         drawLine(color = gridColor, start = androidx.compose.ui.geometry.Offset(0f, y0), end = androidx.compose.ui.geometry.Offset(w, y0), strokeWidth = 1f)
 
-        // P7.S4 4b — dotted level lines at each stage boundary (Lv 1, Lv 2, …)
-        if (effectiveTarget != null && effectiveStage >= 1) {
+        // P7.S4 4b rev5: level lines drawn from 0 up to the actual Y-axis max,
+        // so they always match the visible range regardless of `stage` param.
+        if (effectiveTarget != null && max >= effectiveTarget) {
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 5f), 0f)
-            for (lv in 1..effectiveStage) {
+            val numLevels = (max / effectiveTarget).toInt()
+            for (lv in 1..numLevels) {
                 val lvY = h - ((lv * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
                 if (kotlin.math.abs(lvY - y0) < 2f) continue
                 drawLine(
