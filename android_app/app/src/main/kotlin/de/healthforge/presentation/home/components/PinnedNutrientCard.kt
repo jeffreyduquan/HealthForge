@@ -388,15 +388,15 @@ fun Sparkline(
 
         // P7.S4 4b — dotted level lines at each stage boundary (Lv 1, Lv 2, …)
         if (effectiveTarget != null && effectiveStage >= 1) {
-            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
+            val dashEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 5f), 0f)
             for (lv in 1..effectiveStage) {
                 val lvY = h - ((lv * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
                 if (kotlin.math.abs(lvY - y0) < 2f) continue
                 drawLine(
-                    color = lineColor.copy(alpha = 0.25f),
+                    color = lineColor.copy(alpha = 0.35f),
                     start = androidx.compose.ui.geometry.Offset(0f, lvY),
                     end = androidx.compose.ui.geometry.Offset(w, lvY),
-                    strokeWidth = 1.6f,
+                    strokeWidth = 2.5f,
                     pathEffect = dashEffect,
                 )
             }
