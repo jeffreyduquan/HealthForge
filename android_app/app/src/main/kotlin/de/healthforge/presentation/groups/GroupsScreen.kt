@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.network.GroupSummaryDto
+import de.healthforge.presentation.theme.GradientFab
+import de.healthforge.presentation.theme.LocalHmTokens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,8 +86,8 @@ fun GroupsScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreate = true }) {
-                Icon(Icons.Filled.Add, contentDescription = "Gruppe erstellen")
+            GradientFab(onClick = { showCreate = true }, size = 48.dp) {
+                Icon(Icons.Filled.Add, contentDescription = "Gruppe erstellen", tint = de.healthforge.presentation.theme.LocalHmTokens.current.fgPrimary)
             }
         },
     ) { padding ->

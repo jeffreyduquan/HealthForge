@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,9 +37,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,6 +72,7 @@ import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.SectionPill
 import de.healthforge.presentation.theme.SegmentedTabs
+import de.healthforge.presentation.theme.StatusOverUl
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -535,15 +540,9 @@ private fun SlotCard(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 items.forEach { item ->
                     val dto = recipeDtos[item.sourceId] ?: item.toRecipeListItemDto(slotType)
-                    RecipeCard(
-                        recipe = dto,
-                        onClick = { },
-                        trailingActions = {
-                            IconButton(onClick = { onDeleteItem(item.id) }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Item löschen", tint = hm.fgSecondary)
-                            }
-                        },
-                    )
+                    SwipeDeletePlanItem(onDelete = { onDeleteItem(item.id) }) {
+                        RecipeCard(recipe = dto, onClick = { })
+                    }
                 }
             }
             Row(modifier = Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -564,6 +563,36 @@ private fun SlotCard(
             }
         }
     }
+}
+
+/**
+ * Wraps a RecipeCard in right-swipe-to-delete for PlanScreen items.
+ * Kein X-Button — nur Swipe (konsistent mit HomeScreen).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeDeletePlanItem(
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.StartToEnd) {
+                try { onDelete() } catch (_: Exception) { }
+                true
+            } else false
+        }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.CenterStart) {
+                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
+            }
+        },
+        enableDismissFromEndToStart = false,
+        enableDismissFromStartToEnd = true,
+    ) { content() }
 }
 
 private fun MealPlanItemEntity.toRecipeListItemDto(slotType: String): RecipeListItemDto {

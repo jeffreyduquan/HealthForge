@@ -352,7 +352,9 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
  * @param accent Color for the data line and fill.
  * @param stageTarget The goal value per day (e.g. 2100 kcal). Used to position
  *   level lines. `null` or ≤ 0 disables level lines.
- * @param stage Current stage (0-based). Level lines 1..stage are drawn.
+ * @param stage Current stage (0-based). Level lines for Lv 1..stage are drawn,
+ *   and the Y-axis extends to accommodate them so that higher-level lines are
+ *   never clipped off-canvas.
  */
 @Composable
 fun Sparkline(
@@ -367,8 +369,16 @@ fun Sparkline(
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val max = values.maxOrNull()?.coerceAtLeast(1.0) ?: return@Canvas
+        val dataMax = values.maxOrNull()?.coerceAtLeast(1.0) ?: return@Canvas
         val min = values.minOrNull() ?: 0.0
+
+        // P7.S4 4b rev2: Y-axis extends to stage boundaries so level lines
+        // are never clipped, even when all data values are below the goal.
+        val effectiveTarget = stageTarget?.takeIf { it > 0.0 }
+        val effectiveStage = stage.coerceAtLeast(0)
+        val topBound = effectiveTarget?.let { t -> effectiveStage * t } ?: 0.0
+        val max = maxOf(dataMax, topBound)
+
         val range = (max - min).coerceAtLeast(1.0)
         val stepX = w / (values.size - 1).coerceAtLeast(1).toFloat()
 
@@ -376,20 +386,17 @@ fun Sparkline(
         val y0 = h - ((0.0 - min) / range * h).toFloat().coerceIn(0f, h)
         drawLine(color = gridColor, start = androidx.compose.ui.geometry.Offset(0f, y0), end = androidx.compose.ui.geometry.Offset(w, y0), strokeWidth = 1f)
 
-        // P7.S4 4b — dotted level lines at stage boundaries
-        val effectiveTarget = stageTarget?.takeIf { it > 0.0 }
-        val effectiveStage = stage.coerceAtLeast(0)
+        // P7.S4 4b — dotted level lines at each stage boundary (Lv 1, Lv 2, …)
         if (effectiveTarget != null && effectiveStage >= 1) {
             val dashEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
-            for (lvl in 1..effectiveStage) {
-                val lvlY = h - ((lvl * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
-                // Skip if the level line would overlap with the baseline
-                if (kotlin.math.abs(lvlY - y0) < 2f) continue
+            for (lv in 1..effectiveStage) {
+                val lvY = h - ((lv * effectiveTarget - min) / range * h).toFloat().coerceIn(0f, h)
+                if (kotlin.math.abs(lvY - y0) < 2f) continue
                 drawLine(
-                    color = lineColor.copy(alpha = 0.18f),
-                    start = androidx.compose.ui.geometry.Offset(0f, lvlY),
-                    end = androidx.compose.ui.geometry.Offset(w, lvlY),
-                    strokeWidth = 0.8f,
+                    color = lineColor.copy(alpha = 0.25f),
+                    start = androidx.compose.ui.geometry.Offset(0f, lvY),
+                    end = androidx.compose.ui.geometry.Offset(w, lvY),
+                    strokeWidth = 1.6f,
                     pathEffect = dashEffect,
                 )
             }

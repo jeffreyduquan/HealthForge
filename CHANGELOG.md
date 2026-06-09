@@ -5,40 +5,46 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## Feature: P7.S4 4b — Sparkline-Level-Lines & Recipe-Card-Unification (2026-06-09)
+## Feature: P7.S4 4b rev2 — Sparkline-Level-Lines, RecipeCard-Reuse, FAB-Consistency (2026-06-09)
 
-**Scope:** Sparklines zeigen jetzt gestrichelte Level-Linien pro Progress-Bar-Stufe. RecipeCards werden nur noch mit gecachten Server-DTOs gerendert — ohne Fallback-DTOs ohne Bild/Beschreibung. GEGESSEN-Toggle ist ein integrierter Inline-Chip statt GradientFab. Quick-Add-FAB von 56dp auf 44dp verkleinert.
+**Scope:** Sparkline-Y-Achse skaliert jetzt bis zur höchsten Stufe (nicht nur bis Daten-Maximum). Level-Linien dicker (1.6f statt 0.8f). HomeRecipeCard auf puren RecipeCard-Reuse vereinfacht — exakt identisch zu essen/rezepte. GEGESSEN-Toggle als dezenter grüner/outlined Chip ganz rechts. X-Buttons aus Home & Plan entfernt (nur Right-Swipe-Deletion). Alle + FABs auf GradientFab 48dp vereinheitlicht (Groups & Recipes umgestellt).
 
 **Änderungen:**
 
-**UI — PinnedNutrientCard (Sparkline):**
-- `Sparkline`: Neue Parameter `stageTarget: Double?` und `stage: Int`
-- Bei `stage ≥ 1`: gestrichelte horizontale Linien (`PathEffect.dashPathEffect`) an jedem Stufen-Übergang (1×goal, 2×goal, …)
-- `PinnedNutrientRow`: übergibt `target` und `stage` an `Sparkline`
-- Wasser-Sparkline in `HomeScreen`: berechnet Wasser-Stufe und übergibt `stageTarget` + `stage`
+**UI — PinnedNutrientCard (Sparkline-Level-Lines):**
+- Y-Achse erstreckt sich jetzt bis `max(dataMax, stage * stageTarget)` — Level-Linien werden nie abgeschnitten
+- Dotted-Line-Stroke von 0.8f → 1.6f (besser sichtbar)
+- Alpha von 0.18f → 0.25f
+- Kommentare auf "Lv 1, Lv 2"-Terminologie aktualisiert
 
-**UI — HomeScreen (Recipe Cards):**
-- `HomeRecipeCard`: Aufgesplittet in drei Pfade:
-  - Server-DTO verfügbar → `SwipeableRecipeCard` mit echter `RecipeCard`
-  - Kein DTO (geplant) → `CompactPlannedRow` (nur Text, kein Fallback-RecipeCard)
-  - Kein DTO (Intake) → `CompactIntakeRow` (nur Text + Zeit)
-- NEU: `SwipeableRecipeCard` — Wrapper für RecipeCard mit Swipe-to-Delete
-- NEU: `InlineToggleChip` — ersetzt GradientFab für GEGESSEN-Toggle:
-  - Nicht gegessen: accent-gradient pill mit "✓ Gegessen"-Label
-  - Gegessen: outlined ✗ IconButton (Undo)
-- NEU: `CompactPlannedRow` / `CompactIntakeRow` — schlanke Text-Zeilen für Einträge ohne Server-DTO
-- `GradientFab` Quick-Add: Größe von 56dp → 44dp, Icon auf 20dp
-- ENTFERNT: `IntakeEntryEntity.toRecipeListItemDto()` — nicht mehr benötigt
-- ENTFERNT: Fallback-`RecipeListItemDto`-Konstruktion mit `image_key = null`
+**UI — HomeScreen (RecipeCard-Reuse):**
+- `HomeRecipeCard`: radikal vereinfacht — bei Server-DTO purer `RecipeCard`-Reuse (exakt wie essen/rezepte)
+- ENTFERNT: `SwipeableRecipeCard`, `InlineToggleChip`, `CompactPlannedRow`, `CompactIntakeRow`
+- NEU: `SwipeDeleteWrapper` / `SwipeDeleteCompact` — generische Swipe-Container
+- NEU: `GegessenToggle` — dezenter Chip rechts:
+  - Gegessen: grüner Mini-Chip (✓ "Gegessen") via `sem.statusGood`
+  - Nicht gegessen: outlined "Gegessen"-Label
+- Kein X-Button auf Home-Cards — nur Right-Swipe
+
+**UI — PlanScreen (Swipe statt X):**
+- `SlotCard`: X-Button (`IconButton` mit `Icons.Filled.Close`) von Item-RecipeCards entfernt
+- NEU: `SwipeDeletePlanItem` — Right-Swipe-Deletion für Plan-Items
+- `Icons.Filled.Delete` importiert
+
+**UI — FAB-Consistency (alle + Buttons einheitlich):**
+- `GroupsScreen.kt`: `FloatingActionButton` → `GradientFab(size = 48.dp)` (war Standard-M3-FAB)
+- `RecipesScreen.kt`: `FloatingActionButton` → `GradientFab(size = 48.dp)` (war Standard-M3-FAB)
+- `HomeScreen.kt`: `GradientFab(size = 44.dp)` → auf 48.dp vereinheitlicht
+- Alle FABs jetzt `accentGradient` + `violetGlow` Shadow — konsistent
 
 **Touched Docs:**
-- `docs/ReqSpec.md` — MOD: REQ-HOME-TREND-001 (Level-Linien), REQ-HOME-PLAN-001 (Keine Fallback-Cards)
+- `docs/ReqSpec.md` — MOD: REQ-HOME-TREND-001 (Level-Linien), REQ-HOME-PLAN-001 (Reiner RecipeCard-Reuse)
 - `CHANGELOG.md` — dieser Eintrag
 
 **Untouched (begründet):**
 - `docs/Architecture.md` — keine Architekturänderung (rein Presentation-Layer)
-- `docs/GUI.md` — keine neuen Design-Tokens; InlineToggleChip nutzt bestehende Tokens
-- `docs/UsabilityMap.md` — Layout-Struktur unverändert; neue Components sind Drop-in-Replacements
+- `docs/GUI.md` — keine neuen Design-Tokens; GradientFab ist bestehende Komponente
+- `docs/UsabilityMap.md` — Layout-Struktur unverändert
 - `docs/SprintPlan.md` / `docs/TraceabilityMatrix.md` — keine neuen REQ-IDs
 - `docs/TestStrategy.md` / `docs/BattleTestPlan.md` — kein neues Testverfahren
 

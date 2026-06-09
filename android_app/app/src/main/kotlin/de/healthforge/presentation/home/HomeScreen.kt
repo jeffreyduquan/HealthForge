@@ -20,11 +20,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,6 +67,7 @@ import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.LocalHmTokens
+import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
 import de.healthforge.presentation.theme.StatusOverUl
@@ -223,14 +224,14 @@ fun HomeScreen(
             Spacer(Modifier.height(96.dp).navigationBarsPadding())
         }
 
-        // GradientFab overlay (REQ-HOME-003) — P7.S4 4b reduced from 56dp to 44dp
+        // GradientFab overlay (REQ-HOME-003) — P7.S4 4b rev2: 48dp konsistent mit allen Screens
         GradientFab(
             onClick = vm::openQuickAdd,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()
                 .padding(end = 24.dp, bottom = 24.dp),
-            size = 44.dp,
+            size = 48.dp,
             icon = { Icon(Icons.Filled.Add, contentDescription = "Hinzuf\u00fcgen", tint = hm.fgPrimary, modifier = Modifier.size(20.dp)) },
         )
 
@@ -281,23 +282,36 @@ private fun HomeRecipeCard(
         val serverDto = if (item.sourceType == IntakeSourceType.RECIPE) recipeDtos[item.sourceId] else null
 
         if (serverDto != null) {
-            // P7.S4 4b: Proper RecipeCard with integrated toggle — the ONLY card style
-            SwipeableRecipeCard(
-                dto = serverDto,
-                isConsumed = isConsumed,
-                onToggleEaten = onToggleEaten,
-                onDelete = onDelete,
-            )
+            // Pure RecipeCard (identisch zu essen/rezepte) + GEGESSEN-Toggle rechts
+            SwipeDeleteWrapper(onDelete = onDelete) {
+                RecipeCard(
+                    recipe = serverDto,
+                    onClick = { },
+                    trailingActions = {
+                        GegessenToggle(
+                            isConsumed = isConsumed,
+                            onToggle = onToggleEaten ?: {},
+                        )
+                    },
+                )
+            }
         } else {
-            // P7.S4 4b: No cached recipe DTO → compact row (NOT a RecipeCard without image/description)
-            CompactPlannedRow(
+            // Kein Server-DTO → kompakte Textzeile, kein RecipeCard
+            SwipeDeleteCompact(
                 name = item.snapshotName,
-                amount = item.amount,
-                sourceType = item.sourceType,
-                kcalPer100g = item.snapshotKcalPer100g,
-                isConsumed = isConsumed,
-                onToggleEaten = onToggleEaten,
+                desc = buildString {
+                    if (item.sourceType == IntakeSourceType.RECIPE) append("%.0f Portion(en)".format(item.amount))
+                    else append("%.0f g".format(item.amount))
+                    item.snapshotKcalPer100g?.let { kcal ->
+                        append(" · ${(kcal * item.amount / 100.0).toInt()} kcal")
+                    }
+                },
                 onDelete = onDelete,
+                trailing = {
+                    if (onToggleEaten != null) {
+                        GegessenToggle(isConsumed = isConsumed, onToggle = onToggleEaten)
+                    }
+                },
             )
         }
         return
@@ -313,22 +327,33 @@ private fun HomeRecipeCard(
         val serverDto = if (entry.sourceType == IntakeSourceType.RECIPE) recipeDtos[entry.sourceId] else null
 
         if (serverDto != null) {
-            // Proper RecipeCard for already-logged recipe entries
-            SwipeableRecipeCard(
-                dto = serverDto,
-                isConsumed = true,
-                onToggleEaten = null,
-                onDelete = onDelete,
-                timeLabel = timeLabel,
-            )
+            SwipeDeleteWrapper(onDelete = onDelete) {
+                RecipeCard(
+                    recipe = serverDto,
+                    onClick = { },
+                    trailingActions = {
+                        Text(
+                            timeLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = hm.fgTertiary,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    },
+                )
+            }
         } else {
-            // Compact row for logged non-recipe entries
-            CompactIntakeRow(
+            SwipeDeleteCompact(
                 name = entry.snapshotName,
-                portionGrams = entry.portionGrams,
-                kcalPer100g = entry.snapshotKcalPer100g,
-                timeLabel = timeLabel,
+                desc = buildString {
+                    append("${entry.portionGrams.toInt()} g")
+                    entry.snapshotKcalPer100g?.let { kcal ->
+                        append(" · ${(kcal * entry.portionGrams / 100.0).toInt()} kcal")
+                    }
+                },
                 onDelete = onDelete,
+                trailing = {
+                    Text(timeLabel, style = MaterialTheme.typography.labelSmall, color = hm.fgTertiary)
+                },
             )
         }
         return
@@ -336,21 +361,15 @@ private fun HomeRecipeCard(
 }
 
 /**
- * P7.S4 4b — RecipeCard with integrated toggle and swipe-to-delete.
- * The toggle button is an inline chip (not a separate GradientFab) for better
- * visual integration into the trailing-actions area.
+ * Wraps content in a right-swipe-to-delete container.
+ * Keine X-Buttons — nur Swipe (konsistent mit PlanScreen).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeableRecipeCard(
-    dto: RecipeListItemDto,
-    isConsumed: Boolean,
-    onToggleEaten: (() -> Unit)?,
+private fun SwipeDeleteWrapper(
     onDelete: () -> Unit,
-    timeLabel: String? = null,
+    content: @Composable () -> Unit,
 ) {
-    val hm = LocalHmTokens.current
-
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.StartToEnd) {
@@ -359,250 +378,128 @@ private fun SwipeableRecipeCard(
             } else false
         }
     )
-
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
+            Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.CenterStart) {
+                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
+            }
+        },
+        enableDismissFromEndToStart = false,
+        enableDismissFromStartToEnd = true,
+    ) { content() }
+}
+
+/**
+ * Compact text row for items without a cached recipe DTO (non-recipe items).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeDeleteCompact(
+    name: String,
+    desc: String,
+    onDelete: () -> Unit,
+    trailing: @Composable RowScope.() -> Unit = {},
+) {
+    val hm = LocalHmTokens.current
+    val shape = RoundedCornerShape(14.dp)
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.StartToEnd) {
+                try { onDelete() } catch (_: Exception) { }
+                true
+            } else false
+        }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.CenterStart) {
                 Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
             }
         },
         enableDismissFromEndToStart = false,
         enableDismissFromStartToEnd = true,
     ) {
-        RecipeCard(
-            recipe = dto,
-            onClick = { },
-            trailingActions = {
-                if (onToggleEaten != null) {
-                    InlineToggleChip(
-                        isConsumed = isConsumed,
-                        onToggle = onToggleEaten,
-                    )
-                }
-                if (timeLabel != null) {
-                    Text(
-                        timeLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = hm.fgTertiary,
-                        modifier = Modifier.padding(end = 4.dp),
-                    )
-                }
-            },
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(hm.cardSurface)
+                .border(1.dp, hm.cardBorder, shape)
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = hm.fgPrimary,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = hm.fgSecondary,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+            }
+            trailing()
+        }
     }
 }
 
 /**
- * P7.S4 4b — Inline toggle chip replacing the GradientFab for eaten/not-eaten.
- * Compact, better integrated into the card's trailing area.
- *
- * Not eaten: outlined pill with "✓ Gegessen" label
- * Eaten: filled accent pill with "✓" checkmark + subtle background
+ * GEGESSEN-Toggle — ganz rechts auf der RecipeCard.
+ * - Nicht gegessen: kleiner accent Pill-Button "Gegessen"
+ * - Gegessen:    kleiner ausgefüllter Check-Pill
  */
 @Composable
-private fun InlineToggleChip(
+private fun GegessenToggle(
     isConsumed: Boolean,
     onToggle: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    val shape = RoundedCornerShape(12.dp)
+    val sem = LocalSemanticColors.current
+    val shape = RoundedCornerShape(10.dp)
 
     if (isConsumed) {
-        // Already eaten — show subtle "undo" indicator
-        IconButton(onClick = onToggle, modifier = Modifier.size(32.dp)) {
-            Icon(
-                Icons.Outlined.Close,
-                contentDescription = "Nicht gegessen",
-                tint = hm.fgSecondary,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-    } else {
-        // Not eaten — compact "mark as eaten" chip
+        // Gegessen → grüner Mini-Chip
         Row(
             modifier = Modifier
                 .clip(shape)
-                .background(hm.accentGradient)
+                .background(sem.statusGood.copy(alpha = 0.15f))
+                .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape)
                 .clickable(onClick = onToggle),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                Icons.Outlined.Check,
-                contentDescription = "Als gegessen markieren",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(start = 10.dp, top = 5.dp, bottom = 5.dp)
-                    .size(16.dp),
+                Icons.Filled.Check,
+                contentDescription = "Als nicht gegessen markieren",
+                tint = sem.statusGood,
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp, bottom = 4.dp).size(14.dp),
             )
             Text(
-                text = "Gegessen",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),
-                color = Color.White,
-                modifier = Modifier.padding(start = 2.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+                "Gegessen",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = sem.statusGood,
+                modifier = Modifier.padding(start = 1.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
             )
         }
-    }
-}
-
-/**
- * P7.S4 4b — Compact row for planned meals without a cached recipe DTO.
- * Replaces the old fallback RecipeCard that had no image/description.
- */
-@Composable
-private fun CompactPlannedRow(
-    name: String,
-    amount: Double,
-    sourceType: IntakeSourceType,
-    kcalPer100g: Double?,
-    isConsumed: Boolean,
-    onToggleEaten: (() -> Unit)?,
-    onDelete: () -> Unit,
-) {
-    val hm = LocalHmTokens.current
-    val shape = RoundedCornerShape(14.dp)
-    val desc = buildString {
-        if (sourceType == IntakeSourceType.RECIPE) append("%.0f Portion(en)".format(amount))
-        else append("%.0f g".format(amount))
-        kcalPer100g?.let { kcal ->
-            val total = (kcal * amount / 100.0).toInt()
-            append(" · $total kcal")
-        }
-    }
-
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.StartToEnd) {
-                try { onDelete() } catch (_: Exception) { }
-                true
-            } else false
-        }
-    )
-
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
-            }
-        },
-        enableDismissFromEndToStart = false,
-        enableDismissFromStartToEnd = true,
-    ) {
-        Row(
+    } else {
+        // Nicht gegessen → dezent outlined
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .clip(shape)
-                .background(hm.cardSurface)
-                .border(1.dp, hm.cardBorder, shape)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
+                .clickable(onClick = onToggle)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = hm.fgPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = desc,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (onToggleEaten != null) {
-                InlineToggleChip(isConsumed = isConsumed, onToggle = onToggleEaten)
-            }
-        }
-    }
-}
-
-/**
- * P7.S4 4b — Compact row for logged intake entries without a cached recipe DTO.
- */
-@Composable
-private fun CompactIntakeRow(
-    name: String,
-    portionGrams: Double,
-    kcalPer100g: Double?,
-    timeLabel: String,
-    onDelete: () -> Unit,
-) {
-    val hm = LocalHmTokens.current
-    val shape = RoundedCornerShape(14.dp)
-    val kcal = kcalPer100g?.let { (it * portionGrams / 100.0).toInt() }
-    val desc = buildString {
-        append("${portionGrams.toInt()} g")
-        if (kcal != null) append(" · $kcal kcal")
-    }
-
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.StartToEnd) {
-                try { onDelete() } catch (_: Exception) { }
-                true
-            } else false
-        }
-    )
-
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
-            }
-        },
-        enableDismissFromEndToStart = false,
-        enableDismissFromStartToEnd = true,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(hm.cardSurface)
-                .border(1.dp, hm.cardBorder, shape)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = hm.fgPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = desc,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
             Text(
-                timeLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = hm.fgTertiary,
+                "Gegessen",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = hm.fgSecondary,
             )
         }
     }

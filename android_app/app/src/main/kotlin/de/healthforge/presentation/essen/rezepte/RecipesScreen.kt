@@ -29,7 +29,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
+import de.healthforge.presentation.theme.GradientFab
+import de.healthforge.presentation.theme.LocalHmTokens
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -60,8 +61,8 @@ fun RecipesScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreate) {
-                Icon(Icons.Filled.Add, contentDescription = "Rezept anlegen")
+            GradientFab(onClick = onCreate, size = 48.dp) {
+                Icon(Icons.Filled.Add, contentDescription = "Rezept anlegen", tint = LocalHmTokens.current.fgPrimary)
             }
         },
     ) { padding ->
