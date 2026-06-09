@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -78,6 +77,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onOpenHistory: () -> Unit,
+    onOpenRecipe: (String) -> Unit = {},
     vm: HomeViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsStateWithLifecycle()
@@ -141,13 +141,13 @@ fun HomeScreen(
                                     onCommit = vm::setWaterMl,
                                     onToggleReminder = vm::setWaterReminderEnabled,
                                 )
-                                // REQ-HOME-TREND-001: 7-day water sparkline with P7.S4 4b level lines
+                                // REQ-HOME-TREND-001: 7-day water sparkline — 18dp for level-line visibility
                                 if (waterTrendVals.size >= 2) {
                                     val waterStage = kotlin.math.floor(s.waterMl.toDouble() / s.targets.waterMl.coerceAtLeast(1).toDouble()).toInt().coerceAtLeast(0)
                                     Sparkline(
                                         values = waterTrendVals,
                                         accent = hm.ambientCyan,
-                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(14.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp).height(18.dp),
                                         stageTarget = s.targets.waterMl.toDouble(),
                                         stage = waterStage,
                                     )
@@ -196,6 +196,7 @@ fun HomeScreen(
                         HomeRecipeCard(
                             planned = planned,
                             recipeDtos = s.recipeDtos,
+                            onOpenRecipe = onOpenRecipe,
                             onToggleEaten = {
                                 if (planned.slotConsumed) vm.markAsNotEaten(planned.slotId)
                                 else vm.markAsEaten(planned.slotId)
@@ -208,6 +209,7 @@ fun HomeScreen(
                         HomeRecipeCard(
                             intakeEntry = e,
                             recipeDtos = s.recipeDtos,
+                            onOpenRecipe = onOpenRecipe,
                             onDelete = { vm.deleteIntakeEntry(e.id) },
                         )
                     }
@@ -270,99 +272,55 @@ private fun HomeRecipeCard(
     planned: PlannedMealInfo? = null,
     intakeEntry: IntakeEntryEntity? = null,
     recipeDtos: Map<String, RecipeListItemDto>,
+    onOpenRecipe: (String) -> Unit = {},
     onToggleEaten: (() -> Unit)? = null,
     onDelete: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
 
-    // ── Planned meal path ──
+    // ── Planned meal ── ONLY RecipeCard, NOTHING else
     if (planned != null) {
         val item = planned.item
-        val isConsumed = planned.slotConsumed
-        val serverDto = if (item.sourceType == IntakeSourceType.RECIPE) recipeDtos[item.sourceId] else null
-
-        if (serverDto != null) {
-            // Pure RecipeCard (identisch zu essen/rezepte) + GEGESSEN-Toggle rechts
-            SwipeDeleteWrapper(onDelete = onDelete) {
-                RecipeCard(
-                    recipe = serverDto,
-                    onClick = { },
-                    trailingActions = {
-                        GegessenToggle(
-                            isConsumed = isConsumed,
-                            onToggle = onToggleEaten ?: {},
-                        )
-                    },
-                )
-            }
-        } else {
-            // Kein Server-DTO → kompakte Textzeile, kein RecipeCard
-            SwipeDeleteCompact(
-                name = item.snapshotName,
-                desc = buildString {
-                    if (item.sourceType == IntakeSourceType.RECIPE) append("%.0f Portion(en)".format(item.amount))
-                    else append("%.0f g".format(item.amount))
-                    item.snapshotKcalPer100g?.let { kcal ->
-                        append(" · ${(kcal * item.amount / 100.0).toInt()} kcal")
-                    }
-                },
-                onDelete = onDelete,
-                trailing = {
-                    if (onToggleEaten != null) {
-                        GegessenToggle(isConsumed = isConsumed, onToggle = onToggleEaten)
-                    }
+        if (item.sourceType != IntakeSourceType.RECIPE) return
+        val serverDto = recipeDtos[item.sourceId] ?: return
+        SwipeDeleteWrapper(onDelete = onDelete) {
+            RecipeCard(
+                recipe = serverDto,
+                onClick = { onOpenRecipe(serverDto.id) },
+                trailingActions = {
+                    GegessenToggle(
+                        isConsumed = planned.slotConsumed,
+                        onToggle = onToggleEaten ?: {},
+                    )
                 },
             )
         }
         return
     }
 
-    // ── Intake entry path ──
+    // ── Intake entry ── ONLY RecipeCard, NOTHING else
     if (intakeEntry != null) {
         val entry = intakeEntry
+        if (entry.sourceType != IntakeSourceType.RECIPE) return
+        val serverDto = recipeDtos[entry.sourceId] ?: return
         val timeLabel = entry.loggedAt.let { ts ->
             val cal = java.util.Calendar.getInstance().apply { timeInMillis = ts }
             "%02d:%02d".format(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
         }
-        val serverDto = if (entry.sourceType == IntakeSourceType.RECIPE) recipeDtos[entry.sourceId] else null
-
-        if (serverDto != null) {
-            SwipeDeleteWrapper(onDelete = onDelete) {
-                RecipeCard(
-                    recipe = serverDto,
-                    onClick = { },
-                    trailingActions = {
-                        Text(
-                            timeLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = hm.fgTertiary,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    },
-                )
-            }
-        } else {
-            SwipeDeleteCompact(
-                name = entry.snapshotName,
-                desc = buildString {
-                    append("${entry.portionGrams.toInt()} g")
-                    entry.snapshotKcalPer100g?.let { kcal ->
-                        append(" · ${(kcal * entry.portionGrams / 100.0).toInt()} kcal")
-                    }
-                },
-                onDelete = onDelete,
-                trailing = {
+        SwipeDeleteWrapper(onDelete = onDelete) {
+            RecipeCard(
+                recipe = serverDto,
+                onClick = { onOpenRecipe(serverDto.id) },
+                trailingActions = {
                     Text(timeLabel, style = MaterialTheme.typography.labelSmall, color = hm.fgTertiary)
                 },
             )
         }
-        return
     }
 }
 
 /**
- * Wraps content in a right-swipe-to-delete container.
- * Keine X-Buttons — nur Swipe (konsistent mit PlanScreen).
+ * Right-swipe-to-delete wrapper. Keine X-Buttons.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -391,117 +349,30 @@ private fun SwipeDeleteWrapper(
 }
 
 /**
- * Compact text row for items without a cached recipe DTO (non-recipe items).
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SwipeDeleteCompact(
-    name: String,
-    desc: String,
-    onDelete: () -> Unit,
-    trailing: @Composable RowScope.() -> Unit = {},
-) {
-    val hm = LocalHmTokens.current
-    val shape = RoundedCornerShape(14.dp)
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.StartToEnd) {
-                try { onDelete() } catch (_: Exception) { }
-                true
-            } else false
-        }
-    )
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = Alignment.CenterStart) {
-                Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = StatusOverUl, modifier = Modifier.size(24.dp))
-            }
-        },
-        enableDismissFromEndToStart = false,
-        enableDismissFromStartToEnd = true,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(hm.cardSurface)
-                .border(1.dp, hm.cardBorder, shape)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = hm.fgPrimary,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = desc,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                )
-            }
-            trailing()
-        }
-    }
-}
-
-/**
- * GEGESSEN-Toggle — ganz rechts auf der RecipeCard.
- * - Nicht gegessen: kleiner accent Pill-Button "Gegessen"
- * - Gegessen:    kleiner ausgefüllter Check-Pill
+ * GEGESSEN-Toggle — rechts auf der RecipeCard.
+ * Gegessen: grüner Mini-Chip. Nicht gegessen: outlined Label.
  */
 @Composable
-private fun GegessenToggle(
-    isConsumed: Boolean,
-    onToggle: () -> Unit,
-) {
+private fun GegessenToggle(isConsumed: Boolean, onToggle: () -> Unit) {
     val hm = LocalHmTokens.current
     val sem = LocalSemanticColors.current
     val shape = RoundedCornerShape(10.dp)
-
     if (isConsumed) {
-        // Gegessen → grüner Mini-Chip
         Row(
-            modifier = Modifier
-                .clip(shape)
-                .background(sem.statusGood.copy(alpha = 0.15f))
-                .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape)
-                .clickable(onClick = onToggle),
+            modifier = Modifier.clip(shape).background(sem.statusGood.copy(alpha = 0.15f))
+                .border(1.dp, sem.statusGood.copy(alpha = 0.5f), shape).clickable(onClick = onToggle),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = "Als nicht gegessen markieren",
-                tint = sem.statusGood,
-                modifier = Modifier.padding(start = 6.dp, top = 4.dp, bottom = 4.dp).size(14.dp),
-            )
-            Text(
-                "Gegessen",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = sem.statusGood,
-                modifier = Modifier.padding(start = 1.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
-            )
+            Icon(Icons.Filled.Check, "Nicht gegessen", tint = sem.statusGood,
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp, bottom = 4.dp).size(14.dp))
+            Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = sem.statusGood, modifier = Modifier.padding(start = 1.dp, end = 6.dp, top = 4.dp, bottom = 4.dp))
         }
     } else {
-        // Nicht gegessen → dezent outlined
         Box(
-            modifier = Modifier
-                .clip(shape)
-                .border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
-                .clickable(onClick = onToggle)
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-        ) {
-            Text(
-                "Gegessen",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                color = hm.fgSecondary,
-            )
-        }
+            modifier = Modifier.clip(shape).border(1.dp, hm.fgTertiary.copy(alpha = 0.4f), shape)
+                .clickable(onClick = onToggle).padding(horizontal = 10.dp, vertical = 6.dp),
+        ) { Text("Gegessen", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium), color = hm.fgSecondary) }
     }
 }
 

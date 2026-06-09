@@ -326,6 +326,7 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
             }
         }
         // REQ-HOME-TREND-001: 7-day mini sparkline with P7.S4 4b level lines
+        // Height 24dp ensures multi-level dotted lines are visible even at Lv 5+
         if (entry.trendValues.size >= 2) {
             Sparkline(
                 values = entry.trendValues,
@@ -333,7 +334,7 @@ private fun PinnedNutrientRow(entry: PinnedNutrientEntry) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
-                    .height(16.dp),
+                    .height(24.dp),
                 stageTarget = target,
                 stage = stage,
             )

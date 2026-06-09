@@ -90,6 +90,7 @@ private val SLOT_ORDER = listOf("BREAKFAST", "LUNCH", "DINNER", "SNACK")
 @Composable
 fun PlanScreen(
     onOpenShoppingList: () -> Unit = {},
+    onOpenRecipe: (String) -> Unit = {},
     vm: PlanViewModel = hiltViewModel(),
     autoVm: AutoPlanViewModel = hiltViewModel(),
 ) {
@@ -183,6 +184,7 @@ fun PlanScreen(
                             consumed = sw.slot.consumed,
                             items = sw.items,
                             recipeDtos = state.recipeDtos,
+                            onOpenRecipe = onOpenRecipe,
                             onAddItem = { pickerForSlot = sw.slot.id },
                             onMarkConsumed = { vm.markConsumed(sw.slot.id) },
                             onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
@@ -194,14 +196,15 @@ fun PlanScreen(
             }
         }
 
-        // Bottom-right GradientFab — Histamind PlanFab idiom.
+        // Bottom-right GradientFab — 48dp einheitlich mit allen Screens
         GradientFab(
             onClick = { addSlotDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()
-                .padding(end = 20.dp, bottom = 20.dp),
-        ) { Icon(Icons.Filled.Add, contentDescription = "Mahlzeit hinzufügen", tint = Color.White) }
+                .padding(end = 24.dp, bottom = 24.dp),
+            size = 48.dp,
+        ) { Icon(Icons.Filled.Add, contentDescription = "Mahlzeit hinzufügen", tint = Color.White, modifier = Modifier.size(20.dp)) }
 
         SnackbarHost(
             hostState = snackbar,
@@ -469,6 +472,7 @@ private fun SlotCard(
     consumed: Boolean,
     items: List<MealPlanItemEntity>,
     recipeDtos: Map<String, RecipeListItemDto>,
+    onOpenRecipe: (String) -> Unit = {},
     onAddItem: () -> Unit,
     onMarkConsumed: () -> Unit,
     onDeleteSlot: () -> Unit,
@@ -541,7 +545,7 @@ private fun SlotCard(
                 items.forEach { item ->
                     val dto = recipeDtos[item.sourceId] ?: item.toRecipeListItemDto(slotType)
                     SwipeDeletePlanItem(onDelete = { onDeleteItem(item.id) }) {
-                        RecipeCard(recipe = dto, onClick = { })
+                        RecipeCard(recipe = dto, onClick = { onOpenRecipe(dto.id) })
                     }
                 }
             }
