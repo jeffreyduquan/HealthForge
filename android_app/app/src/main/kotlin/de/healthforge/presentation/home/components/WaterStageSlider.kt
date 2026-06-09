@@ -121,8 +121,12 @@ fun WaterStageSlider(
     LaunchedEffect(currentMl, safeGoal) {
         val localAbsolute = displayedStage * safeGoal + relativeMl
         if (localAbsolute != currentMl) {
-            displayedStage = initialStage
-            relativeMl = initialRelative
+            // P7.S4 4b rev9: Don't reset displayedStage if user has dragged UP
+            // (ahead of DB persistence). Only reset if behind or equal.
+            if (displayedStage <= initialStage) {
+                displayedStage = initialStage
+                relativeMl = initialRelative
+            }
         }
     }
 

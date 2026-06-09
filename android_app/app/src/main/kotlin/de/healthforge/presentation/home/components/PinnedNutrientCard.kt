@@ -399,7 +399,7 @@ fun Sparkline(
             val n = (top / goal).toInt()
             for (lv in 1..n) {
                 val lvY = y(lv * goal)
-                if (lvY <= 0f || lvY >= h) continue
+                if (lvY < 0f || lvY > h) continue
                 drawLine(
                     color = lineColor.copy(alpha = 0.35f),
                     start = Offset(0f, lvY),
