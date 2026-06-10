@@ -145,14 +145,16 @@ private fun NutritionCard(state: HomeState, vm: HomeViewModel) {
 private fun WaterCard(state: HomeState, vm: HomeViewModel, hm: de.healthforge.presentation.theme.HmTokens) {
     NeoSectionLabel("Wasser")
     NeoCard {
-        WaterStageSlider(
-            state.waterMl, state.waterGhostMl, state.targets.waterMl,
-            state.waterReminderEnabled, vm::setWaterMl, vm::setWaterReminderEnabled,
-        )
-        val wv = state.waterTrend.entries.sortedBy { it.key }.map { it.value.toDouble() }
-        if (wv.size >= 2) {
-            val s = (state.waterMl / state.targets.waterMl.coerceAtLeast(1))
-            Sparkline(wv, hm.ambientCyan, Modifier.fillMaxWidth().padding(top = 4.dp).height(22.dp), state.targets.waterMl.toDouble(), s)
+        Column {
+            WaterStageSlider(
+                state.waterMl, state.waterGhostMl, state.targets.waterMl,
+                state.waterReminderEnabled, vm::setWaterMl, vm::setWaterReminderEnabled,
+            )
+            val wv = state.waterTrend.entries.sortedBy { it.key }.map { it.value.toDouble() }
+            if (wv.size >= 2) {
+                val s = (state.waterMl / state.targets.waterMl.coerceAtLeast(1))
+                Sparkline(wv, hm.ambientCyan, Modifier.fillMaxWidth().padding(top = 4.dp).height(22.dp), state.targets.waterMl.toDouble(), s)
+            }
         }
     }
 }
