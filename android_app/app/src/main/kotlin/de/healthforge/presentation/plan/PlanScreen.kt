@@ -63,6 +63,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.data.network.RecipeListItemDto
+import de.healthforge.presentation.common.PickerData
+import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
@@ -235,14 +237,17 @@ fun PlanScreen(
     }
 
     pickerForSlot?.let { slotId ->
-        val sheet = rememberModalBottomSheetState()
-        ModalBottomSheet(onDismissRequest = { pickerForSlot = null; vm.clearPicker() }, sheetState = sheet) {
-            SlotItemPicker(
-                vm = vm,
-                onPick = { pickerForSlot = null; vm.clearPicker() },
-                slotId = slotId,
-            )
-        }
+        val picker by vm.picker.collectAsState()
+        PlanItemPicker(
+            show = true,
+            onDismiss = { pickerForSlot = null; vm.clearPicker() },
+            pickerData = PickerData(recipes = picker.recipes, ingredients = picker.ingredients),
+            onSearchRecipes = vm::searchRecipes,
+            onSearchIngredients = vm::searchIngredients,
+            onSelectRecipe = { vm.addRecipeItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
+            onSelectIngredient = { vm.addIngredientItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
+            onClearPicker = vm::clearPicker,
+        )
     }
 
     if (autoState.visible && autoState.preview == null) {

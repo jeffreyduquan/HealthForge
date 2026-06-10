@@ -37,9 +37,9 @@ fun PlanItemPicker(
     onSearchIngredients: (String) -> Unit,
     onSelectRecipe: (RecipeListItemDto) -> Unit,
     onSelectIngredient: (IngredientDto) -> Unit,
-    onSelectSupplement: (SupplementEntity) -> Unit,
+    onSelectSupplement: ((SupplementEntity) -> Unit)? = null,
     onClearPicker: () -> Unit,
-    supplementList: List<SupplementEntity>,
+    supplementList: List<SupplementEntity> = emptyList(),
 ) {
     if (!show) return
     val sheetState = rememberModalBottomSheetState()
@@ -52,7 +52,8 @@ fun PlanItemPicker(
             Text("Rezept oder Lebensmittel", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = hm.fgPrimary)
             Spacer(Modifier.height(10.dp))
             SegmentedTabs(
-                options = listOf("Rezepte", "Lebensmittel", "Supplements"),
+                options = if (onSelectSupplement != null) listOf("Rezepte", "Lebensmittel", "Supplements")
+                          else listOf("Rezepte", "Lebensmittel"),
                 selectedIndex = tab,
                 onSelect = { tab = it; q = ""; onClearPicker() },
             )
@@ -78,10 +79,15 @@ fun PlanItemPicker(
                             ing.energy_kcal_per_100g?.let { Text("${it.toInt()} kcal / 100g", style = MaterialTheme.typography.labelSmall, color = hm.fgSecondary) }
                         }
                     }
-                    2 -> items(supplementList, key = { it.id }) { s ->
-                        GlassCard(Modifier.fillMaxWidth().clickable { onSelectSupplement(s) }, padding = PaddingValues(12.dp)) {
-                            Text(s.nameDe, fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
-                            Text("${s.defaultDose} ${s.unitLabel}", style = MaterialTheme.typography.labelSmall, color = hm.fgSecondary)
+                    2 -> {
+                        val sel = onSelectSupplement
+                        if (sel != null) {
+                            items(supplementList, key = { it.id }) { s ->
+                                GlassCard(Modifier.fillMaxWidth().clickable { sel(s) }, padding = PaddingValues(12.dp)) {
+                                    Text(s.nameDe, fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
+                                    Text("${s.defaultDose} ${s.unitLabel}", style = MaterialTheme.typography.labelSmall, color = hm.fgSecondary)
+                                }
+                            }
                         }
                     }
                 }
