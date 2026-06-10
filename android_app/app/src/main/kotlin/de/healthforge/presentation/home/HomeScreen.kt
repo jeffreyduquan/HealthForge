@@ -40,10 +40,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.essen.rezepte.RecipeCard
+import de.healthforge.presentation.home.components.AddToPlanSheet
 import de.healthforge.presentation.home.components.DateNavigator
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
-import de.healthforge.presentation.home.components.QuickAddDialog
 import de.healthforge.presentation.home.components.Sparkline
 import de.healthforge.presentation.home.components.SupplementChecklist
 import de.healthforge.presentation.home.components.WaterStageSlider
@@ -91,13 +91,25 @@ fun HomeScreen(
         SnackbarHost(s, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 96.dp))
     }
 
-    if (state.showQuickAdd)
-        QuickAddDialog(
-            state.quickAddQuery, state.quickAddResults, state.quickAddPortion,
-            state.quickAddSelected, state.quickAddLoading,
-            vm::onQuickAddQuery, vm::onQuickAddSelect, vm::onQuickAddClearSelection,
-            vm::onQuickAddPortion, vm::confirmQuickAdd, vm::closeQuickAdd,
-        )
+    AddToPlanSheet(
+        show = state.showQuickAdd,
+        onDismiss = vm::closeQuickAdd,
+        ingredientQuery = state.quickAddQuery,
+        ingredientResults = state.quickAddResults,
+        ingredientLoading = state.quickAddLoading,
+        recipeResults = state.quickAddRecipes,
+        recipeLoading = state.quickAddRecipeLoading,
+        supplementList = state.quickAddSupplements,
+        onIngredientQuery = vm::onQuickAddQuery,
+        onSelectIngredient = vm::onQuickAddSelect,
+        onSelectRecipe = vm::selectAddRecipe,
+        onSelectSupplement = vm::selectAddSupplement,
+        onConfirmIngredient = vm::confirmQuickAdd,
+        selectedIngredient = state.quickAddSelected,
+        portionGrams = state.quickAddPortion,
+        onPortionChange = vm::onQuickAddPortion,
+        onClearIngredient = vm::onQuickAddClearSelection,
+    )
 }
 
 // ═══ 1. HEADER ═══

@@ -98,6 +98,10 @@ data class HomeState(
     val quickAddLoading: Boolean = false,
     val quickAddSelected: IngredientDto? = null,
     val quickAddPortion: String = "100",
+    val quickAddTab: Int = 0,
+    val quickAddRecipes: List<RecipeListItemDto> = emptyList(),
+    val quickAddSupplements: List<SupplementEntity> = emptyList(),
+    val quickAddRecipeLoading: Boolean = false,
     val waterReminderEnabled: Boolean = false,
     val error: String? = null,
     val recipeDtos: Map<String, RecipeListItemDto> = emptyMap(),
@@ -275,6 +279,7 @@ class HomeViewModel @Inject constructor(
         _state.value = _state.value.copy(
             showQuickAdd = false, quickAddQuery = "", quickAddResults = emptyList(),
             quickAddSelected = null, quickAddPortion = "100", error = null,
+            quickAddTab = 0, quickAddRecipes = emptyList(), quickAddSupplements = emptyList(),
         )
         queryFlow.value = ""
     }
@@ -334,6 +339,89 @@ class HomeViewModel @Inject constructor(
             )
             closeQuickAdd()
         }
+    }
+
+    // ── Add-to-Plan: Recipe search ──
+    fun searchAddRecipes(q: String) {
+        _state.value = _state.value.copy(quickAddRecipeLoading = true, quickAddRecipes = emptyList())
+        viewModelScope.launch {
+            recipeRepo.browse(q = q.takeIf { it.isNotBlank() }).onSuccess { list ->
+                _state.value = _state.value.copy(quickAddRecipes = list, quickAddRecipeLoading = false)
+            }.onFailure {
+                _state.value = _state.value.copy(quickAddRecipeLoading = false, error = it.message)
+            }
+        }
+    }
+
+    // ── Add-to-Plan: Supplements list ──
+    fun loadAddSupplements() {
+        viewModelScope.launch {
+            val list = supplementRepo.listAll()
+            _state.value = _state.value.copy(quickAddSupplements = list)
+        }
+    }
+
+    // ── Add-to-Plan: Select recipe → add to plan + intake ──
+    fun selectAddRecipe(recipe: RecipeListItemDto) {
+        val day = _state.value.date
+        viewModelScope.launch {
+            // Add to intake
+            intakeRepo.add(IntakeEntryEntity(
+                loggedAt = System.currentTimeMillis(), dayDateIso = day.toString(),
+                sourceType = IntakeSourceType.RECIPE, sourceId = recipe.id,
+                portionGrams = (recipe.servings * 100).toDouble(), snapshotName = recipe.title,
+                snapshotKcalPer100g = null, snapshotProteinPer100g = null,
+                snapshotCarbsPer100g = null, snapshotFatPer100g = null,
+            ))
+            // Add to plan
+            val slots = planRepo.observeSlotsForDay(day).first()
+            val quickSlot = slots.firstOrNull { it.slotType == "QUICK" }?.id
+                ?: planRepo.addSlot(day, "QUICK")
+            planRepo.addItem(de.healthforge.data.db.entities.MealPlanItemEntity(
+                slotId = quickSlot, sourceType = IntakeSourceType.RECIPE,
+                sourceId = recipe.id, amount = recipe.servings.toDouble(),
+                snapshotName = recipe.title,
+                snapshotKcalPer100g = null,
+                snapshotProteinPer100g = null,
+                snapshotCarbsPer100g = null,
+                snapshotFatPer100g = null,
+            ))
+            closeQuickAdd()
+        }
+    }
+
+    // ── Add-to-Plan: Select supplement → add to plan + intake ──
+    fun selectAddSupplement(sup: SupplementEntity) {
+        val day = _state.value.date
+        viewModelScope.launch {
+            intakeRepo.add(IntakeEntryEntity(
+                loggedAt = System.currentTimeMillis(), dayDateIso = day.toString(),
+                sourceType = IntakeSourceType.SUPPLEMENT, sourceId = sup.id.toString(),
+                portionGrams = sup.defaultDose, snapshotName = sup.nameDe,
+                snapshotBrand = sup.brand, snapshotKcalPer100g = sup.kcalPerDose,
+                snapshotProteinPer100g = sup.proteinPerDose,
+                snapshotCarbsPer100g = sup.carbsPerDose,
+                snapshotFatPer100g = sup.fatPerDose,
+            ))
+            val slots = planRepo.observeSlotsForDay(day).first()
+            val quickSlot = slots.firstOrNull { it.slotType == "QUICK" }?.id
+                ?: planRepo.addSlot(day, "QUICK")
+            planRepo.addItem(de.healthforge.data.db.entities.MealPlanItemEntity(
+                slotId = quickSlot, sourceType = IntakeSourceType.SUPPLEMENT,
+                sourceId = sup.id.toString(), amount = sup.defaultDose,
+                snapshotName = sup.nameDe,
+                snapshotKcalPer100g = sup.kcalPerDose,
+                snapshotProteinPer100g = sup.proteinPerDose,
+                snapshotCarbsPer100g = sup.carbsPerDose,
+                snapshotFatPer100g = sup.fatPerDose,
+            ))
+            closeQuickAdd()
+        }
+    }
+
+    fun setAddTab(tab: Int) {
+        _state.value = _state.value.copy(quickAddTab = tab)
+        if (tab == 2) loadAddSupplements()
     }
 
     /**
