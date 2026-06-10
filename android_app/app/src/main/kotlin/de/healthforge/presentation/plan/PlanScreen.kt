@@ -246,7 +246,9 @@ fun PlanScreen(
             onSearchIngredients = vm::searchIngredients,
             onSelectRecipe = { vm.addRecipeItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
             onSelectIngredient = { vm.addIngredientItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
+            onSelectSupplement = { vm.addSupplementItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
             onClearPicker = vm::clearPicker,
+            supplementList = vm.supplementList,
         )
     }
 

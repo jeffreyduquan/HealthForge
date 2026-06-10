@@ -6,11 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.data.db.entities.MealPlanSlotEntity
+import de.healthforge.data.db.entities.SupplementEntity
 import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.MealPlanRepository
 import de.healthforge.data.repository.RecipeRepository
+import de.healthforge.data.repository.SupplementRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +52,7 @@ class PlanViewModel @Inject constructor(
     private val planRepo: MealPlanRepository,
     private val recipeRepo: RecipeRepository,
     private val ingredientRepo: IngredientRepository,
+    private val supplementRepo: SupplementRepository,
 ) : ViewModel() {
 
     private val _day = MutableStateFlow(LocalDate.now())
@@ -154,4 +157,18 @@ class PlanViewModel @Inject constructor(
     }
 
     fun clearPicker() = _picker.update { PickerSuggestions() }
+
+    val supplementList: List<SupplementEntity> by lazy { kotlinx.coroutines.runBlocking { supplementRepo.listAll() } }
+
+    fun addSupplementItem(slotId: Long, sup: SupplementEntity) = viewModelScope.launch {
+        planRepo.addItem(MealPlanItemEntity(
+            slotId = slotId, sourceType = IntakeSourceType.SUPPLEMENT,
+            sourceId = sup.id.toString(), amount = sup.defaultDose,
+            snapshotName = sup.nameDe,
+            snapshotKcalPer100g = sup.kcalPerDose,
+            snapshotProteinPer100g = sup.proteinPerDose,
+            snapshotCarbsPer100g = sup.carbsPerDose,
+            snapshotFatPer100g = sup.fatPerDose,
+        ))
+    }
 }
