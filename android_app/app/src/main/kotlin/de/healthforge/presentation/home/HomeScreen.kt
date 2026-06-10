@@ -1,6 +1,8 @@
 package de.healthforge.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,6 +66,8 @@ import de.healthforge.presentation.theme.StatusOverUl
 fun HomeScreen(
     onOpenHistory: () -> Unit,
     onOpenRecipe: (String) -> Unit = {},
+    onOpenFood: (String) -> Unit = {},
+    onOpenSupplement: (Long) -> Unit = {},
     vm: HomeViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -79,7 +85,7 @@ fun HomeScreen(
             NutritionCard(state, vm)
             if (state.pinnedKeys.contains("water")) WaterCard(state, vm, hm)
             if (state.supplementChecklist.isNotEmpty()) SupplementsCard(state, vm)
-            OverviewCard(state, vm, hm, onOpenRecipe)
+            OverviewCard(state, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement)
             Spacer(Modifier.height(80.dp).navigationBarsPadding())
         }
         // FAB
@@ -173,7 +179,10 @@ private fun SupplementsCard(state: HomeState, vm: HomeViewModel) {
 @Composable
 private fun OverviewCard(
     state: HomeState, vm: HomeViewModel,
-    hm: de.healthforge.presentation.theme.HmTokens, onOpenRecipe: (String) -> Unit,
+    hm: de.healthforge.presentation.theme.HmTokens,
+    onOpenRecipe: (String) -> Unit,
+    onOpenFood: (String) -> Unit,
+    onOpenSupplement: (Long) -> Unit,
 ) {
     NeoSectionLabel("Übersicht")
     if (state.plannedMeals.isEmpty()) {
@@ -181,7 +190,7 @@ private fun OverviewCard(
         return
     }
     state.plannedMeals.forEach { m ->
-        PlannedEntry(m, state.recipeDtos, vm, hm, onOpenRecipe)
+        PlannedEntry(m, state.recipeDtos, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement)
     }
 }
 
@@ -193,6 +202,8 @@ private fun PlannedEntry(
     vm: HomeViewModel,
     hm: de.healthforge.presentation.theme.HmTokens,
     onOpenRecipe: (String) -> Unit,
+    onOpenFood: (String) -> Unit,
+    onOpenSupplement: (Long) -> Unit,
 ) {
     val item = meal.item
     val isRecipe = item.sourceType == IntakeSourceType.RECIPE
@@ -229,7 +240,20 @@ private fun PlannedEntry(
             val amount = "%.0f".format(item.amount)
             val unit = if (isRecipe) "Portion(en)" else "g"
             val kcal = ((item.snapshotKcalPer100g ?: 0.0) * item.amount / 100).toInt()
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            val isSupp = item.sourceType == IntakeSourceType.SUPPLEMENT
+            val onClick = {
+                when {
+                    isSupp -> onOpenSupplement(item.sourceId.toLongOrNull() ?: 0L)
+                    else -> onOpenFood(item.sourceId)
+                }
+            }
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                    .background(hm.cardSurface).border(1.dp, hm.cardBorder, RoundedCornerShape(16.dp))
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Column(Modifier.weight(1f)) {
                     Text(item.snapshotName, style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
