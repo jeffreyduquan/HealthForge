@@ -40,7 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.essen.rezepte.RecipeCard
-import de.healthforge.presentation.home.components.AddToPlanSheet
+import de.healthforge.presentation.common.PickerData
+import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.home.components.DateNavigator
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
@@ -91,24 +92,20 @@ fun HomeScreen(
         SnackbarHost(s, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 96.dp))
     }
 
-    AddToPlanSheet(
+    PlanItemPicker(
         show = state.showQuickAdd,
         onDismiss = vm::closeQuickAdd,
-        ingredientQuery = state.quickAddQuery,
-        ingredientResults = state.quickAddResults,
-        ingredientLoading = state.quickAddLoading,
-        recipeResults = state.quickAddRecipes,
-        recipeLoading = state.quickAddRecipeLoading,
-        supplementList = state.quickAddSupplements,
-        onIngredientQuery = vm::onQuickAddQuery,
-        onSelectIngredient = vm::onQuickAddSelect,
+        pickerData = PickerData(
+            recipes = state.quickAddRecipes,
+            ingredients = state.quickAddResults,
+        ),
+        onSearchRecipes = vm::searchAddRecipes,
+        onSearchIngredients = vm::onQuickAddQuery,
         onSelectRecipe = vm::selectAddRecipe,
+        onSelectIngredient = vm::onQuickAddSelect,
         onSelectSupplement = vm::selectAddSupplement,
-        onConfirmIngredient = vm::confirmQuickAdd,
-        selectedIngredient = state.quickAddSelected,
-        portionGrams = state.quickAddPortion,
-        onPortionChange = vm::onQuickAddPortion,
-        onClearIngredient = vm::onQuickAddClearSelection,
+        onClearPicker = vm::onQuickAddClearSelection,
+        supplementList = state.quickAddSupplements,
     )
 }
 
