@@ -60,7 +60,7 @@ class WaterIntakeRepository @Inject constructor(
      * ersetzt. Bei [totalMl] == 0 verbleibt der Tag eintragslos.
      */
     suspend fun setDayTotal(day: LocalDate, totalMl: Int) {
-        require(totalMl in 0..5000) { "totalMl must be 0..5000" }
+        require(totalMl >= 0) { "totalMl must be >= 0" }
         dao.replaceDayTotal(day.toString(), totalMl, System.currentTimeMillis())
     }
 }

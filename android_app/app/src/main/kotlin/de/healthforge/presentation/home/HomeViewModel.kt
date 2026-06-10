@@ -345,7 +345,7 @@ class HomeViewModel @Inject constructor(
      */
     fun setWaterMl(totalMl: Int) {
         viewModelScope.launch {
-            runCatching { waterRepo.setDayTotal(_state.value.date, totalMl.coerceIn(0, 5000)) }
+            runCatching { waterRepo.setDayTotal(_state.value.date, totalMl.coerceAtLeast(0)) }
                 .onFailure { _state.value = _state.value.copy(error = it.message) }
         }
     }
