@@ -54,9 +54,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -215,6 +219,38 @@ fun PlanScreen(
                 }
             }
 
+            // ── ADD-SLOT (dotted + Box unter den Slots) ──
+            item(key = "add_slot") {
+                val shape = RoundedCornerShape(16.dp)
+                val dashColor = hm.fgTertiary.copy(alpha = 0.35f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .clip(shape)
+                        .drawBehind {
+                            drawRoundRect(
+                                color = dashColor,
+                                cornerRadius = CornerRadius(16.dp.toPx()),
+                                style = Stroke(
+                                    width = 2.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10.dp.toPx(), 6.dp.toPx()), 0f),
+                                ),
+                            )
+                        }
+                        .clickable { addSlotDialog = true }
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Mahlzeit hinzufügen",
+                        tint = dashColor,
+                        modifier = Modifier.size(32.dp),
+                    )
+                }
+            }
+
             // ── ERNÄHRUNG ──
             item(key = "nutrition") {
                 NeoSectionLabel("Ernährung", Modifier.padding(horizontal = 20.dp))
@@ -269,16 +305,6 @@ fun PlanScreen(
                 }
             }
         }
-
-        // Bottom-right GradientFab — 48dp einheitlich mit allen Screens
-        GradientFab(
-            onClick = { addSlotDialog = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(end = 24.dp, bottom = 24.dp),
-            size = 48.dp,
-        ) { Icon(Icons.Filled.Add, contentDescription = "Mahlzeit hinzufügen", tint = Color.White, modifier = Modifier.size(20.dp)) }
 
         SnackbarHost(
             hostState = snackbar,
