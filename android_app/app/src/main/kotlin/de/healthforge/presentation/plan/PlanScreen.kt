@@ -50,7 +50,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +78,6 @@ import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.SectionPill
 import de.healthforge.presentation.theme.SegmentedTabs
 import de.healthforge.presentation.theme.StatusOverUl
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -105,7 +103,6 @@ fun PlanScreen(
     val autoState by autoVm.state.collectAsState()
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     var pickerForSlot by remember { mutableStateOf<Long?>(null) }
     var addSlotDialog by remember { mutableStateOf(false) }
     var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
@@ -195,11 +192,7 @@ fun PlanScreen(
                             recipeDtos = state.recipeDtos,
                             onOpenRecipe = onOpenRecipe,
                             onOpenIngredient = { id ->
-                                scope.launch {
-                                    vm.fetchIngredientById(id)
-                                        .onSuccess { detailTarget = it }
-                                        .onFailure { snackbar.showSnackbar("Lebensmittel konnte nicht geladen werden") }
-                                }
+                                state.ingredientDtos[id]?.let { detailTarget = it }
                             },
                             onAddItem = { pickerForSlot = sw.slot.id },
                             onMarkConsumed = { vm.markConsumed(sw.slot.id) },

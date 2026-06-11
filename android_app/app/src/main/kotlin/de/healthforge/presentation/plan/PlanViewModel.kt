@@ -44,6 +44,7 @@ data class PlanUiState(
     val slots: List<SlotWithItems> = emptyList(),
     val message: String? = null,
     val recipeDtos: Map<String, RecipeListItemDto> = emptyMap(),
+    val ingredientDtos: Map<String, IngredientDto> = emptyMap(),
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -58,6 +59,7 @@ class PlanViewModel @Inject constructor(
     private val _day = MutableStateFlow(LocalDate.now())
     private val _message = MutableStateFlow<String?>(null)
     private val _recipeDtos = MutableStateFlow<Map<String, RecipeListItemDto>>(emptyMap())
+    private val _ingredientDtos = MutableStateFlow<Map<String, IngredientDto>>(emptyMap())
 
     val state: StateFlow<PlanUiState> = combine(
         _day.flatMapLatest { d ->
@@ -71,7 +73,8 @@ class PlanViewModel @Inject constructor(
         _day,
         _message,
         _recipeDtos,
-    ) { slots, day, msg, dtos -> PlanUiState(selectedDay = day, slots = slots, message = msg, recipeDtos = dtos) }
+        _ingredientDtos,
+    ) { slots, day, msg, rd, id -> PlanUiState(selectedDay = day, slots = slots, message = msg, recipeDtos = rd, ingredientDtos = id) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanUiState())
 
     init {
@@ -89,6 +92,12 @@ class PlanViewModel @Inject constructor(
                 }
             } else {
                 _recipeDtos.value = emptyMap()
+            }
+            val ingredientIds = items.filter { it.sourceType == IntakeSourceType.INGREDIENT }.map { it.sourceId }.distinct()
+            ingredientIds.forEach { id ->
+                ingredientRepo.byId(id).onSuccess { dto ->
+                    _ingredientDtos.value = _ingredientDtos.value + (id to dto)
+                }
             }
         }.launchIn(viewModelScope)
     }
@@ -157,10 +166,6 @@ class PlanViewModel @Inject constructor(
     }
 
     fun clearPicker() = _picker.update { PickerSuggestions() }
-
-    fun getIngredientById(id: String): Result<IngredientDto> = kotlinx.coroutines.runBlocking { ingredientRepo.byId(id) }
-
-    suspend fun fetchIngredientById(id: String): Result<IngredientDto> = ingredientRepo.byId(id)
 
     val supplementList: List<SupplementEntity> by lazy { kotlinx.coroutines.runBlocking { supplementRepo.listAll() } }
 

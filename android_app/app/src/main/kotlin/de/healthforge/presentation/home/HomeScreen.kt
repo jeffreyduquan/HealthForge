@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +64,6 @@ import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
 import de.healthforge.presentation.theme.StatusOverUl
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +77,6 @@ fun HomeScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     val s = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
 
     Box(Modifier.fillMaxSize().background(hm.background)) {
@@ -94,11 +91,7 @@ fun HomeScreen(
             if (state.pinnedKeys.contains("water")) WaterCard(state, vm, hm)
             if (state.supplementChecklist.isNotEmpty()) SupplementsCard(state, vm)
             OverviewCard(state, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement, onOpenDetail = { id ->
-                scope.launch {
-                    vm.fetchIngredientById(id)
-                        .onSuccess { detailTarget = it }
-                        .onFailure { s.showSnackbar("Lebensmittel konnte nicht geladen werden") }
-                }
+                state.ingredientDtos[id]?.let { detailTarget = it }
             })
             Spacer(Modifier.height(80.dp).navigationBarsPadding())
         }

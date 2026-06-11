@@ -105,6 +105,7 @@ data class HomeState(
     val waterReminderEnabled: Boolean = false,
     val error: String? = null,
     val recipeDtos: Map<String, RecipeListItemDto> = emptyMap(),
+    val ingredientDtos: Map<String, IngredientDto> = emptyMap(),
 )
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -176,6 +177,27 @@ class HomeViewModel @Inject constructor(
                 } else {
                     _state.value = _state.value.copy(recipeDtos = emptyMap())
                 }
+            }
+            .launchIn(viewModelScope)
+
+        // Fetch IngredientDtos for planned food items (same pattern as recipeDtos)
+        dateFlow
+            .flatMapLatest { day ->
+                combine(
+                    intakeRepo.observeForDay(day),
+                    planRepo.observeItemsForDay(day),
+                ) { entries, planItems ->
+                    val entryIds = entries.filter { it.sourceType == IntakeSourceType.INGREDIENT }.map { it.sourceId }
+                    val planIds = planItems.filter { it.sourceType == IntakeSourceType.INGREDIENT }.map { it.sourceId }
+                    (entryIds + planIds).distinct()
+                }
+            }
+            .onEach { ingredientIds ->
+                val map = mutableMapOf<String, IngredientDto>()
+                ingredientIds.forEach { id ->
+                    ingredientRepo.byId(id).onSuccess { dto -> map[id] = dto }
+                }
+                _state.value = _state.value.copy(ingredientDtos = map)
             }
             .launchIn(viewModelScope)
 
@@ -448,10 +470,6 @@ class HomeViewModel @Inject constructor(
     fun deleteEntry(id: Long) {
         viewModelScope.launch { intakeRepo.deleteById(id) }
     }
-
-    fun getIngredientById(id: String): Result<IngredientDto> = kotlinx.coroutines.runBlocking { ingredientRepo.byId(id) }
-
-    suspend fun fetchIngredientById(id: String): Result<IngredientDto> = ingredientRepo.byId(id)
 
     /**
      * Manually mark a supplement as taken from the Home-checklist tap (bypassing the
