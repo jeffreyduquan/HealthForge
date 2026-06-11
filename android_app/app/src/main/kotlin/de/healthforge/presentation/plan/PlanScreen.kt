@@ -147,6 +147,58 @@ fun PlanScreen(
             contentPadding = PaddingValues(bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // ── TAGSPLAN (ganz oben) ──
+            item(key = "plan_label") {
+                NeoSectionLabel("Tagesplan", Modifier.padding(horizontal = 20.dp))
+            }
+
+            item(key = "day_strip") {
+                DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
+            }
+
+            if (state.slots.isEmpty()) {
+                item(key = "empty") {
+                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Noch keine Mahlzeiten geplant",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                color = hm.fgSecondary,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            TextButton(onClick = { addSlotDialog = true }) {
+                                Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
+                                Spacer(Modifier.width(6.dp))
+                                Text("Mahlzeit hinzufügen", color = hm.ambientViolet)
+                            }
+                        }
+                    }
+                }
+            } else {
+                item(key = "day_header") {
+                    DayHeader(date = state.selectedDay)
+                }
+                item(key = "day_summary") {
+                    DaySummary(slots = state.slots)
+                }
+                items(state.slots, key = { it.slot.id }) { sw ->
+                    SlotCard(
+                        slotType = sw.slot.slotType,
+                        consumed = sw.slot.consumed,
+                        items = sw.items,
+                        recipeDtos = state.recipeDtos,
+                        onOpenRecipe = onOpenRecipe,
+                        onOpenIngredient = { id ->
+                            state.ingredientDtos[id]?.let { detailTarget = it }
+                        },
+                        onAddItem = { pickerForSlot = sw.slot.id },
+                        onMarkConsumed = { vm.markConsumed(sw.slot.id) },
+                        onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
+                        onDeleteItem = { id -> vm.deleteItem(id) },
+                    )
+                }
+            }
+
             // ── AKTIONEN ──
             item(key = "actions") {
                 Row(
@@ -218,58 +270,6 @@ fun PlanScreen(
                     NeoCard(Modifier.padding(horizontal = 20.dp), contentPadding = PaddingValues(0.dp)) {
                         SupplementChecklist(homeState.supplementChecklist, homeVm::markSupplementTaken)
                     }
-                }
-            }
-
-            // ── TAGSPLAN ──
-            item(key = "plan_label") {
-                NeoSectionLabel("Tagesplan", Modifier.padding(horizontal = 20.dp))
-            }
-
-            item(key = "day_strip") {
-                DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
-            }
-
-            if (state.slots.isEmpty()) {
-                item(key = "empty") {
-                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                "Noch keine Mahlzeiten geplant",
-                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                                color = hm.fgSecondary,
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            TextButton(onClick = { addSlotDialog = true }) {
-                                Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
-                                Spacer(Modifier.width(6.dp))
-                                Text("Mahlzeit hinzufügen", color = hm.ambientViolet)
-                            }
-                        }
-                    }
-                }
-            } else {
-                item(key = "day_header") {
-                    DayHeader(date = state.selectedDay)
-                }
-                item(key = "day_summary") {
-                    DaySummary(slots = state.slots)
-                }
-                items(state.slots, key = { it.slot.id }) { sw ->
-                    SlotCard(
-                        slotType = sw.slot.slotType,
-                        consumed = sw.slot.consumed,
-                        items = sw.items,
-                        recipeDtos = state.recipeDtos,
-                        onOpenRecipe = onOpenRecipe,
-                        onOpenIngredient = { id ->
-                            state.ingredientDtos[id]?.let { detailTarget = it }
-                        },
-                        onAddItem = { pickerForSlot = sw.slot.id },
-                        onMarkConsumed = { vm.markConsumed(sw.slot.id) },
-                        onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
-                        onDeleteItem = { id -> vm.deleteItem(id) },
-                    )
                 }
             }
         }
