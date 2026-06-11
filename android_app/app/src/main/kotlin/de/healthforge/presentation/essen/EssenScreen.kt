@@ -28,6 +28,7 @@ fun EssenScreen(
     onOpenRecipeDetail: (String) -> Unit = {},
     onCreateRecipe: () -> Unit = {},
     onSuggestIngredient: (initialName: String) -> Unit = {},
+    onOpenIngredientDetail: (String) -> Unit = {},
 ) {
     var selected by remember(preselectedTab) { mutableIntStateOf(preselectedTab ?: 0) }
     val tabs = listOf("Lebensmittel", "Rezepte", "Supplements")
@@ -42,7 +43,10 @@ fun EssenScreen(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
             when (selected) {
-                0 -> LebensmittelScreen(onSuggestIngredient = onSuggestIngredient)
+                0 -> LebensmittelScreen(
+                    onSuggestIngredient = onSuggestIngredient,
+                    onOpenIngredientDetail = onOpenIngredientDetail,
+                )
                 1 -> RecipesScreen(onOpenDetail = onOpenRecipeDetail, onCreate = onCreateRecipe)
                 2 -> SupplementsScreen(onOpenEdit = onOpenSupplementEdit)
             }

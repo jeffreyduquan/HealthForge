@@ -75,13 +75,13 @@ fun LebensmittelScreen(
     preselect: Boolean = false,
     onPick: (IngredientDto) -> Unit = {},
     onSuggestIngredient: (initialName: String) -> Unit = {},
+    onOpenIngredientDetail: (String) -> Unit = {},
     vm: LebensmittelViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     var showFilters by remember { mutableStateOf(false) }
     var fieldPrTarget by remember { mutableStateOf<IngredientDto?>(null) }
-    var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.toast) {
@@ -176,7 +176,7 @@ fun LebensmittelScreen(
                             isLiked = state.likedIngredientIds.contains(item.id),
                             isDisliked = state.dislikedIngredientIds.contains(item.id),
                             onPick = { onPick(item) },
-                            onOpenDetail = { detailTarget = item },
+                            onOpenDetail = { onOpenIngredientDetail(item.id) },
                             onCorrect = { fieldPrTarget = item },
                             onToggleLike = { vm.toggleLikeIngredient(item.id) },
                             onToggleDislike = { vm.toggleDislikeIngredient(item.id) },
@@ -208,14 +208,7 @@ fun LebensmittelScreen(
         )
     }
 
-    // P7.S5 — Detail-Sheet bei Tap auf Karte (nur Standard-Modus).
-    detailTarget?.let { target ->
-        IngredientDetailSheet(
-            item = target,
-            onDismiss = { detailTarget = null },
-        )
-    }
-
+    // P7.S5 — Detail jetzt Full-Screen via onOpenIngredientDetail Navigation.
     SnackbarHost(hostState = snackbarHostState)
 }
 

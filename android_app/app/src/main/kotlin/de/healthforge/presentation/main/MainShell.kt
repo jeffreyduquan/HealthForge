@@ -29,6 +29,7 @@ import de.healthforge.presentation.essen.EssenScreen
 import de.healthforge.presentation.essen.rezepte.RecipeCreateWizardScreen
 import de.healthforge.presentation.essen.rezepte.RecipeDetailScreen
 import de.healthforge.presentation.essen.rezepte.RecipeEditScreen
+import de.healthforge.presentation.lebensmittel.IngredientDetailScreen
 import de.healthforge.presentation.lebensmittel.IngredientSuggestWizardScreen
 import de.healthforge.presentation.groups.GroupDetailScreen
 import de.healthforge.presentation.groups.GroupsScreen
@@ -81,6 +82,10 @@ object MainRoutes {
     const val SHOPPING_LIST = "main/shopping-list"
     const val EXPORT = "main/export"
     const val INSIGHTS = "main/insights"
+    /** REQ-INGREDIENT-DETAIL-001 — Full-screen ingredient detail (replaces ModalBottomSheet). */
+    const val INGREDIENT_DETAIL = "main/ingredient-detail"
+    const val INGREDIENT_DETAIL_ARG = "id"
+    fun ingredientDetail(id: String): String = "$INGREDIENT_DETAIL/$id"
     /** REQ-INGREDIENT-CREATE-WIZARD-001 — 4-Step Wizard. */
     const val INGREDIENT_SUGGEST_WIZARD = "main/ingredient-suggest-wizard"
     const val INGREDIENT_SUGGEST_WIZARD_ARG = "name"
@@ -167,6 +172,9 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     },
                     onSuggestIngredient = { initialName ->
                         navController.navigate(MainRoutes.ingredientSuggestWizard(initialName))
+                    },
+                    onOpenIngredientDetail = { id ->
+                        navController.navigate(MainRoutes.ingredientDetail(id))
                     },
                 )
             }
@@ -289,6 +297,19 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
             }
             composable(MainRoutes.INSIGHTS) {
                 InsightsScreen(onBack = { navController.popBackStack() })
+            }
+            // P6.S5: Full-screen ingredient detail (replaces old ModalBottomSheet).
+            composable(
+                route = "${MainRoutes.INGREDIENT_DETAIL}/{${MainRoutes.INGREDIENT_DETAIL_ARG}}",
+                arguments = listOf(
+                    navArgument(MainRoutes.INGREDIENT_DETAIL_ARG) { type = NavType.StringType },
+                ),
+            ) { entry ->
+                val id = entry.arguments?.getString(MainRoutes.INGREDIENT_DETAIL_ARG) ?: return@composable
+                IngredientDetailScreen(
+                    ingredientId = id,
+                    onBack = { navController.popBackStack() },
+                )
             }
             // P6.S5: 4-Step Wizard zum Vorschlagen eines neuen Lebensmittels.
             composable(
