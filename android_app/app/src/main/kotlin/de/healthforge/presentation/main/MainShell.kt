@@ -32,7 +32,6 @@ import de.healthforge.presentation.essen.rezepte.RecipeEditScreen
 import de.healthforge.presentation.lebensmittel.IngredientSuggestWizardScreen
 import de.healthforge.presentation.groups.GroupDetailScreen
 import de.healthforge.presentation.groups.GroupsScreen
-import de.healthforge.presentation.home.HomeScreen
 import de.healthforge.presentation.home.IntakeHistoryScreen
 import de.healthforge.presentation.log.CustomSymptomManagerScreen
 import de.healthforge.presentation.log.LogChartsScreen
@@ -45,7 +44,7 @@ import de.healthforge.presentation.profile.ExportScreen
 import de.healthforge.presentation.profile.ProfileScreen
 import de.healthforge.presentation.supplements.SupplementEditScreen
 
-/** Bottom-Navigation tab destinations. REQ-NAV-001 (6 Tabs: Home/Plan/Gruppen/Essen/Log/Profil). */
+/** Bottom-Navigation tab destinations. REQ-NAV-001 (5 Tabs: Home/Gruppen/Essen/Log/Profil). */
 private data class TabSpec(
     val route: String,
     val label: String,
@@ -98,7 +97,6 @@ object MainRoutes {
 
 private val TABS = listOf(
     TabSpec(MainRoutes.HOME, "Home", Icons.Filled.Home),
-    TabSpec(MainRoutes.PLAN, "Plan", Icons.Filled.CalendarMonth),
     TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.ESSEN, "Essen", Icons.Filled.Restaurant),
     TabSpec(MainRoutes.LOG, "Log", Icons.Filled.BookmarkBorder),
@@ -106,11 +104,11 @@ private val TABS = listOf(
 )
 
 /**
- * Shell hosting the 6-Tab Bottom-Navigation (REQ-NAV-001..004) plus sub-routes
+ * Shell hosting the 5-Tab Bottom-Navigation (REQ-NAV-001..004) plus sub-routes
  * that participate in the same nav graph (Intake-History, REQ-NAV-004).
  * Auth/Onboarding live OUTSIDE this shell.
  *
- * Tabs: Home | Plan | Gruppen | Essen | Log | Profil
+ * Tabs: Home | Gruppen | Essen | Log | Profil
  */
 @Composable
 fun MainShell(onRestartOnboarding: () -> Unit) {
@@ -150,12 +148,8 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 .padding(padding),
         ) {
             composable(MainRoutes.HOME) {
-                HomeScreen(
-                    onOpenHistory = { navController.navigate(MainRoutes.INTAKE_HISTORY) },
-                )
-            }
-            composable(MainRoutes.PLAN) {
                 PlanScreen(
+                    onOpenHistory = { navController.navigate(MainRoutes.INTAKE_HISTORY) },
                     onOpenShoppingList = { navController.navigate(MainRoutes.SHOPPING_LIST) },
                 )
             }

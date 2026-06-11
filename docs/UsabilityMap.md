@@ -10,18 +10,17 @@ Diese Datei beschreibt das **UX-Gerüst**: Navigation, Screens, Aktionen, User-F
 
 ## 1. Navigation (LOCKED)
 
-### 1.1 Bottom-Navigation (6 Tabs)
+### 1.1 Bottom-Navigation (5 Tabs)
 
 ```
 ┌──────────────────────────────────────────────────┐
-│ Home  Plan  Gruppen  Essen  Log  Profil│
+│ Home  Gruppen  Essen  Log  Profil                │
 └──────────────────────────────────────────────────┘
 ```
 
 | Tab | Icon (lucide) | Zweck |
 |-----|---------------|-------|
-| **Home** | `home` | Heutiger Überblick, Quick-Add, Tagesdashboard |
-| **Plan** | `calendar-days` | Mahlzeiten-Wochenplaner |
+| **Home** | `home` | Ernährungsübersicht + Mahlzeiten-Wochenplaner (fusioniert aus ex-Home + ex-Plan) |
 | **Gruppen** | `users` | Eigene Gruppen, Gruppen-Rezepte, Mitglieder, Gruppen entdecken |
 | **Essen** | `utensils` | Lebensmittel + Rezepte + Supplements (3 Sub-Tabs) |
 | **Log** | `book-open` | Symptom-Tagebuch (Mood/Schlaf/Symptome) |
@@ -39,8 +38,7 @@ Diese Datei beschreibt das **UX-Gerüst**: Navigation, Screens, Aktionen, User-F
 
 | Tab | P1 (Foundation) | P2 (Recipes) | P3 (Community) | P4 (Power) |
 |-----|-----------------|--------------|----------------|------------|
-| Home | minimal | volle Funktion | + Plan-Links | unverändert |
-| Plan | Placeholder "Bald verfügbar" | Placeholder | volle Funktion | + Auto-Planner |
+| Home | Ernährungsübersicht + Placeholder-Plan | + Quick-Add + Wasser | + Mahlzeiten-Wochenplaner | + Auto-Planner |
 | Gruppen | ✅ Funktion (als Sub-Screen im Profil) | ✅ Funktion | ✅ Eigener Tab (P7) | unverändert |
 | Essen → Lebensmittel | Browse/Filter/Detail | + Quick-Add | unverändert | unverändert |
 | Essen → Rezepte | Placeholder | volle Funktion | + Gruppen-Filter | + Insights-Link |
@@ -78,7 +76,9 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ---
 
-## 3. Home-Tab (P7-Refactor)
+## 3. Home-Tab (fusioniert: ex-Home + ex-Plan, P7-Refactor 2026-06-11)
+
+Der Home-Tab kombiniert die Ernährungsübersicht (Nährwerte, Wasser, Supplemente) mit dem Mahlzeiten-Wochenplaner. Die alte Trennung in „Home" und „Plan" wurde aufgehoben.
 
 ### 3.1 Layout (vertikal, scrollbar)
 
@@ -135,7 +135,7 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ---
 
-## 4. Plan-Tab
+## 4. Plan-Tab → integriert in Home-Tab (§3)
 
 ### 4.1 Layout (Tages-Liste, vertikal scrollend)
 

@@ -126,7 +126,7 @@ Verwendung):
 | `displaySmall` | 36sp | 400 | 44sp | Splash-Screen |
 | `headlineLarge` | 32sp | 400 | 40sp | Empty-State-Heroes |
 | `headlineMedium` | 28sp | 400 | 36sp | Screen-Titel groß |
-| `headlineSmall` | 24sp | 400 | 32sp | Section-Header (Home, Plan) |
+| `headlineSmall` | 24sp | 400 | 32sp | Section-Header (Home) |
 | `titleLarge` | 22sp | 500 | 28sp | TopAppBar-Titel, Dialog-Titel |
 | `titleMedium` | 16sp | 500 | 24sp | Card-Titel, List-Item-Primärtext |
 | `titleSmall` | 14sp | 500 | 20sp | Tab-Labels, Chip-Text |
@@ -277,12 +277,12 @@ außer den unten gelisteten Wrapper-Components.
 | `WaterTracker` | Horizontale Glas-Reihe mit getappten Füll-Glässern + Plus-Button |
 | `RatingPill` | 4-state-Pill (Recommend / NotRecommend / MoreOften / Intolerant) basierend auf Context |
 | `AllergenWarningBadge` | Roter Badge mit Allergen-Icon + Text bei Konflikt |
-| `MealSlot` | Slot-Card für Plan-Tab mit Mahlzeit-Typ, Zeit, Item-Liste, "Habe gegessen"-Button |
+| `MealSlot` | Slot-Card für Home-Tab (Tagesplan) mit Mahlzeit-Typ, Zeit, Item-Liste, "Habe gegessen"-Button |
 | `SymptomSeverityChip` | FilterChip mit Severity-Color-Background (1–5) |
 | `EmptyState` | Hero-Icon + Headline + Body + Optional-Action-Button |
 | `OfflineBanner` | Snackbar-Variante oben, persistent, mit Retry-Button |
 | `PhasePlaceholder` | Vollscreen-Placeholder für Features die in späterer Phase kommen |
-| `DateNavigator` | Pfeil-Links / Datum-Pill / Pfeil-Rechts (Home, Plan, Log) |
+| `DateNavigator` | Pfeil-Links / Datum-Pill / Pfeil-Rechts (Home, Log) |
 | `PinnedNutrientCard` (P7) | Glass-Card mit einer Zeile pro gepinntem Nährstoff. Jede Zeile = **Stufen-Bar** (P7.S3.b: einheitliche Mechanik mit Wasser). Layout: Name + Wert/Ziel + Lv-Badge (ab Stufe ≥ 1) + Prozent + gefüllte Bar darunter. Bar-Farbe = `waterStageGradient(stage)`, Track = `waterStageTrackColor(stage)` (Vorgängerstufe × 0.25). `trailingSlot` rendert WaterStageSlider als letzte Zeile. **P7.S4 4e (Revision 2026-05-28):** Card-Header mit Titel ("Angepinnt" ↔ "Nährstoffe verwalten") + **einzigem** Chevron-IconButton (Expand-Toggle). Collapsed-Modus (default) = nur gepinnte Progress-Rows + Wasser-Slot. Expanded-Modus = vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges) mit kompakter Toggle-Row pro Nährstoff: Name + DGE-Default + trailing `IconButton(PushPin)`. **Filled** = pinned, **Outlined** = nicht. Tap → `onTogglePin(key)` (sofort persistent in `UserProfileEntity.pinnedNutrientsJson`, Min-1-Invariant). Visuelle Differenzierung Aktiv/Inaktiv: aktiv = `Icons.Filled.PushPin` (18.dp) in `hm.ambientViolet` auf rundem `ambientViolet` Alpha 0.22 Background; inaktiv = `Icons.Outlined.PushPin` (16.dp) in `hm.fgTertiary`, kein Background. Header-Chevron: violette Pill-Affordance (`ambientViolet`-Background Alpha 0.12 + Border Alpha 0.35 im Collapsed; Alpha 0.28 + Border Alpha 0.7 + violet-Tint im Expanded). |
 | `WaterBarWithGhost` (P7) | Single Linear-Bar mit ZWEI ueberlagerten Progress-Layern (real blau + ghost transparent + Defizit-Bereich rot). Canvas-basiert, beidseitig draggable Slider on top. Schritt 50 ml. |
 | `WaterSlider` (P7) | Slider auf `WaterBarWithGhost`. onValueChangeFinished → `WaterIntakeRepository.add(delta)`. Triggert 5-min Debounce in `WaterDeficitScheduler`. |

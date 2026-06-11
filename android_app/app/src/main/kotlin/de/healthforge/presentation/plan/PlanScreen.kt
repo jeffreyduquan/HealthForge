@@ -61,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.data.network.IngredientDto
@@ -68,6 +69,13 @@ import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.common.PickerData
 import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
+import de.healthforge.presentation.home.HomeViewModel
+import de.healthforge.presentation.home.components.DateNavigator
+import de.healthforge.presentation.home.components.PinnedNutrientCard
+import de.healthforge.presentation.home.components.PinnedNutrientEntry
+import de.healthforge.presentation.home.components.Sparkline
+import de.healthforge.presentation.home.components.SupplementChecklist
+import de.healthforge.presentation.home.components.WaterStageSlider
 import de.healthforge.presentation.lebensmittel.components.IngredientDetailSheet
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
@@ -75,6 +83,8 @@ import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.GradientText
 import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.LocalSemanticColors
+import de.healthforge.presentation.theme.NeoCard
+import de.healthforge.presentation.theme.NeoSectionLabel
 import de.healthforge.presentation.theme.SectionPill
 import de.healthforge.presentation.theme.SegmentedTabs
 import de.healthforge.presentation.theme.StatusOverUl
@@ -94,18 +104,24 @@ private val SLOT_ORDER = listOf("BREAKFAST", "LUNCH", "DINNER", "SNACK")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanScreen(
+    onOpenHistory: () -> Unit = {},
     onOpenShoppingList: () -> Unit = {},
     onOpenRecipe: (String) -> Unit = {},
     vm: PlanViewModel = hiltViewModel(),
     autoVm: AutoPlanViewModel = hiltViewModel(),
+    homeVm: HomeViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
     val autoState by autoVm.state.collectAsState()
+    val homeState by homeVm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
     var pickerForSlot by remember { mutableStateOf<Long?>(null) }
     var addSlotDialog by remember { mutableStateOf(false) }
     var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
+
+    // Sync date PlanViewModel ↔ HomeViewModel
+    LaunchedEffect(state.selectedDay) { homeVm.setDate(state.selectedDay) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -126,11 +142,28 @@ fun PlanScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         AmbientBackdrop()
 
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            // Header — Histamind §6.3: SectionPill+Glass-Tile-Row oben, GradientText darunter.
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionPill(label = "PLAN")
+        // Einzige durchgehend scrollbare LazyColumn — Ernährung + Wasser + Tagesplan
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().statusBarsPadding(),
+            contentPadding = PaddingValues(bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // ── HEADER ──
+            item(key = "header") {
+                DateNavigator(
+                    homeState.date,
+                    { d -> vm.selectDay(d); homeVm.setDate(d) },
+                    Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                )
+            }
+
+            // ── AKTIONEN ──
+            item(key = "actions") {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SectionPill(label = "HOME")
                     Spacer(Modifier.weight(1f))
                     GlassIconTile(
                         onClick = { autoVm.open() },
@@ -142,65 +175,111 @@ fun PlanScreen(
                         contentDescription = "Einkaufsliste",
                     ) { Icon(Icons.Filled.ShoppingCart, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
                 }
-                Spacer(Modifier.height(6.dp))
-                GradientText(
-                    text = "Wochenplan",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.W800,
-                        letterSpacing = (-0.5).sp,
-                    ),
-                )
             }
 
-            DayStrip(selected = state.selectedDay, onPick = vm::selectDay)
+            // ── ERNÄHRUNG ──
+            item(key = "nutrition") {
+                NeoSectionLabel("Ernährung", Modifier.padding(horizontal = 20.dp))
+                NeoCard(Modifier.padding(horizontal = 20.dp)) {
+                    PinnedNutrientCard(
+                        entries = homeState.pinnedKeys.filter { it != "water" }.map { k ->
+                            val tr = homeState.trendTotals.entries.sortedBy { it.key }.map { (_, t) -> trend(k, t) }
+                            when (k) {
+                                "kcal"    -> PinnedNutrientEntry(k, homeState.totals.kcal.toDouble(), homeState.targets.kcal.toDouble(), tr)
+                                "protein" -> PinnedNutrientEntry(k, homeState.totals.proteinG, homeState.targets.proteinG.toDouble(), tr)
+                                "carbs"   -> PinnedNutrientEntry(k, homeState.totals.carbsG, homeState.targets.carbsG.toDouble(), tr)
+                                "fat"     -> PinnedNutrientEntry(k, homeState.totals.fatG, homeState.targets.fatG.toDouble(), tr)
+                                else      -> PinnedNutrientEntry(k, 0.0,
+                                    de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(k)?.defaultPerDay ?: 1.0, tr)
+                            }
+                        },
+                        pinnedKeys = homeState.pinnedKeys,
+                        expanded = homeState.pinsExpanded,
+                        onToggleExpanded = homeVm::togglePinsExpanded,
+                        onTogglePin = homeVm::togglePin,
+                    )
+                }
+            }
 
-            Spacer(Modifier.height(8.dp))
+            // ── WASSER ──
+            if (homeState.pinnedKeys.contains("water")) {
+                item(key = "water") {
+                    NeoSectionLabel("Wasser", Modifier.padding(horizontal = 20.dp))
+                    NeoCard(Modifier.padding(horizontal = 20.dp)) {
+                        Column {
+                            WaterStageSlider(
+                                homeState.waterMl, homeState.waterGhostMl, homeState.targets.waterMl,
+                                homeState.waterReminderEnabled, homeVm::setWaterMl, homeVm::setWaterReminderEnabled,
+                            )
+                            val wv = homeState.waterTrend.entries.sortedBy { it.key }.map { it.value.toDouble() }
+                            if (wv.size >= 2) {
+                                val s = (homeState.waterMl / homeState.targets.waterMl.coerceAtLeast(1))
+                                Sparkline(wv, hm.ambientCyan, Modifier.fillMaxWidth().padding(top = 4.dp).height(22.dp), homeState.targets.waterMl.toDouble(), s)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── SUPPLEMENTE ──
+            if (homeState.supplementChecklist.isNotEmpty()) {
+                item(key = "supplements") {
+                    NeoSectionLabel("Supplemente", Modifier.padding(horizontal = 20.dp))
+                    NeoCard(Modifier.padding(horizontal = 20.dp), contentPadding = PaddingValues(0.dp)) {
+                        SupplementChecklist(homeState.supplementChecklist, homeVm::markSupplementTaken)
+                    }
+                }
+            }
+
+            // ── TAGSPLAN ──
+            item(key = "plan_label") {
+                NeoSectionLabel("Tagesplan", Modifier.padding(horizontal = 20.dp))
+            }
+
+            item(key = "day_strip") {
+                DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
+            }
 
             if (state.slots.isEmpty()) {
-                Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Noch keine Mahlzeiten geplant",
-                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                            color = hm.fgSecondary,
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        TextButton(onClick = { addSlotDialog = true }) {
-                            Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
-                            Spacer(Modifier.width(6.dp))
-                            Text("Mahlzeit hinzufügen", color = hm.ambientViolet)
+                item(key = "empty") {
+                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Noch keine Mahlzeiten geplant",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                color = hm.fgSecondary,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            TextButton(onClick = { addSlotDialog = true }) {
+                                Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
+                                Spacer(Modifier.width(6.dp))
+                                Text("Mahlzeit hinzufügen", color = hm.ambientViolet)
+                            }
                         }
                     }
                 }
             } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    item {
-                        DayHeader(date = state.selectedDay)
-                    }
-                    item {
-                        DaySummary(slots = state.slots)
-                    }
-                    items(state.slots, key = { it.slot.id }) { sw ->
-                        SlotCard(
-                            slotType = sw.slot.slotType,
-                            consumed = sw.slot.consumed,
-                            items = sw.items,
-                            recipeDtos = state.recipeDtos,
-                            onOpenRecipe = onOpenRecipe,
-                            onOpenIngredient = { id ->
-                                state.ingredientDtos[id]?.let { detailTarget = it }
-                            },
-                            onAddItem = { pickerForSlot = sw.slot.id },
-                            onMarkConsumed = { vm.markConsumed(sw.slot.id) },
-                            onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
-                            onDeleteItem = { id -> vm.deleteItem(id) },
-                        )
-                    }
-                    item { Spacer(Modifier.height(96.dp)) }
+                item(key = "day_header") {
+                    DayHeader(date = state.selectedDay)
+                }
+                item(key = "day_summary") {
+                    DaySummary(slots = state.slots)
+                }
+                items(state.slots, key = { it.slot.id }) { sw ->
+                    SlotCard(
+                        slotType = sw.slot.slotType,
+                        consumed = sw.slot.consumed,
+                        items = sw.items,
+                        recipeDtos = state.recipeDtos,
+                        onOpenRecipe = onOpenRecipe,
+                        onOpenIngredient = { id ->
+                            state.ingredientDtos[id]?.let { detailTarget = it }
+                        },
+                        onAddItem = { pickerForSlot = sw.slot.id },
+                        onMarkConsumed = { vm.markConsumed(sw.slot.id) },
+                        onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
+                        onDeleteItem = { id -> vm.deleteItem(id) },
+                    )
                 }
             }
         }
@@ -783,4 +862,8 @@ private fun SlotItemPicker(
             }
         }
     }
+}
+
+private fun trend(k: String, t: de.healthforge.data.repository.DayNutrientTotals) = when (k) {
+    "kcal" -> t.kcal; "protein" -> t.proteinG; "carbs" -> t.carbsG; "fat" -> t.fatG; else -> 0.0
 }

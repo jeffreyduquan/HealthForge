@@ -1415,7 +1415,7 @@ User-Direktive: P6 wird autonom ausgeführt. Es werden nur **Critical-Decision-Q
 | Add-Flow-Konsolidierung (F-007) | „Hinzufügen"-Buttons in Home/Plan navigieren direkt zu `LebensmittelScreen` mit Pre-Selection-Mode (Result-Callback). Eigenes Add-Sheet entfällt. | Reduziert Navigation-Tiefe; ein Pattern statt zwei. |
 | Listen-Vorbefüllung (F-009) | `IngredientScreen` + `RecipeScreen` laden bei Open Paginated-Page (50 Items alphabetisch); Search filtert clientseitig + serverseitig. | Bestehende Endpoints supporten Paged-List; nur UI-Flag. |
 | Wording-Fix (F-008) | Plan-Add-Sheet: „Rezept oder Lebensmittel" (ersetzt „Zutat"). Glossary-Lock: „Zutat" = Bestandteil EINES Rezepts; „Lebensmittel" = Standalone-Eintrag in Datenbank. | Klarer Glossary-Split. |
-| Bottom-Nav-Structure | Bleibt 5 Tabs in aktueller Reihenfolge (Home/Essen/Plan/Log/Profil). | Keine Nav-Strukturänderung — matched Histamind nah genug. |
+| Bottom-Nav-Structure | 5 Tabs: Home (fusioniert ex-Home + ex-Plan), Gruppen, Essen, Log, Profil. | P7-Refactor 2026-06-11: Plan-Tab in Home integriert, HomeScreen.kt gelöscht. |
 | Slider-Granularität (F-003) | Age 14–100 step 1; Height 140–220 cm step 1; Weight 30–200 kg step 0.5. | Decken realistische Range; halb-kg-Granularität fürs Tracking. |
 
 **Critical-Decision-Trigger** (askQuestion nur bei):
