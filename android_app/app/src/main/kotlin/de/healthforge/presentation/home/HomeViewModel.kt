@@ -451,6 +451,8 @@ class HomeViewModel @Inject constructor(
 
     fun getIngredientById(id: String): Result<IngredientDto> = kotlinx.coroutines.runBlocking { ingredientRepo.byId(id) }
 
+    suspend fun fetchIngredientById(id: String): Result<IngredientDto> = ingredientRepo.byId(id)
+
     /**
      * Manually mark a supplement as taken from the Home-checklist tap (bypassing the
      * notification action). REQ-SUPP-003.

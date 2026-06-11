@@ -160,6 +160,8 @@ class PlanViewModel @Inject constructor(
 
     fun getIngredientById(id: String): Result<IngredientDto> = kotlinx.coroutines.runBlocking { ingredientRepo.byId(id) }
 
+    suspend fun fetchIngredientById(id: String): Result<IngredientDto> = ingredientRepo.byId(id)
+
     val supplementList: List<SupplementEntity> by lazy { kotlinx.coroutines.runBlocking { supplementRepo.listAll() } }
 
     fun addSupplementItem(slotId: Long, sup: SupplementEntity) = viewModelScope.launch {

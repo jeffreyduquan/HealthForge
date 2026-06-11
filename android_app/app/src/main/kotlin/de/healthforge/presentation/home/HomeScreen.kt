@@ -95,7 +95,7 @@ fun HomeScreen(
             if (state.supplementChecklist.isNotEmpty()) SupplementsCard(state, vm)
             OverviewCard(state, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement, onOpenDetail = { id ->
                 scope.launch {
-                    vm.getIngredientById(id)
+                    vm.fetchIngredientById(id)
                         .onSuccess { detailTarget = it }
                         .onFailure { s.showSnackbar("Lebensmittel konnte nicht geladen werden") }
                 }

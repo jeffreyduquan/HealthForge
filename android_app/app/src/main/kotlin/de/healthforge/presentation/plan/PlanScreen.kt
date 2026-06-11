@@ -196,7 +196,7 @@ fun PlanScreen(
                             onOpenRecipe = onOpenRecipe,
                             onOpenIngredient = { id ->
                                 scope.launch {
-                                    vm.getIngredientById(id)
+                                    vm.fetchIngredientById(id)
                                         .onSuccess { detailTarget = it }
                                         .onFailure { snackbar.showSnackbar("Lebensmittel konnte nicht geladen werden") }
                                 }
