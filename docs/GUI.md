@@ -126,7 +126,7 @@ Verwendung):
 | `displaySmall` | 36sp | 400 | 44sp | Splash-Screen |
 | `headlineLarge` | 32sp | 400 | 40sp | Empty-State-Heroes |
 | `headlineMedium` | 28sp | 400 | 36sp | Screen-Titel groß |
-| `headlineSmall` | 24sp | 400 | 32sp | Section-Header (Home, Plan) |
+| `headlineSmall` | 24sp | 400 | 32sp | Section-Header (Home) |
 | `titleLarge` | 22sp | 500 | 28sp | TopAppBar-Titel, Dialog-Titel |
 | `titleMedium` | 16sp | 500 | 24sp | Card-Titel, List-Item-Primärtext |
 | `titleSmall` | 14sp | 500 | 20sp | Tab-Labels, Chip-Text |
@@ -277,17 +277,17 @@ außer den unten gelisteten Wrapper-Components.
 | `WaterTracker` | Horizontale Glas-Reihe mit getappten Füll-Glässern + Plus-Button |
 | `RatingPill` | 4-state-Pill (Recommend / NotRecommend / MoreOften / Intolerant) basierend auf Context |
 | `AllergenWarningBadge` | Roter Badge mit Allergen-Icon + Text bei Konflikt |
-| `MealSlot` | Slot-Card für Plan-Tab mit Mahlzeit-Typ, Zeit, Item-Liste, "Habe gegessen"-Button |
+| `MealSlot` | Slot-Card für Home-Tab (Tagesplan) mit Mahlzeit-Typ, Zeit, Item-Liste, "Habe gegessen"-Button |
 | `SymptomSeverityChip` | FilterChip mit Severity-Color-Background (1–5) |
 | `EmptyState` | Hero-Icon + Headline + Body + Optional-Action-Button |
 | `OfflineBanner` | Snackbar-Variante oben, persistent, mit Retry-Button |
 | `PhasePlaceholder` | Vollscreen-Placeholder für Features die in späterer Phase kommen |
-| `DateNavigator` | Pfeil-Links / Datum-Pill / Pfeil-Rechts (Home, Plan, Log) |
+| `DateNavigator` | Pfeil-Links / Datum-Pill / Pfeil-Rechts (Home, Log) |
 | `PinnedNutrientCard` (P7) | Glass-Card mit einer Zeile pro gepinntem Nährstoff. Jede Zeile = **Stufen-Bar** (P7.S3.b: einheitliche Mechanik mit Wasser). Layout: Name + Wert/Ziel + Lv-Badge (ab Stufe ≥ 1) + Prozent + gefüllte Bar darunter. Bar-Farbe = `waterStageGradient(stage)`, Track = `waterStageTrackColor(stage)` (Vorgängerstufe × 0.25). `trailingSlot` rendert WaterStageSlider als letzte Zeile. **P7.S4 4e (Revision 2026-05-28):** Card-Header mit Titel ("Angepinnt" ↔ "Nährstoffe verwalten") + **einzigem** Chevron-IconButton (Expand-Toggle). Collapsed-Modus (default) = nur gepinnte Progress-Rows + Wasser-Slot. Expanded-Modus = vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges) mit kompakter Toggle-Row pro Nährstoff: Name + DGE-Default + trailing `IconButton(PushPin)`. **Filled** = pinned, **Outlined** = nicht. Tap → `onTogglePin(key)` (sofort persistent in `UserProfileEntity.pinnedNutrientsJson`, Min-1-Invariant). Visuelle Differenzierung Aktiv/Inaktiv: aktiv = `Icons.Filled.PushPin` (18.dp) in `hm.ambientViolet` auf rundem `ambientViolet` Alpha 0.22 Background; inaktiv = `Icons.Outlined.PushPin` (16.dp) in `hm.fgTertiary`, kein Background. Header-Chevron: violette Pill-Affordance (`ambientViolet`-Background Alpha 0.12 + Border Alpha 0.35 im Collapsed; Alpha 0.28 + Border Alpha 0.7 + violet-Tint im Expanded). |
 | `WaterBarWithGhost` (P7) | Single Linear-Bar mit ZWEI ueberlagerten Progress-Layern (real blau + ghost transparent + Defizit-Bereich rot). Canvas-basiert, beidseitig draggable Slider on top. Schritt 50 ml. |
 | `WaterSlider` (P7) | Slider auf `WaterBarWithGhost`. onValueChangeFinished → `WaterIntakeRepository.add(delta)`. Triggert 5-min Debounce in `WaterDeficitScheduler`. |
 | `NutrientRow` (P7) | Kompakte Zeile fuer Expand-Liste „Alle Naehrstoffe": Pin-Icon (Toggle) + Name + Wert/Ziel + Mini-LinearBar. Reagiert sofort auf Pin-Tap. |
-| `PlannedMealRow` (P7) | Zeile im Home-Section „Geplante Mahlzeiten heute": Checkbox + Zeit + Mahlzeit-Name. Check → `intake_entries`-Insert mit Snapshot; Uncheck-Undo binnen 60 s per Snackbar. |
+| `PlannedMealRow` (P7) | Zeile im Home-Tab „Geplante Mahlzeiten heute": Checkbox + Zeit + Mahlzeit-Name. Check → `intake_entries`-Insert mit Snapshot; Uncheck-Undo binnen 60 s per Snackbar. |
 | `NutrientGoalRow` (P7) | Zeile im Profil-Tagesziele-Section: Naehrstoff-Name + Default-Value (klein, read-only) + Override-NumberField + Reset-Icon. Override schreibt in `UserProfileEntity.dailyNutrientGoalsJson`. |
 | `IngredientDetailSheet` (P7.S5 4f) | `ModalBottomSheet` (skipPartiallyExpanded). Zeigt zu einem `IngredientDto` pro 100 g: Header (`name_de` + Brand + Source-Badge mit `fdc_id`), Makros (8 Felder, nur gesetzte), Mikronährstoffe gruppiert in Vitamine + Mineralstoffe (gefiltert auf `value > 0`, Reihenfolge aus `NutrientCatalog.ofCategory`, jede Zeile mit %-DGE-Pill `(value / nutrient.defaultPerDay) × 100`), Allergene/FODMAP-Chips (conditional), Histamin-Block (conditional). Sub-Components: `SourceBadge` (Box mit `ambientViolet` Alpha 0.16 + `RoundedCornerShape(50)`), `MacrosGrid`, `MicroSection(category, title, micros)`, `ValueRow(label, value, percentDge)`. Layout-Constraints: `padding(horizontal = 20.dp)`, Sections getrennt durch `SectionPill` + `Spacer(16.dp)`. Format-Helper: ≥100 ⇒ Int, ≥10 ⇒ 1 Dezimale, sonst 2. |
 
