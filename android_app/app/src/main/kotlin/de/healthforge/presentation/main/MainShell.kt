@@ -151,6 +151,7 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 PlanScreen(
                     onOpenHistory = { navController.navigate(MainRoutes.INTAKE_HISTORY) },
                     onOpenShoppingList = { navController.navigate(MainRoutes.SHOPPING_LIST) },
+                    onOpenRecipe = { id -> navController.navigate(MainRoutes.recipeDetail(id)) },
                 )
             }
             composable(MainRoutes.ESSEN) {
