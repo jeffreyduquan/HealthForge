@@ -147,11 +147,27 @@ fun PlanScreen(
             contentPadding = PaddingValues(bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ── TAGSPLAN (ganz oben) ──
-            item(key = "plan_label") {
-                NeoSectionLabel("Tagesplan", Modifier.padding(horizontal = 20.dp))
+            // ── AKTIONEN (ganz oben) ──
+            item(key = "actions") {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SectionPill(label = "HOME")
+                    Spacer(Modifier.weight(1f))
+                    GlassIconTile(
+                        onClick = { autoVm.open() },
+                        contentDescription = "Plan generieren",
+                    ) { Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
+                    Spacer(Modifier.width(8.dp))
+                    GlassIconTile(
+                        onClick = onOpenShoppingList,
+                        contentDescription = "Einkaufsliste",
+                    ) { Icon(Icons.Filled.ShoppingCart, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
+                }
             }
 
+            // ── TAGSPLAN ──
             item(key = "day_strip") {
                 DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
             }
@@ -196,26 +212,6 @@ fun PlanScreen(
                         onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
                         onDeleteItem = { id -> vm.deleteItem(id) },
                     )
-                }
-            }
-
-            // ── AKTIONEN ──
-            item(key = "actions") {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SectionPill(label = "HOME")
-                    Spacer(Modifier.weight(1f))
-                    GlassIconTile(
-                        onClick = { autoVm.open() },
-                        contentDescription = "Plan generieren",
-                    ) { Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
-                    Spacer(Modifier.width(8.dp))
-                    GlassIconTile(
-                        onClick = onOpenShoppingList,
-                        contentDescription = "Einkaufsliste",
-                    ) { Icon(Icons.Filled.ShoppingCart, contentDescription = null, tint = hm.fgPrimary, modifier = Modifier.size(18.dp)) }
                 }
             }
 
