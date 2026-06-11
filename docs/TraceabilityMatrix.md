@@ -66,7 +66,7 @@
 
 | REQ-ID | Phase | Status | Implementation-File |
 |---|---|:-:|---|
-| REQ-NAV-001 | P7 | ✅ | `android_app/.../presentation/main/MainShell.kt` (NavigationBar 5 Items: Home/Gruppen/Essen/Log/Profil — Home fusioniert ex-Home + ex-Plan) |
+| REQ-NAV-001 | P7 | ✅ | `android_app/.../presentation/main/MainShell.kt` (NavigationBar 6 Items: Home/Plan/Gruppen/Essen/Log/Profil) |
 | REQ-NAV-002 | P1 | ✅ | `android_app/.../presentation/essen/EssenScreen.kt` (TabRow 3 Sub-Tabs: Lebensmittel/Rezepte/Supplements) |
 | REQ-NAV-003 | P1 | ✅ | `presentation/common/PhasePlaceholder.kt` (zentrale Komponente: Icon + Title + Description + optional PhaseLabel); `presentation/plan/PlanScreen.kt` → P2-Label „Mahlzeiten-Wochenplaner“; `presentation/log/LogScreen.kt` → P3-Label „Symptom-Tagebuch“; `EssenScreen.SubTabPlaceholder` für Rezepte+Supplements (P1.S8 refactor) |
 | REQ-NAV-004 | P3 | ✅ | `presentation/log/LogScreen.kt` (Symptom-Tagebuch vollständig in P3.S1+P3.S4); Verlauf-Button: `HomeScreen.kt` TopAppBar action → `MainRoutes.INTAKE_HISTORY` |

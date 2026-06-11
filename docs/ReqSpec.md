@@ -7,7 +7,7 @@
 This document is the single source of truth for **what HealthForge is**. Anything not in this document or its companion docs is out of scope.
 
 ### Changelog
-- **v0.2 (2025-05-25)**: Scope merged — M1+M2+M3 → unified v1.0 release. Added REQ-RATING split (local + community). Promoted Supplement-Peer-Review, Meal-Planner, Symptom-Log, Wasser-Tracker, Groups, Reminders, Export, Insights, Barcode, Field-PR, Full Admin UI from "deferred" to in-scope. Locked 5-Tab navigation (Home/Gruppen/Essen/Log/Profil). Log-Tab repurposed from intake-history → symptom-diary.
+- **v0.2 (2025-05-25)**: Scope merged — M1+M2+M3 → unified v1.0 release. Added REQ-RATING split (local + community). Promoted Supplement-Peer-Review, Meal-Planner, Symptom-Log, Wasser-Tracker, Groups, Reminders, Export, Insights, Barcode, Field-PR, Full Admin UI from "deferred" to in-scope. Locked 5-Tab navigation (Home/Plan/Essen/Log/Profil). Log-Tab repurposed from intake-history → symptom-diary.
 - **v0.1 (2025-05-25)**: Initial lock — MVP scope, tech stack, data quality system.
 
 ---
@@ -81,7 +81,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 
 | Req | Statement |
 |---|---|
-| REQ-NAV-001 | The app SHALL use a **5-Tab Bottom-Navigation**: `Home`, `Gruppen`, `Essen`, `Log`, `Profil`. Der Home-Tab kombiniert die ehemaligen Tabs „Home" (Ernährungsübersicht, Wasser) und „Plan" (Mahlzeiten-Wochenplaner). |
+| REQ-NAV-001 | The app SHALL use a **6-Tab Bottom-Navigation**: `Home`, `Plan`, `Gruppen`, `Essen`, `Log`, `Profil`. |
 | REQ-NAV-002 | The `Essen`-Tab SHALL contain three Top-Sub-Tabs: `Lebensmittel`, `Rezepte`, `Supplements`. |
 | REQ-NAV-003 | Tabs not yet implemented in a development phase SHALL render a "Bald verfügbar"-Placeholder. |
 | REQ-NAV-004 | The `Log`-Tab SHALL be the **Symptom-Tagebuch** (NOT intake-history). Intake-history is accessible via Date-Navigation in Home (kein separater "Verlauf"-Button mehr). |

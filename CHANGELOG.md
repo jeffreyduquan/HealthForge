@@ -5,52 +5,6 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## Feature: P7 — Tab-Fusion: PLAN → HOME, alter HOME-Tab entfernt (2026-06-11)
-
-**Scope:** Der PLAN-Tab wird in HOME umbenannt und um die Ernährungs- & Wasser-Übersicht aus dem alten HOME-Tab erweitert. Der alte HOME-Tab entfällt. Bottom-Navigation geht von 6 auf 5 Tabs.
-
-**Änderungen:**
-
-**Navigation — MainShell.kt:**
-- `TABS`: HOME-Tab entfernt, PLAN-Tab → Label "Home", Icon `Icons.Filled.Home`
-- `startDestination`: `MainRoutes.HOME` → `MainRoutes.PLAN`
-- `composable(MainRoutes.HOME)` { HomeScreen } entfernt
-- `PlanScreen`-Aufruf um `onOpenHistory`-Parameter erweitert
-- Kommentare: 6-Tab → 5-Tab aktualisiert
-
-**UI — PlanScreen.kt (erweitert zum neuen Home):**
-- `HomeViewModel` als zusätzliches ViewModel integriert (`homeVm`)
-- Datum-Synchronisation: `LaunchedEffect` sync `PlanViewModel.selectedDay` → `HomeViewModel.setDate()`
-- Header: `DateNavigator` (aus Home) ersetzt alten PLAN-Header
-- Ernährungs-Übersicht: `PinnedNutrientCard` mit kcal/Protein/Carbs/Fat + 7-Tage-Sparklines
-- Wasser-Tracking: `WaterStageSlider` + Sparkline
-- Supplement-Checklist: `SupplementChecklist` (wenn Einträge vorhanden)
-- Tagesplan: `NeoSectionLabel("Tagesplan")` + bestehender `DayStrip` + `LazyColumn`
-- `trend()`-Helper-Funktion hinzugefügt
-- `onOpenHistory`-Parameter für Intake-History-Navigation
-
-**Touched Docs:**
-- `docs/Architecture.md` §3.1: `home/` + `plan/` → fusioniert zu `home/` (ex-Plan)
-- `docs/ReqSpec.md`: REQ-NAV-001 von 6-Tab auf 5-Tab; Changelog aktualisiert
-- `docs/UsabilityMap.md` §1.1: 6→5 Tabs; §1.3: Home-Zeile fusioniert; §3+§4: merge dokumentiert
-- `docs/GUI.md`: Section-Header, MealSlot, DateNavigator, PlannedMealRow referenzen aktualisiert
-- `docs/SprintPlan.md`: Bottom-Nav-Structure aktualisiert
-- `docs/TraceabilityMatrix.md`: REQ-NAV-001 aktualisiert
-- `CHANGELOG.md`: dieser Eintrag
-
-**Untouched Docs (Begründung):**
-- `docs/HistamindDesignReference.md`: Design-Tokens unverändert
-- `docs/TestStrategy.md`: Test-Strategie nicht betroffen (UI-Tests folgen in P7.S5)
-- `docs/BattleTestPlan.md`: Walkthrough-Pfade müssen aktualisiert werden (separater Task)
-- `docs/IngredientDbAudit-2026-05-31.md`: Datenbank nicht betroffen
-- `deploy/`: Infrastruktur nicht betroffen
-- `admin-ui/`: Admin-UI nicht betroffen
-- `server/`: Server nicht betroffen
-
-**Verifikation:** Android-Build `:app:assembleDebug` muss erfolgreich durchlaufen; manueller Smoketest: 5 Tabs sichtbar, Home-Tab selected, Ernährungsdaten + Tagesplan sichtbar.
-
----
-
 ## Feature: P7.S4 4b rev2 — Sparkline-Level-Lines, RecipeCard-Reuse, FAB-Consistency (2026-06-09)
 
 **Scope:** Sparkline-Y-Achse skaliert jetzt bis zur höchsten Stufe (nicht nur bis Daten-Maximum). Level-Linien dicker (1.6f statt 0.8f). HomeRecipeCard auf puren RecipeCard-Reuse vereinfacht — exakt identisch zu essen/rezepte. GEGESSEN-Toggle als dezenter grüner/outlined Chip ganz rechts. X-Buttons aus Home & Plan entfernt (nur Right-Swipe-Deletion). Alle + FABs auf GradientFab 48dp vereinheitlicht (Groups & Recipes umgestellt).

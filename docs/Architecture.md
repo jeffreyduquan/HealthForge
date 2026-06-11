@@ -87,7 +87,8 @@ Deployment für v1.0). Orchestrierung via **docker-compose**.
 ```
 app/
 ├── presentation/        ← Compose Screens + ViewModels (Hilt)
-│   ├── home/             ← Home-Tab (Ernährungsübersicht + Mahlzeiten-Wochenplaner, ex-Plan)
+│   ├── home/
+│   ├── plan/
 │   ├── essen/
 │   │   ├── lebensmittel/
 │   │   ├── rezepte/
