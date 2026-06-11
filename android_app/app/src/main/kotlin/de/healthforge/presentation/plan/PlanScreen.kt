@@ -730,29 +730,27 @@ private fun IngredientPlanCard(
 ) {
     val hm = LocalHmTokens.current
     val kcal = (item.snapshotKcalPer100g ?: 0.0) * item.amount / 100.0
-    val shape = RoundedCornerShape(16.dp)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(Brush.verticalGradient(listOf(hm.glassFillTop, hm.glassFillBottom)))
-            .border(1.dp, hm.glassBorder, shape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    androidx.compose.material3.ElevatedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                item.snapshotName,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = hm.fgPrimary,
-            )
-            Text(
-                "${"%.0f".format(item.amount)} g · ${kcal.toInt()} kcal",
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                color = hm.fgSecondary,
-            )
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    item.snapshotName,
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = hm.fgPrimary,
+                )
+                Text(
+                    "${"%.0f".format(item.amount)} g · ${kcal.toInt()} kcal",
+                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    color = hm.fgSecondary,
+                )
+            }
         }
     }
 }

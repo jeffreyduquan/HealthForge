@@ -115,16 +115,18 @@ private fun SupplementRow(
     onDelete: () -> Unit,
     onAdopt: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    val hm = LocalHmTokens.current
+    androidx.compose.material3.ElevatedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(sup.nameDe, style = MaterialTheme.typography.titleSmall)
+                    Text(sup.nameDe, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
                     if (!sup.isLocal) {
                         AssistChip(
@@ -136,29 +138,24 @@ private fun SupplementRow(
                         )
                     }
                 }
-                sup.brand?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall)
+                sup.brand?.takeIf { it.isNotBlank() }?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
                 }
                 Text(
                     "${sup.defaultDose} ${sup.unitLabel}" +
                         (sup.kcalPerDose?.let { " · ${it.toInt()} kcal" }.orEmpty()),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = hm.fgSecondary,
                 )
             }
             if (sup.isLocal) {
-                IconButton(onClick = onClick) {
-                    Text("Bearb.", style = MaterialTheme.typography.labelSmall)
-                }
+                TextButton(onClick = onClick) { Text("Bearb.") }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Löschen")
+                    Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = hm.fgTertiary)
                 }
             } else {
                 IconButton(onClick = onAdopt) {
-                    Icon(
-                        Icons.Filled.CloudDownload,
-                        contentDescription = "Übernehmen",
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+                    Icon(Icons.Filled.CloudDownload, contentDescription = "Übernehmen", tint = MaterialTheme.colorScheme.primary)
                 }
             }
         }
