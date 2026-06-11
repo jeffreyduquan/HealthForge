@@ -33,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.IntakeSourceType
+import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.essen.rezepte.RecipeCard
 import de.healthforge.presentation.common.PickerData
@@ -52,6 +56,7 @@ import de.healthforge.presentation.home.components.PinnedNutrientEntry
 import de.healthforge.presentation.home.components.Sparkline
 import de.healthforge.presentation.home.components.SupplementChecklist
 import de.healthforge.presentation.home.components.WaterStageSlider
+import de.healthforge.presentation.lebensmittel.components.IngredientDetailSheet
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
@@ -60,6 +65,7 @@ import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
 import de.healthforge.presentation.theme.StatusOverUl
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +79,8 @@ fun HomeScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     val s = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
 
     Box(Modifier.fillMaxSize().background(hm.background)) {
         AmbientBackdrop(Modifier.fillMaxSize())
@@ -85,7 +93,13 @@ fun HomeScreen(
             NutritionCard(state, vm)
             if (state.pinnedKeys.contains("water")) WaterCard(state, vm, hm)
             if (state.supplementChecklist.isNotEmpty()) SupplementsCard(state, vm)
-            OverviewCard(state, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement)
+            OverviewCard(state, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement, onOpenDetail = { id ->
+                scope.launch {
+                    vm.getIngredientById(id)
+                        .onSuccess { detailTarget = it }
+                        .onFailure { s.showSnackbar("Lebensmittel konnte nicht geladen werden") }
+                }
+            })
             Spacer(Modifier.height(80.dp).navigationBarsPadding())
         }
         // FAB
@@ -96,6 +110,10 @@ fun HomeScreen(
             icon = { Icon(Icons.Filled.Add, "Hinzufügen", tint = hm.fgPrimary, modifier = Modifier.size(20.dp)) },
         )
         SnackbarHost(s, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 96.dp))
+    }
+
+    detailTarget?.let { target ->
+        IngredientDetailSheet(item = target, onDismiss = { detailTarget = null })
     }
 
     PlanItemPicker(
@@ -183,6 +201,7 @@ private fun OverviewCard(
     onOpenRecipe: (String) -> Unit,
     onOpenFood: (String) -> Unit,
     onOpenSupplement: (Long) -> Unit,
+    onOpenDetail: (String) -> Unit = {},
 ) {
     NeoSectionLabel("Übersicht")
     if (state.plannedMeals.isEmpty()) {
@@ -190,7 +209,7 @@ private fun OverviewCard(
         return
     }
     state.plannedMeals.forEach { m ->
-        PlannedEntry(m, state.recipeDtos, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement)
+        PlannedEntry(m, state.recipeDtos, vm, hm, onOpenRecipe, onOpenFood, onOpenSupplement, onOpenDetail)
     }
 }
 
@@ -204,6 +223,7 @@ private fun PlannedEntry(
     onOpenRecipe: (String) -> Unit,
     onOpenFood: (String) -> Unit,
     onOpenSupplement: (Long) -> Unit,
+    onOpenDetail: (String) -> Unit = {},
 ) {
     val item = meal.item
     val isRecipe = item.sourceType == IntakeSourceType.RECIPE
@@ -244,7 +264,8 @@ private fun PlannedEntry(
             val onClick = {
                 when {
                     isSupp -> onOpenSupplement(item.sourceId.toLongOrNull() ?: 0L)
-                    else -> onOpenFood(item.sourceId)
+                    isRecipe -> onOpenRecipe(item.sourceId)
+                    else -> onOpenDetail(item.sourceId)
                 }
             }
             Row(

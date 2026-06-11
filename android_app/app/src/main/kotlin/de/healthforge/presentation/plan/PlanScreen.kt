@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,11 +62,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.MealPlanItemEntity
+import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.common.PickerData
 import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
+import de.healthforge.presentation.lebensmittel.components.IngredientDetailSheet
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientFab
@@ -75,6 +79,7 @@ import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.SectionPill
 import de.healthforge.presentation.theme.SegmentedTabs
 import de.healthforge.presentation.theme.StatusOverUl
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -100,8 +105,10 @@ fun PlanScreen(
     val autoState by autoVm.state.collectAsState()
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var pickerForSlot by remember { mutableStateOf<Long?>(null) }
     var addSlotDialog by remember { mutableStateOf(false) }
+    var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
 
     LaunchedEffect(state.message) {
         state.message?.let {
@@ -187,6 +194,13 @@ fun PlanScreen(
                             items = sw.items,
                             recipeDtos = state.recipeDtos,
                             onOpenRecipe = onOpenRecipe,
+                            onOpenIngredient = { id ->
+                                scope.launch {
+                                    vm.getIngredientById(id)
+                                        .onSuccess { detailTarget = it }
+                                        .onFailure { snackbar.showSnackbar("Lebensmittel konnte nicht geladen werden") }
+                                }
+                            },
                             onAddItem = { pickerForSlot = sw.slot.id },
                             onMarkConsumed = { vm.markConsumed(sw.slot.id) },
                             onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
@@ -267,6 +281,10 @@ fun PlanScreen(
             onCommit = { autoVm.commit() },
             onCancel = { autoVm.dismiss() },
         )
+    }
+
+    detailTarget?.let { target ->
+        IngredientDetailSheet(item = target, onDismiss = { detailTarget = null })
     }
 }
 
@@ -480,6 +498,7 @@ private fun SlotCard(
     items: List<MealPlanItemEntity>,
     recipeDtos: Map<String, RecipeListItemDto>,
     onOpenRecipe: (String) -> Unit = {},
+    onOpenIngredient: (String) -> Unit = {},
     onAddItem: () -> Unit,
     onMarkConsumed: () -> Unit,
     onDeleteSlot: () -> Unit,
@@ -550,9 +569,19 @@ private fun SlotCard(
             }
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 items.forEach { item ->
-                    val dto = recipeDtos[item.sourceId] ?: item.toRecipeListItemDto(slotType)
-                    SwipeDeletePlanItem(onDelete = { onDeleteItem(item.id) }) {
-                        RecipeCard(recipe = dto, onClick = { onOpenRecipe(dto.id) })
+                    val isRecipe = item.sourceType == IntakeSourceType.RECIPE
+                    if (isRecipe) {
+                        val dto = recipeDtos[item.sourceId] ?: item.toRecipeListItemDto(slotType)
+                        SwipeDeletePlanItem(onDelete = { onDeleteItem(item.id) }) {
+                            RecipeCard(recipe = dto, onClick = { onOpenRecipe(dto.id) })
+                        }
+                    } else {
+                        SwipeDeletePlanItem(onDelete = { onDeleteItem(item.id) }) {
+                            IngredientPlanCard(
+                                item = item,
+                                onClick = { onOpenIngredient(item.sourceId) },
+                            )
+                        }
                     }
                 }
             }
@@ -604,6 +633,44 @@ private fun SwipeDeletePlanItem(
         enableDismissFromEndToStart = false,
         enableDismissFromStartToEnd = true,
     ) { content() }
+}
+
+/**
+ * Card for ingredient/food items in Plan slots. Renders a GlassCard with
+ * name, amount, kcal — tap opens [IngredientDetailSheet].
+ */
+@Composable
+private fun IngredientPlanCard(
+    item: MealPlanItemEntity,
+    onClick: () -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val kcal = (item.snapshotKcalPer100g ?: 0.0) * item.amount / 100.0
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(hm.glassFillTop, hm.glassFillBottom)))
+            .border(1.dp, hm.glassBorder, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                item.snapshotName,
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = hm.fgPrimary,
+            )
+            Text(
+                "${"%.0f".format(item.amount)} g · ${kcal.toInt()} kcal",
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = hm.fgSecondary,
+            )
+        }
+    }
 }
 
 private fun MealPlanItemEntity.toRecipeListItemDto(slotType: String): RecipeListItemDto {
