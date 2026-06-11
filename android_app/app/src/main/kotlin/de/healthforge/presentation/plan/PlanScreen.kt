@@ -70,7 +70,6 @@ import de.healthforge.presentation.common.PickerData
 import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
 import de.healthforge.presentation.home.HomeViewModel
-import de.healthforge.presentation.home.components.DateNavigator
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
 import de.healthforge.presentation.home.components.Sparkline
@@ -148,15 +147,6 @@ fun PlanScreen(
             contentPadding = PaddingValues(bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ── HEADER ──
-            item(key = "header") {
-                DateNavigator(
-                    homeState.date,
-                    { d -> vm.selectDay(d); homeVm.setDate(d) },
-                    Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                )
-            }
-
             // ── AKTIONEN ──
             item(key = "actions") {
                 Row(
