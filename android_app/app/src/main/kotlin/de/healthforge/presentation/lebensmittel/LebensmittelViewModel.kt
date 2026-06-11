@@ -8,6 +8,7 @@ import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.IngredientSuggestRequest
 import de.healthforge.data.network.FieldPrRequest
+import de.healthforge.data.prefs.IngredientRatingStore
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.ProfileRepository
 import kotlinx.coroutines.FlowPreview
@@ -33,6 +34,8 @@ data class LebensmittelState(
     val excludedFodmap: Set<FodmapType> = emptySet(),
     val submitting: Boolean = false,
     val toast: String? = null,
+    val likedIngredientIds: Set<String> = emptySet(),
+    val dislikedIngredientIds: Set<String> = emptySet(),
 )
 
 @OptIn(FlowPreview::class)
@@ -40,6 +43,7 @@ data class LebensmittelState(
 class LebensmittelViewModel @Inject constructor(
     private val ingredients: IngredientRepository,
     private val profile: ProfileRepository,
+    private val ratingStore: IngredientRatingStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LebensmittelState())
@@ -159,5 +163,22 @@ class LebensmittelViewModel @Inject constructor(
 
     fun clearToast() {
         _state.value = _state.value.copy(toast = null)
+    }
+
+    fun refreshRatings() {
+        _state.value = _state.value.copy(
+            likedIngredientIds = ratingStore.getLiked(),
+            dislikedIngredientIds = ratingStore.getDisliked(),
+        )
+    }
+
+    fun toggleLikeIngredient(id: String) {
+        ratingStore.toggleLike(id)
+        refreshRatings()
+    }
+
+    fun toggleDislikeIngredient(id: String) {
+        ratingStore.toggleDislike(id)
+        refreshRatings()
     }
 }

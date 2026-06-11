@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -86,6 +90,9 @@ fun LebensmittelScreen(
             vm.clearToast()
         }
     }
+
+    // Load ingredient ratings on first composition
+    LaunchedEffect(Unit) { vm.refreshRatings() }
 
     Column(
         modifier = Modifier
@@ -166,9 +173,13 @@ fun LebensmittelScreen(
                         IngredientRow(
                             item = item,
                             preselect = preselect,
+                            isLiked = state.likedIngredientIds.contains(item.id),
+                            isDisliked = state.dislikedIngredientIds.contains(item.id),
                             onPick = { onPick(item) },
                             onOpenDetail = { detailTarget = item },
                             onCorrect = { fieldPrTarget = item },
+                            onToggleLike = { vm.toggleLikeIngredient(item.id) },
+                            onToggleDislike = { vm.toggleDislikeIngredient(item.id) },
                         )
                     }
                 }
@@ -213,52 +224,81 @@ fun LebensmittelScreen(
 private fun IngredientRow(
     item: IngredientDto,
     preselect: Boolean,
+    isLiked: Boolean,
+    isDisliked: Boolean,
     onPick: () -> Unit,
     onOpenDetail: () -> Unit,
     onCorrect: () -> Unit,
+    onToggleLike: () -> Unit,
+    onToggleDislike: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    GlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = if (preselect) onPick else onOpenDetail),
-        padding = PaddingValues(12.dp),
+    androidx.compose.material3.ElevatedCard(
+        onClick = if (preselect) onPick else onOpenDetail,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column {
+        Column(modifier = Modifier.padding(12.dp)) {
+            // Title + Brand (RecipeCard-Stil)
             Text(
                 text = item.name_de,
-                style = MaterialTheme.typography.titleSmall,
-                color = hm.fgPrimary,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
-            item.brand?.let {
-                Text(text = it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
+            item.brand?.takeIf { it.isNotBlank() }?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary, maxLines = 1)
             }
-            Row(
-                modifier = Modifier.padding(top = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+
+            Spacer(Modifier.height(6.dp))
+
+            // Footer: kcal + Histamin + Source + Likes
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 item.energy_kcal_per_100g?.let {
-                    Text("${it.toInt()} kcal/100g", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                    Text("${it.toInt()} kcal", style = MaterialTheme.typography.labelMedium)
+                    Spacer(Modifier.width(16.dp))
                 }
                 item.histamine_score?.let {
-                    Text("Histamin: $it/3", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                    Text("Histamin $it/3", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
+                    Spacer(Modifier.width(16.dp))
                 }
-                Text("Quelle: ${item.source}", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                Text(item.source, style = MaterialTheme.typography.labelMedium, color = hm.fgTertiary)
+
+                if (!preselect) {
+                    Spacer(Modifier.weight(1f))
+                    // Like button (thumbs up)
+                    IconButton(onClick = onToggleLike, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Filled.ThumbUp,
+                            contentDescription = "Like",
+                            tint = if (isLiked) MaterialTheme.colorScheme.primary else hm.fgTertiary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                    // Dislike button (heart / not recommend)
+                    IconButton(onClick = onToggleDislike, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Filled.ThumbDown,
+                            contentDescription = "Nicht empfehlen",
+                            tint = if (isDisliked) MaterialTheme.colorScheme.error else hm.fgTertiary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
             }
+
+            // Allergens
             if (item.allergens.isNotEmpty()) {
                 Text(
                     text = "Enthält: " + item.allergens.joinToString(", "),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 2.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = hm.fgSecondary,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             }
-            // REQ-SEARCH-005 / REQ-QUALITY-004: FODMAP-Quality-Badges (German Labels).
+
+            // FODMAP badges
             if (item.fodmap_flags.isNotEmpty()) {
                 FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     item.fodmap_flags.forEach { flag ->
@@ -271,13 +311,10 @@ private fun IngredientRow(
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                if (!preselect) {
+
+            // Korrektur-Button
+            if (!preselect) {
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onCorrect) { Text("Korrektur vorschlagen") }
                 }
             }
