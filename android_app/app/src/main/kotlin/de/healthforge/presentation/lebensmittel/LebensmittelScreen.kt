@@ -52,7 +52,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
-import de.healthforge.presentation.lebensmittel.components.IngredientDetailSheet
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.LocalHmTokens
 

@@ -7,6 +7,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,9 +39,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.presentation.theme.FoodIcon
@@ -52,13 +59,16 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
- * A single intake entry rendered as a GlassCard row.
- * Swipe-to-dismiss triggers permanent deletion (IntakeEntry + linked MealPlanItem).
+ * Intake card with category icon (or recipe photo), name, time,
+ * and ONLY the currently pinned nutrients (no default g/kcal line).
+ * Swipe-to-dismiss = permanent cascade delete.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun IntakeCard(
     entry: IntakeEntryEntity,
+    pinnedKeys: List<String>,
+    recipeImageUrl: String? = null,
     onDelete: () -> Unit,
     onTap: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -66,6 +76,7 @@ fun IntakeCard(
     val hm = LocalHmTokens.current
     val sem = LocalSemanticColors.current
     val foodIcon = resolveIcon(entry)
+    val isRecipe = entry.sourceType == IntakeSourceType.RECIPE
 
     val swipeState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
@@ -123,61 +134,91 @@ fun IntakeCard(
                 )
                 .padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                // Category icon circle
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    hm.ambientViolet.copy(alpha = 0.15f),
-                                    hm.ambientCyan.copy(alpha = 0.08f),
-                                )
-                            )
-                        )
-                        .border(1.dp, hm.glassBorder, CircleShape),
-                    contentAlignment = Alignment.Center,
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                // ── Top row: icon/photo + name + time ──
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Icon(
-                        imageVector = foodIcon.icon,
-                        contentDescription = null,
-                        tint = foodIcon.tint ?: hm.fgSecondary,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+                    // Recipe photo or category icon
+                    if (isRecipe && !recipeImageUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(recipeImageUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = entry.snapshotName,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .border(1.dp, hm.glassBorder, CircleShape),
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            hm.ambientViolet.copy(alpha = 0.15f),
+                                            hm.ambientCyan.copy(alpha = 0.08f),
+                                        )
+                                    )
+                                )
+                                .border(1.dp, hm.glassBorder, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = foodIcon.icon,
+                                contentDescription = null,
+                                tint = foodIcon.tint ?: hm.fgSecondary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
 
-                // Name + portion
-                Column(modifier = Modifier.weight(1f)) {
+                    // Name
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = entry.snapshotName,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = hm.fgPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "${"%.0f".format(entry.portionGrams)} g",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = hm.fgTertiary,
+                        )
+                    }
+
+                    // Time
                     Text(
-                        text = entry.snapshotName,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = hm.fgPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    val portion = "${"%.0f".format(entry.portionGrams)} g"
-                    val kcal = entry.snapshotKcalPer100g?.let {
-                        " \u00b7 ${(it * entry.portionGrams / 100.0).toInt()} kcal"
-                    } ?: ""
-                    Text(
-                        text = "$portion$kcal",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = formatEntryTime(entry.loggedAt),
+                        style = MaterialTheme.typography.labelSmall,
                         color = hm.fgTertiary,
                     )
                 }
 
-                // Time
-                Text(
-                    text = formatEntryTime(entry.loggedAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = hm.fgTertiary,
-                )
+                // ── Pinned nutrients row ──
+                val nutrients = computePinnedNutrients(entry, pinnedKeys)
+                if (nutrients.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        nutrients.forEach { (label, value) ->
+                            Text(
+                                text = "$label $value",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.W500),
+                                color = hm.fgSecondary,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -201,8 +242,47 @@ fun resolveIcon(entry: IntakeEntryEntity): FoodIcon {
     }
 }
 
+/** Compute nutrient contributions for this entry, filtered to pinned keys. */
+fun computePinnedNutrients(entry: IntakeEntryEntity, pinnedKeys: List<String>): List<Pair<String, String>> {
+    val f = entry.portionGrams / 100.0
+    return pinnedKeys.mapNotNull { key ->
+        val value = when (key) {
+            "kcal" -> (entry.snapshotKcalPer100g ?: 0.0) * f
+            "protein" -> (entry.snapshotProteinPer100g ?: 0.0) * f
+            "carbs" -> (entry.snapshotCarbsPer100g ?: 0.0) * f
+            "fat" -> (entry.snapshotFatPer100g ?: 0.0) * f
+            "sugar" -> (entry.snapshotCarbsPer100g ?: 0.0) * f * 0.5 // heuristic
+            "fiber" -> 0.0 // not in snapshot
+            "salt" -> 0.0 // not in snapshot
+            "water" -> null // skip water
+            else -> null
+        }
+        value?.let { v ->
+            val label = nutrientShortLabel(key)
+            val formatted = when {
+                v < 1 -> "%.1f".format(v)
+                v < 100 -> "%.0f".format(v)
+                else -> "%.0f".format(v)
+            }
+            label to formatted
+        }
+    }
+}
+
+private fun nutrientShortLabel(key: String): String = when (key) {
+    "kcal" -> "kcal"
+    "protein" -> "Prot"
+    "carbs" -> "Carbs"
+    "fat" -> "Fat"
+    "sugar" -> "Zucker"
+    "fiber" -> "Ballast"
+    "salt" -> "Salz"
+    "satfat" -> "ges.Fett"
+    else -> key.take(4)
+}
+
 /**
- * Dotted "+" add button — large, centered, opens the item picker.
+ * Dotted "+" add button — navigates to Essen tab.
  */
 @Composable
 fun DottedAddButton(
@@ -246,3 +326,4 @@ fun DottedAddButton(
         )
     }
 }
+

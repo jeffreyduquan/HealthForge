@@ -43,6 +43,7 @@ import de.healthforge.presentation.plan.PlanScreen
 import de.healthforge.presentation.insights.InsightsScreen
 import de.healthforge.presentation.profile.ExportScreen
 import de.healthforge.presentation.profile.ProfileScreen
+import de.healthforge.presentation.supplements.SupplementDetailScreen
 import de.healthforge.presentation.supplements.SupplementEditScreen
 
 /** Bottom-Navigation tab destinations. REQ-NAV-001 (5 Tabs: Home/Gruppen/Essen/Log/Profil). */
@@ -98,6 +99,10 @@ object MainRoutes {
     fun recipeCreateWizard(groupId: String? = null): String =
         if (groupId.isNullOrBlank()) RECIPE_CREATE_WIZARD
         else "$RECIPE_CREATE_WIZARD?$RECIPE_CREATE_WIZARD_GROUP_ARG=$groupId"
+    /** P7.S4b — Full-screen supplement detail. */
+    const val SUPPLEMENT_DETAIL = "main/supplement-detail"
+    const val SUPPLEMENT_DETAIL_ARG = "id"
+    fun supplementDetail(id: String): String = "$SUPPLEMENT_DETAIL/$id"
 }
 
 private val TABS = listOf(
@@ -157,6 +162,15 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     onOpenHistory = { navController.navigate(MainRoutes.INTAKE_HISTORY) },
                     onOpenShoppingList = { navController.navigate(MainRoutes.SHOPPING_LIST) },
                     onOpenRecipe = { id -> navController.navigate(MainRoutes.recipeDetail(id)) },
+                    onOpenIngredient = { id -> navController.navigate(MainRoutes.ingredientDetail(id)) },
+                    onOpenSupplement = { id -> navController.navigate(MainRoutes.supplementDetail(id)) },
+                    onNavigateToEssen = {
+                        navController.navigate(MainRoutes.ESSEN) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 )
             }
             composable(MainRoutes.ESSEN) {
@@ -308,6 +322,19 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 val id = entry.arguments?.getString(MainRoutes.INGREDIENT_DETAIL_ARG) ?: return@composable
                 IngredientDetailScreen(
                     ingredientId = id,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            // P7.S4b: Full-screen supplement detail
+            composable(
+                route = "${MainRoutes.SUPPLEMENT_DETAIL}/{${MainRoutes.SUPPLEMENT_DETAIL_ARG}}",
+                arguments = listOf(
+                    navArgument(MainRoutes.SUPPLEMENT_DETAIL_ARG) { type = NavType.StringType },
+                ),
+            ) { entry ->
+                val id = entry.arguments?.getString(MainRoutes.SUPPLEMENT_DETAIL_ARG) ?: return@composable
+                SupplementDetailScreen(
+                    supplementId = id,
                     onBack = { navController.popBackStack() },
                 )
             }
