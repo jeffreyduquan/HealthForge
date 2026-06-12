@@ -190,14 +190,18 @@ fun PlanScreen(
             } else {
                 items(entries, key = { "intake-${it.id}" }) { entry ->
                     val recipeUrl = if (entry.sourceType == IntakeSourceType.RECIPE)
-                        homeState.recipeDtos[entry.sourceId]?.image_key?.let { k ->
-                            "https://api.healthforge.de/media/$k"
-                        } else null
+                        de.healthforge.data.repository.MediaRepository.imageUrl(
+                            "recipes",
+                            homeState.recipeDtos[entry.sourceId]?.image_key,
+                            variant = "medium"
+                        ) else null
                     IntakeCard(
                         entry = entry,
                         pinnedKeys = homeState.pinnedKeys,
                         recipeImageUrl = recipeUrl,
+                        ingredientDto = homeState.ingredientDtos[entry.sourceId],
                         onDelete = { homeVm.deleteIntakeEntryCascade(entry) },
+                        onToggleConsumed = { homeVm.toggleEntryConsumed(entry) },
                         onTap = {
                             when (entry.sourceType) {
                                 IntakeSourceType.RECIPE -> onOpenRecipe(entry.sourceId)

@@ -21,8 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -47,6 +50,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
+import de.healthforge.data.network.IngredientDto
 import de.healthforge.presentation.theme.FoodIcon
 import de.healthforge.presentation.theme.FoodIcons
 import de.healthforge.presentation.theme.LocalHmTokens
@@ -67,7 +71,9 @@ fun IntakeCard(
     entry: IntakeEntryEntity,
     pinnedKeys: List<String>,
     recipeImageUrl: String? = null,
+    ingredientDto: IngredientDto? = null,
     onDelete: () -> Unit,
+    onToggleConsumed: () -> Unit = {},
     onTap: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -182,10 +188,19 @@ fun IntakeCard(
                         style = MaterialTheme.typography.labelSmall,
                         color = hm.fgTertiary,
                     )
+                    // Consumed toggle
+                    IconButton(onClick = onToggleConsumed, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            imageVector = if (entry.consumed) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircleOutline,
+                            contentDescription = if (entry.consumed) "Gegessen" else "Nicht gegessen",
+                            tint = if (entry.consumed) hm.ambientCyan else hm.fgTertiary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
 
                 // ── Pinned nutrients row ──
-                val nutrients = computePinnedNutrients(entry, pinnedKeys)
+                val nutrients = computePinnedNutrients(entry, pinnedKeys, ingredientDto)
                 if (nutrients.isNotEmpty()) {
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -223,43 +238,78 @@ fun resolveIcon(entry: IntakeEntryEntity): FoodIcon {
     }
 }
 
-/** Compute nutrient contributions for this entry, filtered to pinned keys. */
-fun computePinnedNutrients(entry: IntakeEntryEntity, pinnedKeys: List<String>): List<Pair<String, String>> {
+/** Compute nutrient contributions for this entry, filtered to pinned keys. Uses German labels. */
+fun computePinnedNutrients(
+    entry: IntakeEntryEntity,
+    pinnedKeys: List<String>,
+    ingredientDto: IngredientDto? = null,
+): List<Pair<String, String>> {
     val f = entry.portionGrams / 100.0
     return pinnedKeys.mapNotNull { key ->
-        val value = when (key) {
+        // Try snapshot fields first, then micronutrients from DTO
+        val value: Double? = when (key) {
             "kcal" -> (entry.snapshotKcalPer100g ?: 0.0) * f
             "protein" -> (entry.snapshotProteinPer100g ?: 0.0) * f
             "carbs" -> (entry.snapshotCarbsPer100g ?: 0.0) * f
             "fat" -> (entry.snapshotFatPer100g ?: 0.0) * f
-            "sugar" -> (entry.snapshotCarbsPer100g ?: 0.0) * f * 0.5 // heuristic
-            "fiber" -> 0.0 // not in snapshot
-            "salt" -> 0.0 // not in snapshot
-            "water" -> null // skip water
-            else -> null
+            "sugar" -> ingredientDto?.sugar_g_per_100g?.times(f)
+            "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
+            "salt" -> ingredientDto?.salt_g_per_100g?.times(f)
+            "satfat" -> ingredientDto?.satfat_g_per_100g?.times(f)
+            "water" -> null // skip water on cards
+            else -> ingredientDto?.micronutrients?.get(key)?.times(f)
         }
         value?.let { v ->
-            val label = nutrientShortLabel(key)
+            val label = nutrientLabelDe(key)
             val formatted = when {
+                v < 0.1 -> "%.2f".format(v)
                 v < 1 -> "%.1f".format(v)
+                v < 10 -> "%.1f".format(v)
                 v < 100 -> "%.0f".format(v)
                 else -> "%.0f".format(v)
             }
-            label to formatted
+            if (v > 0) label to formatted else null
         }
     }
 }
 
-private fun nutrientShortLabel(key: String): String = when (key) {
+private fun nutrientLabelDe(key: String): String = when (key) {
     "kcal" -> "kcal"
-    "protein" -> "Prot"
-    "carbs" -> "Carbs"
-    "fat" -> "Fat"
+    "protein" -> "Eiweiß"
+    "carbs" -> "KH"
+    "fat" -> "Fett"
     "sugar" -> "Zucker"
-    "fiber" -> "Ballast"
+    "fiber" -> "Ballast."
     "salt" -> "Salz"
     "satfat" -> "ges.Fett"
-    else -> key.take(4)
+    "vitamin_a" -> "Vit.A"
+    "vitamin_b1" -> "Vit.B1"
+    "vitamin_b2" -> "Vit.B2"
+    "vitamin_b3" -> "Vit.B3"
+    "vitamin_b5" -> "Vit.B5"
+    "vitamin_b6" -> "Vit.B6"
+    "vitamin_b7" -> "Vit.B7"
+    "vitamin_b9" -> "Vit.B9"
+    "vitamin_b12" -> "Vit.B12"
+    "vitamin_c" -> "Vit.C"
+    "vitamin_d" -> "Vit.D"
+    "vitamin_e" -> "Vit.E"
+    "vitamin_k" -> "Vit.K"
+    "calcium" -> "Calcium"
+    "iron" -> "Eisen"
+    "magnesium" -> "Magnesium"
+    "zinc" -> "Zink"
+    "iodine" -> "Jod"
+    "potassium" -> "Kalium"
+    "sodium" -> "Natrium"
+    "phosphorus" -> "Phosphor"
+    "selenium" -> "Selen"
+    "manganese" -> "Mangan"
+    "copper" -> "Kupfer"
+    "chromium" -> "Chrom"
+    "molybdenum" -> "Molybdän"
+    "chloride" -> "Chlorid"
+    else -> key.take(6)
 }
 
 /**

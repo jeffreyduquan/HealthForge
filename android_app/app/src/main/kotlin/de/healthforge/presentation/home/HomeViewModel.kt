@@ -536,6 +536,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { intakeRepo.deleteById(id) }
     }
 
+    /** Toggle the consumed flag on an intake entry. */
+    fun toggleEntryConsumed(entry: IntakeEntryEntity) {
+        viewModelScope.launch {
+            intakeRepo.update(entry.copy(consumed = !entry.consumed))
+        }
+    }
+
     /**
      * Cascade-delete: removes the IntakeEntry AND any linked MealPlanItem
      * (matched by sourceType + sourceId for the current day). Also cleans up the

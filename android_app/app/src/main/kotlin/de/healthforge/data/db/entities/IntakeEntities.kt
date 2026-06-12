@@ -32,6 +32,7 @@ data class IntakeEntryEntity(
     val snapshotProteinPer100g: Double? = null,
     val snapshotCarbsPer100g: Double? = null,
     val snapshotFatPer100g: Double? = null,
+    val consumed: Boolean = true,
 )
 
 /**

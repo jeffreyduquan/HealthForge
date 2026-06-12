@@ -3,6 +3,8 @@ package de.healthforge.data.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import de.healthforge.data.db.dao.AllergyDao
 import de.healthforge.data.db.dao.IntakeEntryDao
 import de.healthforge.data.db.dao.IntoleranceDao
@@ -52,7 +54,7 @@ import de.healthforge.data.db.entities.WaterIntakeEntity
         LogEntryTagEntity::class,
         ShoppingListItemEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 @TypeConverters(EnumConverters::class)
@@ -71,5 +73,11 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DB_NAME = "healthforge.db"
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE intake_entry ADD COLUMN consumed INTEGER NOT NULL DEFAULT 1")
+            }
+        }
     }
 }
