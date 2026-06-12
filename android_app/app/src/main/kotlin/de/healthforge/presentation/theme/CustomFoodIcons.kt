@@ -1,6 +1,5 @@
 package de.healthforge.presentation.theme
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
@@ -9,6 +8,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -57,7 +57,7 @@ private fun ImageVector.Builder.filledPath(
     path(
         fill = fill,
         stroke = null,
-        fillType = PathFillType.EvenOdd,
+        pathFillType = PathFillType.EvenOdd,
     ) {
         pathData.forEachIndexed { i, (x, y, isMove) ->
             if (isMove || i == 0) moveTo(x, y) else lineTo(x, y)
@@ -76,7 +76,7 @@ private fun L(x: Float, y: Float) = Triple(x, y, false)
 object FoodIcons {
 
     // 1 ─ Rind/Kalb: stylized cow silhouette (circle head + curved body)
-    val RIND: ImageVector = ImageVector.Builder("rind", 24f, 24f, 24f, 24f).apply {
+    val RIND: ImageVector = ImageVector.Builder("rind", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(7f,10f), L(5.5f,7f), L(7f,4f), L(9f,3f), L(12f,3.5f),
             L(15f,3f), L(17f,4f), L(18.5f,7f), L(17f,10f),
@@ -89,7 +89,7 @@ object FoodIcons {
     }.build()
 
     // 2 ─ Schwein: round body + snout + ears
-    val SCHWEIN: ImageVector = ImageVector.Builder("schwein", 24f, 24f, 24f, 24f).apply {
+    val SCHWEIN: ImageVector = ImageVector.Builder("schwein", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(8f,8f), L(6f,7f), L(5f,9f), L(5f,13f), L(6f,15f),
             L(9f,15f), L(10f,19f), L(14f,19f), L(15f,15f),
@@ -105,7 +105,7 @@ object FoodIcons {
     }.build()
 
     // 3 ─ Geflügel: chicken/drumstick
-    val GEFLUEGEL: ImageVector = ImageVector.Builder("gefluegel", 24f, 24f, 24f, 24f).apply {
+    val GEFLUEGEL: ImageVector = ImageVector.Builder("gefluegel", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(12f,2f), L(14f,3f), L(15f,5f), L(16f,7f),
             L(17f,10f), L(16f,13f), L(14f,15f), L(12f,16f),
@@ -117,7 +117,7 @@ object FoodIcons {
     }.build()
 
     // 4 ─ Fisch: fish silhouette
-    val FISCH: ImageVector = ImageVector.Builder("fisch", 24f, 24f, 24f, 24f).apply {
+    val FISCH: ImageVector = ImageVector.Builder("fisch", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(20f,12f), L(17f,9f), L(12f,8f), L(7f,7f),
             L(4f,9f), L(3f,12f), L(4f,15f), L(7f,17f),
@@ -131,7 +131,7 @@ object FoodIcons {
     }.build()
 
     // 5 ─ Wurst/Aufschnitt: sausage shapes
-    val WURST: ImageVector = ImageVector.Builder("wurst", 24f, 24f, 24f, 24f).apply {
+    val WURST: ImageVector = ImageVector.Builder("wurst", 24.dp, 24.dp, 24f, 24f).apply {
         // two sausages
         strokePath(listOf(
             M(4f,8f), L(8f,6f), L(14f,6f), L(18f,7f),
@@ -146,7 +146,7 @@ object FoodIcons {
     }.build()
 
     // 6 ─ Milch: milk carton
-    val MILCH: ImageVector = ImageVector.Builder("milch", 24f, 24f, 24f, 24f).apply {
+    val MILCH: ImageVector = ImageVector.Builder("milch", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(7f,3f), L(7f,21f), L(17f,21f), L(17f,3f)
         ))
@@ -159,7 +159,7 @@ object FoodIcons {
     }.build()
 
     // 7 ─ Käse: cheese wedge with holes
-    val KAESE: ImageVector = ImageVector.Builder("kaese", 24f, 24f, 24f, 24f).apply {
+    val KAESE: ImageVector = ImageVector.Builder("kaese", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(4f,10f), L(12f,3f), L(20f,10f), L(20f,20f), L(4f,20f), L(4f,10f)
         ))
@@ -170,7 +170,7 @@ object FoodIcons {
     }.build()
 
     // 8 ─ Joghurt/Quark: cup/pot
-    val JOGHURT: ImageVector = ImageVector.Builder("joghurt", 24f, 24f, 24f, 24f).apply {
+    val JOGHURT: ImageVector = ImageVector.Builder("joghurt", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(9f,3f), L(9f,6f), L(18f,7f), L(19f,20f), L(5f,20f), L(6f,7f), L(9f,6f)
         ))
@@ -179,7 +179,7 @@ object FoodIcons {
     }.build()
 
     // 9 ─ Eier: egg shapes
-    val EIER: ImageVector = ImageVector.Builder("eier", 24f, 24f, 24f, 24f).apply {
+    val EIER: ImageVector = ImageVector.Builder("eier", 24.dp, 24.dp, 24f, 24f).apply {
         // egg 1
         strokePath(listOf(
             M(9f,6f), L(7f,8f), L(6f,12f), L(7f,16f), L(9f,19f),
@@ -193,7 +193,7 @@ object FoodIcons {
     }.build()
 
     // 10 ─ Brot: bread loaf
-    val BROT: ImageVector = ImageVector.Builder("brot", 24f, 24f, 24f, 24f).apply {
+    val BROT: ImageVector = ImageVector.Builder("brot", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(5f,12f), L(3f,10f), L(4f,7f), L(8f,5f), L(16f,5f),
             L(20f,7f), L(21f,10f), L(19f,12f), L(19f,20f), L(5f,20f), L(5f,12f)
@@ -205,7 +205,7 @@ object FoodIcons {
     }.build()
 
     // 11 ─ Nudeln/Reis: pasta shapes
-    val NUDELN: ImageVector = ImageVector.Builder("nudeln", 24f, 24f, 24f, 24f).apply {
+    val NUDELN: ImageVector = ImageVector.Builder("nudeln", 24.dp, 24.dp, 24f, 24f).apply {
         // bowl
         strokePath(listOf(
             M(4f,14f), L(3f,20f), L(21f,20f), L(20f,14f)
@@ -215,7 +215,7 @@ object FoodIcons {
     }.build()
 
     // 12 ─ Müsli/Getreide: grain/wheat
-    val MUESLI: ImageVector = ImageVector.Builder("muesli", 24f, 24f, 24f, 24f).apply {
+    val MUESLI: ImageVector = ImageVector.Builder("muesli", 24.dp, 24.dp, 24f, 24f).apply {
         // wheat stalk
         strokePath(listOf(M(12f,3f), L(12f,21f)))
         // grains left
@@ -231,7 +231,7 @@ object FoodIcons {
     }.build()
 
     // 13 ─ Gemüse: carrot/root vegetable
-    val GEMUESE: ImageVector = ImageVector.Builder("gemuese", 24f, 24f, 24f, 24f).apply {
+    val GEMUESE: ImageVector = ImageVector.Builder("gemuese", 24.dp, 24.dp, 24f, 24f).apply {
         // carrot body
         strokePath(listOf(
             M(12f,3f), L(9f,7f), L(7f,12f), L(6f,17f),
@@ -245,7 +245,7 @@ object FoodIcons {
     }.build()
 
     // 14 ─ Salat: lettuce/leafy head
-    val SALAT: ImageVector = ImageVector.Builder("salat", 24f, 24f, 24f, 24f).apply {
+    val SALAT: ImageVector = ImageVector.Builder("salat", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(12f,2f), L(8f,5f), L(4f,10f), L(5f,16f),
             L(8f,20f), L(12f,22f), L(16f,20f), L(19f,16f),
@@ -258,7 +258,7 @@ object FoodIcons {
     }.build()
 
     // 15 ─ Obst: apple with leaf
-    val OBST: ImageVector = ImageVector.Builder("obst", 24f, 24f, 24f, 24f).apply {
+    val OBST: ImageVector = ImageVector.Builder("obst", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(12f,3f), L(9f,4f), L(6.5f,7f), L(5f,12f),
             L(5.5f,17f), L(8f,20f), L(12f,21.5f),
@@ -272,7 +272,7 @@ object FoodIcons {
     }.build()
 
     // 16 ─ Nüsse/Samen: almond/nut shape
-    val NUESSE: ImageVector = ImageVector.Builder("nuesse", 24f, 24f, 24f, 24f).apply {
+    val NUESSE: ImageVector = ImageVector.Builder("nuesse", 24.dp, 24.dp, 24f, 24f).apply {
         // almond 1
         strokePath(listOf(
             M(8f,4f), L(5f,8f), L(4f,14f), L(5f,18f),
@@ -286,7 +286,7 @@ object FoodIcons {
     }.build()
 
     // 17 ─ Öle/Fette: oil drop + bottle hint
-    val OELE: ImageVector = ImageVector.Builder("oele", 24f, 24f, 24f, 24f).apply {
+    val OELE: ImageVector = ImageVector.Builder("oele", 24.dp, 24.dp, 24f, 24f).apply {
         // bottle
         strokePath(listOf(
             M(9f,5f), L(9f,9f), L(7f,12f), L(7f,20f), L(17f,20f), L(17f,12f), L(15f,9f), L(15f,5f)
@@ -300,7 +300,7 @@ object FoodIcons {
     }.build()
 
     // 18 ─ Gewürze: mortar & pestle
-    val GEWUERZE: ImageVector = ImageVector.Builder("gewuerze", 24f, 24f, 24f, 24f).apply {
+    val GEWUERZE: ImageVector = ImageVector.Builder("gewuerze", 24.dp, 24.dp, 24f, 24f).apply {
         // mortar bowl
         strokePath(listOf(
             M(4f,16f), L(2f,20f), L(10f,22f), L(18f,22f), L(22f,20f), L(20f,16f)
@@ -312,7 +312,7 @@ object FoodIcons {
     }.build()
 
     // 19 ─ Süßes: candy/wrapped sweet
-    val SUESSES: ImageVector = ImageVector.Builder("suesses", 24f, 24f, 24f, 24f).apply {
+    val SUESSES: ImageVector = ImageVector.Builder("suesses", 24.dp, 24.dp, 24f, 24f).apply {
         // candy body
         strokePath(listOf(
             M(6f,9f), L(5f,12f), L(6f,15f), L(10f,17f),
@@ -325,7 +325,7 @@ object FoodIcons {
     }.build()
 
     // 20 ─ Kuchen/Gebäck: cake slice
-    val KUCHEN: ImageVector = ImageVector.Builder("kuchen", 24f, 24f, 24f, 24f).apply {
+    val KUCHEN: ImageVector = ImageVector.Builder("kuchen", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(4f,14f), L(3f,20f), L(12f,22f), L(21f,20f), L(20f,14f)
         ))
@@ -339,7 +339,7 @@ object FoodIcons {
     }.build()
 
     // 21 ─ Getränke: cup/glass
-    val GETRAENKE: ImageVector = ImageVector.Builder("getraenke", 24f, 24f, 24f, 24f).apply {
+    val GETRAENKE: ImageVector = ImageVector.Builder("getraenke", 24.dp, 24.dp, 24f, 24f).apply {
         strokePath(listOf(
             M(6f,4f), L(6f,20f), L(15f,20f), L(15f,8f), L(20f,8f), L(20f,5f),
             L(18f,4f), L(16f,5f), L(16f,7f), L(15f,8f)
@@ -351,7 +351,7 @@ object FoodIcons {
     }.build()
 
     // 22 ─ Fertiggerichte: bowl/plate with steam
-    val FERTIGGERICHTE: ImageVector = ImageVector.Builder("fertiggerichte", 24f, 24f, 24f, 24f).apply {
+    val FERTIGGERICHTE: ImageVector = ImageVector.Builder("fertiggerichte", 24.dp, 24.dp, 24f, 24f).apply {
         // bowl
         strokePath(listOf(
             M(4f,14f), L(3f,19f), L(21f,19f), L(20f,14f)
@@ -365,7 +365,7 @@ object FoodIcons {
     }.build()
 
     // 23 ─ Soßen/Dips: sauce pour
-    val SOSSEN: ImageVector = ImageVector.Builder("sossen", 24f, 24f, 24f, 24f).apply {
+    val SOSSEN: ImageVector = ImageVector.Builder("sossen", 24.dp, 24.dp, 24f, 24f).apply {
         // small bowl
         strokePath(listOf(
             M(4f,16f), L(3f,20f), L(13f,21f), L(20f,20f), L(19f,16f)
@@ -381,7 +381,7 @@ object FoodIcons {
     }.build()
 
     // 24 ─ Supplement: capsule/pill (used with color variants)
-    val SUPPLEMENT: ImageVector = ImageVector.Builder("supplement", 24f, 24f, 24f, 24f).apply {
+    val SUPPLEMENT: ImageVector = ImageVector.Builder("supplement", 24.dp, 24.dp, 24f, 24f).apply {
         // left half
         strokePath(listOf(
             M(10f,3f), L(6f,5f), L(3f,10f), L(4f,14f),
@@ -407,7 +407,7 @@ object FoodIcons {
     )
 
     /** Fallback icon for unmatched categories */
-    val FALLBACK: ImageVector = ImageVector.Builder("fallback", 24f, 24f, 24f, 24f).apply {
+    val FALLBACK: ImageVector = ImageVector.Builder("fallback", 24.dp, 24.dp, 24f, 24f).apply {
         // generic plate/food circle
         strokePath(listOf(
             M(12f,2f), L(6f,5f), L(3f,10f), L(3f,16f),

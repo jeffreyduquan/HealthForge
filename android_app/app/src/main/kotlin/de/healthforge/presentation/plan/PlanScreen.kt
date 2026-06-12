@@ -70,10 +70,7 @@ import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.db.entities.MealPlanItemEntity
 import de.healthforge.data.network.IngredientDto
 import de.healthforge.data.network.RecipeListItemDto
-import de.healthforge.presentation.common.PickerData
-import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
-import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.presentation.home.HomeViewModel
 import de.healthforge.presentation.home.components.DottedAddButton
 import de.healthforge.presentation.home.components.IntakeCard
@@ -99,6 +96,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+
+private val SLOT_LABEL = mapOf(
+    "BREAKFAST" to "Frühstück",
+    "LUNCH" to "Mittag",
+    "DINNER" to "Abend",
+    "SNACK" to "Snack",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

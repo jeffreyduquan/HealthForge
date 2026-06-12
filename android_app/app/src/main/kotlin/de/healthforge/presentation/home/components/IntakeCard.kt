@@ -44,6 +44,7 @@ import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.presentation.theme.FoodIcon
 import de.healthforge.presentation.theme.FoodIcons
 import de.healthforge.presentation.theme.LocalHmTokens
+import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.foodIconForName
 import de.healthforge.presentation.theme.supplementIconVariant
 import java.time.Instant
@@ -63,6 +64,7 @@ fun IntakeCard(
     modifier: Modifier = Modifier,
 ) {
     val hm = LocalHmTokens.current
+    val sem = LocalSemanticColors.current
     val foodIcon = resolveIcon(entry)
 
     val swipeState = rememberSwipeToDismissBoxState(
@@ -85,13 +87,13 @@ fun IntakeCard(
                     .fillMaxSize()
                     .padding(horizontal = 20.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(hm.statusOverUl.copy(alpha = 0.15f)),
+                    .background(sem.statusOverUl.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Icon(
                     Icons.Filled.Delete,
                     contentDescription = "Löschen",
-                    tint = hm.statusOverUl,
+                    tint = sem.statusOverUl,
                     modifier = Modifier.padding(start = 20.dp).size(24.dp),
                 )
             }
