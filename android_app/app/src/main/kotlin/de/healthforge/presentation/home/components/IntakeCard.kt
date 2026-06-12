@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +50,6 @@ import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.presentation.theme.FoodIcon
 import de.healthforge.presentation.theme.FoodIcons
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.LocalSemanticColors
 import de.healthforge.presentation.theme.foodIconForName
 import de.healthforge.presentation.theme.supplementIconVariant
 import java.time.Instant
@@ -74,7 +72,6 @@ fun IntakeCard(
     modifier: Modifier = Modifier,
 ) {
     val hm = LocalHmTokens.current
-    val sem = LocalSemanticColors.current
     val foodIcon = resolveIcon(entry)
     val isRecipe = entry.sourceType == IntakeSourceType.RECIPE
 
@@ -92,23 +89,7 @@ fun IntakeCard(
         modifier = modifier,
         enableDismissFromEndToStart = false,
         enableDismissFromStartToEnd = true,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(sem.statusOverUl.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = "Löschen",
-                    tint = sem.statusOverUl,
-                    modifier = Modifier.padding(start = 20.dp).size(24.dp),
-                )
-            }
-        },
+        backgroundContent = {},
     ) {
         Box(
             modifier = Modifier

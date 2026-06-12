@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
@@ -106,9 +107,9 @@ fun RecipeDetailScreen(
                                 Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
                             }
                         }
-                        // Rezept zu Gruppe hinzufügen
-                        IconButton(onClick = { vm.openAddToGroupDialog() }) {
-                            Icon(Icons.Filled.GroupAdd, contentDescription = "Zu Gruppe hinzufügen")
+                        // Zum Plan hinzufügen
+                        IconButton(onClick = { vm.openAddToPlanDialog() }) {
+                            Icon(Icons.Filled.PlaylistAdd, contentDescription = "Zum Plan hinzufügen")
                         }
                     }
                 },
@@ -165,6 +166,13 @@ fun RecipeDetailScreen(
                 }
             },
             confirmButton = { TextButton(onClick = { vm.closeAddToGroupDialog() }) { Text("Abbrechen") } },
+        )
+    }
+    // Add-to-Plan Portion-Dialog
+    if (state.showAddToPlan) {
+        PortionInputDialog(
+            onConfirm = { grams -> vm.addToPlan(grams) },
+            onDismiss = { vm.dismissAddToPlanDialog() },
         )
     }
 }
@@ -400,4 +408,32 @@ private fun StepsCard(steps: List<RecipeStepDto>) {
             }
         }
     }
+}
+
+@Composable
+fun PortionInputDialog(
+    onConfirm: (Double) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember { mutableStateOf("100") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Portion (g)") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) text = it },
+                label = { Text("Gramm") },
+                singleLine = true,
+            )
+        },
+        confirmButton = {
+            val grams = text.toDoubleOrNull()
+            TextButton(
+                onClick = { grams?.let { onConfirm(it) } },
+                enabled = grams != null && grams > 0,
+            ) { Text("Hinzufügen") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+    )
 }

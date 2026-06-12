@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.healthforge.data.db.entities.IntakeEntryEntity
+import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.network.RecipeDetailDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.network.GroupSummaryDto
 import de.healthforge.data.repository.GroupRepository
+import de.healthforge.data.repository.IntakeRepository
 import de.healthforge.data.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,12 +89,14 @@ data class RecipeDetailUiState(
     val reportSubmitted: Boolean = false,
     val message: String? = null,
     val myGroups: List<GroupSummaryDto>? = null, // null = dialog closed
+    val showAddToPlan: Boolean = false,
 )
 
 @HiltViewModel
 class RecipeDetailViewModel @Inject constructor(
     private val repo: RecipeRepository,
     private val groupRepo: GroupRepository,
+    private val intakeRepo: IntakeRepository,
     private val tokenStore: de.healthforge.data.prefs.SecureTokenStore,
     savedState: SavedStateHandle,
 ) : ViewModel() {
@@ -194,4 +199,26 @@ class RecipeDetailViewModel @Inject constructor(
     }
 
     fun closeAddToGroupDialog() { _state.update { it.copy(myGroups = null) } }
+
+    fun openAddToPlanDialog() { _state.update { it.copy(showAddToPlan = true) } }
+    fun dismissAddToPlanDialog() { _state.update { it.copy(showAddToPlan = false) } }
+
+    fun addToPlan(grams: Double) {
+        val r = _state.value.recipe ?: return
+        viewModelScope.launch {
+            intakeRepo.add(IntakeEntryEntity(
+                loggedAt = System.currentTimeMillis(),
+                dayDateIso = java.time.LocalDate.now().toString(),
+                sourceType = IntakeSourceType.RECIPE,
+                sourceId = r.id,
+                portionGrams = grams,
+                snapshotName = r.title,
+                snapshotKcalPer100g = null,
+                snapshotProteinPer100g = null,
+                snapshotCarbsPer100g = null,
+                snapshotFatPer100g = null,
+            ))
+            _state.update { it.copy(showAddToPlan = false, message = "Zum Plan hinzugefügt") }
+        }
+    }
 }

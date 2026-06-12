@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.presentation.essen.rezepte.PortionInputDialog
 import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
@@ -74,6 +76,13 @@ fun IngredientDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { vm.openAddToPlanDialog() }) {
+                        Icon(
+                            Icons.Filled.PlaylistAdd,
+                            contentDescription = "Zum Plan hinzufügen",
+                            tint = hm.fgPrimary,
+                        )
+                    }
                     IconButton(onClick = { onToggleLike(ingredientId) }) {
                         Icon(
                             Icons.Filled.ThumbUp,
@@ -226,6 +235,13 @@ fun IngredientDetailScreen(
         if (state.error != null) {
             Text(state.error!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
         }
+    }
+
+    if (state.showAddToPlan) {
+        PortionInputDialog(
+            onConfirm = { grams -> vm.addToPlan(grams) },
+            onDismiss = { vm.dismissAddToPlanDialog() },
+        )
     }
 }
 

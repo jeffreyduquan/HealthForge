@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.healthforge.presentation.essen.rezepte.PortionInputDialog
 import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.NeoCard
 import de.healthforge.presentation.theme.NeoSectionLabel
@@ -58,6 +60,11 @@ fun SupplementDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { vm.openAddToPlanDialog() }) {
+                        Icon(Icons.Filled.PlaylistAdd, contentDescription = "Zum Plan hinzufügen")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -120,6 +127,13 @@ fun SupplementDetailScreen(
                     }
                 }
             }
+        }
+
+        if (state.showAddToPlan) {
+            PortionInputDialog(
+                onConfirm = { grams -> vm.addToPlan(grams) },
+                onDismiss = { vm.dismissAddToPlanDialog() },
+            )
         }
     }
 }
