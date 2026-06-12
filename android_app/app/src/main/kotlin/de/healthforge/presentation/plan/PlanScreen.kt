@@ -73,9 +73,13 @@ import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.presentation.common.PickerData
 import de.healthforge.presentation.common.PlanItemPicker
 import de.healthforge.presentation.essen.rezepte.RecipeCard
+import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.presentation.home.HomeViewModel
+import de.healthforge.presentation.home.components.DottedAddButton
+import de.healthforge.presentation.home.components.IntakeCard
 import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
+import de.healthforge.presentation.home.components.QuickAddDialog
 import de.healthforge.presentation.home.components.Sparkline
 import de.healthforge.presentation.home.components.SupplementChecklist
 import de.healthforge.presentation.home.components.WaterStageSlider
@@ -96,14 +100,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val SLOT_LABEL = mapOf(
-    "BREAKFAST" to "Frühstück",
-    "LUNCH" to "Mittag",
-    "DINNER" to "Abend",
-    "SNACK" to "Snack",
-)
-private val SLOT_ORDER = listOf("BREAKFAST", "LUNCH", "DINNER", "SNACK")
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanScreen(
@@ -119,8 +115,6 @@ fun PlanScreen(
     val homeState by homeVm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
-    var pickerForSlot by remember { mutableStateOf<Long?>(null) }
-    var addSlotDialog by remember { mutableStateOf(false) }
     var detailTarget by remember { mutableStateOf<IngredientDto?>(null) }
 
     // Sync date PlanViewModel ↔ HomeViewModel
@@ -171,84 +165,51 @@ fun PlanScreen(
                 }
             }
 
-            // ── TAGSPLAN ──
+            // ── TAG & HEUTE-INTAKES ──
             item(key = "day_strip") {
                 DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
             }
 
-            if (state.slots.isEmpty()) {
-                item(key = "empty") {
-                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                "Noch keine Mahlzeiten geplant",
-                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                                color = hm.fgSecondary,
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            TextButton(onClick = { addSlotDialog = true }) {
-                                Icon(Icons.Filled.Add, contentDescription = null, tint = hm.ambientViolet)
-                                Spacer(Modifier.width(6.dp))
-                                Text("Mahlzeit hinzufügen", color = hm.ambientViolet)
-                            }
-                        }
+            item(key = "day_header") {
+                DayHeader(date = state.selectedDay)
+            }
+
+            // ── INTAKE CARDS (flat list, swipe-to-delete) ──
+            val entries = homeState.entries
+            if (entries.isEmpty()) {
+                item(key = "empty_intake") {
+                    Box(
+                        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "Noch nichts gegessen heute",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            color = hm.fgTertiary,
+                        )
                     }
                 }
             } else {
-                item(key = "day_header") {
-                    DayHeader(date = state.selectedDay)
-                }
-                item(key = "day_summary") {
-                    DaySummary(slots = state.slots)
-                }
-                items(state.slots, key = { it.slot.id }) { sw ->
-                    SlotCard(
-                        slotType = sw.slot.slotType,
-                        consumed = sw.slot.consumed,
-                        items = sw.items,
-                        recipeDtos = state.recipeDtos,
-                        onOpenRecipe = onOpenRecipe,
-                        onOpenIngredient = { id ->
-                            state.ingredientDtos[id]?.let { detailTarget = it }
+                items(entries, key = { "intake-${it.id}" }) { entry ->
+                    IntakeCard(
+                        entry = entry,
+                        onDelete = { homeVm.deleteIntakeEntryCascade(entry) },
+                        onTap = {
+                            when (entry.sourceType) {
+                                IntakeSourceType.RECIPE -> onOpenRecipe(entry.sourceId)
+                                IntakeSourceType.INGREDIENT -> {
+                                    homeState.ingredientDtos[entry.sourceId]?.let { detailTarget = it }
+                                }
+                                else -> {}
+                            }
                         },
-                        onAddItem = { pickerForSlot = sw.slot.id },
-                        onMarkConsumed = { vm.markConsumed(sw.slot.id) },
-                        onDeleteSlot = { vm.deleteSlot(sw.slot.id) },
-                        onDeleteItem = { id -> vm.deleteItem(id) },
                     )
                 }
             }
 
-            // ── ADD-SLOT (dotted + Box unter den Slots) ──
-            item(key = "add_slot") {
-                val shape = RoundedCornerShape(16.dp)
-                val dashColor = hm.fgTertiary.copy(alpha = 0.35f)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .clip(shape)
-                        .drawBehind {
-                            drawRoundRect(
-                                color = dashColor,
-                                cornerRadius = CornerRadius(16.dp.toPx()),
-                                style = Stroke(
-                                    width = 2.dp.toPx(),
-                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10.dp.toPx(), 6.dp.toPx()), 0f),
-                                ),
-                            )
-                        }
-                        .clickable { addSlotDialog = true }
-                        .padding(vertical = 24.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Mahlzeit hinzufügen",
-                        tint = dashColor,
-                        modifier = Modifier.size(32.dp),
-                    )
-                }
+            // ── GROSSES DOTTED + (öffnet QuickAdd-Picker) ──
+            item(key = "dotted_add") {
+                DottedAddButton(onClick = { homeVm.openQuickAdd() })
             }
 
             // ── ERNÄHRUNG ──
@@ -312,41 +273,20 @@ fun PlanScreen(
         )
     }
 
-    if (addSlotDialog) {
-        AlertDialog(
-            onDismissRequest = { addSlotDialog = false },
-            title = { Text("Mahlzeit hinzufügen") },
-            text = {
-                Column {
-                    SLOT_ORDER.forEach { slot ->
-                        TextButton(
-                            onClick = {
-                                vm.addSlot(slot)
-                                addSlotDialog = false
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text(SLOT_LABEL[slot] ?: slot) }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = { TextButton(onClick = { addSlotDialog = false }) { Text("Abbrechen") } },
-        )
-    }
-
-    pickerForSlot?.let { slotId ->
-        val picker by vm.picker.collectAsState()
-        PlanItemPicker(
-            show = true,
-            onDismiss = { pickerForSlot = null; vm.clearPicker() },
-            pickerData = PickerData(recipes = picker.recipes, ingredients = picker.ingredients),
-            onSearchRecipes = vm::searchRecipes,
-            onSearchIngredients = vm::searchIngredients,
-            onSelectRecipe = { vm.addRecipeItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
-            onSelectIngredient = { vm.addIngredientItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
-            onSelectSupplement = { vm.addSupplementItem(slotId, it); pickerForSlot = null; vm.clearPicker() },
-            onClearPicker = vm::clearPicker,
-            supplementList = vm.supplementList,
+    // ── QUICK-ADD Dialog (from HomeViewModel) ──
+    if (homeState.showQuickAdd) {
+        QuickAddDialog(
+            query = homeState.quickAddQuery,
+            results = homeState.quickAddResults,
+            portionGrams = homeState.quickAddPortion,
+            selected = homeState.quickAddSelected,
+            loading = homeState.quickAddLoading,
+            onQueryChange = homeVm::onQuickAddQuery,
+            onSelect = homeVm::onQuickAddSelect,
+            onClearSelection = homeVm::onQuickAddClearSelection,
+            onPortionChange = homeVm::onQuickAddPortion,
+            onConfirm = homeVm::confirmQuickAdd,
+            onDismiss = { homeVm.closeQuickAdd() },
         )
     }
 

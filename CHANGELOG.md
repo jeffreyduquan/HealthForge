@@ -5,6 +5,40 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Feature: P7.S4b — Home-Redesign: Slot-Tiles entfernt, flache IntakeCard-Liste, SVG-Icons (2026-06-12)
+
+**Scope:** Mahlzeit-Slot-Kacheln (Frühstück/Mittag/Abend/Snack) vom Home-Tab entfernt.
+Stattdessen flache, chronologische Liste aller Intake-Einträge als `IntakeCard`-Komponenten.
+Swipe-to-delete löscht nun kaskadierend (IntakeEntry + MealPlanItem + leerer Slot).
+Eigene SVG-Kategorie-Icons (24 Stück) für Lebensmittel-Kategorien.
+
+**Touched Docs:**
+- `UsabilityMap.md` §3: Neues Layout, SVG-Icon-Tabelle, Swipe=endgültig-löschen dokumentiert
+- `CHANGELOG.md`: Dieser Eintrag
+
+**Untouched Docs:**
+- `Architecture.md`: Keine Architektur-Änderung (reine UI-Schicht)
+- `ReqSpec.md`: Keine neuen Requirements (bestehende REQ-HOME-* werden anders umgesetzt)
+- `GUI.md`: Keine neuen Design-Tokens (SVG-Icons nutzen bestehende HmTokens)
+- `HistamindDesignReference.md`: Unverändert
+
+**Änderungen:**
+
+**Neue Dateien:**
+- `CustomFoodIcons.kt` — 24 hand-codierte SVG-Kategorie-Icons als Compose `ImageVector` (Rind, Schwein, Geflügel, Fisch, Wurst, Milch, Käse, Joghurt, Eier, Brot, Nudeln, Müsli, Gemüse, Salat, Obst, Nüsse, Öle, Gewürze, Süßes, Kuchen, Getränke, Fertiggerichte, Soßen, Supplement)
+- `FoodCategoryMapper.kt` — Keyword-Heuristik: `snapshotName` → Kategorie-Icon (deutsch, case-insensitive)
+- `IntakeCard.kt` — Neue Card-Komponente mit SVG-Icon, Swipe-to-Delete, Uhrzeit; plus `DottedAddButton`
+
+**Geändert:**
+- `PlanScreen.kt`: Slot-Tiles + `addSlotDialog` + `pickerForSlot` entfernt. Stattdessen `IntakeCard`-Liste + `DottedAddButton` + `QuickAddDialog`. Importe bereinigt.
+- `HomeViewModel.kt`: `deleteIntakeEntryCascade()` hinzugefügt (kaskadierende Löschung: IntakeEntry → MealPlanItem → leerer Slot)
+
+**Verifikation:**
+- Keine Compile-Fehler in allen 5 geänderten/neuen Dateien
+- Flow: IntakeEntry-Löschung triggert automatisch Neuberechnung der Tages-Totals via `observeTotalsForDay`
+
+---
+
 ## Feature: P7 — Tab-Fusion: PLAN in HOME integriert, alter HOME-Tab entfernt (2026-06-11)
 
 **Scope:** Der PLAN-Tab wird aufgehoben; seine Funktionalität (Mahlzeiten-Wochenplaner) wandert in den HOME-Tab. Der HOME-Tab wird um Ernährung & Wasser aus dem alten HomeScreen erweitert. `HomeScreen.kt` gelöscht. Bottom-Navigation: 6→5 Tabs.

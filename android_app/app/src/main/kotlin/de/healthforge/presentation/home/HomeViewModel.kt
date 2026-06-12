@@ -536,6 +536,41 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { intakeRepo.deleteById(id) }
     }
 
+    /**
+     * Cascade-delete: removes the IntakeEntry AND any linked MealPlanItem
+     * (matched by sourceType + sourceId for the current day). Also cleans up the
+     * parent MealPlanSlot if it becomes empty.
+     *
+     * This makes a swiped-away card behave as if the item was never eaten.
+     */
+    fun deleteIntakeEntryCascade(entry: IntakeEntryEntity) {
+        viewModelScope.launch {
+            // 1. Delete the intake entry
+            intakeRepo.deleteById(entry.id)
+
+            // 2. Find and delete matching MealPlanItem (same sourceType + sourceId for today)
+            try {
+                val dayItems = planRepo.observeItemsForDay(_state.value.date).first()
+                val match = dayItems.firstOrNull {
+                    it.sourceType == entry.sourceType && it.sourceId == entry.sourceId
+                }
+                if (match != null) {
+                    planRepo.deleteItem(match.id)
+
+                    // 3. If slot is now empty, delete the slot too
+                    val remainingItems = dayItems.filter {
+                        it.slotId == match.slotId && it.id != match.id
+                    }
+                    if (remainingItems.isEmpty()) {
+                        planRepo.deleteSlot(match.slotId)
+                    }
+                }
+            } catch (_: Exception) {
+                // Plan cleanup is best-effort; intake deletion already succeeded
+            }
+        }
+    }
+
     /** Delete a planned slot + all its items + associated intake entries. */
     fun deletePlannedSlot(slotId: Long) {
         viewModelScope.launch {

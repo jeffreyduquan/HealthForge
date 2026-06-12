@@ -76,62 +76,98 @@ Forward-only, 17 Steps. Skippable Steps mit Warnung markiert.
 
 ---
 
-## 3. Home-Tab (fusioniert: ex-Home + ex-Plan, P7-Refactor 2026-06-11)
+## 3. Home-Tab (P7-Refactor 2026-06-11, P7.S4b-Redesign 2026-06-12)
 
-Der Home-Tab kombiniert die Ernährungsübersicht (Nährwerte, Wasser, Supplemente) mit dem Mahlzeiten-Wochenplaner. Die alte Trennung in „Home" und „Plan" wurde aufgehoben.
+Der Home-Tab zeigt eine flache, chronologische Liste aller Intake-Einträge des Tages
+(Supplemente, Lebensmittel, Rezepte). Die Mahlzeit-Slot-Kacheln (Frühstück/Mittag/
+Abend/Snack) wurden entfernt — der User sieht nur, WAS er gegessen hat, nicht in
+welcher „Mahlzeit-Kategorie". Die Slots existieren weiterhin im Plan-Backend für
+die Auto-Planer-Logik (ausgewogene Ernährung), sind aber im Home nicht sichtbar.
 
 ### 3.1 Layout (vertikal, scrollbar)
 
 ```
-┌─────────────────────────────────┐
-│ ← Mo, 08.06.2026 →              │ DateNavigator (clean, kein Hallo/Verlauf)
-├─────────────────────────────────┤
-│ ERNÄHRUNG                        │ SectionPill
-│ ┌──────────────────────────────┐ │ PinnedNutrientCard
-│ │ kcal      1450 / 2100  -650 │ │  Progress-Bar + Stage-Badge
-│ │ █████████████░░░░░░ 70 %   │ │
-│ │ ╱▔▔╲   ▁▃▄█▃▄▅             │ │  7-Tage-Linien-Sparkline (immer sichtbar)
-│ │ Protein    80 / 150g  -70   │ │
-│ │ ███████░░░░░░░░ 53 %       │ │
-│ │ ╱▔╲   ▁▂▃▄▃▄▅             │ │  Sparkline pro Pin
-│ │ … weitere Pins              │ │
-│ │ Wasser  700 / 2000 ml  35%  │ │ WaterStageSlider (letzte Pin-Zeile)
-│ │ ╱▔╲   ▁▂▃▃▄▅▆             │ │
-│ └──────────────────────────────┘ │
-│ [▾ Nährstoffe verwalten]         │ Chevron → Expanded-Pin-Manager
-├─────────────────────────────────┤
-│ HEUTE                            │ SectionPill
-│   Fr  Müsli + Beeren         ✓  │ PlannedMealCard mit GEGESSEN-Button
-│   Fr  Linsensuppe            ✓  │ (aus Plan-Tab, RecipeCard-Stil)
-│   ☑ Kaffee (08:00 erfasst)      │ Already eaten (informativ, keine Aktion)
-│   ☑ Apfel  (09:30 erfasst)      │
-│ [+ Eintrag]                     │ Quick-Add (erzeugt auch Plan-Eintrag)
-└─────────────────────────────────┘
-                            [FAB +]
+┌─────────────────────────────────────┐
+│ ← Mo, 12.06.2026 →    ⚡ 🛒        │ DayStrip + AutoPlan + Einkaufsliste
+├─────────────────────────────────────┤
+│ ERNÄHRUNG                           │ NeoSectionLabel
+│ ┌─────────────────────────────────┐ │ NeoCard
+│ │ kcal · Protein · Carbs · Fat   │ │ PinnedNutrientCard (unverändert)
+│ │ Wasser-Slider                   │ │ WaterStageSlider
+│ └─────────────────────────────────┘ │
+│ [▾ Nährstoffe verwalten]            │
+├─────────────────────────────────────┤
+│ HEUTE   Mo, 12.06.                  │ DayHeader
+│                                     │
+│ ┌─── 🥩 Rind-SVG ─────────────────┐│ ← IntakeCard (swipe-to-delete)
+│ │ Steak             250g · 475kcal ││    Kategorie-Icon links (24 SVG-Icons)
+│ │ 12:30                            ││    Name + Portion + kcal + Uhrzeit
+│ ├─── 🥛 Milch-SVG ────────────────┤│
+│ │ Magermilch         200g · 70kcal ││
+│ │ 08:00                            ││
+│ ├─── 🍎 Obst-SVG ─────────────────┤│
+│ │ Apfel              150g · 95kcal ││
+│ │ 10:30                            ││
+│ ├─── 💊 Supplement-SVG (Variant)──┤│
+│ │ Vitamin D            1 Tab       ││    Supplement-Icon mit Farbvariante
+│ │ 09:00                            ││
+│ └──────────────────────────────────┘│
+│                                     │
+│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐ │  ← DottedAddButton (groß, gestrichelt)
+│ │              ⊕                  │ │     öffnet QuickAddDialog
+│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘ │
+├─────────────────────────────────────┤
+│ SUPPLEMENTE                         │ NeoSectionLabel
+│ ☑ Vitamin D  ☐ Omega 3             │ SupplementChecklist (unverändert)
+└─────────────────────────────────────┘
 ```
 
 ### 3.2 Aktionen
 - **Datum-Nav:** Pfeile + Tap auf Datum → Date-Picker. Kein Hallo-Gruß, kein Verlauf-Button.
-- **PinnedNutrientCard Tap:** Detail-Sheet (geplant vs. tatsächlich, Restmenge, Quellen-Aufschlüsselung pro Mahlzeit).
-- **7-Tage-Sparkline:** Unter jeder Pin-Progress-Bar eine kompakte Linien-Sparkline (letzte 7 Tage). Y-Achse = konsumierter Wert, X-Achse = Tage (heute rechts). Immer sichtbar, alle gepinnten Nährstoffe gleichzeitig.
-- **Pinned-Bars Stufen-Anzeige (P7.S3.b, einheitlich mit Wasser):** Alle Pin-Bars (kcal/Protein/Carbs/Fett/Wasser) zeigen den Konsum als Stufen-Bar. Stufe N = `N×goal..(N+1)×goal`. Bar-Füllung = Prozent **innerhalb der aktuellen Stufe** (0–100 %). Farbe = `waterStageGradient(stage)` (10-Stufen-Cycle, ab Stufe 9 endless). Track = Akzent der **Vorgängerstufe × 0.25 Alpha** (Stufe 0 → neutraler `barTrack`). Ab Stufe ≥ 1 erscheint rechts ein Lv-Badge. Überkonsum (> 100 % Tagesziel) führt zu Stufen-Roll-over mit neuer Farbe — analog Wasser.
-- **WaterStageSlider drag (Stufen-Logik, v2.3):** Wasser ist die letzte Zeile in der `PinnedNutrientCard`, optisch identisch zu den anderen Pin-Bars. Range = 0..goal (0–100 % der aktuellen Stufe). 50-ml-Steps. Stufe N umfasst `N×goal..(N+1)×goal`. **In-Drag Stage-Up**: erreicht der Slider 100 %, schaltet die Bar in die nächste Stufe (Bar 0 %, neue Farbe, Thumb am linken Rand). **In-Drag Stage-Down (Drag-Through-Zero)**: erreicht der Slider in einer Stufe > 0 das untere Ende, schaltet die Bar eine Stufe zurück (Bar 100 %, Thumb am rechten Rand). **Touch-Disconnect bei Stufenwechsel**: Sobald während eines Drags ein Stage-Up/Down ausgelöst wird, wird die aktive Geste per `key`-Remount des Sliders abgebrochen. Für weitere Stufenwechsel muss der User loslassen und neu tippen. Cascade-Effekt konstruktionsbedingt unmöglich. Beim Loslassen genau an einer Stufengrenze rückt der State zusätzlich noch eine Stufe weiter (oben) bzw. zurück (unten). Stufen 0..9 haben je eine eigene Farbe aus der Histamind-Palette; ab Stufe 10+ bleibt die Farbe gleich. Stufen sind endlos. **Ghost-Soll-Marker**: feine weiße vertikale Linie an der Soll-Position innerhalb der gerade angezeigten Stufe. **Defizit-Rotanteil**: Bereich zwischen aktueller Füllung und Soll wird rot (StatusOverUl) gefärbt, wenn current < Soll und beide in derselben Stufe. Persistenz via `WaterIntakeRepository.setDayTotal` (Day-Aggregate).
-- **Reminder-Bell-Toggle:** Trailing-Icon der Wasser-Zeile (statt eigener Card-Header). Stoppt nur Defizit-Notifications. Persistiert in `WaterReminderPrefs`.
-- **Pin-Card Header (P7.S4 Slice 4e, Revision 2026-05-28):** Card-Titel + **ein** Chevron-IconButton rechts. Titel zeigt "Angepinnt" wenn collapsed, "Nährstoffe verwalten" wenn expanded.
-- **Collapsed (default):** zeigt nur die gepinnten Nährstoffe als Progress-Rows + 7-Tage-Sparkline + Wasser-Slider als letzte Zeile. Steady-State der Home-Ansicht.
-- **Expanded (Tap auf Chevron):** zeigt **alle** Nährstoffe gruppiert in vier Kategorie-Sections (Makros / Vitamine / Mineralien / Sonstiges). Pro Eintrag: Name + DGE-Default-Hinweis ("X mg/Tag") + trailing PushPin-Icon. **Filled** = gepinnt, **Outlined** = nicht gepinnt. Tap auf das Icon **pinnt/entpinnt sofort** und persistiert in `UserProfileEntity.pinnedNutrientsJson`.
-- **Min-1-Pin-Invariant:** Der letzte verbleibende Pin kann nicht entfernt werden (Tap = no-op).
-- **Wasser:** keine UI-Sonderbehandlung — gehört zu Sektion "Sonstiges", per Default in `NutrientCatalog.defaultPinnedKeys` gepinnt, aber im Expanded-View normal entpinnbar wie jeder andere Nährstoff. Solange Wasser gepinnt ist, erscheint der `WaterStageSlider` im Collapsed-View als letzte Zeile.
-- **Geplante-Mahlzeiten-Karten:** Jede geplante Mahlzeit wird als RecipeCard mit server-seitigem DTO dargestellt (Bild, Titel, Prep-Zeit, Kategorie). Trailing = ✓-GEGESSEN-Button. Tap auf ✓ → `markConsumed(slotId)` erzeugt IntakeEntry + Slot-Checkmark. Slot bleibt sichtbar, kein Delete in Home (Delete nur im Plan-Tab).
-- **Bereits erfasste Einträge:** Zeigen Name + Uhrzeit + Portion, informativ ohne Aktion (kein Delete, kein Edit).
-- **+ Eintrag:** Bottom-Sheet-Picker (Lebensmittel/Rezept/Supplement). Erzeugt sowohl IntakeEntry (lokal) als auch MealPlanItem (für Plan-Sync, REQ-PLAN-QUICK-001).
+- **PinnedNutrientCard:** unverändert (Progress-Bars + Stufen + Sparklines + Pin-Verwaltung).
+- **IntakeCard Tap:** öffnet Detail (Rezept→RecipeDetail, Lebensmittel→IngredientDetailSheet, Supplement→keine Aktion).
+- **IntakeCard Swipe (rechts→links):** **Endgültige Löschung.** Entfernt den IntakeEntry + den verknüpften MealPlanItem (matched via sourceType+sourceId+Tag). Leere Slots werden mitgelöscht. Kein Undo, kein Tracing — als wäre das Item nie gegessen worden. Die Tagesberechnung (NutrientTotals) aktualisiert sich automatisch via Flow.
+- **DottedAddButton (⊕):** öffnet den QuickAddDialog (Lebensmittel-Suche → Portion wählen → Bestätigen). Erzeugt IntakeEntry + MealPlanItem (in QUICK-Slot) für Plan-Sync.
+- **Supplement-Checkliste:** unverändert (Tap = als eingenommen markieren, erzeugt IntakeEntry).
 
-### 3.3 Pin-Verwaltung
-- **Default-Pins** (nach Onboarding): `kcal, protein, carbs, fat, water` (5 Stück).
-- **Hinzufügen / Entfernen (einziger Pfad, P7.S4 4e Revision):** Chevron im Card-Header → Expanded-View → PushPin-Icon-Tap auf gewünschtem Nährstoff. Persistiert sofort (kein Save-Button).
-- **Mindest-Pin:** **genau 1** (Min-1-Invariant in `HomeViewModel.togglePin`) — verhindert leere Card.
-- **Wasser:** wird wie jeder andere Nährstoff behandelt. Default-pinned, normal entpinnbar.
-- **Reihenfolge:** Insert-Reihenfolge in JSON-Array, kein Drag-Sort in P7 (Polish-Backlog; `HomeViewModel.reorderPins()` ist als Persistenz-Helper bereits vorhanden).
+### 3.3 SVG-Kategorie-Icons
+
+Jedem IntakeEntry wird per `FoodCategoryMapper` ein Icon aus 24 hand-codierten SVG-Kategorien
+zugewiesen (siehe `CustomFoodIcons.kt`). Matching erfolgt über Keyword-Heuristik auf
+`snapshotName` (deutsch, case-insensitive).
+
+| Kategorie | Keywords |
+|-----------|----------|
+| Rind/Kalb | rind, kalb, steak, filet, hackfleisch |
+| Schwein | schwein, schnitzel, kotelett, kassler |
+| Geflügel | hähnchen, huhn, pute, truthahn, gans |
+| Fisch | fisch, lachs, thunfisch, forelle, hering |
+| Wurst | wurst, aufschnitt, salami, schinken |
+| Milch | milch, vollmilch, buttermilch, kefir |
+| Käse | käse, gouda, emmentaler, brie, mozzarella |
+| Joghurt/Quark | joghurt, quark, skyr, schmand |
+| Eier | ei, eier, spiegelei, rührei |
+| Brot | brot, brötchen, toast, baguette |
+| Nudeln/Reis | nudel, pasta, spaghetti, reis |
+| Müsli/Getreide | müsli, haferflocken, getreide, dinkel |
+| Gemüse | gemüse, möhre, kartoffel, brokkoli, zwiebel |
+| Salat | salat, feldsalat, rucola, kopfsalat |
+| Obst | obst, apfel, banane, orange, erdbeere, mango |
+| Nüsse/Samen | nuss, mandel, walnuss, cashew, kürbiskern |
+| Öle/Fette | öl, butterschmalz, margarine, olivenöl |
+| Gewürze | gewürz, pfeffer, salz, curry, oregano |
+| Süßes | schokolade, bonbon, zucker, honig, nutella |
+| Kuchen/Gebäck | kuchen, torte, muffin, kekse, eis |
+| Getränke | getränk, wasser, kaffee, tee, saft, bier |
+| Fertiggerichte | fertiggericht, tiefkühl, konserve |
+| Soßen/Dips | soße, dip, ketchup, mayonnaise, pesto |
+| Supplement | über sourceType=SUPPLEMENT, Farbvariante per id%5 |
+| Fallback | generischer Teller (kein Keyword-Match) |
+
+### 3.4 Pin-Verwaltung (unverändert)
+- **Default-Pins:** `kcal, protein, carbs, fat, water` (5 Stück).
+- **Hinzufügen/Entfernen:** Chevron → Expanded-View → PushPin-Tap. Persistiert sofort.
+- **Mindest-Pin:** 1. **Wasser:** normal entpinnbar.
 
 ---
 
