@@ -90,7 +90,6 @@ data class RecipeDetailUiState(
     val message: String? = null,
     val myGroups: List<GroupSummaryDto>? = null, // null = dialog closed
     val showAddToPlan: Boolean = false,
-    val navigateToHome: Boolean = false,
 )
 
 @HiltViewModel
@@ -207,22 +206,6 @@ class RecipeDetailViewModel @Inject constructor(
     fun addToPlan(grams: Double) {
         val r = _state.value.recipe ?: return
         viewModelScope.launch {
-            // Compute per-100g nutrition from recipe total nutrition + approximate total grams
-            val totalGrams = computeRecipeTotalGrams(r.ingredients)
-            val n = r.nutrition
-            val (kcalPer100, proteinPer100, carbsPer100, fatPer100) = if (totalGrams > 0.0) {
-                val factor = 100.0 / totalGrams
-                listOf(
-                    n.energy_kcal * factor,
-                    n.protein_g * factor,
-                    n.carbs_g * factor,
-                    n.fat_g * factor,
-                )
-            } else {
-                // Fallback: store total recipe values (imperfect but better than 0)
-                listOf(n.energy_kcal, n.protein_g, n.carbs_g, n.fat_g)
-            }
-
             intakeRepo.add(IntakeEntryEntity(
                 loggedAt = System.currentTimeMillis(),
                 dayDateIso = java.time.LocalDate.now().toString(),
@@ -230,35 +213,12 @@ class RecipeDetailViewModel @Inject constructor(
                 sourceId = r.id,
                 portionGrams = grams,
                 snapshotName = r.title,
-                snapshotKcalPer100g = kcalPer100,
-                snapshotProteinPer100g = proteinPer100,
-                snapshotCarbsPer100g = carbsPer100,
-                snapshotFatPer100g = fatPer100,
+                snapshotKcalPer100g = null,
+                snapshotProteinPer100g = null,
+                snapshotCarbsPer100g = null,
+                snapshotFatPer100g = null,
             ))
-            _state.update { it.copy(showAddToPlan = false, navigateToHome = true, message = "Zum Plan hinzugefügt") }
-        }
-    }
-
-    fun onNavigatedToHome() { _state.update { it.copy(navigateToHome = false) } }
-
-    companion object {
-        /** Convert recipe ingredient units to grams. Returns null for non-convertible units. */
-        private fun normaliseToGrams(quantity: Double, unit: String): Double? {
-            return when (unit.trim().lowercase()) {
-                "g", "gramm" -> quantity
-                "kg" -> quantity * 1000.0
-                "mg" -> quantity / 1000.0
-                "ml" -> quantity // water-equivalence assumption
-                "l", "liter" -> quantity * 1000.0
-                else -> null // Stück, TL, EL, Prise etc. — not convertible
-            }
-        }
-
-        /** Sum approximate total grams of a recipe from its ingredient list. */
-        private fun computeRecipeTotalGrams(
-            ingredients: List<de.healthforge.data.network.RecipeIngredientDto>,
-        ): Double {
-            return ingredients.sumOf { normaliseToGrams(it.quantity, it.unit) ?: 0.0 }
+            _state.update { it.copy(showAddToPlan = false, message = "Zum Plan hinzugefügt") }
         }
     }
 }

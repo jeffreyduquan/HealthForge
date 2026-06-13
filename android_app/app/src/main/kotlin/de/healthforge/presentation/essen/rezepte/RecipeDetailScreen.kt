@@ -72,7 +72,6 @@ import de.healthforge.data.repository.MediaRepository
 fun RecipeDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit = {},
-    onAddedToPlan: () -> Unit = {},
     vm: RecipeDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
@@ -83,12 +82,6 @@ fun RecipeDetailScreen(
         state.message?.let {
             snackbarHostState.showSnackbar(it)
             vm.clearMessage()
-        }
-    }
-    LaunchedEffect(state.navigateToHome) {
-        if (state.navigateToHome) {
-            vm.onNavigatedToHome()
-            onAddedToPlan()
         }
     }
     Scaffold(
@@ -421,24 +414,27 @@ private fun StepsCard(steps: List<RecipeStepDto>) {
 fun PortionInputDialog(
     onConfirm: (Double) -> Unit,
     onDismiss: () -> Unit,
+    defaultValue: String = "100",
+    unitLabel: String = "Gramm",
+    title: String = "Portion",
 ) {
-    var text by remember { mutableStateOf("100") }
+    var text by remember { mutableStateOf(defaultValue) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Portion (g)") },
+        title = { Text("$title ($unitLabel)") },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) text = it },
-                label = { Text("Gramm") },
+                label = { Text(unitLabel) },
                 singleLine = true,
             )
         },
         confirmButton = {
-            val grams = text.toDoubleOrNull()
+            val value = text.toDoubleOrNull()
             TextButton(
-                onClick = { grams?.let { onConfirm(it) } },
-                enabled = grams != null && grams > 0,
+                onClick = { value?.let { onConfirm(it) } },
+                enabled = value != null && value > 0,
             ) { Text("Hinzufügen") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },

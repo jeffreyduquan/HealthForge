@@ -46,20 +46,12 @@ import de.healthforge.presentation.theme.SectionPill
 fun SupplementDetailScreen(
     supplementId: String,
     onBack: () -> Unit,
-    onAddedToPlan: () -> Unit = {},
     vm: SupplementDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
     val hm = LocalHmTokens.current
 
     LaunchedEffect(supplementId) { vm.load(supplementId) }
-
-    LaunchedEffect(state.navigateToHome) {
-        if (state.navigateToHome) {
-            vm.onNavigatedToHome()
-            onAddedToPlan()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -138,9 +130,13 @@ fun SupplementDetailScreen(
         }
 
         if (state.showAddToPlan) {
+            val dose = state.supplement?.defaultDose?.let { "%.0f".format(it) } ?: "1"
             PortionInputDialog(
                 onConfirm = { grams -> vm.addToPlan(grams) },
                 onDismiss = { vm.dismissAddToPlanDialog() },
+                defaultValue = dose,
+                unitLabel = "Dosis",
+                title = "Supplement",
             )
         }
     }
