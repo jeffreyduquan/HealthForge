@@ -45,6 +45,7 @@ import de.healthforge.presentation.theme.LocalHmTokens
 @Composable
 fun SupplementsScreen(
     onOpenEdit: (id: Long) -> Unit,
+    onOpenDetail: (id: String) -> Unit = {},
     vm: SupplementsListViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsStateWithLifecycle()
@@ -96,6 +97,9 @@ fun SupplementsScreen(
                     SupplementRow(
                         sup = sup,
                         onClick = {
+                            if (sup.isLocal) onOpenDetail(sup.localId.toString())
+                        },
+                        onEdit = {
                             if (sup.isLocal) onOpenEdit(sup.localId)
                         },
                         onDelete = {
@@ -115,6 +119,7 @@ fun SupplementsScreen(
 private fun SupplementRow(
     sup: SupplementDisplayItem,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     onAdopt: () -> Unit,
 ) {
@@ -152,7 +157,7 @@ private fun SupplementRow(
                 )
             }
             if (sup.isLocal) {
-                TextButton(onClick = onClick) { Text("Bearb.") }
+                TextButton(onClick = onEdit) { Text("Bearb.") }
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = hm.fgTertiary)
                 }

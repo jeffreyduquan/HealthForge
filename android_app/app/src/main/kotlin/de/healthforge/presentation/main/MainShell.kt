@@ -178,6 +178,9 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     onOpenSupplementEdit = { id ->
                         navController.navigate(MainRoutes.supplementEdit(id))
                     },
+                    onOpenSupplementDetail = { id ->
+                        navController.navigate(MainRoutes.supplementDetail(id))
+                    },
                     onOpenRecipeDetail = { id ->
                         navController.navigate(MainRoutes.recipeDetail(id))
                     },
@@ -240,6 +243,13 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 RecipeDetailScreen(
                     onBack = { navController.popBackStack() },
                     onEdit = { id -> navController.navigate(MainRoutes.recipeEdit(id)) },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 )
             }
             composable(
@@ -323,6 +333,13 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 IngredientDetailScreen(
                     ingredientId = id,
                     onBack = { navController.popBackStack() },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 )
             }
             // P7.S4b: Full-screen supplement detail
@@ -336,6 +353,13 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 SupplementDetailScreen(
                     supplementId = id,
                     onBack = { navController.popBackStack() },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 )
             }
             // P6.S5: 4-Step Wizard zum Vorschlagen eines neuen Lebensmittels.

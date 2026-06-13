@@ -82,5 +82,5 @@ fun foodIconForName(nameDe: String): FoodIcon {
 fun supplementIconVariant(supplementId: Long): FoodIcon {
     val index = (supplementId % 5).toInt().coerceIn(0, 4)
     val variant = FoodIcons.SUPPLEMENT_VARIANTS[index]
-    return FoodIcon(icon = variant.first, tint = null) // color handled separately
+    return FoodIcon(icon = variant.first, tint = variant.second)
 }

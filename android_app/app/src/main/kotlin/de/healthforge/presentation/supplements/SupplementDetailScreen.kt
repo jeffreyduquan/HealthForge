@@ -46,12 +46,20 @@ import de.healthforge.presentation.theme.SectionPill
 fun SupplementDetailScreen(
     supplementId: String,
     onBack: () -> Unit,
+    onAddedToPlan: () -> Unit = {},
     vm: SupplementDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
     val hm = LocalHmTokens.current
 
     LaunchedEffect(supplementId) { vm.load(supplementId) }
+
+    LaunchedEffect(state.navigateToHome) {
+        if (state.navigateToHome) {
+            vm.onNavigatedToHome()
+            onAddedToPlan()
+        }
+    }
 
     Scaffold(
         topBar = {

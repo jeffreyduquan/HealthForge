@@ -20,6 +20,7 @@ data class IngredientDetailState(
     val loading: Boolean = false,
     val error: String? = null,
     val showAddToPlan: Boolean = false,
+    val navigateToHome: Boolean = false,
 )
 
 @HiltViewModel
@@ -60,7 +61,9 @@ class IngredientDetailViewModel @Inject constructor(
                 snapshotCarbsPer100g = item.carbs_g_per_100g,
                 snapshotFatPer100g = item.fat_g_per_100g,
             ))
-            _state.update { it.copy(showAddToPlan = false) }
+            _state.update { it.copy(showAddToPlan = false, navigateToHome = true) }
         }
     }
+
+    fun onNavigatedToHome() { _state.update { it.copy(navigateToHome = false) } }
 }

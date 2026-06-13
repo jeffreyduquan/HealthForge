@@ -25,6 +25,7 @@ import de.healthforge.presentation.theme.SegmentedTabs
 fun EssenScreen(
     preselectedTab: Int? = null,
     onOpenSupplementEdit: (id: Long) -> Unit = {},
+    onOpenSupplementDetail: (id: String) -> Unit = {},
     onOpenRecipeDetail: (String) -> Unit = {},
     onCreateRecipe: () -> Unit = {},
     onSuggestIngredient: (initialName: String) -> Unit = {},
@@ -48,7 +49,7 @@ fun EssenScreen(
                     onOpenIngredientDetail = onOpenIngredientDetail,
                 )
                 1 -> RecipesScreen(onOpenDetail = onOpenRecipeDetail, onCreate = onCreateRecipe)
-                2 -> SupplementsScreen(onOpenEdit = onOpenSupplementEdit)
+                2 -> SupplementsScreen(onOpenEdit = onOpenSupplementEdit, onOpenDetail = onOpenSupplementDetail)
             }
         }
     }

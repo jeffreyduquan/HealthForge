@@ -72,6 +72,7 @@ import de.healthforge.data.repository.MediaRepository
 fun RecipeDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit = {},
+    onAddedToPlan: () -> Unit = {},
     vm: RecipeDetailViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
@@ -82,6 +83,12 @@ fun RecipeDetailScreen(
         state.message?.let {
             snackbarHostState.showSnackbar(it)
             vm.clearMessage()
+        }
+    }
+    LaunchedEffect(state.navigateToHome) {
+        if (state.navigateToHome) {
+            vm.onNavigatedToHome()
+            onAddedToPlan()
         }
     }
     Scaffold(

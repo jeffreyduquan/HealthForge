@@ -189,12 +189,12 @@ fun IntakeCard(
                         color = hm.fgTertiary,
                     )
                     // Consumed toggle
-                    IconButton(onClick = onToggleConsumed, modifier = Modifier.size(28.dp)) {
+                    IconButton(onClick = onToggleConsumed, modifier = Modifier.size(42.dp)) {
                         Icon(
                             imageVector = if (entry.consumed) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircleOutline,
                             contentDescription = if (entry.consumed) "Gegessen" else "Nicht gegessen",
                             tint = if (entry.consumed) hm.ambientCyan else hm.fgTertiary,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(32.dp),
                         )
                     }
                 }

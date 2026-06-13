@@ -5,6 +5,55 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: Fünf UI/UX-Fixes (2026-06-13)
+
+**Scope:** Bugfixes und UX-Verbesserungen an IntakeCard, Icons, Navigation, Rezept-Nährwerten und Supplement-Detail.
+
+**Touched Docs:**
+- `CHANGELOG.md`: Dieser Eintrag
+
+**Untouched Docs:**
+- `Architecture.md`: Keine Architektur-Änderung (alle Änderungen in Presentation-Schicht)
+- `ReqSpec.md`: Keine neuen Requirements (Bugfixes bestehender Funktionalität)
+- `GUI.md`: Keine neuen Design-Tokens (nur Größen-Anpassung bestehender Elemente)
+- `UsabilityMap.md`: Navigation nach addToPlan verbessert, aber kein neuer Flow
+- `HistamindDesignReference.md`: Unverändert
+
+**Änderungen:**
+
+1. **IntakeCard — Checkbox vergrößert** (`IntakeCard.kt`):
+   - Gegessen/Nicht-gegessen IconButton: 28dp → 42dp, Icon: 20dp → 32dp
+
+2. **Icons — Supplement-Varianten mit Farben** (`FoodCategoryMapper.kt`, `CustomFoodIcons.kt`):
+   - `SUPPLEMENT_VARIANTS`: `Pair<ImageVector, Long>` → `Pair<ImageVector, Color>` mit echten Tint-Farben (ambientViolet, ambientCyan, statusGood, statusRelax, statusOverUl)
+   - `supplementIconVariant()`: Gibt jetzt `FoodIcon` mit Farb-Tint zurück (statt immer null)
+   - Zuvor: alle 5 Supplement-Varianten identisches Icon ohne Farbunterscheidung
+
+3. **Nach addToPlan → Home-Navigation** (`IngredientDetailScreen.kt`, `SupplementDetailScreen.kt`, `RecipeDetailScreen.kt`, jeweilige ViewModels, `MainShell.kt`):
+   - Alle drei Detail-ViewModels: Neues State-Feld `navigateToHome`, wird nach `addToPlan()` auf `true` gesetzt
+   - Alle drei Detail-Screens: Neuer `onAddedToPlan`-Callback, über `LaunchedEffect` beobachtet
+   - `MainShell.kt`: Callback navigiert zum HOME-Tab (`popUpTo` Start-Destination)
+
+4. **Rezepte — Nährwerte werden jetzt korrekt berechnet** (`RecipesViewModel.kt`):
+   - Neue `normaliseToGrams()`: Konvertiert g/kg/mg/ml/l → Gramm (analog Server-Logik)
+   - Neue `computeRecipeTotalGrams()`: Summiert konvertierbare Zutaten-Gramm
+   - `addToPlan()`: Berechnet per-100g-Werte aus `totalNutrition / totalGrams * 100`
+   - Fallback: Wenn keine Zutat konvertierbar → speichert Total-Werte des Rezepts
+   - Zuvor: `snapshotKcalPer100g` etc. immer `null` → Rezepte trugen 0 kcal/Tag bei
+
+5. **Supplement Detail View aus Liste erreichbar** (`SupplementsScreen.kt`, `EssenScreen.kt`, `MainShell.kt`):
+   - `SupplementsScreen`: Neuer `onOpenDetail`-Callback, Tap auf Karte → Detail (statt Edit)
+   - `SupplementRow`: "Bearb."-Button ruft jetzt `onEdit` (separater Callback)
+   - `EssenScreen`: Neuer `onOpenSupplementDetail`-Parameter, an `SupplementsScreen` durchgereicht
+   - `MainShell.kt`: Verdrahtet `onOpenSupplementDetail` → `SUPPLEMENT_DETAIL`-Route
+
+**Verifikation:**
+- Keine Compile-Fehler in allen 12 geänderten Dateien
+- Keine Architektur-Änderungen (nur Presentation-Layer)
+- Alle bestehenden Tests sollten weiterhin durchlaufen (keine Schnittstellen-Änderungen)
+
+---
+
 ## Feature: P7.S4b — Home-Redesign: Slot-Tiles entfernt, flache IntakeCard-Liste, SVG-Icons (2026-06-12)
 
 **Scope:** Mahlzeit-Slot-Kacheln (Frühstück/Mittag/Abend/Snack) vom Home-Tab entfernt.

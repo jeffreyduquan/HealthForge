@@ -397,13 +397,13 @@ object FoodIcons {
     }.build()
 
     // ── Supplement color variants (5 accent tints) ──
-    /** Map supplement id → icon + color. Deterministic: id % 5. */
-    val SUPPLEMENT_VARIANTS: List<Pair<ImageVector, Long>> = listOf(
-        SUPPLEMENT to 0L, // ambientViolet
-        SUPPLEMENT to 1L, // ambientCyan
-        SUPPLEMENT to 2L, // statusGood
-        SUPPLEMENT to 3L, // statusRelax
-        SUPPLEMENT to 4L, // fgPrimary
+    /** Map supplement id → icon + tint color. Deterministic: id % 5. */
+    val SUPPLEMENT_VARIANTS: List<Pair<ImageVector, Color>> = listOf(
+        SUPPLEMENT to Color(0xFF7C5CFF), // ambientViolet
+        SUPPLEMENT to Color(0xFF4DD0E1), // ambientCyan
+        SUPPLEMENT to Color(0xFF22D3A6), // statusGood
+        SUPPLEMENT to Color(0xFFFFB454), // statusRelax
+        SUPPLEMENT to Color(0xFFFF5470), // statusOverUl (pink/red for contrast)
     )
 
     /** Fallback icon for unmatched categories */
