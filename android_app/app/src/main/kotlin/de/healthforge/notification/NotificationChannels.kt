@@ -22,8 +22,10 @@ object NotificationChannels {
             NotificationChannel(MEAL, "Mahlzeiten", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 description = "Mahlzeit-Erinnerungen"
             },
-            NotificationChannel(WATER, "Wasser", NotificationManager.IMPORTANCE_LOW).apply {
+            NotificationChannel(WATER, "Wasser", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 description = "Wasser-Erinnerungen"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 200, 200, 400)
             },
         ).forEach(mgr::createNotificationChannel)
     }

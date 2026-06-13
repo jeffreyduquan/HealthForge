@@ -20,7 +20,7 @@ class WaterReminderPrefs @Inject constructor(
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     var enabled: Boolean
-        get() = prefs.getBoolean(KEY_ENABLED, false)
+        get() = prefs.getBoolean(KEY_ENABLED, true)
         set(value) { prefs.edit().putBoolean(KEY_ENABLED, value).apply() }
 
     var intervalHours: Int

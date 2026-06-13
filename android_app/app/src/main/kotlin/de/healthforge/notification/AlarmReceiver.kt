@@ -217,7 +217,8 @@ class AlarmReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setContentIntent(contentPi)
             .addAction(0, "+30 min", snoozePi)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVibrate(longArrayOf(0, 200, 200, 400))
             .build()
         mgr.notify(WATER_NOTIF_ID, notif)
     }
