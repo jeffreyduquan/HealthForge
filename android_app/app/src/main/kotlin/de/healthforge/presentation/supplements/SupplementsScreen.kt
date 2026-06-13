@@ -97,7 +97,11 @@ fun SupplementsScreen(
                     SupplementRow(
                         sup = sup,
                         onClick = {
-                            if (sup.isLocal) onOpenDetail(sup.localId.toString())
+                            if (sup.isLocal) {
+                                onOpenDetail(sup.localId.toString())
+                            } else {
+                                sup.publicServerId?.let { vm.adoptPublic(it) }
+                            }
                         },
                         onEdit = {
                             if (sup.isLocal) onOpenEdit(sup.localId)
