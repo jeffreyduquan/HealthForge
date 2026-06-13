@@ -46,7 +46,7 @@ import de.healthforge.presentation.profile.ProfileScreen
 import de.healthforge.presentation.supplements.SupplementDetailScreen
 import de.healthforge.presentation.supplements.SupplementEditScreen
 
-/** Bottom-Navigation tab destinations. REQ-NAV-001 (5 Tabs: Home/Gruppen/Essen/Log/Profil). */
+/** Bottom-Navigation tab destinations. REQ-NAV-001 (5 Tabs: Home/Essen/Gruppen/Log/Profil). */
 private data class TabSpec(
     val route: String,
     val label: String,
@@ -118,7 +118,7 @@ private val TABS = listOf(
  * that participate in the same nav graph (Intake-History, REQ-NAV-004).
  * Auth/Onboarding live OUTSIDE this shell.
  *
- * Tabs: Home | Gruppen | Essen | Log | Profil
+ * Tabs: Home | Essen | Gruppen | Log | Profil
  */
 @Composable
 fun MainShell(onRestartOnboarding: () -> Unit) {
@@ -177,6 +177,9 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 EssenScreen(preselectedTab = 1,
                     onOpenSupplementEdit = { id ->
                         navController.navigate(MainRoutes.supplementEdit(id))
+                    },
+                    onOpenSupplementDetail = { id ->
+                        navController.navigate(MainRoutes.supplementDetail(id))
                     },
                     onOpenRecipeDetail = { id ->
                         navController.navigate(MainRoutes.recipeDetail(id))

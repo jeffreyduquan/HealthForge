@@ -80,7 +80,13 @@ fun foodIconForName(nameDe: String): FoodIcon {
  * Uses `id % 5` for deterministic color assignment.
  */
 fun supplementIconVariant(supplementId: Long): FoodIcon {
-    val index = (supplementId % 5).toInt().coerceIn(0, 4)
-    val variant = FoodIcons.SUPPLEMENT_VARIANTS[index]
-    return FoodIcon(icon = variant.first, tint = variant.second)
+    val colors = listOf(
+        null, // default fgSecondary
+        androidx.compose.ui.graphics.Color(0xFF7C5CFF), // ambientViolet
+        androidx.compose.ui.graphics.Color(0xFF4DD0E1), // ambientCyan
+        androidx.compose.ui.graphics.Color(0xFF22D3A6), // statusGood
+        androidx.compose.ui.graphics.Color(0xFFFFB454), // statusRelax
+    )
+    val tint = colors[(supplementId % colors.size).toInt()]
+    return FoodIcon(icon = FoodIcons.SUPPLEMENT, tint = tint)
 }
