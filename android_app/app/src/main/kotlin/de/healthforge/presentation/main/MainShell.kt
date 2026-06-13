@@ -107,8 +107,8 @@ object MainRoutes {
 
 private val TABS = listOf(
     TabSpec(MainRoutes.HOME, "Home", Icons.Filled.Home),
-    TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.ESSEN, "Essen", Icons.Filled.Restaurant),
+    TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.LOG, "Log", Icons.Filled.BookmarkBorder),
     TabSpec(MainRoutes.PROFIL, "Profil", Icons.Filled.Person),
 )
@@ -173,12 +173,6 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     },
                 )
             }
-            composable(MainRoutes.GROUPS) {
-                GroupsScreen(
-                    showBack = false,
-                    onOpenGroup = { id -> navController.navigate(MainRoutes.groupDetail(id)) },
-                )
-            }
             composable(MainRoutes.ESSEN) {
                 EssenScreen(preselectedTab = 1,
                     onOpenSupplementEdit = { id ->
@@ -199,6 +193,12 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     onOpenIngredientDetail = { id ->
                         navController.navigate(MainRoutes.ingredientDetail(id))
                     },
+                )
+            }
+            composable(MainRoutes.GROUPS) {
+                GroupsScreen(
+                    showBack = false,
+                    onOpenGroup = { id -> navController.navigate(MainRoutes.groupDetail(id)) },
                 )
             }
             composable(MainRoutes.LOG) {
