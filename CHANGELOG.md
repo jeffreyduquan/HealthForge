@@ -5,6 +5,33 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
+## Bugfix: DB-Cleanup — MANUAL→USDA_FDC Remapping + Tab-Reorder (2026-06-13)
+
+**Scope:** 47 MANUAL-Zutaten auf USDA_FDC gemappt & gelöscht. Bottom-Nav-Tabs neu geordnet.
+
+**Touched Docs:**
+- `CHANGELOG.md`: Dieser Eintrag
+
+**Untouched Docs:**
+- `Architecture.md`: Keine Architektur-Änderung (DB-Cleanup + UI-Reorder)
+- `ReqSpec.md`: Keine neuen Requirements
+
+**Änderungen:**
+
+1. **Tab-Reihenfolge** (`MainShell.kt`): Home | Essen | Gruppen | Log | Profil (Gruppen+Essen getauscht)
+
+2. **DB-Cleanup** (Live-Server, per SQL):
+   - 47 MANUAL-Zutaten → USDA_FDC-Äquivalente gemappt (69 recipe_ingredients-Links)
+   - 1 Hühnerbrühe-Ref aus Kartoffelsuppe entfernt (kein FDC-Ersatz)
+   - Tools: `audit_manual_ingredients.sql`, `remap_manual_to_fdc.sql`, `find_missing_fdc.sql`, `find_beeren_bruhe.sql`, `find_manual_replacements.sql`, `map_manual_to_fdc.sql`
+   - Ergebnis: 637 USDA_FDC-Zutaten, 0 MANUAL
+
+**Verifikation:**
+- `SELECT source, COUNT(*) FROM ingredients GROUP BY source` → nur USDA_FDC (637 rows)
+- Keine Compile-Fehler in MainShell.kt
+
+---
+
 ## Bugfix: Fünf UI/UX-Fixes (2026-06-13)
 
 **Scope:** Bugfixes und UX-Verbesserungen an IntakeCard, Icons, Navigation, Rezept-Nährwerten und Supplement-Detail.

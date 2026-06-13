@@ -107,8 +107,8 @@ object MainRoutes {
 
 private val TABS = listOf(
     TabSpec(MainRoutes.HOME, "Home", Icons.Filled.Home),
-    TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.ESSEN, "Essen", Icons.Filled.Restaurant),
+    TabSpec(MainRoutes.GROUPS, "Gruppen", Icons.Filled.Groups),
     TabSpec(MainRoutes.LOG, "Log", Icons.Filled.BookmarkBorder),
     TabSpec(MainRoutes.PROFIL, "Profil", Icons.Filled.Person),
 )
