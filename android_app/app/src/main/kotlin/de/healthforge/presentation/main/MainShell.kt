@@ -173,6 +173,12 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     },
                 )
             }
+            composable(MainRoutes.GROUPS) {
+                GroupsScreen(
+                    showBack = false,
+                    onOpenGroup = { id -> navController.navigate(MainRoutes.groupDetail(id)) },
+                )
+            }
             composable(MainRoutes.ESSEN) {
                 EssenScreen(preselectedTab = 1,
                     onOpenSupplementEdit = { id ->
@@ -266,12 +272,6 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                         navController.popBackStack()
                         navController.navigate(MainRoutes.recipeDetail(id))
                     },
-                )
-            }
-            composable(MainRoutes.GROUPS) {
-                GroupsScreen(
-                    showBack = false,
-                    onOpenGroup = { id -> navController.navigate(MainRoutes.groupDetail(id)) },
                 )
             }
             composable(
