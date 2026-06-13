@@ -55,6 +55,7 @@ import de.healthforge.presentation.theme.SectionPill
 fun IngredientDetailScreen(
     ingredientId: String,
     onBack: () -> Unit,
+    onAddedToPlan: () -> Unit = {},
     onToggleLike: (String) -> Unit = {},
     onToggleDislike: (String) -> Unit = {},
     isLiked: Boolean = false,
@@ -65,6 +66,10 @@ fun IngredientDetailScreen(
     val hm = LocalHmTokens.current
 
     LaunchedEffect(ingredientId) { vm.load(ingredientId) }
+
+    LaunchedEffect(state.navigateHome) {
+        if (state.navigateHome) onAddedToPlan()
+    }
 
     Scaffold(
         topBar = {

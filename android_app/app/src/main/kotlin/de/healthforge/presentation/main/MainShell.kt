@@ -243,6 +243,11 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 RecipeDetailScreen(
                     onBack = { navController.popBackStack() },
                     onEdit = { id -> navController.navigate(MainRoutes.recipeEdit(id)) },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                 )
             }
             composable(
@@ -326,6 +331,11 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 IngredientDetailScreen(
                     ingredientId = id,
                     onBack = { navController.popBackStack() },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                 )
             }
             // P7.S4b: Full-screen supplement detail
@@ -339,6 +349,11 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 SupplementDetailScreen(
                     supplementId = id,
                     onBack = { navController.popBackStack() },
+                    onAddedToPlan = {
+                        navController.navigate(MainRoutes.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                 )
             }
             // P6.S5: 4-Step Wizard zum Vorschlagen eines neuen Lebensmittels.

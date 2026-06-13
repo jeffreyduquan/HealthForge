@@ -19,6 +19,7 @@ data class SupplementDetailState(
     val supplement: SupplementEntity? = null,
     val loading: Boolean = false,
     val showAddToPlan: Boolean = false,
+    val navigateHome: Boolean = false,
 )
 
 @HiltViewModel
@@ -58,7 +59,7 @@ class SupplementDetailViewModel @Inject constructor(
                 snapshotCarbsPer100g = sup.carbsPerDose,
                 snapshotFatPer100g = sup.fatPerDose,
             ))
-            _state.update { it.copy(showAddToPlan = false) }
+            _state.update { it.copy(showAddToPlan = false, navigateHome = true) }
         }
     }
 }

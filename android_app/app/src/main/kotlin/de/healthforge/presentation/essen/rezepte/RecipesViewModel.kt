@@ -90,6 +90,7 @@ data class RecipeDetailUiState(
     val message: String? = null,
     val myGroups: List<GroupSummaryDto>? = null, // null = dialog closed
     val showAddToPlan: Boolean = false,
+    val navigateHome: Boolean = false,
 )
 
 @HiltViewModel
@@ -218,7 +219,7 @@ class RecipeDetailViewModel @Inject constructor(
                 snapshotCarbsPer100g = null,
                 snapshotFatPer100g = null,
             ))
-            _state.update { it.copy(showAddToPlan = false, message = "Zum Plan hinzugefügt") }
+            _state.update { it.copy(showAddToPlan = false, navigateHome = true, message = "Zum Plan hinzugefügt") }
         }
     }
 }
