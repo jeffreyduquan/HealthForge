@@ -16,12 +16,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.ThumbDown
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -91,20 +93,6 @@ fun IngredientDetailScreen(
                             tint = hm.fgPrimary,
                         )
                     }
-                    IconButton(onClick = { onToggleLike(ingredientId) }) {
-                        Icon(
-                            Icons.Filled.ThumbUp,
-                            contentDescription = "Like",
-                            tint = if (isLiked) MaterialTheme.colorScheme.primary else hm.fgTertiary,
-                        )
-                    }
-                    IconButton(onClick = { onToggleDislike(ingredientId) }) {
-                        Icon(
-                            Icons.Filled.ThumbDown,
-                            contentDescription = "Nicht empfehlen",
-                            tint = if (isDisliked) MaterialTheme.colorScheme.error else hm.fgTertiary,
-                        )
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = hm.background,
@@ -142,6 +130,32 @@ fun IngredientDetailScreen(
                 }
 
                 HorizontalDivider(color = hm.fgTertiary.copy(alpha = 0.3f))
+
+                // Like / Dislike (gleicher Stil wie RecipeDetailScreen)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(
+                        selected = isLiked,
+                        onClick = { onToggleLike(ingredientId) },
+                        leadingIcon = {
+                            Icon(
+                                if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = null,
+                            )
+                        },
+                        label = { Text("Gefällt mir") },
+                    )
+                    FilterChip(
+                        selected = isDisliked,
+                        onClick = { onToggleDislike(ingredientId) },
+                        leadingIcon = {
+                            Icon(Icons.Filled.ThumbDown, contentDescription = null)
+                        },
+                        label = { Text("Nie wieder") },
+                    )
+                }
 
                 // Macros per 100g
                 NeoSectionLabel("Nährwerte pro 100 g")
