@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,10 +20,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -121,69 +125,11 @@ fun ProfileScreen(
                 },
             )
 
-            // Allergien — click to expand
+            // Allergien — opens ModalBottomSheet
             SectionPill(label = "ALLERGIEN & INTOLERANZEN")
-            TextButton(onClick = { showAllergies = !showAllergies }, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    if (showAllergies) "▾ Allergien & Intoleranzen" else "▸ Allergien & Intoleranzen bearbeiten",
-                    color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge
-                )
+            TextButton(onClick = { showAllergies = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("Allergien & Intoleranzen bearbeiten →", color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge)
             }
-            if (showAllergies) {
-                GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                val selectedAllergies = full?.allergies ?: emptySet()
-                val selectedIntol = full?.intolerances ?: emptySet()
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        "Allergien (EU-14)",
-                        color = hm.fgSecondary,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    androidx.compose.foundation.layout.FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        de.healthforge.data.db.entities.AllergenType.entries.forEach { a ->
-                            val isOn = a in selectedAllergies
-                            FilterChip(
-                                selected = isOn,
-                                onClick = {
-                                    val next = selectedAllergies.toMutableSet()
-                                    if (isOn) next.remove(a) else next.add(a)
-                                    vm.setAllergies(next)
-                                },
-                                label = { Text(a.germanLabel, style = MaterialTheme.typography.bodySmall) },
-                            )
-                        }
-                    }
-                    Text(
-                        "FODMAP-Intoleranzen",
-                        color = hm.fgSecondary,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 4.dp),
-                    )
-                    androidx.compose.foundation.layout.FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        de.healthforge.data.db.entities.FodmapType.entries.forEach { f ->
-                            val isOn = f in selectedIntol
-                            FilterChip(
-                                selected = isOn,
-                                onClick = {
-                                    val next = selectedIntol.toMutableSet()
-                                    if (isOn) next.remove(f) else next.add(f)
-                                    vm.setIntolerances(next)
-                                },
-                                label = { Text(f.germanLabel, style = MaterialTheme.typography.bodySmall) },
-                            )
-                        }
-                    }
-                }
-            }
-            } // showAllergies
 
             SectionPill(label = "ERSCHEINUNGSBILD")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
@@ -204,51 +150,11 @@ fun ProfileScreen(
                 }
             }
 
-            // Tagesziele — click to expand
+            // Tagesziele — opens ModalBottomSheet
             SectionPill(label = "TAGESZIELE")
-            TextButton(onClick = { showGoals = !showGoals }, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    if (showGoals) "▾ Tagesziele" else "▸ Tagesziele bearbeiten",
-                    color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge
-                )
+            TextButton(onClick = { showGoals = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("Tagesziele bearbeiten →", color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge)
             }
-            if (showGoals) {
-            GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                val defaults by vm.computedDefaults.collectAsStateWithLifecycle()
-                val goalsJson = p?.dailyNutrientGoalsJson ?: "{}"
-                val goals = remember(goalsJson) {
-                    runCatching { org.json.JSONObject(goalsJson) }.getOrElse { org.json.JSONObject() }
-                }
-                val waterMl = p?.waterGoalMl ?: 2000
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    de.healthforge.domain.nutrition.NutrientCatalog.Category.entries.forEach { cat ->
-                        val rows = de.healthforge.domain.nutrition.NutrientCatalog.ofCategory(cat)
-                        if (rows.isEmpty()) return@forEach
-                        Text(
-                            categoryLabel(cat),
-                            color = hm.fgSecondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
-                        )
-                        rows.forEach { nut ->
-                            val computedDefault = effectiveDefault(nut, defaults, nut.defaultPerDay)
-                            val override: Double? = when (nut.key) {
-                                "water" -> waterMl.toDouble().takeIf { it != 2000.0 }
-                                else -> if (goals.has(nut.key)) goals.optDouble(nut.key) else null
-                            }
-                            de.healthforge.presentation.profile.components.NutrientGoalRow(
-                                nutrient = nut,
-                                effectiveDefault = computedDefault,
-                                override = override,
-                                onChange = { vm.setNutrientGoal(nut.key, it) },
-                                onReset = { vm.clearNutrientGoal(nut.key) },
-                            )
-                        }
-                    }
-                }
-            }
-            } // showGoals
 
             SectionPill(label = "MEHR")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
@@ -330,6 +236,74 @@ fun ProfileScreen(
                 }
             }
             Spacer(Modifier.height(24.dp))
+        }
+    }
+
+    // Modal Sheets
+    if (showAllergies) {
+        val selectedAllergies = full?.allergies ?: emptySet()
+        val selectedIntol = full?.intolerances ?: emptySet()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { showAllergies = false }, sheetState = sheetState, containerColor = hm.background) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                GradientText("Allergien & Intoleranzen", style = MaterialTheme.typography.titleLarge)
+                Text("Allergien (EU-14)", color = hm.fgPrimary, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    de.healthforge.data.db.entities.AllergenType.entries.forEach { a ->
+                        val isOn = a in selectedAllergies
+                        FilterChip(selected = isOn, onClick = {
+                            val next = selectedAllergies.toMutableSet()
+                            if (isOn) next.remove(a) else next.add(a)
+                            vm.setAllergies(next)
+                        }, label = { Text(a.germanLabel, style = MaterialTheme.typography.bodySmall) })
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Text("FODMAP-Intoleranzen", color = hm.fgPrimary, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    de.healthforge.data.db.entities.FodmapType.entries.forEach { f ->
+                        val isOn = f in selectedIntol
+                        FilterChip(selected = isOn, onClick = {
+                            val next = selectedIntol.toMutableSet()
+                            if (isOn) next.remove(f) else next.add(f)
+                            vm.setIntolerances(next)
+                        }, label = { Text(f.germanLabel, style = MaterialTheme.typography.bodySmall) })
+                    }
+                }
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+    }
+    if (showGoals) {
+        val p = full?.profile
+        val defaults by vm.computedDefaults.collectAsStateWithLifecycle()
+        val goalsJson = p?.dailyNutrientGoalsJson ?: "{}"
+        val goals = remember(goalsJson) { runCatching { org.json.JSONObject(goalsJson) }.getOrElse { org.json.JSONObject() } }
+        val waterMl = p?.waterGoalMl ?: 2000
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { showGoals = false }, sheetState = sheetState, containerColor = hm.background) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                GradientText("Tagesziele", style = MaterialTheme.typography.titleLarge)
+                de.healthforge.domain.nutrition.NutrientCatalog.Category.entries.forEach { cat ->
+                    val rows = de.healthforge.domain.nutrition.NutrientCatalog.ofCategory(cat)
+                    if (rows.isEmpty()) return@forEach
+                    Text(categoryLabel(cat), color = hm.fgSecondary, style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 10.dp, bottom = 4.dp))
+                    rows.forEach { nut ->
+                        val computedDefault = effectiveDefault(nut, defaults, nut.defaultPerDay)
+                        val override: Double? = when (nut.key) {
+                            "water" -> waterMl.toDouble().takeIf { it != 2000.0 }
+                            else -> if (goals.has(nut.key)) goals.optDouble(nut.key) else null
+                        }
+                        de.healthforge.presentation.profile.components.NutrientGoalRow(
+                            nutrient = nut, effectiveDefault = computedDefault, override = override,
+                            onChange = { vm.setNutrientGoal(nut.key, it) },
+                            onReset = { vm.clearNutrientGoal(nut.key) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(32.dp))
+            }
         }
     }
 }

@@ -57,6 +57,7 @@ import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
 import de.healthforge.presentation.common.components.HfCard
 import de.healthforge.presentation.common.components.HfRatingBar
+import de.healthforge.presentation.common.components.HfFilterDialog
 import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.common.components.MasterTileNutrient
@@ -126,16 +127,8 @@ fun LebensmittelScreen(
             onFilterClick = { showFilters = true },
         )
 
-        // Filter chip (matching position of filter row in other tabs)
-        FilterChip(
-            selected = state.applyProfileFilters,
-            onClick = vm::toggleApplyProfileFilters,
-            label = {
-                val n = state.excludedAllergens.size + state.excludedFodmap.size
-                Text(if (state.applyProfileFilters) "Profil-Filter ($n)" else "Profil-Filter aus")
-            },
-        )
-        Spacer(Modifier.height(8.dp))
+        // Filter row removed — everything in filter dialog
+        Spacer(Modifier.height(4.dp))
 
         when {
             state.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
@@ -168,10 +161,12 @@ fun LebensmittelScreen(
     } // Scaffold
 
     if (showFilters) {
-        FilterDialog(
-            allergens = state.excludedAllergens, fodmap = state.excludedFodmap,
+        HfFilterDialog(
+            excludedAllergens = state.excludedAllergens, excludedFodmap = state.excludedFodmap,
             onToggleAllergen = vm::toggleAllergen, onToggleFodmap = vm::toggleFodmap,
             onDismiss = { showFilters = false },
+            applyProfileFilters = state.applyProfileFilters,
+            onToggleProfileFilters = vm::toggleApplyProfileFilters,
         )
     }
     fieldPrTarget?.let { target ->
@@ -220,58 +215,6 @@ private fun IngredientRow(
         trailingSlot = if (!preselect) {
             { TextButton(onClick = onCorrect) { Text("Korrektur") } }
         } else null,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-@Composable
-private fun FilterDialog(
-    allergens: Set<AllergenType>,
-    fodmap: Set<FodmapType>,
-    onToggleAllergen: (AllergenType) -> Unit,
-    onToggleFodmap: (FodmapType) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Fertig") } },
-        title = { Text("Ausschluss-Filter") },
-        text = {
-            Column {
-                Text("Allergene", style = androidx.compose.material3.MaterialTheme.typography.titleSmall)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.padding(vertical = 6.dp),
-                ) {
-                    AllergenType.values().forEach { a ->
-                        FilterChip(
-                            selected = a in allergens,
-                            onClick = { onToggleAllergen(a) },
-                            label = { Text(a.germanLabel) },
-                            colors = FilterChipDefaults.filterChipColors(),
-                        )
-                    }
-                }
-                HorizontalDivider()
-                Text(
-                    "FODMAP",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.padding(vertical = 6.dp),
-                ) {
-                    FodmapType.values().forEach { f ->
-                        FilterChip(
-                            selected = f in fodmap,
-                            onClick = { onToggleFodmap(f) },
-                            label = { Text(f.germanLabel) },
-                        )
-                    }
-                }
-            }
-        },
     )
 }
 

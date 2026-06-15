@@ -39,6 +39,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +52,7 @@ import coil.compose.AsyncImage
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.MediaRepository
 import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfFilterDialog
 import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.common.components.MasterTileNutrient
@@ -63,6 +67,7 @@ fun RecipesScreen(
     vm: RecipeBrowseViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
+    var showFilters by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
@@ -76,20 +81,10 @@ fun RecipesScreen(
             query = state.query,
             onQueryChange = vm::setQuery,
             placeholder = "Rezepte suchen…",
+            showFilterIcon = true,
+            onFilterClick = { showFilters = true },
         )
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(SLOT_OPTIONS) { (code, label) ->
-                FilterChip(
-                    selected = code in state.slotFilter,
-                    onClick = { vm.toggleSlot(code) },
-                    label = { Text(label) },
-                )
-            }
-        }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
 
         when {
             state.isLoading && state.items.isEmpty() -> CenteredLoader()
@@ -107,6 +102,19 @@ fun RecipesScreen(
             }
         }
     }
+    }
+
+    if (showFilters) {
+        HfFilterDialog(
+            excludedAllergens = emptySet(),
+            excludedFodmap = emptySet(),
+            onToggleAllergen = {},
+            onToggleFodmap = {},
+            onDismiss = { showFilters = false },
+            slotOptions = SLOT_OPTIONS,
+            selectedSlots = state.slotFilter,
+            onToggleSlot = vm::toggleSlot,
+        )
     }
 }
 
