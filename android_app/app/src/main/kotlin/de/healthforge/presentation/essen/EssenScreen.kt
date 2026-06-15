@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,7 +31,7 @@ fun EssenScreen(
     onSuggestIngredient: (initialName: String) -> Unit = {},
     onOpenIngredientDetail: (String) -> Unit = {},
 ) {
-    var selected by remember(preselectedTab) { mutableIntStateOf(preselectedTab ?: 0) }
+    var selected by rememberSaveable(preselectedTab) { mutableIntStateOf(preselectedTab ?: 0) }
     val tabs = listOf("Rezepte", "Lebensmittel", "Supplements")
 
     Box(modifier = Modifier.fillMaxSize()) {
