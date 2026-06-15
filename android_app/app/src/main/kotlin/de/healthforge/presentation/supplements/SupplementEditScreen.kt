@@ -1,11 +1,17 @@
 package de.healthforge.presentation.supplements
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -14,8 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -25,14 +29,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +49,12 @@ import de.healthforge.data.db.entities.ReminderFrequency
 import de.healthforge.data.db.entities.SupplementReminderEntity
 import de.healthforge.notification.AlarmScheduler
 import de.healthforge.notification.RequestNotificationPermissionEffect
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfDetailTopBar
+import de.healthforge.presentation.common.components.HfSectionHeader
+import de.healthforge.presentation.theme.AmbientBackdrop
+import de.healthforge.presentation.theme.GradientButton
+import de.healthforge.presentation.theme.LocalHmTokens
 import java.time.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,122 +86,152 @@ fun SupplementEditScreen(
     }
 
     LaunchedEffect(s.saved) { if (s.saved) onBack() }
+    val hm = LocalHmTokens.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (supplementId > 0) "Supplement bearbeiten" else "Neues Supplement") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(hm.background),
+    ) {
+        AmbientBackdrop(Modifier.fillMaxSize())
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .statusBarsPadding()
+                .navigationBarsPadding(),
         ) {
-            OutlinedTextField(
-                value = s.name, onValueChange = vm::setName,
-                label = { Text("Name *") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = s.brand, onValueChange = vm::setBrand,
-                label = { Text("Marke (optional)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = s.defaultDose, onValueChange = vm::setDose,
-                    label = { Text("Dosis *") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = s.unitLabel, onValueChange = vm::setUnit,
-                    label = { Text("Einheit") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-            }
-            Text("Nährwerte pro Dosis (optional)", style = MaterialTheme.typography.titleSmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = s.kcal, onValueChange = vm::setKcal,
-                    label = { Text("kcal") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = s.protein, onValueChange = vm::setProtein,
-                    label = { Text("Eiweiß (g)") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = s.carbs, onValueChange = vm::setCarbs,
-                    label = { Text("KH (g)") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = s.fat, onValueChange = vm::setFat,
-                    label = { Text("Fett (g)") }, singleLine = true, modifier = Modifier.weight(1f),
-                )
-            }
-            OutlinedTextField(
-                value = s.notes, onValueChange = vm::setNotes,
-                label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
+            HfDetailTopBar(
+                title = if (supplementId > 0) "Supplement bearbeiten" else "Neues Supplement",
+                onBack = onBack,
             )
 
-            s.error?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-            }
-
-            Button(
-                onClick = { vm.save() },
-                enabled = !s.saving,
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(if (s.saving) "Speichern…" else "Speichern") }
-
-            OutlinedButton(
-                onClick = { confirmSuggest = true },
-                enabled = !s.suggesting,
-                modifier = Modifier.fillMaxWidth(),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    if (s.suggesting) "Wird gesendet…"
-                    else "Für globalen Katalog vorschlagen",
-                )
-            }
+                Spacer(Modifier.height(4.dp))
 
-            if (s.id > 0) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Erinnerungen", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-                    OutlinedButton(onClick = { requestNotifPerm = true }) { Text("+ Neu") }
+                HfSectionHeader("Name & Marke")
+                HfCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = s.name, onValueChange = vm::setName,
+                            label = { Text("Name *") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = s.brand, onValueChange = vm::setBrand,
+                            label = { Text("Marke (optional)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
-                if (s.reminders.isEmpty()) {
-                    Text(
-                        "Noch keine Erinnerungen.",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        items(items = s.reminders, key = { it.id }) { r ->
-                            ReminderRow(
-                                r = r,
-                                onToggle = { vm.toggleReminderEnabled(r) },
-                                onEdit = { editingReminder = r },
-                                onDelete = { vm.deleteReminder(r.id) },
+
+                HfSectionHeader("Dosierung")
+                HfCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = s.defaultDose, onValueChange = vm::setDose,
+                                label = { Text("Dosis *") }, singleLine = true, modifier = Modifier.weight(1f),
                             )
+                            OutlinedTextField(
+                                value = s.unitLabel, onValueChange = vm::setUnit,
+                                label = { Text("Einheit") }, singleLine = true, modifier = Modifier.weight(1f),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = s.kcal, onValueChange = vm::setKcal,
+                            label = { Text("kcal pro Dosis (optional)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+
+                HfSectionHeader("Nährwerte pro Dosis")
+                HfCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = s.protein, onValueChange = vm::setProtein,
+                                label = { Text("Eiweiß (g)") }, singleLine = true, modifier = Modifier.weight(1f),
+                            )
+                            OutlinedTextField(
+                                value = s.carbs, onValueChange = vm::setCarbs,
+                                label = { Text("KH (g)") }, singleLine = true, modifier = Modifier.weight(1f),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = s.fat, onValueChange = vm::setFat,
+                            label = { Text("Fett (g)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = s.notes, onValueChange = vm::setNotes,
+                    label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
+                )
+
+                s.error?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+
+                GradientButton(
+                    text = if (s.saving) "Speichern…" else "Speichern",
+                    onClick = { vm.save() },
+                    enabled = !s.saving,
+                )
+
+                OutlinedButton(
+                    onClick = { confirmSuggest = true },
+                    enabled = !s.suggesting,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        if (s.suggesting) "Wird gesendet…"
+                        else "Für globalen Katalog vorschlagen",
+                    )
+                }
+
+                if (s.id > 0) {
+                    HfSectionHeader("Erinnerungen")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(Modifier.weight(1f))
+                        OutlinedButton(onClick = { requestNotifPerm = true }) { Text("+ Neu") }
+                    }
+                    if (s.reminders.isEmpty()) {
+                        Text(
+                            "Noch keine Erinnerungen.",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(vertical = 4.dp),
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            items(items = s.reminders, key = { it.id }) { r ->
+                                ReminderRow(
+                                    r = r,
+                                    onToggle = { vm.toggleReminderEnabled(r) },
+                                    onEdit = { editingReminder = r },
+                                    onDelete = { vm.deleteReminder(r.id) },
+                                )
+                            }
                         }
                     }
                 }
+
+                Spacer(Modifier.height(32.dp))
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+        )
     }
 
     editingReminder?.let { r ->
@@ -237,12 +274,10 @@ private fun ReminderRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    HfCard {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(r.label, style = MaterialTheme.typography.titleSmall)
