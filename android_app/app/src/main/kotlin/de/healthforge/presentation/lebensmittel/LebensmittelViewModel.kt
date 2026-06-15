@@ -11,13 +11,18 @@ import de.healthforge.data.network.FieldPrRequest
 import de.healthforge.data.prefs.IngredientRatingStore
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.domain.nutrition.NutrientCatalog
+import de.healthforge.presentation.home.HomeViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -51,6 +56,10 @@ class LebensmittelViewModel @Inject constructor(
 
     private val queryFlow = MutableStateFlow("")
     private var searchJob: Job? = null
+
+    val pinnedKeys: StateFlow<List<String>> = profile.observe()
+        .map { de.healthforge.presentation.home.HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NutrientCatalog.defaultPinnedKeys)
 
     init {
         // Hydrate the default filter state from the user's profile (REQ-QUALITY-FIX-001).

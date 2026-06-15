@@ -58,6 +58,7 @@ fun SupplementsScreen(
     vm: SupplementsListViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsStateWithLifecycle()
+    val pinnedKeys by vm.pinnedKeys.collectAsStateWithLifecycle()
     var query by remember { mutableStateOf("") }
     val filtered = remember(s.items, query) {
         if (query.isBlank()) s.items
@@ -143,6 +144,7 @@ fun SupplementsScreen(
                                 onAdopt = {
                                     sup.publicServerId?.let { vm.adoptPublic(it) }
                                 },
+                                pinnedKeys = pinnedKeys,
                             )
                         }
                     }
@@ -159,17 +161,17 @@ private fun SupplementRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onAdopt: () -> Unit,
+    pinnedKeys: List<String> = emptyList(),
 ) {
     val subtitle = buildString {
         append("${sup.defaultDose} ${sup.unitLabel}")
         sup.kcalPerDose?.let { append(" · ${it.toInt()} kcal") }
     }
 
-    val pinnedKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys
     val nutrients = buildList {
-        if ("protein" in pinnedKeys) sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
-        if ("carbs" in pinnedKeys) sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
-        if ("fat" in pinnedKeys) sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
+        if (pinnedKeys.isEmpty() || "protein" in pinnedKeys) sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
+        if (pinnedKeys.isEmpty() || "carbs" in pinnedKeys) sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
+        if (pinnedKeys.isEmpty() || "fat" in pinnedKeys) sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
     }
 
     HfMasterTile(

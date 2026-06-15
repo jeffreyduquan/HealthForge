@@ -12,9 +12,15 @@ import de.healthforge.data.network.GroupSummaryDto
 import de.healthforge.data.repository.GroupRepository
 import de.healthforge.data.repository.IntakeRepository
 import de.healthforge.data.repository.RecipeRepository
+import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.domain.nutrition.NutrientCatalog
+import de.healthforge.presentation.home.HomeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,10 +39,15 @@ data class RecipeBrowseUiState(
 @HiltViewModel
 class RecipeBrowseViewModel @Inject constructor(
     private val repo: RecipeRepository,
+    private val profileRepo: de.healthforge.data.repository.ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipeBrowseUiState())
     val state: StateFlow<RecipeBrowseUiState> = _state.asStateFlow()
+
+    val pinnedKeys: StateFlow<List<String>> = profileRepo.observe()
+        .map { HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NutrientCatalog.defaultPinnedKeys)
 
     init { refresh() }
 

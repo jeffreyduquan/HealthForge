@@ -8,12 +8,16 @@ import de.healthforge.data.db.entities.SupplementEntity
 import de.healthforge.data.db.entities.SupplementReminderEntity
 import de.healthforge.data.network.PublicSupplementDto
 import de.healthforge.data.repository.SupplementRepository
+import de.healthforge.data.repository.ProfileRepository
+import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.notification.AlarmScheduler
+import de.healthforge.presentation.home.HomeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,10 +50,15 @@ data class SupplementsListState(
 @HiltViewModel
 class SupplementsListViewModel @Inject constructor(
     private val repo: SupplementRepository,
+    private val profileRepo: de.healthforge.data.repository.ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SupplementsListState(loading = true))
     val state: StateFlow<SupplementsListState> = _state.asStateFlow()
+
+    val pinnedKeys: StateFlow<List<String>> = profileRepo.observe()
+        .map { de.healthforge.presentation.home.HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NutrientCatalog.defaultPinnedKeys)
 
     private var publicCache: List<PublicSupplementDto> = emptyList()
 

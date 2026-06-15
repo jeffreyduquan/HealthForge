@@ -88,6 +88,7 @@ fun LebensmittelScreen(
     vm: LebensmittelViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val pinnedKeys by vm.pinnedKeys.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     var showFilters by remember { mutableStateOf(false) }
     var fieldPrTarget by remember { mutableStateOf<IngredientDto?>(null) }
@@ -153,6 +154,7 @@ fun LebensmittelScreen(
                         onCorrect = { fieldPrTarget = item },
                         onToggleLike = { vm.toggleLikeIngredient(item.id) },
                         onToggleDislike = { vm.toggleDislikeIngredient(item.id) },
+                        pinnedKeys = pinnedKeys,
                     )
                 }
             }
@@ -191,6 +193,7 @@ private fun IngredientRow(
     onCorrect: () -> Unit,
     onToggleLike: () -> Unit,
     onToggleDislike: () -> Unit,
+    pinnedKeys: List<String> = emptyList(),
 ) {
     val hm = LocalHmTokens.current
     val subtitle = buildString {
@@ -200,7 +203,7 @@ private fun IngredientRow(
 
     val nutrients = buildIngredientNutrientRows(
         item = item,
-        pinnedKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys,
+        pinnedKeys = pinnedKeys,
     )
 
     HfMasterTile(

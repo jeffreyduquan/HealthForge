@@ -67,6 +67,7 @@ fun RecipesScreen(
     vm: RecipeBrowseViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
+    val pinnedKeys by vm.pinnedKeys.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -97,7 +98,7 @@ fun RecipesScreen(
             ) {
                 items(state.items, key = { it.id }) { recipe ->
                     RecipeCard(recipe = recipe, onClick = { onOpenDetail(recipe.id) },
-                        pinnedNutrientKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys)
+                        pinnedNutrientKeys = pinnedKeys)
                 }
             }
         }
