@@ -21,9 +21,12 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +68,8 @@ fun ProfileScreen(
     val updateState by vm.updateState.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
     val hm = LocalHmTokens.current
+    var showAllergies by remember { mutableStateOf(false) }
+    var showGoals by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -116,8 +121,16 @@ fun ProfileScreen(
                 },
             )
 
+            // Allergien — click to expand
             SectionPill(label = "ALLERGIEN & INTOLERANZEN")
-            GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
+            TextButton(onClick = { showAllergies = !showAllergies }, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    if (showAllergies) "▾ Allergien & Intoleranzen" else "▸ Allergien & Intoleranzen bearbeiten",
+                    color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            if (showAllergies) {
+                GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
                 val selectedAllergies = full?.allergies ?: emptySet()
                 val selectedIntol = full?.intolerances ?: emptySet()
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -170,6 +183,7 @@ fun ProfileScreen(
                     }
                 }
             }
+            } // showAllergies
 
             SectionPill(label = "ERSCHEINUNGSBILD")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
@@ -190,7 +204,15 @@ fun ProfileScreen(
                 }
             }
 
+            // Tagesziele — click to expand
             SectionPill(label = "TAGESZIELE")
+            TextButton(onClick = { showGoals = !showGoals }, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    if (showGoals) "▾ Tagesziele" else "▸ Tagesziele bearbeiten",
+                    color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            if (showGoals) {
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
                 val defaults by vm.computedDefaults.collectAsStateWithLifecycle()
                 val goalsJson = p?.dailyNutrientGoalsJson ?: "{}"
@@ -226,6 +248,7 @@ fun ProfileScreen(
                     }
                 }
             }
+            } // showGoals
 
             SectionPill(label = "MEHR")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
