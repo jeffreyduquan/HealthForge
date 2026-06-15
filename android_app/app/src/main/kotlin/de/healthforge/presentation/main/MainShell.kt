@@ -44,7 +44,7 @@ import de.healthforge.presentation.insights.InsightsScreen
 import de.healthforge.presentation.profile.ExportScreen
 import de.healthforge.presentation.profile.ProfileScreen
 import de.healthforge.presentation.supplements.SupplementDetailScreen
-import de.healthforge.presentation.supplements.SupplementEditScreen
+import de.healthforge.presentation.supplements.SupplementWizardScreen
 
 /** Bottom-Navigation tab destinations. REQ-NAV-001 (5 Tabs: Home/Essen/Gruppen/Log/Profil). */
 private data class TabSpec(
@@ -235,9 +235,10 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 ),
             ) { entry ->
                 val id = entry.arguments?.getLong(MainRoutes.SUPPLEMENT_EDIT_ARG) ?: 0L
-                SupplementEditScreen(
+                SupplementWizardScreen(
                     supplementId = id,
                     onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
                 )
             }
             composable(

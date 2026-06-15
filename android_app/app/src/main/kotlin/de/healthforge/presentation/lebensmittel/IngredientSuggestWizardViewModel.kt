@@ -27,7 +27,7 @@ data class IngredientWizardState(
     val proteinG: Float = 5f,
     val carbsG: Float = 10f,
     val fatG: Float = 5f,
-    val showAdvancedNutrients: Boolean = false,
+    val showAdvancedNutrients: Boolean = true,
     val sugarG: Float? = null,
     val satfatG: Float? = null,
     val fiberG: Float? = null,
