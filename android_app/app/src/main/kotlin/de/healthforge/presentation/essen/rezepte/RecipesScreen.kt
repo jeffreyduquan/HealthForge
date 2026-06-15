@@ -48,6 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.MediaRepository
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfSearchBar
 
 private val SLOT_OPTIONS = listOf("BREAKFAST" to "Frühstück", "LUNCH" to "Mittag", "DINNER" to "Abend", "SNACK" to "Snack")
 
@@ -67,15 +69,10 @@ fun RecipesScreen(
         },
     ) { padding ->
     Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-        OutlinedTextField(
-            value = state.query,
-            onValueChange = vm::setQuery,
-            singleLine = true,
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-            placeholder = { Text("Rezepte suchen") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+        HfSearchBar(
+            query = state.query,
+            onQueryChange = vm::setQuery,
+            placeholder = "Rezepte suchen…",
         )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -115,17 +112,17 @@ fun RecipeCard(
     onClick: () -> Unit,
     trailingActions: @Composable RowScope.() -> Unit = {},
 ) {
-    ElevatedCard(
+    val hm = LocalHmTokens.current
+    de.healthforge.presentation.common.components.HfCard(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             val thumbUrl = MediaRepository.imageUrl("recipes", recipe.image_key, variant = "thumb")
             if (thumbUrl != null) {
                 AsyncImage(
                     model = thumbUrl,
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)),
+                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
                 )
                 Spacer(Modifier.width(12.dp))
             }
@@ -134,31 +131,32 @@ fun RecipeCard(
                     text = recipe.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    color = hm.fgPrimary,
                 )
                 recipe.description?.takeIf { it.isNotBlank() }?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+                    Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2, color = hm.fgSecondary)
                 }
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
                     Spacer(Modifier.width(4.dp))
-                    Text("${recipe.prep_minutes} min", style = MaterialTheme.typography.labelMedium)
-                    Spacer(Modifier.width(16.dp))
+                    Text("${recipe.prep_minutes} min", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
+                    Spacer(Modifier.width(12.dp))
                     recipe.slot_tags.firstOrNull()?.let {
                         Text(
                             text = humanSlot(it),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = hm.ambientViolet,
                         )
                     }
                     Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
                     Spacer(Modifier.width(4.dp))
-                    Text(recipe.like_count.toString(), style = MaterialTheme.typography.labelMedium)
+                    Text(recipe.like_count.toString(), style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
                     Spacer(Modifier.width(12.dp))
-                    Icon(Icons.Filled.ThumbUp, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.ThumbUp, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
                     Spacer(Modifier.width(4.dp))
-                    Text(recipe.community_recommend_count.toString(), style = MaterialTheme.typography.labelMedium)
+                    Text(recipe.community_recommend_count.toString(), style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
                 }
             }
             trailingActions()

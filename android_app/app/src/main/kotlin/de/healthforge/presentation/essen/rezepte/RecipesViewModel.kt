@@ -152,8 +152,22 @@ class RecipeDetailViewModel @Inject constructor(
                       else repo.communityRate(recipeId, value)
             res.fold(
                 onSuccess = {
-                    load()
-                    _state.update { it.copy(ratingBusy = false) }
+                    // Optimistic update — NO full reload (was: load())
+                    val prevRecommend = if (current.my_community_rating == "RECOMMEND") current.community_recommend_count - 1 else current.community_recommend_count
+                    val prevNot = if (current.my_community_rating == "NOT_RECOMMEND") current.community_not_recommend_count - 1 else current.community_not_recommend_count
+                    val newRecommend = if (value == "RECOMMEND") prevRecommend + 1 else prevRecommend
+                    val newNot = if (value == "NOT_RECOMMEND") prevNot + 1 else prevNot
+
+                    _state.update {
+                        it.copy(
+                            recipe = current.copy(
+                                my_community_rating = value,
+                                community_recommend_count = newRecommend.coerceAtLeast(0),
+                                community_not_recommend_count = newNot.coerceAtLeast(0),
+                            ),
+                            ratingBusy = false,
+                        )
+                    }
                 },
                 onFailure = { e -> _state.update { it.copy(ratingBusy = false, error = e.message) } },
             )

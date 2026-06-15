@@ -66,6 +66,15 @@ import de.healthforge.data.network.RecipeIngredientDto
 import de.healthforge.data.network.RecipeNutritionDto
 import de.healthforge.data.network.RecipeStepDto
 import de.healthforge.data.repository.MediaRepository
+import de.healthforge.presentation.common.components.HfAddToHomeButton
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfDetailTopBar
+import de.healthforge.presentation.common.components.HfNutrientProgressRow
+import de.healthforge.presentation.common.components.HfRatingBar
+import de.healthforge.presentation.common.components.HfSectionHeader
+import de.healthforge.presentation.common.components.HfValueRow
+import de.healthforge.presentation.common.components.formatNutrientValue
+import de.healthforge.presentation.theme.LocalHmTokens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,13 +101,9 @@ fun RecipeDetailScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(state.recipe?.title ?: "Rezept") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                },
+            HfDetailTopBar(
+                title = state.recipe?.title ?: "Rezept",
+                onBack = onBack,
                 actions = {
                     state.recipe?.let { r ->
                         if (!state.reportSubmitted) {
@@ -106,19 +111,20 @@ fun RecipeDetailScreen(
                                 Icon(Icons.Filled.Flag, contentDescription = "Melden")
                             }
                         }
-                        // Nur der Owner darf bearbeiten (REQ-RECIPE-008)
                         if (currentUserId != null && r.author_id == currentUserId) {
                             IconButton(onClick = { onEdit(r.id) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
                             }
                         }
-                        // Zum Plan hinzufügen
                         IconButton(onClick = { vm.openAddToPlanDialog() }) {
                             Icon(Icons.Filled.PlaylistAdd, contentDescription = "Zum Plan hinzufügen")
                         }
                     }
                 },
             )
+        },
+        bottomBar = {
+            HfAddToHomeButton(onClick = { vm.openAddToPlanDialog() })
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
@@ -225,6 +231,7 @@ private fun DetailContent(
     onRate: (String?) -> Unit,
     onAddToGroup: () -> Unit = {},
 ) {
+    val hm = LocalHmTokens.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -252,7 +259,7 @@ private fun DetailContent(
             Spacer(Modifier.width(8.dp))
             Text("· ${recipe.servings} Portionen", style = MaterialTheme.typography.bodyMedium)
         }
-        // Visibility / Group-Origin (REQ-GROUP-006)
+        // Visibility
         Row(verticalAlignment = Alignment.CenterVertically) {
             val visLabel = when (recipe.visibility) {
                 "PUBLIC" -> "Allgemein"
@@ -267,33 +274,90 @@ private fun DetailContent(
             Text(it, style = MaterialTheme.typography.bodyMedium)
         }
 
-        // Like + Community-Rating
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            FilterChip(
-                selected = recipe.liked_by_me,
-                onClick = { if (!likeBusy) onToggleLike() },
-                leadingIcon = {
-                    Icon(
-                        if (recipe.liked_by_me) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = null,
-                    )
-                },
-                label = { Text("Gefällt mir · ${recipe.like_count}") },
-            )
-            Spacer(Modifier.width(8.dp))
-            CommunityRatingPill(
-                myValue = recipe.my_community_rating,
-                recommendCount = recipe.community_recommend_count,
-                notRecommendCount = recipe.community_not_recommend_count,
-                onRate = onRate,
+        // ── Unified Rating Bar ──
+        HfRatingBar(
+            liked = recipe.liked_by_me,
+            likeCount = recipe.like_count,
+            likeBusy = likeBusy,
+            onToggleLike = { if (!likeBusy) onToggleLike() },
+            myCommunityRating = recipe.my_community_rating,
+            recommendCount = recipe.community_recommend_count,
+            notRecommendCount = recipe.community_not_recommend_count,
+            onRate = onRate,
+        )
+
+        // ── DGE Progress Bars (per portion) ──
+        val n = recipe.nutrition
+        val servings = recipe.servings.coerceAtLeast(1)
+        val perServing = { v: Double -> v / servings }
+        HfSectionHeader("Tagesbedarf-Abdeckung (pro Portion)")
+        HfCard {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                HfNutrientProgressRow("Kalorien", "${perServing(n.energy_kcal).toInt()} kcal",
+                    perServing(n.energy_kcal) / 2000.0 * 100)
+                HfNutrientProgressRow("Eiweiß", "${formatNutrientValue(perServing(n.protein_g))} g",
+                    perServing(n.protein_g) / 50.0 * 100)
+                HfNutrientProgressRow("Kohlenhydrate", "${formatNutrientValue(perServing(n.carbs_g))} g",
+                    perServing(n.carbs_g) / 260.0 * 100)
+                HfNutrientProgressRow("Fett", "${formatNutrientValue(perServing(n.fat_g))} g",
+                    perServing(n.fat_g) / 65.0 * 100)
+                HfNutrientProgressRow("Ballaststoffe", "${formatNutrientValue(perServing(n.fiber_g))} g",
+                    perServing(n.fiber_g) / 30.0 * 100)
+            }
+        }
+
+        if (n.missing_ingredients.isNotEmpty()) {
+            Text(
+                "${n.missing_ingredients.size} Zutat(en) ohne Nährwert-Daten",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
             )
         }
 
-        NutritionCard(recipe.nutrition, recipe.servings)
-        IngredientsCard(recipe.ingredients)
-        StepsCard(recipe.steps)
+        // Zutaten
+        HfSectionHeader("Zutaten")
+        HfCard {
+            Column(Modifier.padding(0.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                recipe.ingredients.sortedBy { it.position }.forEach { ing ->
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${"%g".format(ing.quantity)} ${ing.unit}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.width(96.dp),
+                        )
+                        Text(
+                            text = ing.ingredient_name ?: ing.ingredient_id.take(8),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        if (ing.is_optional) {
+                            Spacer(Modifier.width(4.dp))
+                            Text("(optional)", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+        }
 
-        // Prominenter "Zu Gruppe"-Button
+        // Schritte
+        HfSectionHeader("Schritte")
+        HfCard {
+            Column(Modifier.padding(0.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                recipe.steps.sortedBy { it.position }.forEachIndexed { idx, step ->
+                    Row {
+                        Text(
+                            "${idx + 1}.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.width(24.dp),
+                        )
+                        Text(step.text, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+
+        // "Zu Gruppe"-Button
         OutlinedButton(
             onClick = onAddToGroup,
             modifier = Modifier.fillMaxWidth(),
@@ -303,115 +367,8 @@ private fun DetailContent(
             Spacer(Modifier.width(8.dp))
             Text("Zu Gruppe hinzufügen")
         }
-    }
-}
 
-@Composable
-private fun CommunityRatingPill(
-    myValue: String?,
-    recommendCount: Long,
-    notRecommendCount: Long,
-    onRate: (String?) -> Unit,
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        FilterChip(
-            selected = myValue == "RECOMMEND",
-            onClick = { onRate(if (myValue == "RECOMMEND") null else "RECOMMEND") },
-            leadingIcon = { Icon(Icons.Filled.ThumbUp, contentDescription = null) },
-            label = { Text(recommendCount.toString()) },
-        )
-        FilterChip(
-            selected = myValue == "NOT_RECOMMEND",
-            onClick = { onRate(if (myValue == "NOT_RECOMMEND") null else "NOT_RECOMMEND") },
-            leadingIcon = { Icon(Icons.Filled.ThumbDown, contentDescription = null) },
-            label = { Text(notRecommendCount.toString()) },
-        )
-    }
-}
-
-@Composable
-private fun NutritionCard(n: RecipeNutritionDto, servings: Int) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp)) {
-            Text("Nährwerte (gesamt)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(4.dp))
-            NutriRow("Kalorien", "${n.energy_kcal.toInt()} kcal")
-            NutriRow("Protein", "${"%.1f".format(n.protein_g)} g")
-            NutriRow("Kohlenhydrate", "${"%.1f".format(n.carbs_g)} g")
-            NutriRow("Fett", "${"%.1f".format(n.fat_g)} g")
-            NutriRow("Ballaststoffe", "${"%.1f".format(n.fiber_g)} g")
-            if (n.missing_ingredients.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "${n.missing_ingredients.size} Zutat(en) ohne Nährwert-Daten",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-            if (servings > 1) {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "Pro Portion: ${(n.energy_kcal / servings).toInt()} kcal",
-                    style = MaterialTheme.typography.labelMedium,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NutriRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodyMedium)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-private fun IngredientsCard(items: List<RecipeIngredientDto>) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp)) {
-            Text("Zutaten", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(4.dp))
-            items.sortedBy { it.position }.forEach { ing ->
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "${"%g".format(ing.quantity)} ${ing.unit}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.width(96.dp),
-                    )
-                    Text(
-                        text = ing.ingredient_name ?: ing.ingredient_id.take(8),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    if (ing.is_optional) {
-                        Spacer(Modifier.width(4.dp))
-                        Text("(optional)", style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepsCard(steps: List<RecipeStepDto>) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Schritte", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            steps.sortedBy { it.position }.forEachIndexed { idx, step ->
-                Row {
-                    Text(
-                        "${idx + 1}.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.width(24.dp),
-                    )
-                    Text(step.text, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
+        Spacer(Modifier.height(80.dp)) // leave room for sticky bottom button
     }
 }
 

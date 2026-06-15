@@ -52,7 +52,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
-import de.healthforge.presentation.theme.GlassCard
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfRatingBar
+import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -98,21 +100,13 @@ fun LebensmittelScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            OutlinedTextField(
-                value = state.query,
-                onValueChange = vm::onQueryChanged,
-                label = { Text("Suche (z. B. Apfel, Brot, Tomate)") },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(onClick = { showFilters = true }) {
-                Icon(Icons.Default.FilterList, contentDescription = "Filter")
-            }
-        }
+        HfSearchBar(
+            query = state.query,
+            onQueryChange = vm::onQueryChanged,
+            placeholder = "Apfel, Brot, Tomate…",
+            showFilterIcon = true,
+            onFilterClick = { showFilters = true },
+        )
 
             FilterChip(
                 selected = state.applyProfileFilters,
@@ -225,16 +219,16 @@ private fun IngredientRow(
     onToggleDislike: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    androidx.compose.material3.ElevatedCard(
+    de.healthforge.presentation.common.components.HfCard(
         onClick = if (preselect) onPick else onOpenDetail,
-        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            // Title + Brand (RecipeCard-Stil)
+        Column {
+            // Title + Brand
             Text(
                 text = item.name_de,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = hm.fgPrimary,
             )
             item.brand?.takeIf { it.isNotBlank() }?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary, maxLines = 1)
@@ -242,10 +236,10 @@ private fun IngredientRow(
 
             Spacer(Modifier.height(6.dp))
 
-            // Footer: kcal + Histamin + Source + Likes
+            // Footer: kcal + Histamin + Source + Rating
             Row(verticalAlignment = Alignment.CenterVertically) {
                 item.energy_kcal_per_100g?.let {
-                    Text("${it.toInt()} kcal", style = MaterialTheme.typography.labelMedium)
+                    Text("${it.toInt()} kcal", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
                     Spacer(Modifier.width(16.dp))
                 }
                 item.histamine_score?.let {
@@ -256,24 +250,10 @@ private fun IngredientRow(
 
                 if (!preselect) {
                     Spacer(Modifier.weight(1f))
-                    // Like button (thumbs up)
-                    IconButton(onClick = onToggleLike, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            Icons.Filled.ThumbUp,
-                            contentDescription = "Like",
-                            tint = if (isLiked) MaterialTheme.colorScheme.primary else hm.fgTertiary,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
-                    // Dislike button (heart / not recommend)
-                    IconButton(onClick = onToggleDislike, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            Icons.Filled.ThumbDown,
-                            contentDescription = "Nicht empfehlen",
-                            tint = if (isDisliked) MaterialTheme.colorScheme.error else hm.fgTertiary,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
+                    de.healthforge.presentation.common.components.HfRatingBar(
+                        liked = isLiked,
+                        onToggleLike = onToggleLike,
+                    )
                 }
             }
 

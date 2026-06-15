@@ -289,7 +289,27 @@ außer den unten gelisteten Wrapper-Components.
 | `NutrientRow` (P7) | Kompakte Zeile fuer Expand-Liste „Alle Naehrstoffe": Pin-Icon (Toggle) + Name + Wert/Ziel + Mini-LinearBar. Reagiert sofort auf Pin-Tap. |
 | `PlannedMealRow` (P7) | Zeile im Home-Section „Geplante Mahlzeiten heute": Checkbox + Zeit + Mahlzeit-Name. Check → `intake_entries`-Insert mit Snapshot; Uncheck-Undo binnen 60 s per Snackbar. |
 | `NutrientGoalRow` (P7) | Zeile im Profil-Tagesziele-Section: Naehrstoff-Name + Default-Value (klein, read-only) + Override-NumberField + Reset-Icon. Override schreibt in `UserProfileEntity.dailyNutrientGoalsJson`. |
-| `IngredientDetailSheet` (P7.S5 4f) | `ModalBottomSheet` (skipPartiallyExpanded). Zeigt zu einem `IngredientDto` pro 100 g: Header (`name_de` + Brand + Source-Badge mit `fdc_id`), Makros (8 Felder, nur gesetzte), Mikronährstoffe gruppiert in Vitamine + Mineralstoffe (gefiltert auf `value > 0`, Reihenfolge aus `NutrientCatalog.ofCategory`, jede Zeile mit %-DGE-Pill `(value / nutrient.defaultPerDay) × 100`), Allergene/FODMAP-Chips (conditional), Histamin-Block (conditional). Sub-Components: `SourceBadge` (Box mit `ambientViolet` Alpha 0.16 + `RoundedCornerShape(50)`), `MacrosGrid`, `MicroSection(category, title, micros)`, `ValueRow(label, value, percentDge)`. Layout-Constraints: `padding(horizontal = 20.dp)`, Sections getrennt durch `SectionPill` + `Spacer(16.dp)`. Format-Helper: ≥100 ⇒ Int, ≥10 ⇒ 1 Dezimale, sonst 2. |
+| `IngredientDetailSheet` (P7.S5 4f) | **ERSETZT** durch `IngredientDetailScreen` (Full-Screen) mit Hf*-Komponenten (P7.S5). |
+
+### P7.S5 Unified Components (2026-06-15)
+
+Diese Komponenten ersetzen die vorherigen Custom-Wrapper und sind die SINGLE SOURCE OF TRUTH
+für alle Screens. Definiert in `presentation/common/components/`.
+
+| Component | Zweck |
+|---|---|
+| `HfCard` | Master-Card (16dp Radius, HmTokens, clickable). Ersetzt GlassCard, NeoCard, ElevatedCard, Card. |
+| `HfSectionHeader` | Einheitlicher Section-Header (uppercase, semiBold, fgTertiary). Ersetzt SectionPill + NeoSectionLabel. |
+| `HfValueRow` | Label-Value-Zeile (SpaceBetween). Ersetzt MacroRow ×2 + NutriRow. |
+| `HfNutrientProgressRow` | Nährwert-Zeile mit 4dp DGE-Progress-Bar (Stage-Farben: grün/gelb/rot). |
+| `HfAddToHomeButton` | Sticky Bottom-Bar, lilafarbener Accent-Gradient, "ZUM HOME-SCREEN HINZUFÜGEN". |
+| `HfRatingBar` | Einheitliches Rating: Like (Heart) + Community Recommend/Not (ThumbUp/ThumbDown) als FilterChips. |
+| `HfSearchBar` | Einheitliche Suchleiste: OutlinedTextField + Search-Icon leading + optionales Filter-Icon. |
+| `HfDetailTopBar` | Einheitliche TopAppBar für Detail-Screens: hm.background, Back-Pfeil, Actions. |
+| `HfEmptyState` | Zentrierter Text + optionaler Action-Button. |
+| `HfLoadingState` | Zentrierter CircularProgressIndicator. |
+| `HfSourceBadge` | Violet-Pill mit Source-Name + optionaler FDC-ID. |
+| `HfThumbnail` | Einheitliches AsyncImage-Thumbnail (48dp, 8dp Radius, Card-Border). |
 
 ### 8.3 Phase-Verfügbarkeit
 

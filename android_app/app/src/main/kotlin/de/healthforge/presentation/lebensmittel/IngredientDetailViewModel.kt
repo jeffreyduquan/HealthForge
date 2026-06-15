@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.data.prefs.IngredientRatingStore
 import de.healthforge.data.repository.IngredientRepository
 import de.healthforge.data.repository.IntakeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +22,15 @@ data class IngredientDetailState(
     val error: String? = null,
     val showAddToPlan: Boolean = false,
     val navigateHome: Boolean = false,
+    val isLiked: Boolean = false,
+    val isDisliked: Boolean = false,
 )
 
 @HiltViewModel
 class IngredientDetailViewModel @Inject constructor(
     private val ingredientRepo: IngredientRepository,
     private val intakeRepo: IntakeRepository,
+    private val ratingStore: IngredientRatingStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(IngredientDetailState())
@@ -37,9 +41,27 @@ class IngredientDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             ingredientRepo.byId(id)
-                .onSuccess { _state.value = IngredientDetailState(item = it) }
+                .onSuccess { item ->
+                    _state.value = IngredientDetailState(
+                        item = item,
+                        isLiked = ratingStore.isLiked(id),
+                        isDisliked = ratingStore.isDisliked(id),
+                    )
+                }
                 .onFailure { _state.value = IngredientDetailState(error = it.message ?: "Fehler beim Laden") }
         }
+    }
+
+    fun toggleLike() {
+        val id = _state.value.item?.id ?: return
+        ratingStore.toggleLike(id)
+        _state.update { it.copy(isLiked = !it.isLiked, isDisliked = false) }
+    }
+
+    fun toggleDislike() {
+        val id = _state.value.item?.id ?: return
+        ratingStore.toggleDislike(id)
+        _state.update { it.copy(isDisliked = !it.isDisliked, isLiked = false) }
     }
 
     fun openAddToPlanDialog() { _state.update { it.copy(showAddToPlan = true) } }

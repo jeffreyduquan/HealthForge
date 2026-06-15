@@ -30,12 +30,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -49,6 +54,11 @@ fun SupplementsScreen(
     vm: SupplementsListViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsStateWithLifecycle()
+    var query by remember { mutableStateOf("") }
+    val filtered = remember(s.items, query) {
+        if (query.isBlank()) s.items
+        else s.items.filter { it.nameDe.contains(query, ignoreCase = true) || (it.brand?.contains(query, ignoreCase = true) == true) }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -86,14 +96,30 @@ fun SupplementsScreen(
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(items = s.items, key = { it.id }) { sup ->
+            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                HfSearchBar(
+                    query = query,
+                    onQueryChange = { query = it },
+                    placeholder = "Supplements suchen…",
+                )
+                if (filtered.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            if (query.isNotBlank()) "Keine Treffer für \"$query\""
+                            else "Noch keine Supplements",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(items = filtered, key = { it.id }) { sup ->
                     SupplementRow(
                         sup = sup,
                         onClick = {
@@ -128,17 +154,16 @@ private fun SupplementRow(
     onAdopt: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    androidx.compose.material3.ElevatedCard(
+    de.healthforge.presentation.common.components.HfCard(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(sup.nameDe, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(sup.nameDe, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
                     Spacer(Modifier.width(8.dp))
                     if (!sup.isLocal) {
                         AssistChip(

@@ -1,6 +1,7 @@
 package de.healthforge.presentation.lebensmittel
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -9,16 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.ThumbDown
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,8 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,15 +35,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.healthforge.data.network.IngredientDto
+import de.healthforge.domain.nutrition.NutrientCatalog
+import de.healthforge.presentation.common.components.HfAddToHomeButton
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfDetailTopBar
+import de.healthforge.presentation.common.components.HfNutrientProgressRow
+import de.healthforge.presentation.common.components.HfRatingBar
+import de.healthforge.presentation.common.components.HfSectionHeader
+import de.healthforge.presentation.common.components.HfSourceBadge
+import de.healthforge.presentation.common.components.formatNutrientValue
 import de.healthforge.presentation.essen.rezepte.PortionInputDialog
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.NeoCard
-import de.healthforge.presentation.theme.NeoSectionLabel
-import de.healthforge.presentation.theme.SectionPill
 
 /**
- * Full-screen ingredient detail — styled like RecipeDetailScreen.
- * Replaces the old [IngredientDetailSheet] ModalBottomSheet.
+ * Full-screen ingredient detail — P7.S5 Consistency Refactor.
+ * Uses unified Hf* components. Shows DGE progress bars for all nutrients.
+ * Like/Dislike managed by ViewModel via IngredientRatingStore.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -73,13 +75,9 @@ fun IngredientDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(state.item?.name_de ?: "Lebensmittel", maxLines = 1) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                },
+            HfDetailTopBar(
+                title = state.item?.name_de ?: "Lebensmittel",
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = { vm.openAddToPlanDialog() }) {
                         Icon(
@@ -88,32 +86,19 @@ fun IngredientDetailScreen(
                             tint = hm.fgPrimary,
                         )
                     }
-                    IconButton(onClick = { onToggleLike(ingredientId) }) {
-                        Icon(
-                            Icons.Filled.ThumbUp,
-                            contentDescription = "Like",
-                            tint = if (isLiked) MaterialTheme.colorScheme.primary else hm.fgTertiary,
-                        )
-                    }
-                    IconButton(onClick = { onToggleDislike(ingredientId) }) {
-                        Icon(
-                            Icons.Filled.ThumbDown,
-                            contentDescription = "Nicht empfehlen",
-                            tint = if (isDisliked) MaterialTheme.colorScheme.error else hm.fgTertiary,
-                        )
-                    }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = hm.background,
-                    titleContentColor = hm.fgPrimary,
-                ),
             )
         },
         containerColor = hm.background,
+        bottomBar = {
+            HfAddToHomeButton(onClick = { vm.openAddToPlanDialog() })
+        },
     ) { padding ->
         val item = state.item
         if (state.loading) {
-            // loading indicator handled by ViewModel state
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
         }
         if (item != null) {
             Column(
@@ -121,68 +106,39 @@ fun IngredientDetailScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Spacer(Modifier.height(4.dp))
 
-                // Brand + Source
+                // Brand
                 item.brand?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = hm.fgSecondary)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionPill(label = item.source)
-                    item.fdc_id?.let { fdc ->
-                        Spacer(Modifier.width(8.dp))
-                        Text("#$fdc", style = MaterialTheme.typography.labelSmall, color = hm.fgTertiary)
-                    }
-                }
+
+                // Source badge
+                HfSourceBadge(source = item.source, fdcId = item.fdc_id)
+
+                // Rating bar (Like/Dislike — managed by ViewModel)
+                HfRatingBar(
+                    liked = state.isLiked,
+                    onToggleLike = { vm.toggleLike() },
+                )
 
                 HorizontalDivider(color = hm.fgTertiary.copy(alpha = 0.3f))
 
-                // Macros per 100g
-                NeoSectionLabel("Nährwerte pro 100 g")
-                NeoCard {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        item.energy_kcal_per_100g?.let {
-                            MacroRow("Kalorien", "${it.toInt()} kcal")
-                        }
-                        item.protein_g_per_100g?.let {
-                            MacroRow("Eiweiß", "${formatNum(it)} g")
-                        }
-                        item.carbs_g_per_100g?.let {
-                            MacroRow("Kohlenhydrate", "${formatNum(it)} g")
-                        }
-                        item.sugar_g_per_100g?.let {
-                            MacroRow("  davon Zucker", "${formatNum(it)} g")
-                        }
-                        item.fat_g_per_100g?.let {
-                            MacroRow("Fett", "${formatNum(it)} g")
-                        }
-                        item.satfat_g_per_100g?.let {
-                            MacroRow("  davon gesättigt", "${formatNum(it)} g")
-                        }
-                        item.fiber_g_per_100g?.let {
-                            MacroRow("Ballaststoffe", "${formatNum(it)} g")
-                        }
-                        item.salt_g_per_100g?.let {
-                            MacroRow("Salz", "${formatNum(it)} g")
-                        }
-                    }
-                }
-
-                // Micronutrients
-                if (item.micronutrients.isNotEmpty()) {
-                    NeoSectionLabel("Mikronährstoffe")
-                    NeoCard {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            item.micronutrients.entries.forEach { (key, value) ->
-                                val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)
-                                val label = nutrient?.displayDe ?: key
-                                val unitLabel = nutrient?.unit?.label ?: ""
-                                val dge = nutrient?.defaultPerDay
-                                val pct = if (dge != null && dge > 0) " ${(value / dge * 100).toInt()} %" else ""
-                                MacroRow(label, "${formatNum(value)} $unitLabel$pct")
+                // ── TAGESBEDARF-ABDECKUNG (DGE Progress Bars) ──
+                val dgeRows = buildDgeRows(item)
+                if (dgeRows.isNotEmpty()) {
+                    HfSectionHeader("Tagesbedarf-Abdeckung")
+                    HfCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            dgeRows.forEach { (label, value, pct) ->
+                                HfNutrientProgressRow(
+                                    label = label,
+                                    value = value,
+                                    percentDge = pct,
+                                )
                             }
                         }
                     }
@@ -190,7 +146,7 @@ fun IngredientDetailScreen(
 
                 // Allergens
                 if (item.allergens.isNotEmpty()) {
-                    NeoSectionLabel("Allergene")
+                    HfSectionHeader("Allergene")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         item.allergens.forEach { allergen ->
                             AssistChip(
@@ -204,7 +160,7 @@ fun IngredientDetailScreen(
 
                 // FODMAP
                 if (item.fodmap_flags.isNotEmpty()) {
-                    NeoSectionLabel("FODMAP")
+                    HfSectionHeader("FODMAP")
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         item.fodmap_flags.forEach { flag ->
                             val label = runCatching {
@@ -221,7 +177,7 @@ fun IngredientDetailScreen(
 
                 // Histamin
                 item.histamine_score?.let { score ->
-                    NeoSectionLabel("Histamin (SIGHI)")
+                    HfSectionHeader("Histamin (SIGHI)")
                     Text(
                         "$score / 3",
                         style = MaterialTheme.typography.titleMedium,
@@ -233,7 +189,7 @@ fun IngredientDetailScreen(
                     )
                 }
 
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(80.dp)) // leave room for sticky bottom button
             }
         }
 
@@ -250,22 +206,37 @@ fun IngredientDetailScreen(
     }
 }
 
-@Composable
-private fun MacroRow(label: String, value: String) {
-    val hm = LocalHmTokens.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = hm.fgSecondary)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
-    }
-}
+/**
+ * Build list of (label, value, percentDge) for all nutrients that have DGE references.
+ * Sorted by % DGE descending so most impactful nutrients appear first.
+ */
+private fun buildDgeRows(item: IngredientDto): List<Triple<String, String, Double>> {
+    val rows = mutableListOf<Triple<String, String, Double>>()
 
-/** Smart rounding: >=100 → int, >=10 → 1 decimal, <10 → 2 decimals. */
-private fun formatNum(v: Double): String = when {
-    v >= 100 -> v.toInt().toString()
-    v >= 10 -> "%.1f".format(v)
-    else -> "%.2f".format(v)
+    fun add(key: String, value: Double, unit: String) {
+        val nutrient = NutrientCatalog.byKeyOrNull(key) ?: return
+        val dge = nutrient.defaultPerDay
+        if (dge <= 0) return
+        val pct = (value / dge) * 100.0
+        rows.add(Triple(nutrient.displayDe, "${formatNutrientValue(value)} $unit", pct))
+    }
+
+    item.energy_kcal_per_100g?.let { add("kcal", it, "kcal") }
+    item.protein_g_per_100g?.let { add("protein", it, "g") }
+    item.carbs_g_per_100g?.let { add("carbs", it, "g") }
+    item.fat_g_per_100g?.let { add("fat", it, "g") }
+    item.fiber_g_per_100g?.let { add("fiber", it, "g") }
+
+    item.micronutrients.entries.forEach { (key, value) ->
+        val nutrient = NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+        val dge = nutrient.defaultPerDay
+        if (dge > 0) {
+            val pct = (value / dge) * 100.0
+            rows.add(Triple(nutrient.displayDe, "${formatNutrientValue(value)} ${nutrient.unit.label}", pct))
+        }
+    }
+
+    // Sort: highest % DGE first
+    rows.sortByDescending { it.third }
+    return rows
 }

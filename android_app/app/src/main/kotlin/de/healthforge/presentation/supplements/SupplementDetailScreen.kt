@@ -1,6 +1,7 @@
 package de.healthforge.presentation.supplements
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,18 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,15 +25,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.healthforge.presentation.common.components.HfAddToHomeButton
+import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfDetailTopBar
+import de.healthforge.presentation.common.components.HfNutrientProgressRow
+import de.healthforge.presentation.common.components.HfSectionHeader
+import de.healthforge.presentation.common.components.HfValueRow
+import de.healthforge.presentation.common.components.formatNutrientValue
 import de.healthforge.presentation.essen.rezepte.PortionInputDialog
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.NeoCard
-import de.healthforge.presentation.theme.NeoSectionLabel
-import de.healthforge.presentation.theme.SectionPill
 
 /**
- * Full-screen supplement detail view — styled like IngredientDetailScreen.
- * Shows supplement name, brand, default dose, and nutrient contribution per dose.
+ * Full-screen supplement detail view — P7.S5 Consistency Refactor.
+ * Uses unified Hf* components. Shows DGE progress bars per dose.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,35 +58,30 @@ fun SupplementDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(state.supplement?.nameDe ?: "Supplement", maxLines = 1) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { vm.openAddToPlanDialog() }) {
-                        Icon(Icons.Filled.PlaylistAdd, contentDescription = "Zum Plan hinzufügen")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = hm.background,
-                    titleContentColor = hm.fgPrimary,
-                ),
+            HfDetailTopBar(
+                title = state.supplement?.nameDe ?: "Supplement",
+                onBack = onBack,
             )
         },
         containerColor = hm.background,
+        bottomBar = {
+            HfAddToHomeButton(onClick = { vm.openAddToPlanDialog() })
+        },
     ) { padding ->
         val sup = state.supplement
+        if (state.loading) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
+        }
         if (sup != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Spacer(Modifier.height(4.dp))
 
@@ -96,65 +89,55 @@ fun SupplementDetailScreen(
                 sup.brand?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = hm.fgSecondary)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionPill(label = "Supplement")
-                }
 
                 HorizontalDivider(color = hm.fgTertiary.copy(alpha = 0.3f))
 
                 // Dose info
-                NeoSectionLabel("Dosierung")
-                NeoCard {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MacroRow("Empfohlene Dosis", "${formatNum(sup.defaultDose)} g")
+                HfSectionHeader("Dosierung")
+                HfCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        HfValueRow("Empfohlene Dosis", "${formatNum(sup.defaultDose)} g")
                         sup.kcalPerDose?.let {
-                            MacroRow("Kalorien pro Dosis", "${formatNum(it)} kcal")
+                            HfValueRow("Kalorien pro Dosis", "${formatNum(it)} kcal")
                         }
                     }
                 }
 
-                // Nutrient contributions per dose
-                val hasNutrients = sup.proteinPerDose != null || sup.carbsPerDose != null || sup.fatPerDose != null
-                if (hasNutrients) {
-                    NeoSectionLabel("Nährwerte pro Dosis")
-                    NeoCard {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                // DGE-Abdeckung
+                val hasProtein = sup.proteinPerDose != null
+                val hasCarbs = sup.carbsPerDose != null
+                val hasFat = sup.fatPerDose != null
+                if (hasProtein || hasCarbs || hasFat) {
+                    HfSectionHeader("Tagesbedarf-Abdeckung")
+                    HfCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             sup.proteinPerDose?.let {
-                                MacroRow("Eiweiß", "${formatNum(it)} g")
+                                HfNutrientProgressRow("Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)
                             }
                             sup.carbsPerDose?.let {
-                                MacroRow("Kohlenhydrate", "${formatNum(it)} g")
+                                HfNutrientProgressRow("Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)
                             }
                             sup.fatPerDose?.let {
-                                MacroRow("Fett", "${formatNum(it)} g")
+                                HfNutrientProgressRow("Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)
                             }
                         }
                     }
                 }
+
+                Spacer(Modifier.height(80.dp))
             }
         }
-
-        if (state.showAddToPlan) {
-            val dose = state.supplement?.defaultDose?.let { "%.0f".format(it) } ?: "1"
-            PortionInputDialog(
-                onConfirm = { grams -> vm.addToPlan(grams) },
-                onDismiss = { vm.dismissAddToPlanDialog() },
-                defaultValue = dose,
-                unitLabel = "Dosis",
-                title = "Supplement",
-            )
-        }
     }
-}
 
-@Composable
-private fun MacroRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = LocalHmTokens.current.fgSecondary)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = LocalHmTokens.current.fgPrimary)
+    if (state.showAddToPlan) {
+        val dose = state.supplement?.defaultDose?.let { "%.0f".format(it) } ?: "1"
+        PortionInputDialog(
+            onConfirm = { grams -> vm.addToPlan(grams) },
+            onDismiss = { vm.dismissAddToPlanDialog() },
+            defaultValue = dose,
+            unitLabel = "Dosis",
+            title = "Supplement",
+        )
     }
 }
 

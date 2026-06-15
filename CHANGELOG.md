@@ -5,29 +5,57 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 ---
 
-## Bugfix: DB-Cleanup — MANUAL→USDA_FDC Remapping + Tab-Reorder (2026-06-13)
+## P7.S5: UI-Design-System-Konsolidierung (2026-06-15)
 
-**Scope:** 47 MANUAL-Zutaten auf USDA_FDC gemappt & gelöscht. Bottom-Nav-Tabs neu geordnet.
+**Scope:** Komplette Vereinheitlichung aller UI-Komponenten. 24 Inkonsistenzen beseitigt.
+17 neue Singleton-Komponenten in `presentation/common/components/` erstellt.
 
 **Touched Docs:**
 - `CHANGELOG.md`: Dieser Eintrag
+- `docs/GUI.md`: Neue Hf*-Komponenten dokumentiert (§8.2)
+- `docs/UsabilityMap.md`: Detail-Screen Layouts aktualisiert (§5.3–5.7)
 
 **Untouched Docs:**
-- `Architecture.md`: Keine Architektur-Änderung (DB-Cleanup + UI-Reorder)
-- `ReqSpec.md`: Keine neuen Requirements
+- `docs/Architecture.md`: Keine Architektur-Änderung (nur UI-Refactoring)
+- `docs/ReqSpec.md`: Keine neuen Requirements (bestehende REQs besser umgesetzt)
 
 **Änderungen:**
 
-1. **Tab-Reihenfolge** (`MainShell.kt`): Home | Essen | Gruppen | Log | Profil (Gruppen+Essen getauscht)
+### Neue Singleton-Komponenten (`presentation/common/components/`):
+1. **HfCard** — Einheitliche Master-Card (16dp Radius, HmTokens, clickable)
+2. **HfSectionHeader** — Einheitlicher Section-Header (ersetzt SectionPill + NeoSectionLabel)
+3. **HfValueRow** — Einheitliche Label-Value-Zeile (ersetzt MacroRow ×2 + NutriRow)
+4. **HfNutrientProgressRow** — Nährwert-Zeile mit DGE-Progress-Bar (4dp, Stage-Farben)
+5. **HfAddToHomeButton** — Prominenter lila Sticky-Bottom-Button (Accent-Gradient)
+6. **HfRatingBar** — Einheitliches Rating (Like + Community Recommend/Not)
+7. **HfSearchBar** — Einheitliche Suchleiste mit optionalem Filter-Icon
+8. **HfDetailTopBar** — Einheitliche TopAppBar für Detail-Screens
+9. **HfEmptyState** — Einheitlicher Empty-State
+10. **HfLoadingState** — Einheitlicher Centered Loader
+11. **HfSourceBadge** — Source + FDC-ID Badge
+12. **HfThumbnail** — Einheitliches Image-Thumbnail
+13. **HfRatingBar** — Rating-Komponente (Like/Dislike + Community)
 
-2. **DB-Cleanup** (Live-Server, per SQL):
-   - 47 MANUAL-Zutaten → USDA_FDC-Äquivalente gemappt (69 recipe_ingredients-Links)
-   - 1 Hühnerbrühe-Ref aus Kartoffelsuppe entfernt (kein FDC-Ersatz)
-   - Tools: `audit_manual_ingredients.sql`, `remap_manual_to_fdc.sql`, `find_missing_fdc.sql`, `find_beeren_bruhe.sql`, `find_manual_replacements.sql`, `map_manual_to_fdc.sql`
-   - Ergebnis: 637 USDA_FDC-Zutaten, 0 MANUAL
+### Refaktorisierte Screens:
+- **IngredientDetailScreen**: HfDetailTopBar, HfCard, HfRatingBar, HfNutrientProgressRow, HfAddToHomeButton, HfSourceBadge. Makro-Sektion entfernt (durch DGE-Progress-Bars abgedeckt). Like/Dislike jetzt via ViewModel (IngredientRatingStore).
+- **RecipeDetailScreen**: HfDetailTopBar, HfCard, HfRatingBar, HfNutrientProgressRow, HfAddToHomeButton. CommunityRatingPill+NuritionCard+IngredientsCard+StepsCard+NuriRow ersetzt.
+- **SupplementDetailScreen**: HfDetailTopBar, HfCard, HfNutrientProgressRow, HfAddToHomeButton. MacroRow+NeoCard+SectionPill+NeoSectionLabel ersetzt.
+- **LebensmittelScreen**: IngredientRow nutzt HfCard + HfRatingBar. Suchleiste via HfSearchBar.
+- **RecipesScreen**: RecipeCard nutzt HfCard. Suchleiste via HfSearchBar.
+- **SupplementsScreen**: SupplementRow nutzt HfCard. Suchleiste via HfSearchBar (NEU!).
+
+### Bugfix:
+- **RecipeDetailViewModel.rate()**: Kein `load()`-Aufruf mehr nach Community-Rating → kein Full-Page-Reload. Optimistisches UI-Update via Count-Berechnung.
+
+### ViewModel-Erweiterungen:
+- **IngredientDetailViewModel**: `toggleLike()`, `toggleDislike()` via `IngredientRatingStore`. State enthält jetzt `isLiked`, `isDisliked`.
 
 **Verifikation:**
-- `SELECT source, COUNT(*) FROM ingredients GROUP BY source` → nur USDA_FDC (637 rows)
+- Alle Detail-Screens verwenden identische Hf*-Komponenten
+- Alle Listen-Tiles verwenden HfCard
+- Alle Suchleisten verwenden HfSearchBar
+- RecipeDetail: Community-Rating löst keinen Spinner/Reload mehr aus
+- IngredientDetail: Like/Dislike funktioniert und persistiert
 - Keine Compile-Fehler in MainShell.kt
 
 ---
