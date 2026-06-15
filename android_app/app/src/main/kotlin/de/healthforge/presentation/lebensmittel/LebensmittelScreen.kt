@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
@@ -58,6 +59,7 @@ import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.common.components.MasterTileNutrient
 import de.healthforge.presentation.common.components.formatNutrientValue
+import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -98,6 +100,7 @@ fun LebensmittelScreen(
     // Load ingredient ratings on first composition
     LaunchedEffect(Unit) { vm.refreshRatings() }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -206,6 +209,16 @@ fun LebensmittelScreen(
 
     // P7.S5 — Detail jetzt Full-Screen via onOpenIngredientDetail Navigation.
     SnackbarHost(hostState = snackbarHostState)
+
+        // Unified FAB
+        GradientFab(
+            onClick = { onSuggestIngredient(state.query) },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            size = 56.dp,
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = "Lebensmittel vorschlagen", tint = hm.fgPrimary)
+        }
+    } // Box
 }
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)

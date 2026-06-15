@@ -44,6 +44,7 @@ import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.common.components.MasterTileNutrient
 import de.healthforge.presentation.common.components.formatNutrientValue
+import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -65,11 +66,12 @@ fun SupplementsScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            GradientFab(
                 onClick = { onOpenEdit(0L) },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Neu") },
-            )
+                size = 56.dp,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Supplement anlegen", tint = LocalHmTokens.current.fgPrimary)
+            }
         },
     ) { padding ->
         if (s.loading) {

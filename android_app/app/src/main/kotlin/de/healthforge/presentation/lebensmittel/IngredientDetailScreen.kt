@@ -78,15 +78,6 @@ fun IngredientDetailScreen(
             HfDetailTopBar(
                 title = state.item?.name_de ?: "Lebensmittel",
                 onBack = onBack,
-                actions = {
-                    IconButton(onClick = { vm.openAddToPlanDialog() }) {
-                        Icon(
-                            Icons.Filled.PlaylistAdd,
-                            contentDescription = "Zum Plan hinzufügen",
-                            tint = hm.fgPrimary,
-                        )
-                    }
-                },
             )
         },
         containerColor = hm.background,

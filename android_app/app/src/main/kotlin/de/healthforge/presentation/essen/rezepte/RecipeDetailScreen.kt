@@ -116,9 +116,6 @@ fun RecipeDetailScreen(
                                 Icon(Icons.Filled.Edit, contentDescription = "Bearbeiten")
                             }
                         }
-                        IconButton(onClick = { vm.openAddToPlanDialog() }) {
-                            Icon(Icons.Filled.PlaylistAdd, contentDescription = "Zum Plan hinzufügen")
-                        }
                     }
                 },
             )
