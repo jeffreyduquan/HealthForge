@@ -174,7 +174,7 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                 )
             }
             composable(MainRoutes.ESSEN) {
-                EssenScreen(preselectedTab = 1,
+                EssenScreen(
                     onOpenSupplementEdit = { id ->
                         navController.navigate(MainRoutes.supplementEdit(id))
                     },
