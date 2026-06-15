@@ -77,49 +77,63 @@ fun OnboardingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .statusBarsPadding(),
         ) {
-            Spacer(Modifier.height(8.dp))
-            StepDots(currentIndex = s.stepIndex, total = TOTAL_STEPS)
-            Spacer(Modifier.height(4.dp))
+            // ── Step Dots (fixed top) ──
+            StepDots(
+                currentIndex = s.stepIndex,
+                total = TOTAL_STEPS,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
 
-            when (s.stepIndex) {
-                0 -> StepWelcome()
-                1 -> StepDisplayName(s.displayName, vm::setDisplayName)
-                2 -> StepAge(s.ageYears, vm::setAge)
-                3 -> StepSex(s.sex, vm::setSex)
-                4 -> StepHeight(s.heightCm, vm::setHeight)
-                5 -> StepWeight(s.weightKg, vm::setWeight)
-                6 -> StepActivity(s.activity, vm::setActivity)
-                7 -> StepGoal(s.goal, vm::setGoal)
-                8 -> StepAllergies(s.allergies, vm::toggleAllergy)
-                9 -> StepIntolerances(s.intolerances, s.histamine, vm::toggleIntolerance, vm::setHistamine)
-                10 -> StepMealSlots(s.mealSlots, vm::toggleMealSlot)
-                11 -> StepMaxPrep(s.maxPrepTimeMin, vm::setMaxPrepTime)
-                12 -> StepTheme(s.theme, vm::setTheme)
-                13 -> StepReview(s)
+            // ── Scrollable content ──
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Spacer(Modifier.height(4.dp))
+
+                when (s.stepIndex) {
+                    0 -> StepWelcome()
+                    1 -> StepDisplayName(s.displayName, vm::setDisplayName)
+                    2 -> StepAge(s.ageYears, vm::setAge)
+                    3 -> StepSex(s.sex, vm::setSex)
+                    4 -> StepHeight(s.heightCm, vm::setHeight)
+                    5 -> StepWeight(s.weightKg, vm::setWeight)
+                    6 -> StepActivity(s.activity, vm::setActivity)
+                    7 -> StepGoal(s.goal, vm::setGoal)
+                    8 -> StepAllergies(s.allergies, vm::toggleAllergy)
+                    9 -> StepIntolerances(s.intolerances, s.histamine, vm::toggleIntolerance, vm::setHistamine)
+                    10 -> StepMealSlots(s.mealSlots, vm::toggleMealSlot)
+                    11 -> StepMaxPrep(s.maxPrepTimeMin, vm::setMaxPrepTime)
+                    12 -> StepTheme(s.theme, vm::setTheme)
+                    13 -> StepReview(s)
+                }
+
+                Spacer(Modifier.height(24.dp))
             }
-            Spacer(Modifier.height(8.dp))
+
+            // ── Nav buttons (fixed bottom) ──
             NavButtons(
                 stepIndex = s.stepIndex,
                 committing = s.committing,
                 onBack = vm::back,
                 onNext = vm::next,
                 onFinish = vm::commit,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
             )
-            Spacer(Modifier.height(24.dp).navigationBarsPadding())
         }
     }
 }
 
 @Composable
-private fun StepDots(currentIndex: Int, total: Int) {
+private fun StepDots(currentIndex: Int, total: Int, modifier: Modifier = Modifier) {
     val hm = LocalHmTokens.current
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -127,10 +141,10 @@ private fun StepDots(currentIndex: Int, total: Int) {
             val active = i <= currentIndex
             Box(
                 modifier = Modifier
-                    .height(8.dp)
-                    .let { if (active) it.width(20.dp) else it.size(8.dp) }
-                    .clip(if (active) RoundedCornerShape(4.dp) else CircleShape)
-                    .background(if (active) hm.accentGradient else androidx.compose.ui.graphics.SolidColor(hm.glassBorder)),
+                    .height(6.dp)
+                    .let { if (active) it.width(18.dp) else it.size(6.dp) }
+                    .clip(if (active) RoundedCornerShape(3.dp) else CircleShape)
+                    .background(if (active) hm.accentGradient else androidx.compose.ui.graphics.SolidColor(hm.barTrack)),
             )
         }
     }
@@ -143,9 +157,11 @@ private fun NavButtons(
     onBack: () -> Unit,
     onNext: () -> Unit,
     onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val hm = LocalHmTokens.current
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().navigationBarsPadding(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (stepIndex > 0) {
@@ -166,17 +182,20 @@ private fun NavButtons(
 
 @Composable
 private fun StepWelcome() {
+    val hm = LocalHmTokens.current
     GradientText("Willkommen bei HealthForge", style = MaterialTheme.typography.headlineMedium)
     Text(
-        "Wir richten dein Profil ein, damit Empfehlungen zu deinen Bed\u00fcrfnissen passen. " +
-            "Alle Daten bleiben verschl\u00fcsselt auf diesem Ger\u00e4t.",
+        "Wir richten dein Profil ein, damit Empfehlungen zu deinen Bedürfnissen passen. " +
+            "Alle Daten bleiben verschlüsselt auf diesem Gerät.",
         style = MaterialTheme.typography.bodyMedium,
+        color = hm.fgSecondary,
     )
 }
 
 @Composable
 private fun StepDisplayName(value: String, onChange: (String) -> Unit) {
-    Text("Wie sollen wir dich nennen?", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Wie sollen wir dich nennen?", style = MaterialTheme.typography.titleLarge)
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
@@ -199,19 +218,21 @@ private fun StepAge(value: Int?, onChange: (Int?) -> Unit) {
 
 @Composable
 private fun StepSex(value: BiologicalSex?, onChange: (BiologicalSex) -> Unit) {
-    Text("Biologisches Geschlecht", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Biologisches Geschlecht", style = MaterialTheme.typography.titleLarge)
     Text(
-        "F\u00fcr die Berechnung des Grundumsatzes (Mifflin\u2013St Jeor).",
+        "Für die Berechnung des Grundumsatzes (Mifflin–St Jeor).",
         style = MaterialTheme.typography.bodySmall,
+        color = hm.fgSecondary,
     )
     BiologicalSex.entries.forEach { opt ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             RadioButton(selected = value == opt, onClick = { onChange(opt) })
             Text(when (opt) {
-                BiologicalSex.MALE -> "M\u00e4nnlich"
+                BiologicalSex.MALE -> "Männlich"
                 BiologicalSex.FEMALE -> "Weiblich"
                 BiologicalSex.OTHER -> "Divers / keine Angabe"
-            })
+            }, color = hm.fgPrimary)
         }
     }
 }
@@ -323,44 +344,47 @@ private fun NumberStep(
 
 @Composable
 private fun StepActivity(value: ActivityLevel?, onChange: (ActivityLevel) -> Unit) {
-    Text("Wie aktiv bist du?", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Wie aktiv bist du?", style = MaterialTheme.typography.titleLarge)
     ActivityLevel.entries.forEach { opt ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             RadioButton(selected = value == opt, onClick = { onChange(opt) })
             Text(when (opt) {
                 ActivityLevel.SEDENTARY -> "Sitzend (kaum Sport)"
-                ActivityLevel.LIGHT -> "Leicht aktiv (1\u20133x Sport / Woche)"
-                ActivityLevel.MODERATE -> "Moderat (3\u20135x Sport / Woche)"
-                ActivityLevel.ACTIVE -> "Aktiv (6\u20137x Sport / Woche)"
-                ActivityLevel.VERY_ACTIVE -> "Sehr aktiv (intensiv + k\u00f6rperliche Arbeit)"
-            })
+                ActivityLevel.LIGHT -> "Leicht aktiv (1–3x Sport / Woche)"
+                ActivityLevel.MODERATE -> "Moderat (3–5x Sport / Woche)"
+                ActivityLevel.ACTIVE -> "Aktiv (6–7x Sport / Woche)"
+                ActivityLevel.VERY_ACTIVE -> "Sehr aktiv (intensiv + körperliche Arbeit)"
+            }, color = hm.fgPrimary)
         }
     }
 }
 
 @Composable
 private fun StepGoal(value: DietGoal?, onChange: (DietGoal) -> Unit) {
-    Text("Was ist dein Ziel?", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Was ist dein Ziel?", style = MaterialTheme.typography.titleLarge)
     DietGoal.entries.forEach { opt ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             RadioButton(selected = value == opt, onClick = { onChange(opt) })
             Text(when (opt) {
-                DietGoal.LOSE -> "Abnehmen (\u221220 % Kalorien)"
+                DietGoal.LOSE -> "Abnehmen (−20 % Kalorien)"
                 DietGoal.MAINTAIN -> "Gewicht halten"
                 DietGoal.GAIN -> "Aufbau (+15 % Kalorien)"
-            })
+            }, color = hm.fgPrimary)
         }
     }
 }
 
 @Composable
 private fun StepAllergies(selected: Set<AllergenType>, onToggle: (AllergenType) -> Unit) {
-    Text("Allergien (EU-14)", style = MaterialTheme.typography.titleLarge)
-    Text("Mehrfachauswahl m\u00f6glich.", style = MaterialTheme.typography.bodySmall)
+    val hm = LocalHmTokens.current
+    GradientText("Allergien (EU-14)", style = MaterialTheme.typography.titleLarge)
+    Text("Mehrfachauswahl möglich.", style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
     AllergenType.entries.forEach { a ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Checkbox(checked = a in selected, onCheckedChange = { onToggle(a) })
-            Text(a.germanLabel)
+            Text(a.germanLabel, color = hm.fgPrimary)
         }
     }
 }
@@ -372,15 +396,16 @@ private fun StepIntolerances(
     onToggle: (FodmapType) -> Unit,
     onHistamine: (HistamineSensitivity) -> Unit,
 ) {
-    Text("FODMAP-Intoleranzen", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("FODMAP-Intoleranzen", style = MaterialTheme.typography.titleLarge)
     FodmapType.entries.forEach { f ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Checkbox(checked = f in selected, onCheckedChange = { onToggle(f) })
-            Text(f.germanLabel)
+            Text(f.germanLabel, color = hm.fgPrimary)
         }
     }
     Spacer(Modifier.height(8.dp))
-    Text("Histamin-Empfindlichkeit", style = MaterialTheme.typography.titleMedium)
+    Text("Histamin-Empfindlichkeit", style = MaterialTheme.typography.titleMedium, color = hm.fgPrimary)
     HistamineSensitivity.entries.forEach { h ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             RadioButton(selected = histamine == h, onClick = { onHistamine(h) })
@@ -389,7 +414,7 @@ private fun StepIntolerances(
                 HistamineSensitivity.MILD -> "Leicht"
                 HistamineSensitivity.MODERATE -> "Mittel"
                 HistamineSensitivity.HIGH -> "Stark"
-            })
+            }, color = hm.fgPrimary)
         }
     }
 }
@@ -397,35 +422,43 @@ private fun StepIntolerances(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StepMealSlots(selected: Set<MealSlot>, onToggle: (MealSlot) -> Unit) {
-    Text("Welche Mahlzeiten m\u00f6chtest du planen?", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Welche Mahlzeiten möchtest du planen?", style = MaterialTheme.typography.titleLarge)
     MealSlot.entries.forEach { m ->
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Checkbox(checked = m in selected, onCheckedChange = { onToggle(m) })
             Text(when (m) {
-                MealSlot.FRUEHSTUECK -> "Fr\u00fchst\u00fcck"
-                MealSlot.ZWEITES_FRUEHSTUECK -> "Zweites Fr\u00fchst\u00fcck"
+                MealSlot.FRUEHSTUECK -> "Frühstück"
+                MealSlot.ZWEITES_FRUEHSTUECK -> "Zweites Frühstück"
                 MealSlot.MITTAG -> "Mittagessen"
                 MealSlot.SNACK -> "Snack"
                 MealSlot.ABENDESSEN -> "Abendessen"
                 MealSlot.NACHT -> "Nachts"
-            })
+            }, color = hm.fgPrimary)
         }
     }
 }
 
 @Composable
 private fun StepMaxPrep(value: Int?, onChange: (Int?) -> Unit) {
-    NumberStep(
-        title = "Maximale Zubereitungszeit",
-        label = "Minuten (optional)",
+    val hm = LocalHmTokens.current
+    GradientText("Maximale Zubereitungszeit", style = MaterialTheme.typography.titleLarge)
+    OutlinedTextField(
         value = value?.toString().orEmpty(),
-    ) { onChange(it.toIntOrNull()) }
+        onValueChange = { onChange(it.toIntOrNull()) },
+        label = { Text("Minuten (optional)") },
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StepTheme(value: ThemePreference, onChange: (ThemePreference) -> Unit) {
-    Text("Erscheinungsbild", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Erscheinungsbild", style = MaterialTheme.typography.titleLarge)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ThemePreference.entries.forEach { t ->
             FilterChip(
@@ -445,17 +478,19 @@ private fun StepTheme(value: ThemePreference, onChange: (ThemePreference) -> Uni
 
 @Composable
 private fun StepReview(s: OnboardingState) {
-    Text("Zusammenfassung", style = MaterialTheme.typography.titleLarge)
+    val hm = LocalHmTokens.current
+    GradientText("Zusammenfassung", style = MaterialTheme.typography.titleLarge)
     val kcal = s.computedKcalTarget
     if (kcal != null) {
-        Text("Berechnetes Kalorienziel: $kcal kcal/Tag", style = MaterialTheme.typography.bodyLarge)
+        Text("Berechnetes Kalorienziel: $kcal kcal/Tag", style = MaterialTheme.typography.bodyLarge, color = hm.fgPrimary)
     } else {
         Text(
-            "Kalorienziel konnte nicht berechnet werden \u2014 einige Werte fehlen.",
+            "Kalorienziel konnte nicht berechnet werden — einige Werte fehlen.",
             style = MaterialTheme.typography.bodyMedium,
+            color = hm.fgSecondary,
         )
     }
-    Text("Allergien: ${if (s.allergies.isEmpty()) "keine" else s.allergies.joinToString { it.germanLabel }}")
-    Text("Intoleranzen: ${if (s.intolerances.isEmpty()) "keine" else s.intolerances.joinToString { it.germanLabel }}")
-    Text("Mahlzeiten: ${s.mealSlots.joinToString { it.name }}")
+    Text("Allergien: ${if (s.allergies.isEmpty()) "keine" else s.allergies.joinToString { it.germanLabel }}", color = hm.fgPrimary)
+    Text("Intoleranzen: ${if (s.intolerances.isEmpty()) "keine" else s.intolerances.joinToString { it.germanLabel }}", color = hm.fgPrimary)
+    Text("Mahlzeiten: ${s.mealSlots.joinToString { it.name }}", color = hm.fgPrimary)
 }
