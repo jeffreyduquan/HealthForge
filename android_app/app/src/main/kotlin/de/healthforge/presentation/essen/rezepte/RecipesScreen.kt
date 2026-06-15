@@ -66,7 +66,7 @@ fun RecipesScreen(
 
     Scaffold(
         floatingActionButton = {
-            GradientFab(onClick = onCreate, size = 48.dp) {
+            GradientFab(onClick = onCreate, size = 56.dp) {
                 Icon(Icons.Filled.Add, contentDescription = "Rezept anlegen", tint = LocalHmTokens.current.fgPrimary)
             }
         },

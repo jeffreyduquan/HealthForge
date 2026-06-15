@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -34,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -100,10 +102,20 @@ fun LebensmittelScreen(
     // Load ingredient ratings on first composition
     LaunchedEffect(Unit) { vm.refreshRatings() }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        floatingActionButton = {
+            GradientFab(
+                onClick = { onSuggestIngredient(state.query) },
+                size = 56.dp,
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Lebensmittel vorschlagen", tint = hm.fgPrimary)
+            }
+        },
+    ) { padding ->
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(padding)
             .padding(horizontal = 16.dp),
     ) {
         HfSearchBar(
@@ -114,111 +126,62 @@ fun LebensmittelScreen(
             onFilterClick = { showFilters = true },
         )
 
-            FilterChip(
-                selected = state.applyProfileFilters,
-                onClick = vm::toggleApplyProfileFilters,
-                label = {
-                    val n = state.excludedAllergens.size + state.excludedFodmap.size
-                    Text(
-                        if (state.applyProfileFilters)
-                            "Profil-Filter aktiv ($n)"
-                        else
-                            "Profil-Filter aus",
-                    )
-                },
-                modifier = Modifier.padding(top = 8.dp),
+        // Filter chip (matching position of filter row in other tabs)
+        FilterChip(
+            selected = state.applyProfileFilters,
+            onClick = vm::toggleApplyProfileFilters,
+            label = {
+                val n = state.excludedAllergens.size + state.excludedFodmap.size
+                Text(if (state.applyProfileFilters) "Profil-Filter ($n)" else "Profil-Filter aus")
+            },
+        )
+        Spacer(Modifier.height(8.dp))
+
+        when {
+            state.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            state.error != null -> Text("Fehler: ${state.error}", modifier = Modifier.padding(16.dp))
+            state.results.isEmpty() -> Text(
+                if (state.query.isBlank()) "Keine Lebensmittel verfügbar." else "Keine Treffer für \"${state.query}\".",
+                modifier = Modifier.padding(16.dp),
             )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End,
+            else -> LazyColumn(
+                contentPadding = PaddingValues(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                OutlinedButton(onClick = { onSuggestIngredient(state.query) }) {
-                    Text("Neues Lebensmittel vorschlagen")
+                items(items = state.results, key = { it.id }) { item ->
+                    IngredientRow(
+                        item = item, preselect = preselect,
+                        isLiked = state.likedIngredientIds.contains(item.id),
+                        isDisliked = state.dislikedIngredientIds.contains(item.id),
+                        onPick = { onPick(item) },
+                        onOpenDetail = { onOpenIngredientDetail(item.id) },
+                        onCorrect = { fieldPrTarget = item },
+                        onToggleLike = { vm.toggleLikeIngredient(item.id) },
+                        onToggleDislike = { vm.toggleDislikeIngredient(item.id) },
+                    )
                 }
             }
-
-            Spacer(Modifier.height(8.dp))
-            HorizontalDivider()
-
-            when {
-                state.loading -> Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
-
-                state.error != null -> Text(
-                    text = "Fehler: ${state.error}",
-                    modifier = Modifier.padding(16.dp),
-                )
-
-                state.results.isEmpty() -> Text(
-                    text = if (state.query.isBlank())
-                        "Keine Lebensmittel verfügbar."
-                    else
-                        "Keine Treffer für \"${state.query}\".",
-                    modifier = Modifier.padding(16.dp),
-                )
-
-                else -> LazyColumn(
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(items = state.results, key = { it.id }) { item ->
-                        IngredientRow(
-                            item = item,
-                            preselect = preselect,
-                            isLiked = state.likedIngredientIds.contains(item.id),
-                            isDisliked = state.dislikedIngredientIds.contains(item.id),
-                            onPick = { onPick(item) },
-                            onOpenDetail = { onOpenIngredientDetail(item.id) },
-                            onCorrect = { fieldPrTarget = item },
-                            onToggleLike = { vm.toggleLikeIngredient(item.id) },
-                            onToggleDislike = { vm.toggleDislikeIngredient(item.id) },
-                        )
-                    }
-                }
-            }
+        }
     }
+    } // Scaffold
 
     if (showFilters) {
         FilterDialog(
-            allergens = state.excludedAllergens,
-            fodmap = state.excludedFodmap,
-            onToggleAllergen = vm::toggleAllergen,
-            onToggleFodmap = vm::toggleFodmap,
+            allergens = state.excludedAllergens, fodmap = state.excludedFodmap,
+            onToggleAllergen = vm::toggleAllergen, onToggleFodmap = vm::toggleFodmap,
             onDismiss = { showFilters = false },
         )
     }
-
     fieldPrTarget?.let { target ->
         FieldPrDialog(
-            ingredientId = target.id,
-            ingredientName = target.name_de,
+            ingredientId = target.id, ingredientName = target.name_de,
             onDismiss = { fieldPrTarget = null },
-            onSubmit = { id, req ->
-                vm.submitFieldPr(id, req)
-                fieldPrTarget = null
-            },
+            onSubmit = { id, req -> vm.submitFieldPr(id, req); fieldPrTarget = null },
         )
     }
-
-    // P7.S5 — Detail jetzt Full-Screen via onOpenIngredientDetail Navigation.
     SnackbarHost(hostState = snackbarHostState)
-
-        // Unified FAB
-        GradientFab(
-            onClick = { onSuggestIngredient(state.query) },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-            size = 56.dp,
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = "Lebensmittel vorschlagen", tint = hm.fgPrimary)
-        }
-    } // Box
 }
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
