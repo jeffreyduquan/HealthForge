@@ -40,7 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
+import de.healthforge.presentation.common.components.MasterTileNutrient
+import de.healthforge.presentation.common.components.formatNutrientValue
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -155,48 +158,35 @@ private fun SupplementRow(
     onDelete: () -> Unit,
     onAdopt: () -> Unit,
 ) {
-    val hm = LocalHmTokens.current
-    de.healthforge.presentation.common.components.HfCard(
-        onClick = onClick,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(sup.nameDe, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = hm.fgPrimary)
-                    Spacer(Modifier.width(8.dp))
-                    if (!sup.isLocal) {
-                        AssistChip(
-                            onClick = {},
-                            label = { Text("Öffentlich", style = MaterialTheme.typography.labelSmall) },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
-                        )
-                    }
-                }
-                sup.brand?.takeIf { it.isNotBlank() }?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
-                }
-                Text(
-                    "${sup.defaultDose} ${sup.unitLabel}" +
-                        (sup.kcalPerDose?.let { " · ${it.toInt()} kcal" }.orEmpty()),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = hm.fgSecondary,
-                )
-            }
+    val subtitle = buildString {
+        append("${sup.defaultDose} ${sup.unitLabel}")
+        sup.kcalPerDose?.let { append(" · ${it.toInt()} kcal") }
+    }
+
+    val nutrients = buildList {
+        sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
+        sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
+        sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
+    }
+
+    HfMasterTile(
+        title = sup.nameDe,
+        subtitle = subtitle,
+        sourceBadge = if (!sup.isLocal) "ÖFFENTLICH" else null,
+        nutrients = nutrients,
+        nutrientLabel = "PRO DOSIS",
+        onClick = if (sup.isLocal) onClick else null,
+        trailingSlot = {
             if (sup.isLocal) {
                 TextButton(onClick = onEdit) { Text("Bearb.") }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = hm.fgTertiary)
+                    Icon(Icons.Filled.Delete, contentDescription = "Löschen", tint = LocalHmTokens.current.fgTertiary)
                 }
             } else {
                 IconButton(onClick = onAdopt) {
                     Icon(Icons.Filled.CloudDownload, contentDescription = "Übernehmen", tint = MaterialTheme.colorScheme.primary)
                 }
             }
-        }
-    }
+        },
+    )
 }

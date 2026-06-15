@@ -199,18 +199,15 @@ fun IntakeCard(
                     }
                 }
 
-                // ── Pinned nutrients row ──
-                val nutrients = computePinnedNutrients(entry, pinnedKeys, ingredientDto)
-                if (nutrients.isNotEmpty()) {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        nutrients.forEach { (label, value) ->
-                            Text(
-                                text = "$label $value",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.W500),
-                                color = hm.fgSecondary,
+                // ── Pinned nutrients with progress bars ──
+                val nutrientRows = computePinnedNutrientBars(entry, pinnedKeys, ingredientDto)
+                if (nutrientRows.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        nutrientRows.forEach { (label, value, pct) ->
+                            de.healthforge.presentation.common.components.HfNutrientProgressRow(
+                                label = label,
+                                value = value,
+                                percentDge = pct,
                             )
                         }
                     }
@@ -269,6 +266,36 @@ fun computePinnedNutrients(
                 else -> "%.0f".format(v)
             }
             if (v > 0) label to formatted else null
+        }
+    }
+}
+
+/** P7.S5: Compute nutrients with DGE percentages for progress bars. */
+fun computePinnedNutrientBars(
+    entry: IntakeEntryEntity,
+    pinnedKeys: List<String>,
+    ingredientDto: IngredientDto? = null,
+): List<Triple<String, String, Double>> {
+    val f = entry.portionGrams / 100.0
+    return pinnedKeys.mapNotNull { key ->
+        val dge = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.defaultPerDay ?: return@mapNotNull null
+        if (dge <= 0) return@mapNotNull null
+
+        val value: Double? = when (key) {
+            "kcal" -> (entry.snapshotKcalPer100g ?: 0.0) * f
+            "protein" -> (entry.snapshotProteinPer100g ?: 0.0) * f
+            "carbs" -> (entry.snapshotCarbsPer100g ?: 0.0) * f
+            "fat" -> (entry.snapshotFatPer100g ?: 0.0) * f
+            "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
+            "water" -> null
+            else -> ingredientDto?.micronutrients?.get(key)?.times(f)
+        }
+        value?.takeIf { it > 0 }?.let { v ->
+            val pct = (v / dge) * 100.0
+            val label = nutrientLabelDe(key)
+            val unit = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.unit?.label ?: ""
+            val formatted = de.healthforge.presentation.common.components.formatNutrientValue(v)
+            Triple(label, "$formatted $unit", pct)
         }
     }
 }
