@@ -97,6 +97,12 @@ class RecipeService(
         val steps = stepRowRepo.findByRecipeIdOrderByPositionAsc(id)
         val nutrition = nutritionCompute.compute(items)
         val myRating = ratingRepo.findByRecipeIdAndUserId(id, viewerId)
+        // Load ingredient entities once for names + allergens
+        val ingIds = items.map { it.ingredientId }.distinct()
+        val ingById: Map<UUID, de.healthforge.ingredient.IngredientEntity> = if (ingIds.isEmpty()) emptyMap()
+            else ingredientRepo.findAllById(ingIds).associateBy { it.id }
+        val allAllergens = ingById.values.flatMap { parseJsonArray(it.allergensJson) }.distinct().sorted()
+        val allFodmap = ingById.values.flatMap { parseJsonArray(it.fodmapFlagsJson) }.distinct().sorted()
         return RecipeDetailDto(
             id = r.id,
             title = r.title,
@@ -113,19 +119,16 @@ class RecipeService(
             authorId = r.authorId,
             createdAt = r.createdAt,
             updatedAt = r.updatedAt,
-            ingredients = run {
-                val ids = items.map { it.ingredientId }.distinct()
-                val nameById = if (ids.isEmpty()) emptyMap()
-                    else ingredientRepo.findAllById(ids).associate { it.id to it.nameDe }
-                items.map {
-                    RecipeIngredientDto(
-                        it.position, it.ingredientId, nameById[it.ingredientId],
-                        it.quantity, it.unit, it.isOptional, it.note,
-                    )
-                }
+            ingredients = items.map {
+                RecipeIngredientDto(
+                    it.position, it.ingredientId, ingById[it.ingredientId]?.nameDe,
+                    it.quantity, it.unit, it.isOptional, it.note,
+                )
             },
             steps = steps.map { RecipeStepDto(it.position, it.text, it.imageKey) },
             nutrition = nutrition,
+            allergens = allAllergens,
+            fodmapFlags = allFodmap,
             likeCount = likeRepo.countByRecipeId(id),
             likedByMe = likeRepo.existsByRecipeIdAndUserId(id, viewerId),
             communityRecommendCount = ratingRepo.countByRecipeIdAndValue(id, CommunityRatingValue.RECOMMEND.name),
@@ -367,6 +370,11 @@ class RecipeService(
             )
         }
     }
+
+    private fun parseJsonArray(json: String): List<String> =
+        runCatching {
+            com.fasterxml.jackson.databind.ObjectMapper().readValue(json, List::class.java) as? List<String>
+        }.getOrDefault(emptyList()).orEmpty()
 }
 
 enum class BrowseScope { PUBLIC, MINE, PUBLIC_OR_MINE }

@@ -88,6 +88,9 @@ data class RecipeDetailDto(
     val community_recommend_count: Long,
     val community_not_recommend_count: Long,
     val my_community_rating: String?,
+    // P7.S5 — Aggregated from ingredients
+    val allergens: List<String> = emptyList(),
+    val fodmap_flags: List<String> = emptyList(),
 )
 
 @JsonClass(generateAdapter = true)

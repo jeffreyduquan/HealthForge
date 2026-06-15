@@ -118,4 +118,7 @@ data class RecipeDetailDto(
     @JsonProperty("community_recommend_count") val communityRecommendCount: Long,
     @JsonProperty("community_not_recommend_count") val communityNotRecommendCount: Long,
     @JsonProperty("my_community_rating") val myCommunityRating: CommunityRatingValue?,
+    // P7.S5 — Aggregated from ingredients
+    @JsonProperty("allergens") val allergens: List<String>,
+    @JsonProperty("fodmap_flags") val fodmapFlags: List<String>,
 )

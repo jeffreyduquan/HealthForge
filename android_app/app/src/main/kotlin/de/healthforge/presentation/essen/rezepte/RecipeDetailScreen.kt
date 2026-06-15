@@ -311,6 +311,27 @@ private fun DetailContent(
             )
         }
 
+        // ── Allergens & FODMAP (aggregated from ingredients) ──
+        if (recipe.allergens.isNotEmpty()) {
+            HfSectionHeader("Enthält Allergene")
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                recipe.allergens.forEach { allergen ->
+                    AssistChip(onClick = {}, label = { Text(allergen) })
+                }
+            }
+        }
+        if (recipe.fodmap_flags.isNotEmpty()) {
+            HfSectionHeader("FODMAP-Hinweise")
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                recipe.fodmap_flags.forEach { flag ->
+                    val label = runCatching {
+                        de.healthforge.data.db.entities.FodmapType.valueOf(flag).germanLabel
+                    }.getOrDefault(flag)
+                    AssistChip(onClick = {}, label = { Text(label) })
+                }
+            }
+        }
+
         // Zutaten
         HfSectionHeader("Zutaten")
         HfCard {
