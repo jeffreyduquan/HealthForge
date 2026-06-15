@@ -52,10 +52,11 @@ Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendun
 
 **Verifikation:**
 - Alle Detail-Screens verwenden identische Hf*-Komponenten
-- Alle Listen-Tiles verwenden HfCard
+- Alle Listen-Tiles verwenden HfMasterTile
 - Alle Suchleisten verwenden HfSearchBar
 - RecipeDetail: Community-Rating löst keinen Spinner/Reload mehr aus
 - IngredientDetail: Like/Dislike funktioniert und persistiert
+- **Docs aktualisiert**: ReqSpec.md v0.3 (§5.5a + REQ-RECIPE-010/011 + REQ-NAV-002 fix), UsabilityMap.md (§1.2 + §5.0), GUI.md (§8.2)
 - Keine Compile-Fehler in MainShell.kt
 
 ---

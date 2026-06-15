@@ -30,7 +30,7 @@ Diese Datei beschreibt das **UX-Gerüst**: Navigation, Screens, Aktionen, User-F
 
 ```
 ┌──────────────────────────────────┐
-│ Lebensmittel │ Rezepte │ Supplements │
+│ Rezepte │ Lebensmittel │ Supplements │   ← P7.S5: Rezepte first
 └──────────────────────────────────┘
 ```
 
@@ -221,6 +221,14 @@ zugewiesen (siehe `CustomFoodIcons.kt`). Matching erfolgt über Keyword-Heuristi
 ---
 
 ## 5. Essen-Tab
+
+### 5.0 Unified List Tiles (P7.S5)
+
+Alle drei Sub-Tabs verwenden dieselbe **`HfMasterTile`**-Card:
+- Name + Source-Badge + Subtitle-Zeile
+- Gepinnte Nährstoffe als Progress-Bars (4dp, Stage-Farben, DGE-%)
+- Optionaler Rating-Footer (Like/Community)
+- Einheitliche `HfSearchBar` + `GradientFab(+)` in jedem Tab
 
 ### 5.1 Top-Sub-Tabs
 

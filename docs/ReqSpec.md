@@ -7,6 +7,7 @@
 This document is the single source of truth for **what HealthForge is**. Anything not in this document or its companion docs is out of scope.
 
 ### Changelog
+- **v0.3 (2026-06-15)**: P7.S5 — Unified Design System. Added REQ-RECIPE-010/011 (per-100g nutrition in list DTOs). Added §5.5a Unified Design System (REQ-DESIGN-001..008): HfMasterTile, HfNutrientProgressRow, HfRatingBar, HfSearchBar, HfCard, HfSectionHeader, HfDetailTopBar, HfAddToHomeButton. REQ-NAV-002 reorder: Rezepte first.
 - **v0.2 (2025-05-25)**: Scope merged — M1+M2+M3 → unified v1.0 release. Added REQ-RATING split (local + community). Promoted Supplement-Peer-Review, Meal-Planner, Symptom-Log, Wasser-Tracker, Groups, Reminders, Export, Insights, Barcode, Field-PR, Full Admin UI from "deferred" to in-scope. Locked 5-Tab navigation (Home/Gruppen/Essen/Log/Profil). Log-Tab repurposed from intake-history → symptom-diary.
 - **v0.1 (2025-05-25)**: Initial lock — MVP scope, tech stack, data quality system.
 
@@ -82,7 +83,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | Req | Statement |
 |---|---|
 | REQ-NAV-001 | The app SHALL use a **5-Tab Bottom-Navigation**: `Home`, `Gruppen`, `Essen`, `Log`, `Profil`. Der Home-Tab kombiniert die ehemaligen Tabs „Home" (Ernährungsübersicht, Wasser) und „Plan" (Mahlzeiten-Wochenplaner). |
-| REQ-NAV-002 | The `Essen`-Tab SHALL contain three Top-Sub-Tabs: `Lebensmittel`, `Rezepte`, `Supplements`. |
+| REQ-NAV-002 | The `Essen`-Tab SHALL contain three Top-Sub-Tabs: `Rezepte`, `Lebensmittel`, `Supplements` (P7.S5 reorder: recipes first for quicker meal discovery). |
 | REQ-NAV-003 | Tabs not yet implemented in a development phase SHALL render a "Bald verfügbar"-Placeholder. |
 | REQ-NAV-004 | The `Log`-Tab SHALL be the **Symptom-Tagebuch** (NOT intake-history). Intake-history is accessible via Date-Navigation in Home (kein separater "Verlauf"-Button mehr). |
 
@@ -147,6 +148,21 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-RECIPE-007 | Recipe nutrition SHALL be computed live from its ingredients (no stored nutrition block on the recipe row). |
 | REQ-RECIPE-008 | Editing a recipe SHALL be restricted to its owner. |
 | REQ-RECIPE-009 | Deleting a recipe SHALL not break historical Intake-Log entries on the client: the client snapshots the title at intake time. |
+| REQ-RECIPE-010 | (P7.S5) Recipe list items SHALL include per-100g nutrition (kcal, protein, carbs, fat, fiber) for MasterTile progress bars. Total weight SHALL be computed from ingredient quantities. |
+| REQ-RECIPE-011 | (P7.S5) Recipe list DTOs SHALL be served with nutrition summary via `RecipeNutritionCompute.computeSummary()`. |
+
+### 5.5a Unified Design System (P7.S5 — 2026-06-15)
+
+| Req | Statement |
+|---|---|
+| REQ-DESIGN-001 | The app SHALL use a **single Master Tile** component (`HfMasterTile`) for all food/recipe/supplement list items across Home, Essen, and Gruppen tabs. |
+| REQ-DESIGN-002 | The Master Tile SHALL display the user's **pinned nutrients** as compact horizontal progress bars (4dp, stage-colored) with DGE-percentage labels. |
+| REQ-DESIGN-003 | Nutrient progress bars SHALL be normalized: Lebensmittel per 100g, Rezepte per 100g (computed), Supplements per dose. |
+| REQ-DESIGN-004 | All Essen sub-tabs SHALL use an identical search bar layout (`HfSearchBar`) with consistent styling. |
+| REQ-DESIGN-005 | All detail screens (ingredient, recipe, supplement) SHALL use a consistent `HfDetailTopBar` + sticky purple `HfAddToHomeButton` bottom bar. |
+| REQ-DESIGN-006 | Rating components (Like, Community Recommend/Not) SHALL be unified in a single `HfRatingBar` component used across all screens. |
+| REQ-DESIGN-007 | Card styling (corner radius, border, background) SHALL be centralized in `HfCard` consuming `HmTokens` as the single source of truth. |
+| REQ-DESIGN-008 | Section headers SHALL use `HfSectionHeader` (uppercase, semiBold, fgTertiary) app-wide, replacing all legacy `SectionPill` and `NeoSectionLabel`. |
 
 ### 5.6 Offline Read-Cache
 
