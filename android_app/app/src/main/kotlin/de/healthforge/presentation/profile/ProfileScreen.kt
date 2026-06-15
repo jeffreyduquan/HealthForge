@@ -37,6 +37,7 @@ import de.healthforge.BuildConfig
 import de.healthforge.domain.DailyTargets
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
+import de.healthforge.presentation.theme.GradientButton
 import de.healthforge.presentation.theme.GradientText
 import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.SectionPill
@@ -103,20 +104,17 @@ fun ProfileScreen(
                         Text("Mahlzeiten: ${p.mealSlotsJson}", color = hm.fgTertiary,
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    val allergies = full?.allergies?.joinToString { it.germanLabel } ?: ""
-                    val intol = full?.intolerances?.joinToString { it.germanLabel } ?: ""
-                    Text(
-                        "Allergien: ${allergies.ifBlank { "keine" }}",
-                        color = hm.fgTertiary,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
-                        "Intoleranzen: ${intol.ifBlank { "keine" }}",
-                        color = hm.fgTertiary,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
                 }
             }
+
+            // P7.S5: Onboarding-Button prominent direkt unter Profil-Card
+            GradientButton(
+                text = "Onboarding wiederholen",
+                onClick = {
+                    vm.restartOnboarding()
+                    onRestartOnboarding()
+                },
+            )
 
             SectionPill(label = "ALLERGIEN & INTOLERANZEN")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
@@ -244,13 +242,6 @@ fun ProfileScreen(
                     OutlinedButton(onClick = onOpenInsights, modifier = Modifier.fillMaxWidth()) {
                         Text("Erkenntnisse")
                     }
-                    OutlinedButton(
-                        onClick = {
-                            vm.restartOnboarding()
-                            onRestartOnboarding()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Onboarding wiederholen") }
 
                     // === In-App Update ===
                     when {
