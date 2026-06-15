@@ -117,7 +117,7 @@ fun IngredientDetailScreen(
                 }
 
                 // Source badge
-                HfSourceBadge(source = item.source, fdcId = item.fdc_id)
+                HfSourceBadge(source = item.source, fdcId = item.fdc_id?.toString())
 
                 // Rating bar (Like/Dislike — managed by ViewModel)
                 HfRatingBar(

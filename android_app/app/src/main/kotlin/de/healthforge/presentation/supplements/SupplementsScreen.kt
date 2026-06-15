@@ -120,25 +120,27 @@ fun SupplementsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(items = filtered, key = { it.id }) { sup ->
-                    SupplementRow(
-                        sup = sup,
-                        onClick = {
-                            if (sup.isLocal) {
-                                onOpenDetail(sup.localId.toString())
-                            } else {
-                                sup.publicServerId?.let { vm.adoptPublic(it) }
-                            }
-                        },
-                        onEdit = {
-                            if (sup.isLocal) onOpenEdit(sup.localId)
-                        },
-                        onDelete = {
-                            if (sup.isLocal) vm.delete(sup.localId)
-                        },
-                        onAdopt = {
-                            sup.publicServerId?.let { vm.adoptPublic(it) }
-                        },
-                    )
+                            SupplementRow(
+                                sup = sup,
+                                onClick = {
+                                    if (sup.isLocal) {
+                                        onOpenDetail(sup.localId.toString())
+                                    } else {
+                                        sup.publicServerId?.let { vm.adoptPublic(it) }
+                                    }
+                                },
+                                onEdit = {
+                                    if (sup.isLocal) onOpenEdit(sup.localId)
+                                },
+                                onDelete = {
+                                    if (sup.isLocal) vm.delete(sup.localId)
+                                },
+                                onAdopt = {
+                                    sup.publicServerId?.let { vm.adoptPublic(it) }
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
