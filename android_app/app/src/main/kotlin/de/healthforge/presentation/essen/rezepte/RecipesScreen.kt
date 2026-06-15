@@ -77,13 +77,14 @@ fun RecipesScreen(
             }
         },
     ) { padding ->
-    Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
         HfSearchBar(
             query = state.query,
             onQueryChange = vm::setQuery,
             placeholder = "Rezepte suchen…",
             showFilterIcon = true,
             onFilterClick = { showFilters = true },
+            filterCount = state.slotFilter.size,
         )
         Spacer(Modifier.height(4.dp))
 

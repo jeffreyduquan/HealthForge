@@ -352,7 +352,7 @@ private fun DayHeader(date: LocalDate) {
 private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
     val hm = LocalHmTokens.current
     val today = LocalDate.now()
-    val days = (-1..5).map { today.plusDays(it.toLong()) }
+    val days = (-365..365).map { today.plusDays(it.toLong()) }
     val fmt = remember { DateTimeFormatter.ofPattern("d.M.") }
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),

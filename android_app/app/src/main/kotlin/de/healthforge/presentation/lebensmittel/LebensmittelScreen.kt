@@ -126,6 +126,7 @@ fun LebensmittelScreen(
             placeholder = "Apfel, Brot, Tomate…",
             showFilterIcon = true,
             onFilterClick = { showFilters = true },
+            filterCount = state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
         )
 
         // Filter row removed — everything in filter dialog
