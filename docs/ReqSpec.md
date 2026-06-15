@@ -1,10 +1,10 @@
 # HealthForge — Requirements Specification
 
-**Version**: 0.2 (Unified-Scope Lock — 2025-05-25)
-**Status**: LOCKED. Scope = **v1.0 Single Release covering all former M1+M2+M3 features**. Development proceeds in phases (see §4), but no separate releases.
+**Version**: 0.4 (P7.S5 — 2026-06-16)
+**Status**: LOCKED.
 **Companion docs**: `SprintPlan.md`, `TraceabilityMatrix.md`, `Architecture.md`, `UsabilityMap.md`, `GUI.md`.
 
-This document is the single source of truth for **what HealthForge is**. Anything not in this document or its companion docs is out of scope.
+This document is the single source of truth for **what HealthForge is**.
 
 ### Changelog
 - **v0.3 (2026-06-15)**: P7.S5 — Unified Design System. Added REQ-RECIPE-010/011 (per-100g nutrition in list DTOs). Added §5.5a Unified Design System (REQ-DESIGN-001..008): HfMasterTile, HfNutrientProgressRow, HfRatingBar, HfSearchBar, HfCard, HfSectionHeader, HfDetailTopBar, HfAddToHomeButton. REQ-NAV-002 reorder: Rezepte first.
@@ -162,7 +162,16 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-DESIGN-005 | All detail screens (ingredient, recipe, supplement) SHALL use a consistent `HfDetailTopBar` + sticky purple `HfAddToHomeButton` bottom bar. |
 | REQ-DESIGN-006 | Rating components (Like, Community Recommend/Not) SHALL be unified in a single `HfRatingBar` component used across all screens. |
 | REQ-DESIGN-007 | Card styling (corner radius, border, background) SHALL be centralized in `HfCard` consuming `HmTokens` as the single source of truth. |
-| REQ-DESIGN-008 | Section headers SHALL use `HfSectionHeader` (uppercase, semiBold, fgTertiary) app-wide, replacing all legacy `SectionPill` and `NeoSectionLabel`. |
+| REQ-DESIGN-008 | Section headers SHALL use `HfSectionHeader` (uppercase, semiBold, fgTertiary) app-wide.
+| REQ-DESIGN-009 | (P7.S5) The search bar filter icon SHALL show a violet badge with active filter count.
+| REQ-DESIGN-010 | (P7.S5) All list tiles SHALL use the user's reactive pinned keys from ProfileRepository.observe().
+| REQ-DESIGN-011 | (P7.S5) All Essen tabs SHALL use a unified `HfFilterDialog` containing allergens, FODMAP, profile toggle, and optional slot tags.
+| REQ-DESIGN-012 | (P7.S5) Recipe detail SHALL display aggregated allergens and FODMAP flags from its ingredients.
+| REQ-DESIGN-013 | (P7.S5) The Home date strip SHALL allow unlimited navigation (±365 days).
+| REQ-DESIGN-014 | (P7.S5) Onboarding wizard SHALL have sticky navigation buttons fixed at screen bottom.
+| REQ-DESIGN-015 | (P7.S5) All Essen sub-tabs SHALL use identical layout: Scaffold + GradientFab(56dp) + HfSearchBar.
+| REQ-DESIGN-016 | (P7.S5) Supplement creation SHALL use a 4-step wizard (Name→Dosierung→Nährwerte→Vorschau).
+| REQ-PROFILE-007 | (P7.S5) Allergien/Intoleranzen and Tagesziele SHALL open as ModalBottomSheets from buttons. |
 
 ### 5.6 Offline Read-Cache
 

@@ -1,7 +1,40 @@
 # HealthForge CHANGELOG
 
-Konvention: Jeder P6-Sprint-Abschluss + jede groessere Code-/Verhaltens-Aenderung erhaelt einen Eintrag.
-Format pro Eintrag: **Sprint/Datum** + **Touched Docs** + **Untouched-Begruendung** + **Verifikation**.
+---
+
+## P7.S5: UI Design System Consolidation (2026-06-15/16)
+
+**Scope:** Complete unification of all UI components across the app. ~10 commits.
+
+**Touched Docs:**
+- `CHANGELOG.md`: This entry
+- `docs/ReqSpec.md`: v0.3→v0.4 (REQ-DESIGN-009..016, REQ-PROFILE-007, REQ-RECIPE-010/011)
+- `docs/GUI.md`: Hf* components documented
+- `docs/UsabilityMap.md`: Essen tab order + MasterTile section
+
+**Untouched Docs:**
+- `docs/Architecture.md`: No architecture changes (UI-only)
+- `docs/SprintPlan.md`, `docs/TraceabilityMatrix.md`: Same scope
+
+**Changes:**
+- 17 new singleton components (HfCard, HfMasterTile, HfNutrientProgressRow, HfAddToHomeButton, HfRatingBar, HfSearchBar, HfFilterDialog, HfDetailTopBar, etc.)
+- All 3 Essen tabs unified (Scaffold + GradientFab 56dp + HfSearchBar + HfFilterDialog)
+- Tab order: Rezepte→Lebensmittel→Supplements
+- Supplement 4-Step Wizard
+- Onboarding: sticky nav buttons + HmTokens colors
+- Profile: Allergien/Tagesziele as ModalBottomSheets, Onboarding button prominent
+- Recipe detail: allergens+FODMAP aggregated from ingredients
+- Reactive pinned nutrients across all list screens
+- DayStrip unlimited navigation (+-365 days)
+- Filter badge on search icon
+- RecipeDetailViewModel.rate() no longer reloads page
+- Server: RecipeListItemDto with per-100g nutrition
+
+**Verification:**
+- All detail screens use identical Hf* components
+- All list tiles use HfMasterTile
+- All search bars identical width/position
+- Reactive pins update immediately on change
 
 ---
 
