@@ -163,10 +163,11 @@ private fun SupplementRow(
         sup.kcalPerDose?.let { append(" · ${it.toInt()} kcal") }
     }
 
+    val pinnedKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys
     val nutrients = buildList {
-        sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
-        sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
-        sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
+        if ("protein" in pinnedKeys) sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
+        if ("carbs" in pinnedKeys) sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
+        if ("fat" in pinnedKeys) sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
     }
 
     HfMasterTile(

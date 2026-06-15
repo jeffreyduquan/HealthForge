@@ -101,7 +101,8 @@ fun RecipesScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 items(state.items, key = { it.id }) { recipe ->
-                    RecipeCard(recipe = recipe, onClick = { onOpenDetail(recipe.id) })
+                    RecipeCard(recipe = recipe, onClick = { onOpenDetail(recipe.id) },
+                        pinnedNutrientKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys)
                 }
             }
         }

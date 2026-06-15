@@ -229,7 +229,7 @@ private fun IngredientRow(
 
     val nutrients = buildIngredientNutrientRows(
         item = item,
-        pinnedKeys = emptyList(), // Show all for now
+        pinnedKeys = de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys,
     )
 
     HfMasterTile(
