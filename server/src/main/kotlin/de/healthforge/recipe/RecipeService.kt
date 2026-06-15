@@ -51,7 +51,10 @@ class RecipeService(
         val ids = browse.browseIds(q, slotTags, prepMinutesMax, excludeAllergens, vf, authorId, groupId, limit, offset)
         if (ids.isEmpty()) return emptyList()
         val byId = recipeRepo.findAllById(ids).associateBy { it.id }
+        // Pre-load ingredient rows for all recipes to compute per-100g nutrition
+        val ingredientRowsById = ingredientRowRepo.findByRecipeIdIn(ids).groupBy { it.recipeId }
         return ids.mapNotNull { byId[it] }.map { r ->
+            val summary = ingredientRowsById[r.id]?.let { nutritionCompute.computeSummary(it) }
             RecipeListItemDto(
                 id = r.id,
                 title = r.title,
@@ -66,6 +69,12 @@ class RecipeService(
                 likeCount = likeRepo.countByRecipeId(r.id),
                 communityRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.RECOMMEND.name),
                 communityNotRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.NOT_RECOMMEND.name),
+                totalWeightGrams = summary?.totalWeightGrams,
+                kcalPer100g = summary?.kcalPer100g,
+                proteinPer100g = summary?.proteinPer100g,
+                carbsPer100g = summary?.carbsPer100g,
+                fatPer100g = summary?.fatPer100g,
+                fiberPer100g = summary?.fiberPer100g,
             )
         }
     }
@@ -200,7 +209,9 @@ class RecipeService(
     fun batchItems(ids: List<UUID>, viewerId: UUID): List<RecipeListItemDto> {
         if (ids.isEmpty()) return emptyList()
         val recipes = recipeRepo.findAllById(ids)
+        val ingredientRowsById = ingredientRowRepo.findByRecipeIdIn(ids).groupBy { it.recipeId }
         return recipes.filter { it.status == RecipeStatus.PUBLISHED.name || it.authorId == viewerId }.map { r ->
+            val summary = ingredientRowsById[r.id]?.let { nutritionCompute.computeSummary(it) }
             RecipeListItemDto(
                 id = r.id, title = r.title, description = r.description,
                 imageKey = r.imageKey, servings = r.servings, prepMinutes = r.prepMinutes,
@@ -210,6 +221,12 @@ class RecipeService(
                 likeCount = likeRepo.countByRecipeId(r.id),
                 communityRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.RECOMMEND.name),
                 communityNotRecommendCount = ratingRepo.countByRecipeIdAndValue(r.id, CommunityRatingValue.NOT_RECOMMEND.name),
+                totalWeightGrams = summary?.totalWeightGrams,
+                kcalPer100g = summary?.kcalPer100g,
+                proteinPer100g = summary?.proteinPer100g,
+                carbsPer100g = summary?.carbsPer100g,
+                fatPer100g = summary?.fatPer100g,
+                fiberPer100g = summary?.fiberPer100g,
             )
         }
     }

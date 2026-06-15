@@ -85,6 +85,13 @@ data class RecipeListItemDto(
     @JsonProperty("like_count") val likeCount: Long,
     @JsonProperty("community_recommend_count") val communityRecommendCount: Long,
     @JsonProperty("community_not_recommend_count") val communityNotRecommendCount: Long,
+    // P7.S5 — Nutrition summary for MasterTile progress bars (per 100g)
+    @JsonProperty("total_weight_grams") val totalWeightGrams: BigDecimal?,
+    @JsonProperty("kcal_per_100g") val kcalPer100g: BigDecimal?,
+    @JsonProperty("protein_per_100g") val proteinPer100g: BigDecimal?,
+    @JsonProperty("carbs_per_100g") val carbsPer100g: BigDecimal?,
+    @JsonProperty("fat_per_100g") val fatPer100g: BigDecimal?,
+    @JsonProperty("fiber_per_100g") val fiberPer100g: BigDecimal?,
 )
 
 data class RecipeDetailDto(

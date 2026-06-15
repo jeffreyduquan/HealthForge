@@ -54,6 +54,13 @@ data class RecipeListItemDto(
     val like_count: Long,
     val community_recommend_count: Long,
     val community_not_recommend_count: Long,
+    // P7.S5 — Per-100g nutrition for MasterTile progress bars
+    val total_weight_grams: Double? = null,
+    val kcal_per_100g: Double? = null,
+    val protein_per_100g: Double? = null,
+    val carbs_per_100g: Double? = null,
+    val fat_per_100g: Double? = null,
+    val fiber_per_100g: Double? = null,
 )
 
 @JsonClass(generateAdapter = true)

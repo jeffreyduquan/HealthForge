@@ -15,6 +15,7 @@ interface RecipeRepo : JpaRepository<RecipeEntity, UUID> {
 
 interface RecipeIngredientRepo : JpaRepository<RecipeIngredientEntity, RecipePositionKey> {
     fun findByRecipeIdOrderByPositionAsc(recipeId: UUID): List<RecipeIngredientEntity>
+    fun findByRecipeIdIn(recipeIds: List<UUID>): List<RecipeIngredientEntity>
     fun deleteByRecipeId(recipeId: UUID)
 }
 

@@ -49,7 +49,10 @@ import coil.compose.AsyncImage
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.repository.MediaRepository
 import de.healthforge.presentation.common.components.HfCard
+import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
+import de.healthforge.presentation.common.components.MasterTileNutrient
+import de.healthforge.presentation.common.components.formatNutrientValue
 
 private val SLOT_OPTIONS = listOf("BREAKFAST" to "Frühstück", "LUNCH" to "Mittag", "DINNER" to "Abend", "SNACK" to "Snack")
 
@@ -110,58 +113,37 @@ fun RecipesScreen(
 fun RecipeCard(
     recipe: RecipeListItemDto,
     onClick: () -> Unit,
-    trailingActions: @Composable RowScope.() -> Unit = {},
+    pinnedNutrientKeys: List<String> = emptyList(),
+    trailingActions: (@Composable () -> Unit)? = null,
 ) {
-    val hm = LocalHmTokens.current
-    de.healthforge.presentation.common.components.HfCard(
-        onClick = onClick,
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            val thumbUrl = MediaRepository.imageUrl("recipes", recipe.image_key, variant = "thumb")
-            if (thumbUrl != null) {
-                AsyncImage(
-                    model = thumbUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
-                )
-                Spacer(Modifier.width(12.dp))
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = recipe.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = hm.fgPrimary,
-                )
-                recipe.description?.takeIf { it.isNotBlank() }?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2, color = hm.fgSecondary)
-                }
-                Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${recipe.prep_minutes} min", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
-                    Spacer(Modifier.width(12.dp))
-                    recipe.slot_tags.firstOrNull()?.let {
-                        Text(
-                            text = humanSlot(it),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = hm.ambientViolet,
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
-                    Spacer(Modifier.width(4.dp))
-                    Text(recipe.like_count.toString(), style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
-                    Spacer(Modifier.width(12.dp))
-                    Icon(Icons.Filled.ThumbUp, contentDescription = null, modifier = Modifier.size(16.dp), tint = hm.fgTertiary)
-                    Spacer(Modifier.width(4.dp))
-                    Text(recipe.community_recommend_count.toString(), style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
-                }
-            }
-            trailingActions()
-        }
+    val thumbUrl = MediaRepository.imageUrl("recipes", recipe.image_key, variant = "thumb")
+    val subtitle = buildString {
+        append("${recipe.prep_minutes} min")
+        append(" · ${recipe.servings} Portionen")
+        recipe.slot_tags.firstOrNull()?.let { append(" · ${humanSlot(it)}") }
     }
+
+    val nutrients = buildNutrientRows(
+        pinnedKeys = pinnedNutrientKeys,
+        kcal = recipe.kcal_per_100g,
+        protein = recipe.protein_per_100g,
+        carbs = recipe.carbs_per_100g,
+        fat = recipe.fat_per_100g,
+        fiber = recipe.fiber_per_100g,
+    )
+
+    HfMasterTile(
+        title = recipe.title,
+        subtitle = subtitle,
+        imageUrl = thumbUrl,
+        nutrients = nutrients,
+        nutrientLabel = if (recipe.total_weight_grams != null) "PRO 100 G" else "PRO PORTION",
+        likeCount = recipe.like_count,
+        recommendCount = recipe.community_recommend_count,
+        notRecommendCount = recipe.community_not_recommend_count,
+        onClick = onClick,
+        trailingSlot = trailingActions,
+    )
 }
 
 internal fun humanSlot(code: String): String = when (code) {
@@ -170,6 +152,41 @@ internal fun humanSlot(code: String): String = when (code) {
     "DINNER" -> "Abend"
     "SNACK" -> "Snack"
     else -> code
+}
+
+/** Build MasterTileNutrient list from per-100g recipe values, filtered to pinned keys. */
+internal fun buildNutrientRows(
+    pinnedKeys: List<String>,
+    kcal: Double?,
+    protein: Double?,
+    carbs: Double?,
+    fat: Double?,
+    fiber: Double?,
+): List<MasterTileNutrient> {
+    val rows = mutableListOf<MasterTileNutrient>()
+
+    fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
+        if (pinnedKeys.isNotEmpty() && key !in pinnedKeys) return
+        val pct = (value / dgeDefault) * 100.0
+        rows.add(MasterTileNutrient(key, nutrientLabel(key), "${formatNutrientValue(value)} $unit", pct))
+    }
+
+    kcal?.let { add("kcal", it, "kcal", 2000.0) }
+    protein?.let { add("protein", it, "g", 50.0) }
+    carbs?.let { add("carbs", it, "g", 260.0) }
+    fat?.let { add("fat", it, "g", 65.0) }
+    fiber?.let { add("fiber", it, "g", 30.0) }
+
+    return rows
+}
+
+private fun nutrientLabel(key: String): String = when (key) {
+    "kcal" -> "Kalorien"
+    "protein" -> "Eiweiß"
+    "carbs" -> "Kohlenhydrate"
+    "fat" -> "Fett"
+    "fiber" -> "Ballaststoffe"
+    else -> key
 }
 
 @Composable

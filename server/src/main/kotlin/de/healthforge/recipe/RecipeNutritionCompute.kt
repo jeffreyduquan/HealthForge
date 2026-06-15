@@ -92,4 +92,57 @@ class RecipeNutritionCompute(
             else -> null
         }
     }
+
+    /**
+     * P7.S5 — Computes total weight + per-100g macros for the MasterTile list view.
+     * Returns null if total weight cannot be determined (missing/unconvertible ingredients).
+     */
+    fun computeSummary(items: List<RecipeIngredientEntity>): RecipeNutritionSummary? {
+        if (items.isEmpty()) return null
+
+        val byId: Map<UUID, IngredientEntity> = ingredientRepo
+            .findAllById(items.map { it.ingredientId })
+            .associateBy { it.id }
+
+        var totalWeight = BigDecimal.ZERO
+        var kcal = BigDecimal.ZERO
+        var protein = BigDecimal.ZERO
+        var carbs = BigDecimal.ZERO
+        var fat = BigDecimal.ZERO
+        var fiber = BigDecimal.ZERO
+
+        for (it in items) {
+            if (it.isOptional) continue
+            val grams = normaliseToGrams(it.quantity, it.unit) ?: return null
+            totalWeight = totalWeight.add(grams)
+            val ing = byId[it.ingredientId] ?: continue
+            val factor = grams.divide(BigDecimal(100), 6, RoundingMode.HALF_UP)
+            kcal = kcal.add((ing.energyKcalPer100g ?: BigDecimal.ZERO).multiply(factor))
+            protein = protein.add((ing.proteinGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            carbs = carbs.add((ing.carbsGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            fat = fat.add((ing.fatGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            fiber = fiber.add((ing.fiberGPer100g ?: BigDecimal.ZERO).multiply(factor))
+        }
+
+        if (totalWeight.compareTo(BigDecimal.ZERO) <= 0) return null
+
+        val factor100 = BigDecimal(100).divide(totalWeight, 6, RoundingMode.HALF_UP)
+        return RecipeNutritionSummary(
+            totalWeightGrams = totalWeight.setScale(1, RoundingMode.HALF_UP),
+            kcalPer100g = kcal.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            proteinPer100g = protein.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            carbsPer100g = carbs.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            fatPer100g = fat.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            fiberPer100g = fiber.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+        )
+    }
 }
+
+data class RecipeNutritionSummary(
+    val totalWeightGrams: BigDecimal,
+    val kcalPer100g: BigDecimal,
+    val proteinPer100g: BigDecimal,
+    val carbsPer100g: BigDecimal,
+    val fatPer100g: BigDecimal,
+    val fiberPer100g: BigDecimal,
+)

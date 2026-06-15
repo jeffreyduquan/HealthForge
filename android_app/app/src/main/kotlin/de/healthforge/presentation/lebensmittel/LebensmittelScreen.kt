@@ -54,7 +54,10 @@ import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.IngredientDto
 import de.healthforge.presentation.common.components.HfCard
 import de.healthforge.presentation.common.components.HfRatingBar
+import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
+import de.healthforge.presentation.common.components.MasterTileNutrient
+import de.healthforge.presentation.common.components.formatNutrientValue
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -219,79 +222,29 @@ private fun IngredientRow(
     onToggleDislike: () -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    de.healthforge.presentation.common.components.HfCard(
-        onClick = if (preselect) onPick else onOpenDetail,
-    ) {
-        Column {
-            // Title + Brand
-            Text(
-                text = item.name_de,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = hm.fgPrimary,
-            )
-            item.brand?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary, maxLines = 1)
-            }
-
-            Spacer(Modifier.height(6.dp))
-
-            // Footer: kcal + Histamin + Source + Rating
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                item.energy_kcal_per_100g?.let {
-                    Text("${it.toInt()} kcal", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
-                    Spacer(Modifier.width(16.dp))
-                }
-                item.histamine_score?.let {
-                    Text("Histamin $it/3", style = MaterialTheme.typography.labelMedium, color = hm.fgSecondary)
-                    Spacer(Modifier.width(16.dp))
-                }
-                Text(item.source, style = MaterialTheme.typography.labelMedium, color = hm.fgTertiary)
-
-                if (!preselect) {
-                    Spacer(Modifier.weight(1f))
-                    de.healthforge.presentation.common.components.HfRatingBar(
-                        liked = isLiked,
-                        onToggleLike = onToggleLike,
-                    )
-                }
-            }
-
-            // Allergens
-            if (item.allergens.isNotEmpty()) {
-                Text(
-                    text = "Enthält: " + item.allergens.joinToString(", "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = hm.fgSecondary,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-
-            // FODMAP badges
-            if (item.fodmap_flags.isNotEmpty()) {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    item.fodmap_flags.forEach { flag ->
-                        val label = runCatching { FodmapType.valueOf(flag).germanLabel }.getOrDefault(flag)
-                        AssistChip(
-                            onClick = {},
-                            label = { Text(label) },
-                            colors = AssistChipDefaults.assistChipColors(),
-                        )
-                    }
-                }
-            }
-
-            // Korrektur-Button
-            if (!preselect) {
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onCorrect) { Text("Korrektur vorschlagen") }
-                }
-            }
-        }
+    val subtitle = buildString {
+        item.brand?.takeIf { it.isNotBlank() }?.let { append(it); append(" · ") }
+        item.energy_kcal_per_100g?.let { append("${it.toInt()} kcal/100g") }
     }
+
+    val nutrients = buildIngredientNutrientRows(
+        item = item,
+        pinnedKeys = emptyList(), // Show all for now
+    )
+
+    HfMasterTile(
+        title = item.name_de,
+        subtitle = subtitle.ifBlank { item.source },
+        sourceBadge = item.source,
+        nutrients = nutrients,
+        nutrientLabel = "PRO 100 G",
+        liked = isLiked,
+        onToggleLike = if (!preselect) onToggleLike else null,
+        onClick = if (preselect) onPick else onOpenDetail,
+        trailingSlot = if (!preselect) {
+            { TextButton(onClick = onCorrect) { Text("Korrektur") } }
+        } else null,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -344,4 +297,44 @@ private fun FilterDialog(
             }
         },
     )
+}
+
+/** Build MasterTileNutrient list from IngredientDto, filtered to pinned keys. */
+private fun buildIngredientNutrientRows(
+    item: IngredientDto,
+    pinnedKeys: List<String>,
+): List<MasterTileNutrient> {
+    val rows = mutableListOf<MasterTileNutrient>()
+
+    fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
+        if (pinnedKeys.isNotEmpty() && key !in pinnedKeys) return
+        val pct = (value / dgeDefault) * 100.0
+        val label = when (key) {
+            "kcal" -> "Kalorien"
+            "protein" -> "Eiweiß"
+            "carbs" -> "Kohlenhydrate"
+            "fat" -> "Fett"
+            "fiber" -> "Ballaststoffe"
+            else -> key
+        }
+        rows.add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))
+    }
+
+    item.energy_kcal_per_100g?.let { add("kcal", it, "kcal", 2000.0) }
+    item.protein_g_per_100g?.let { add("protein", it, "g", 50.0) }
+    item.carbs_g_per_100g?.let { add("carbs", it, "g", 260.0) }
+    item.fat_g_per_100g?.let { add("fat", it, "g", 65.0) }
+    item.fiber_g_per_100g?.let { add("fiber", it, "g", 30.0) }
+
+    // Micronutrients with DGE
+    item.micronutrients.entries.forEach { (key, value) ->
+        val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+        val dge = nutrient.defaultPerDay
+        if (dge > 0) {
+            add(key, value, nutrient.unit.label, dge)
+        }
+    }
+
+    rows.sortByDescending { it.percentDge }
+    return rows
 }
