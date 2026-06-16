@@ -42,7 +42,6 @@ import de.healthforge.presentation.common.components.HfDetailTopBar
 import de.healthforge.presentation.common.components.HfNutrientProgressRow
 import de.healthforge.presentation.common.components.HfRatingBar
 import de.healthforge.presentation.common.components.HfSectionHeader
-import de.healthforge.presentation.common.components.HfSourceBadge
 import de.healthforge.presentation.common.components.formatNutrientValue
 import de.healthforge.presentation.essen.rezepte.PortionInputDialog
 import de.healthforge.presentation.theme.LocalHmTokens
@@ -106,9 +105,6 @@ fun IngredientDetailScreen(
                 item.brand?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = hm.fgSecondary)
                 }
-
-                // Source badge
-                HfSourceBadge(source = item.source, fdcId = item.fdc_id?.toString())
 
                 // Rating bar (Like/Dislike — managed by ViewModel)
                 HfRatingBar(

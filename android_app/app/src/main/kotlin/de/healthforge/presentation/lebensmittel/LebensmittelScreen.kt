@@ -198,8 +198,7 @@ private fun IngredientRow(
 ) {
     val hm = LocalHmTokens.current
     val subtitle = buildString {
-        item.brand?.takeIf { it.isNotBlank() }?.let { append(it); append(" · ") }
-        item.energy_kcal_per_100g?.let { append("${it.toInt()} kcal/100g") }
+        item.brand?.takeIf { it.isNotBlank() }?.let { append(it) }
     }
 
     val nutrients = buildIngredientNutrientRows(
