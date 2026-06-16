@@ -1,614 +1,1449 @@
-# SIGHI Histamin-Verträglichkeitsliste — kuratiert aus SIGHI-Merkblatt v2021-11-17
-# Source: https://www.histaminintoleranz.ch/downloads/SIGHI-Merkblatt_histaminarmeErnaehrung.pdf
-# (c) Copyright by SIGHI — Schweizerische Interessengemeinschaft Histamin-Intoleranz
-# License: Frei verteilbares Merkblatt. Fakten (Verträglichkeitseinstufung) sind nicht
-# urheberrechtlich schützbar. Wir nutzen nur die 0-3-Stufeneinstufung pro Lebensmittel,
-# nicht die Formatierung/Texte.
-#
+﻿# SIGHI Histamin-Verträglichkeitsliste — SIGHI FoodList v2024-08-29
 # Format: keyword;score;category
-# Score: 0 = gut verträglich (grüne Spalte), 1 = unsicher/mässig (gelbe Spalte), 3 = zu meiden (rote Spalte)
-#        2 ist reserviert für "schlecht verträglich" (entstammt nicht direkt dem Merkblatt aber unterstützt vom Domain-Modell)
-# Category: Fleisch | Fisch | Milch | Getreide | Gemuese | Fruechte | Nuesse | Fette | Gewuerze | Suess | Getraenke
-# Matcher: Token-Substring-Match (case-insensitive, unaccent) gegen name_de; bei mehreren Treffern: höchster Score gewinnt.
-keyword;score;category
-# === FLEISCH & EIER ===
+# Score: 0=gut verträglich, 1=unsicher, 2=schlecht verträglich, 3=zu meiden
+#
+Eier;1;Eier
+HÃ¼hnerei;1;Eier
+Vollei;1;Eier
+Eigelb;0;Eier
+Eidotter;0;Eier
+Eiklar;1;Eier
+EiweiÃŸ;1;Eier
+Eiweiss;1;Eier
+Wachteleier;0;Eier
+BlauschimmelkÃ¤se;2;Milchprodukte
+Butter: Sauerrahmbutter;1;Milchprodukte
+mildgesÃ¤uerte Butter;1;Milchprodukte
+Butter: SÃ¼ÃŸrahmbutter;0;Milchprodukte
+SÃ¼ssrahmbutter;0;Milchprodukte
+ButterkÃ¤se;0;Milchprodukte
+Buttermilch;1;Milchprodukte
+angesÃ¤uert;1;Milchprodukte
+Camembert;2;Milchprodukte
+Cheddar KÃ¤se;2;Milchprodukte
+crÃ¨me fraÃ¯che;1;Milchprodukte
+EdelschimmelkÃ¤se;2;Milchprodukte
+Feta;1;Milchprodukte
+Feta-KÃ¤se;1;Milchprodukte
+Fontina KÃ¤se;2;Milchprodukte
+FrischkÃ¤se;0;Milchprodukte
+GeheimratskÃ¤se;0;Milchprodukte
+Ghee;1;Milchprodukte
+Gouda KÃ¤se;2;Milchprodukte
+gereift;2;Milchprodukte
+Gouda KÃ¤se;0;Milchprodukte
+jung;0;Milchprodukte
+Haltbarmilch;0;Milchprodukte
+H-Milch;0;Milchprodukte
+UHT-Milch;0;Milchprodukte
+Up-Milch;0;Milchprodukte
+Joghurt nature;1;Milchprodukte
+KÃ¤se: lange gereifte Sorten und HartkÃ¤se (z.B.;3;Milchprodukte
+KÃ¤sezubereitungen (=Mischungen mit weiteren;2;Milchprodukte
+Kefir;1;Milchprodukte
+Mascarpone KÃ¤se;0;Milchprodukte
+Milch;1;Milchprodukte
+laktosefrei;1;Milchprodukte
+Milch;0;Milchprodukte
+pasteurisiert (PAST-Milch);0;Milchprodukte
+Milchpulver;1;Milchprodukte
+Molke: Sauermolke;0;Milchprodukte
+Molke: SÃ¼ÃŸmolke;0;Milchprodukte
+SÃ¼ssmolke;0;Milchprodukte
+Labmolke;0;Milchprodukte
+Mozzarella KÃ¤se;0;Milchprodukte
+Obers;0;Milchprodukte
+Sahne (wenn ohne Zusatzstoffe);0;Milchprodukte
+Quark;0;Milchprodukte
+Raclette KÃ¤se;2;Milchprodukte
+Rahm;0;Milchprodukte
+sÃ¼ÃŸ (wenn ohne Zusatzstoffe);0;Milchprodukte
+Ricotta KÃ¤se;0;Milchprodukte
+Rohmilch;0;Milchprodukte
+RohmilchkÃ¤se;2;Milchprodukte
+Rohmilchprodukte;2;Milchprodukte
+Roquefort KÃ¤se;2;Milchprodukte
+Sahne;0;Milchprodukte
+Sauerrahm;1;Milchprodukte
+saure Sahne;1;Milchprodukte
+Schafmilch;0;Milchprodukte
+Schafsmilch;0;Milchprodukte
+SchimmelkÃ¤se;2;Milchprodukte
+Schlagobers;0;Milchprodukte
+Schlagsahne (wenn ohne Zusatzstoffe);0;Milchprodukte
+SchmelzkÃ¤se;2;Milchprodukte
+SÃ¼ssrahm;0;Milchprodukte
+SÃ¼ÃŸrahm (wenn ohne Zusatzstoffe);0;Milchprodukte
+Topfen;0;Milchprodukte
+Ziegenmilch;0;Milchprodukte
+DÃ¶rrfleisch;3;Fleisch
 Trockenfleisch;3;Fleisch
-Rohschinken;3;Fleisch
-Bündnerfleisch;3;Fleisch
-Speck;3;Fleisch
-Salami;3;Fleisch
-Landjäger;3;Fleisch
-Bratwurst;3;Fleisch
-Cervelat;3;Fleisch
-Leberwurst;3;Fleisch
-Fleischkäse;3;Fleisch
-Leberpaste;3;Fleisch
-Leber;3;Fleisch
-Innereien;3;Fleisch
-Wurst;3;Fleisch
-Aufschnitt;3;Fleisch
-Pökel;3;Fleisch
-gepökelt;3;Fleisch
-geräuchert;3;Fleisch
-Räucher;3;Fleisch
-Hackfleisch;1;Fleisch
-Wildfleisch;1;Fleisch
-Wild;1;Fleisch
-Kochschinken;1;Fleisch
-Schnitzel;0;Fleisch
-Kotelett;0;Fleisch
-Filet;0;Fleisch
-Hähnchenbrust;0;Fleisch
-Hähnchen;0;Fleisch
-Hühnerfleisch;0;Fleisch
-Huhn;0;Fleisch
-Putenbrust;0;Fleisch
-Pute;0;Fleisch
-Truthahn;0;Fleisch
-Geschnetzeltes;0;Fleisch
-Geflügel;0;Fleisch
-Rindfleisch;0;Fleisch
-Schweinefleisch;0;Fleisch
-Lamm;0;Fleisch
-Schaf;0;Fleisch
-Ziege;0;Fleisch
-Wildschwein;0;Fleisch
-Ei;0;Fleisch
-Eier;0;Fleisch
-Eigelb;0;Fleisch
-Eiweiß;0;Fleisch
-Wachtel;0;Fleisch
-# === FISCH & MEERESFRÜCHTE ===
-Thunfisch;3;Fisch
-Makrele;3;Fisch
-Hering;3;Fisch
-Sardine;3;Fisch
-Sardelle;3;Fisch
-Sardellenpaste;3;Fisch
-Mahi Mahi;3;Fisch
-Fischsauce;3;Fisch
-Fischkonserve;3;Fisch
-Muschel;3;Fisch
-Krebs;3;Fisch
-Krabbe;3;Fisch
-Hummer;3;Fisch
-Languste;3;Fisch
-Crevette;3;Fisch
-Shrimp;3;Fisch
-Garnele;3;Fisch
-Sushi;3;Fisch
-Seelachs;0;Fisch
-Pollack;0;Fisch
-Köhler;0;Fisch
-Dorsch;0;Fisch
-Kabeljau;0;Fisch
-Forelle;0;Fisch
-Felchen;0;Fisch
-Egli;0;Fisch
-Barsch;0;Fisch
-Pangasius;0;Fisch
-Zander;0;Fisch
-Hecht;0;Fisch
-Aal;1;Fisch
-Lachs;1;Fisch
-# === MILCHPRODUKTE ===
-Hartkäse;3;Milch
-Halbhartkäse;3;Milch
-Weichkäse;3;Milch
-Schmelzkäse;3;Milch
-Schimmelkäse;3;Milch
-Blauschimmel;3;Milch
-Camembert;3;Milch
-Brie;3;Milch
-Roquefort;3;Milch
-Gorgonzola;3;Milch
-Parmesan;3;Milch
-Pecorino;3;Milch
-Emmentaler;3;Milch
-Gruyère;3;Milch
-Greyerzer;3;Milch
-Cheddar;3;Milch
-Edamer;3;Milch
-Tilsiter;3;Milch
-Appenzeller;3;Milch
-Raclette;3;Milch
-Fondue;3;Milch
-Joghurt;1;Milch
-Kefir;1;Milch
-Buttermilch;1;Milch
-Sauerrahm;1;Milch
-Crème fraîche;1;Milch
-Schmand;1;Milch
-Feta;1;Milch
-Rohmilch;1;Milch
-Sauermilch;1;Milch
-Milch;0;Milch
-H-Milch;0;Milch
-Vollmilch;0;Milch
-Magermilch;0;Milch
-fettarme Milch;0;Milch
-pasteurisierte Milch;0;Milch
-Butter;0;Milch
-Sahne;0;Milch
-Rahm;0;Milch
-Molke;0;Milch
-Mozzarella;0;Milch
-Quark;0;Milch
-Hüttenkäse;0;Milch
-Mascarpone;0;Milch
-Ricotta;0;Milch
-Ziegenfrischkäse;0;Milch
-Frischkäse;0;Milch
-Butterkäse;0;Milch
-Schichtkäse;0;Milch
-# === GETREIDE & BACKWAREN ===
-Malz;1;Getreide
-Weizenkeim;1;Getreide
-Buchweizen;1;Getreide
-Sauerteig;1;Getreide
-Kartoffel;0;Getreide
-Süßkartoffel;0;Getreide
-Mais;0;Getreide
-Polenta;0;Getreide
-Reis;0;Getreide
-Wildreis;0;Getreide
-Basmati;0;Getreide
-Jasminreis;0;Getreide
-Hafer;0;Getreide
-Haferflocken;0;Getreide
-Weizen;0;Getreide
-Roggen;0;Getreide
-Dinkel;0;Getreide
-Gerste;0;Getreide
-Hirse;0;Getreide
-Quinoa;0;Getreide
-Couscous;0;Getreide
-Bulgur;0;Getreide
-Amaranth;0;Getreide
-Mehl;0;Getreide
-Pasta;0;Getreide
-Spaghetti;0;Getreide
-Makkaroni;0;Getreide
-Nudeln;0;Getreide
-Brot;0;Getreide
-Brötchen;0;Getreide
-Knäckebrot;0;Getreide
-Toast;0;Getreide
-Zwieback;0;Getreide
-Reismehl;0;Getreide
-Maismehl;0;Getreide
-# === GEMÜSE & PILZE ===
-Sauerkraut;3;Gemuese
-Spinat;3;Gemuese
-Tomate;3;Gemuese
-Tomatensaft;3;Gemuese
-Tomatenmark;3;Gemuese
-Ketchup;3;Gemuese
-Aubergine;3;Gemuese
-Avocado;3;Gemuese
-Olive;3;Gemuese
-Linse;3;Gemuese
-Bohne;3;Gemuese
-Kidneybohne;3;Gemuese
-weiße Bohne;3;Gemuese
-schwarze Bohne;3;Gemuese
-Adzuki;3;Gemuese
-Kichererbse;3;Gemuese
-Soja;3;Gemuese
-Sojabohne;3;Gemuese
-Tofu;3;Gemuese
-Tempeh;3;Gemuese
-Edamame;3;Gemuese
-Steinpilz;3;Gemuese
-Morchel;3;Gemuese
-Champignon;3;Gemuese
-Pilz;3;Gemuese
-Shiitake;3;Gemuese
-Pfifferling;3;Gemuese
-Essiggemüse;3;Gemuese
-Essiggurke;3;Gemuese
-Cornichon;3;Gemuese
-grüne Bohne;1;Gemuese
-Buschbohne;1;Gemuese
-Erbse;1;Gemuese
-Karotte;0;Gemuese
-Möhre;0;Gemuese
-Sellerie;0;Gemuese
-Lauch;0;Gemuese
-Porree;0;Gemuese
-Zwiebel;0;Gemuese
-Schalotte;0;Gemuese
-Frühlingszwiebel;0;Gemuese
-Knoblauch;0;Gemuese
-Kürbis;0;Gemuese
-Zucchini;0;Gemuese
-Gurke;0;Gemuese
-Paprika;0;Gemuese
-Brokkoli;0;Gemuese
-Blumenkohl;0;Gemuese
-Rosenkohl;0;Gemuese
-Kohlrabi;0;Gemuese
-Wirsing;0;Gemuese
-Rotkohl;0;Gemuese
-Weißkohl;0;Gemuese
-Grünkohl;0;Gemuese
-Spitzkohl;0;Gemuese
-Chinakohl;0;Gemuese
-Rote Bete;0;Gemuese
-Rote Rübe;0;Gemuese
-Mangold;0;Gemuese
-Pastinake;0;Gemuese
-Rettich;0;Gemuese
-Radieschen;0;Gemuese
-Salat;0;Gemuese
-Kopfsalat;0;Gemuese
-Eichblatt;0;Gemuese
-Feldsalat;0;Gemuese
-Rucola;0;Gemuese
-Endivie;0;Gemuese
-Chicorée;0;Gemuese
-Spargel;0;Gemuese
-Fenchel;0;Gemuese
-Topinambur;0;Gemuese
-Steckrübe;0;Gemuese
-Kohlrübe;0;Gemuese
-# === FRÜCHTE ===
-Erdbeere;3;Fruechte
-Himbeere;3;Fruechte
-Orange;3;Fruechte
-Zitrone;3;Fruechte
-Limette;3;Fruechte
-Grapefruit;3;Fruechte
-Mandarine;3;Fruechte
-Clementine;3;Fruechte
-Pampelmuse;3;Fruechte
-Zitrusfrucht;3;Fruechte
-Banane;3;Fruechte
-Ananas;3;Fruechte
-Kiwi;3;Fruechte
-Birne;3;Fruechte
-Papaya;3;Fruechte
-Guave;3;Fruechte
-Apfel;0;Fruechte
-Pfirsich;0;Fruechte
-Nektarine;0;Fruechte
-Aprikose;0;Fruechte
-Melone;0;Fruechte
-Wassermelone;0;Fruechte
-Honigmelone;0;Fruechte
-Mango;0;Fruechte
-Kaki;0;Fruechte
-Litschi;0;Fruechte
-Litchi;0;Fruechte
-Kirsche;0;Fruechte
-Sauerkirsche;0;Fruechte
-Brombeere;0;Fruechte
-Heidelbeere;0;Fruechte
-Blaubeere;0;Fruechte
-Cranberry;0;Fruechte
-Johannisbeere;0;Fruechte
-Cassis;0;Fruechte
-schwarze Johannisbeere;0;Fruechte
-Maulbeere;0;Fruechte
-Gojibeere;0;Fruechte
-Pflaume;0;Fruechte
-Zwetschge;0;Fruechte
-Rhabarber;0;Fruechte
-Granatapfel;0;Fruechte
-Feige;0;Fruechte
-Dattel;0;Fruechte
-# === NÜSSE & SAMEN ===
-Walnuss;3;Nuesse
-Cashew;3;Nuesse
-Erdnuss;3;Nuesse
-Kokosnuss;0;Nuesse
-Kokosmilch;0;Nuesse
-Kokosöl;0;Nuesse
-Macadamia;0;Nuesse
-Maroni;0;Nuesse
-Edelkastanie;0;Nuesse
-Mandel;0;Nuesse
-Haselnuss;0;Nuesse
-Paranuss;0;Nuesse
-Pinienkern;0;Nuesse
-Pistazie;0;Nuesse
-Sonnenblumenkern;0;Nuesse
-Kürbiskern;0;Nuesse
-Leinsamen;0;Nuesse
-Sesam;0;Nuesse
-Chiasamen;0;Nuesse
-Mohn;0;Nuesse
-# === ÖLE & FETTE ===
-Walnussöl;1;Fette
-Olivenöl;0;Fette
-Rapsöl;0;Fette
-Sonnenblumenöl;0;Fette
-Leinöl;0;Fette
-Sesamöl;0;Fette
-Erdnussöl;0;Fette
-Pflanzenöl;0;Fette
-Fischöl;0;Fette
-Schmalz;0;Fette
-Margarine;0;Fette
-# === GEWÜRZE & WÜRZEN ===
-Weinessig;3;Gewuerze
-Balsamico;3;Gewuerze
-Hefeextrakt;3;Gewuerze
-Glutamat;3;Gewuerze
-Natriumglutamat;3;Gewuerze
-Bouillon;3;Gewuerze
-Brühe;3;Gewuerze
-Brühwürfel;3;Gewuerze
-Sojasauce;3;Gewuerze
-Worcester;3;Gewuerze
-Chili;3;Gewuerze
-Cayennepfeffer;3;Gewuerze
-scharfes Curry;3;Gewuerze
-Senf;1;Gewuerze
-Apfelessig;1;Gewuerze
-Salz;0;Gewuerze
-Kochsalz;0;Gewuerze
-Meersalz;0;Gewuerze
-Pfeffer;0;Gewuerze
-Petersilie;0;Gewuerze
-Basilikum;0;Gewuerze
-Thymian;0;Gewuerze
-Rosmarin;0;Gewuerze
-Oregano;0;Gewuerze
-Salbei;0;Gewuerze
-Dill;0;Gewuerze
-Schnittlauch;0;Gewuerze
-Majoran;0;Gewuerze
-Estragon;0;Gewuerze
-Kerbel;0;Gewuerze
-Liebstöckel;0;Gewuerze
-Bohnenkraut;0;Gewuerze
-Lorbeerblatt;0;Gewuerze
-Kümmel;0;Gewuerze
-Anis;0;Gewuerze
-Fenchelsamen;0;Gewuerze
-Koriander;0;Gewuerze
-Kardamom;0;Gewuerze
-Zimt;0;Gewuerze
-Vanille;0;Gewuerze
-Muskat;0;Gewuerze
-Nelke;0;Gewuerze
-Ingwer;0;Gewuerze
-Kurkuma;0;Gewuerze
-Maisstärke;0;Gewuerze
-Kartoffelstärke;0;Gewuerze
-# === SÜSSIGKEITEN ===
-Kakao;3;Suess
-Kakaopulver;3;Suess
-dunkle Schokolade;3;Suess
-Bitterschokolade;3;Suess
-Zartbitterschokolade;3;Suess
-Schokolade;3;Suess
-Carob;3;Suess
-Nutella;3;Suess
-Schokoaufstrich;3;Suess
-weiße Schokolade;1;Suess
-Zucker;0;Suess
-Rohrzucker;0;Suess
-Puderzucker;0;Suess
-Honig;0;Suess
-Ahornsirup;0;Suess
-Agavendicksaft;0;Suess
-Stevia;0;Suess
-Konfitüre;0;Suess
-Marmelade;0;Suess
-# === GETRÄNKE ===
-Bier;3;Getraenke
-Wein;3;Getraenke
-Rotwein;3;Getraenke
-Weißwein;3;Getraenke
-Sekt;3;Getraenke
-Champagner;3;Getraenke
-Cocktail;3;Getraenke
-Whisky;3;Getraenke
-Rum;3;Getraenke
-Wodka;3;Getraenke
-Likör;3;Getraenke
-Alkohol;3;Getraenke
-Sojamilch;3;Getraenke
-Energydrink;3;Getraenke
-Brennnesseltee;3;Getraenke
-Reismilch;1;Getraenke
-Hafermilch;1;Getraenke
-Espresso;1;Getraenke
-Schwarztee;1;Getraenke
-Grüntee;1;Getraenke
-Kaffee;1;Getraenke
-Tee;1;Getraenke
-Wasser;0;Getraenke
-Mineralwasser;0;Getraenke
-Kräutertee;0;Getraenke
-Rooibos;0;Getraenke
-Fruchtsaft;0;Getraenke
-Mandelmilch;0;Getraenke
-koffeinfreier Kaffee;0;Getraenke
-
-# === HOTFIX-5 SUPPLEMENT (2026-05-31) — Schließt 150 Match-Lücken nach DB-Audit-Snapshot ===
-# Klassifikationen folgen SIGHI-Merkblatt v2021-11-17 (Kategorien-Logik); spezifische deutsche/internationale
-# Produktnamen ergänzt die generische Liste oben. Keywords sind disjunkt von bestehenden Regeln.
-# --- Fleisch (Wurst/Pökel/Wild) ---
-Bacon;3;Fleisch
-Corned Beef;3;Fleisch
-Mortadella;3;Fleisch
-Schinken gekocht;1;Fleisch
-Schinken-Kaese;3;Fleisch
-Rinderzunge;3;Fleisch
-Rinderhack;1;Fleisch
-Hirsch;1;Fleisch
-Reh;1;Fleisch
-Fasan;1;Fleisch
-Kaninchen;0;Fleisch
 Ente;0;Fleisch
-Gans;0;Fleisch
-# --- Fisch & Meeresfrüchte ---
-Matjes;3;Fisch
-Auster;3;Fisch
-Austernsauce;3;Fisch
-Oktopus;3;Fisch
-Tintenfisch;3;Fisch
-Kaisergranat;3;Fisch
-Schwertfisch;3;Fisch
-Schellfisch;0;Fisch
-Scholle;0;Fisch
-Seezunge;0;Fisch
-Tilapia;0;Fisch
-Karpfen;0;Fisch
-Dorade;0;Fisch
-Wels;0;Fisch
-# --- Milch & Käse (Region/Sorte) ---
-Bergader;3;Milch
-Bergkäse;3;Milch
-Gouda;3;Milch
-Grana Padano;3;Milch
-Manchego;3;Milch
-Provolone;3;Milch
-Käsemix;3;Milch
-Burrata;0;Milch
-Skyr;1;Milch
-Evaporated Milk;0;Milch
-Gelatine;0;Milch
-# --- Hefe & fermentierte Soja-Würzen ---
-Hefe frisch;3;Gewuerze
-Hefe trocken;3;Gewuerze
-Trockenhefe;3;Gewuerze
-Natto;3;Gemuese
-Tamari;3;Gewuerze
-Hoisin;3;Gewuerze
-Teriyaki;3;Gewuerze
-Tabasco;3;Gewuerze
-# --- Saucen & Pasten ---
-BBQ;3;Gewuerze
-Pesto;3;Gewuerze
-Salsa;3;Gewuerze
-Passata;3;Gemuese
-Guacamole;3;Gemuese
-Hummus;3;Gemuese
-Halva;0;Suess
-Tahini;0;Nuesse
-# --- Brot & Backwaren ---
-Pumpernickel;1;Getreide
-Bagel;0;Getreide
-Baguette;0;Getreide
-Brezel;0;Getreide
-Croissant;0;Getreide
-Ciabatta;0;Getreide
-Focaccia;0;Getreide
-Pita;0;Getreide
-Kuchen;0;Getreide
-Kekse;0;Getreide
-Müsli;0;Getreide
-Granola;0;Getreide
-Cornflakes;0;Getreide
-Lasagne;0;Getreide
-Tagliatelle;0;Getreide
-Tortellini;0;Getreide
-Farfalle;0;Getreide
-Fusilli;0;Getreide
-Penne;0;Getreide
-# --- Alkohol & Getränke ---
-Sherry;3;Getraenke
-Sherryessig;3;Gewuerze
-Limonade;0;Getraenke
-Sprite;0;Getraenke
-Tonic;0;Getraenke
-Traubensaft;0;Getraenke
-# --- Süßes ---
-Gummibärchen;0;Suess
-Marshmallow;0;Suess
-Bonbon;0;Suess
-Jelly Bean;0;Suess
-Lakritze;0;Suess
-Karamell;0;Suess
-Pralinen;3;Suess
-Schokoriegel;3;Suess
-Sorbet;0;Suess
-Kokoscreme-Pudding;0;Suess
-Melasse;0;Suess
-Xylit;0;Suess
-# --- Obst & Trockenobst ---
-Cantaloupe;0;Fruechte
-Holunderbeere;0;Fruechte
-Quitte;0;Fruechte
-Sanddorn;0;Fruechte
-Stachelbeere;0;Fruechte
-# --- Gewürze, Kräuter, Backzutaten ---
-Asafötida;0;Gewuerze
-Bockshornklee;0;Gewuerze
-Italienische Kräuter;0;Gewuerze
-Kräuter der Provence;0;Gewuerze
-Minze;0;Gewuerze
-Piment;0;Gewuerze
-Safran;0;Gewuerze
-Wacholderbeeren;0;Gewuerze
-Za'atar;0;Gewuerze
-Backpulver;0;Gewuerze
-Natron;0;Gewuerze
-Hanfsamen;0;Nuesse
-# --- Öle ---
-Distelöl;0;Fette
-Palmöl;0;Fette
-Traubenkernöl;0;Fette
-# --- Gemüse & Pilze (Region/Sorte) ---
-Algen Nori;0;Gemuese
-Algen Wakame;0;Gemuese
-Nori;0;Gemuese
-Wakame;0;Gemuese
-Bambussprossen;0;Gemuese
-Maniok;0;Gemuese
-Yamswurzel;0;Gemuese
-Okra;0;Gemuese
-Pak Choi;0;Gemuese
-Portobello;3;Gemuese
-Trüffel;3;Gemuese
-Frisée;0;Gemuese
-Lollo Rosso;0;Gemuese
-Löwenzahn;0;Gemuese
-Mesclun;0;Gemuese
-Mizuna;0;Gemuese
-Radicchio;0;Gemuese
-Romanesco;0;Gemuese
-Brunnenkresse;0;Gemuese
-Kresse;0;Gemuese
-Artischocke;0;Gemuese
-Pestwurz;0;Gemuese
-Chia Samen;0;Nuesse
-Kokosflocken;0;Nuesse
-Pekannuss;0;Nuesse
-# === P7.S5c SUPPLEMENT (2026-06-16) — Schließt 14 Match-Lücken + Umlaut-Varianten ===
-# Neue Keywords aus Deep-Dive SIGHI-Recherche
-Curry;1;Gewuerze
-Currypulver;1;Gewuerze
-Energy;3;Getraenke
-Energy Drink;3;Getraenke
-Rosine;0;Fruechte
-Rosinen;0;Fruechte
-Sriracha;3;Gewuerze
-Sumach;0;Gewuerze
-Nougat;1;Suess
-Mayonnaise;1;Gewuerze
-Lupine;1;Gemuese
-Lupinen;1;Gemuese
-Haehnchen;0;Fleisch
-Haehnchenfleisch;0;Fleisch
-Hack;1;Fleisch
-Raeucher;3;Fleisch
-geraeuchert;3;Fleisch
-Gefluegel;0;Fleisch
-Kaese;3;Milch
-Käse;3;Milch
-Oel;0;Fette
-Öl;0;Fette
-Suesskartoffel;0;Getreide
-Suess;3;Suess
-Gruen;0;Gemuese
-Fruechte;0;Fruechte
-Trauben;0;Fruechte
-Nuesse;0;Nuesse
-Getraenke;3;Getraenke
-Getreide;0;Getreide
-Gewuerze;0;Gewuerze
+Entenfleisch;0;Fleisch
+Faschiertes (=Hackfleisch);0;Fleisch
+bei Verzehr unmittelbar;0;Fleisch
+Faschiertes (=Hackfleisch);2;Fleisch
+Offenverkauf oder unter;2;Fleisch
+GeflÃ¼gelfleisch;0;Fleisch
+gerÃ¤ucherter Fisch;3;Fleisch
+RÃ¤ucherfisch;3;Fleisch
+Geselchtes;3;Fleisch
+Rauchfleisch;3;Fleisch
+Hackfleisch;0;Fleisch
+bei Verzehr unmittelbar nach;0;Fleisch
+Hackfleisch;2;Fleisch
+HÃ¤hnchen;0;Fleisch
+Hendl;0;Fleisch
+HÃ¼hnchen;0;Fleisch
+Huhn;0;Fleisch
+Innereien;2;Fleisch
+Kalbfleisch;0;Fleisch
+frisch;0;Fleisch
+Poulet;0;Fleisch
+Pute;0;Fleisch
+RÃ¤ucherfleisch;3;Fleisch
+gerÃ¤uchertes Fleisch;3;Fleisch
+Rindfleisch;0;Fleisch
+Rohschinken;3;Fleisch
+Salami;3;Fleisch
+Schweinefleisch;1;Fleisch
+frisch;1;Fleisch
+unbehandelt;1;Fleisch
+Selchfleisch;3;Fleisch
+Strauss;0;Fleisch
+StrauÃŸ;0;Fleisch
+StrauÃŸenfleisch;0;Fleisch
+Trute;0;Fleisch
+Wachtel;0;Fleisch
+Wildbret;1;Fleisch
+Wildfleisch;1;Fleisch
+Wurstwaren;2;Fleisch
+Zunge;0;Fleisch
+Rindszunge;0;Fleisch
+Kalbszunge;0;Fleisch
+Anchovis;3;Fisch
+Sardellen-Konserven;3;Fisch
+"Fisch;3;Fisch
+""Frischfisch"" vom KÃ¼hlregal / auf Eis";3;Fisch
+Fisch;0;Fisch
+fangfrisch oder tiefgekÃ¼hlt;0;Fisch
+Forellen (SÃ¼sswasser): Seeforelle;0;Fisch
+Bachforelle;0;Fisch
+Lachs gerÃ¤uchert;2;Fisch
+RÃ¤ucherlachs;2;Fisch
+Sardellenpaste;3;Fisch
+Thunfisch;3;Fisch
+Austern;2;MeeresfrÃ¼chte
+Crevetten;2;MeeresfrÃ¼chte
+Garnelen;2;MeeresfrÃ¼chte
+Hummer;2;MeeresfrÃ¼chte
+Krabben;2;MeeresfrÃ¼chte
+Krebse;2;MeeresfrÃ¼chte
+Krevetten;2;MeeresfrÃ¼chte
+Krustentiere und Schalentiere;2;MeeresfrÃ¼chte
+Langusten;2;MeeresfrÃ¼chte
+MeeresfrÃ¼chte (=wirbellose Meerestiere);2;MeeresfrÃ¼chte
+Muscheln (Miesmuschel;2;MeeresfrÃ¼chte
+Venusmuschel;2;MeeresfrÃ¼chte
+Schmalz: Schweineschmalz;0;MeeresfrÃ¼chte
+Amarant;0;Pflanzlich
+Backwaren;1;Pflanzlich
+Brot;1;Pflanzlich
+Buchweizen: Echter Buchweizen;2;Pflanzlich
+Gemeiner;2;Pflanzlich
+Bulgur;1;Pflanzlich
+Boulghour;1;Pflanzlich
+Bulghur;1;Pflanzlich
+Cornflakes (ohne unvertrÃ¤gliche Zutaten wie Malz;0;Pflanzlich
+Dinkel;0;Pflanzlich
+Edelkastanien;0;Pflanzlich
+frisch oder tiefgekÃ¼hlt;0;Pflanzlich
+Einkorn;0;Pflanzlich
+Blicken;0;Pflanzlich
+Kleiner Spelz;0;Pflanzlich
+Emmer;0;Pflanzlich
+Zweikorn;0;Pflanzlich
+ErdÃ¤pfel;0;Pflanzlich
+frisch geerntet;0;Pflanzlich
+mit Schale;0;Pflanzlich
+gelagert;0;Pflanzlich
+geschÃ¤lt;0;Pflanzlich
+Esskastanien;0;Pflanzlich
+Gerste;1;Pflanzlich
+Gerstenmalz;2;Pflanzlich
+Malz;2;Pflanzlich
+Malzextrakt;2;Pflanzlich
+GrÃ¼nkern;0;Pflanzlich
+GrÃ¼nkorn;0;Pflanzlich
+Hafer;0;Pflanzlich
+Haferflocken;0;Pflanzlich
+Hafermehl;0;Pflanzlich
+Hanfproteinpulver;0;Pflanzlich
+Hanfsamen (Cannabis sativa);0;Pflanzlich
+Hirse;0;Pflanzlich
+KAMUTÂ®;0;Pflanzlich
+Khorasan-Weizen;0;Pflanzlich
+Kartoffel;0;Pflanzlich
+Kukuruz;0;Pflanzlich
+getrocknet: Maisgriess;0;Pflanzlich
+MaisgrieÃŸ;0;Pflanzlich
+Kukuruz: Mais aus der Dose;0;Pflanzlich
+Dosenmais;0;Pflanzlich
+Kukuruz: MaiskÃ¶rner;0;Pflanzlich
+Maiskolben frisch/pasteurisiert;0;Pflanzlich
+Mais aus der Dose;0;Pflanzlich
+Mais;0;Pflanzlich
+Maismehl;0;Pflanzlich
+Mais: MaiskÃ¶rner;0;Pflanzlich
+Maltodextrin;0;Pflanzlich
+Maniok-Wurzelknollen;?;Pflanzlich
+Maroni;0;Pflanzlich
+Marroni;0;Pflanzlich
+Maronen;0;Pflanzlich
+Perlsago;0;Pflanzlich
+SagostÃ¤rke;0;Pflanzlich
+Quinoa;0;Pflanzlich
+Reis;0;Pflanzlich
+Reisnudeln;0;Pflanzlich
+Reiswaffeln;0;Pflanzlich
+Reis-Mais-Waffeln;0;Pflanzlich
+Rice Crispies;0;Pflanzlich
+Roggen;1;Pflanzlich
+Sago;0;Pflanzlich
+Sonnenblumenkerne;2;Pflanzlich
+SÃ¼sskartoffel;0;Pflanzlich
+SÃ¼ÃŸkartoffel;0;Pflanzlich
+Tapioka;0;Pflanzlich
+TapiokastÃ¤rke;0;Pflanzlich
+Weizen;1;Pflanzlich
+Weizenkeime;2;Pflanzlich
+Wildreis;0;Pflanzlich
+Wasserreis (Zizania);0;Pflanzlich
+Baumnuss;3;NÃ¼sse
+Cashew-Kerne;1;NÃ¼sse
+CashewnÃ¼sse;1;NÃ¼sse
+Cashewnuss;1;NÃ¼sse
+Erdmandel;2;NÃ¼sse
+gerÃ¶stet;2;NÃ¼sse
+Erdmandel;0;NÃ¼sse
+Tigernuss (Cyperus esculentus);0;NÃ¼sse
+ErdnÃ¼sse;2;NÃ¼sse
+Erdnuss;2;NÃ¼sse
+Haselnuss;1;NÃ¼sse
+HaselnÃ¼sse;1;NÃ¼sse
+Macadamia-Nuss;0;NÃ¼sse
+Mandeln;1;NÃ¼sse
+Paranuss;0;NÃ¼sse
+Pekannuss;0;NÃ¼sse
+Pecannuss;0;NÃ¼sse
+Pinienkerne;1;NÃ¼sse
+Pistazie;0;NÃ¼sse
+Spanische NÃ¼ssli (=Erdnuss);2;NÃ¼sse
+Tigernuss;0;NÃ¼sse
+Erdmandel (Cyperus esculentus);0;NÃ¼sse
+Walnuss;3;NÃ¼sse
+BaumnussÃ¶l;2;Fette
+DistelÃ¶l;0;Fette
+FÃ¤rberdistelÃ¶l;0;Fette
+SaflorÃ¶l;0;Fette
+Kokosfett;0;Fette
+KokosÃ¶l;0;Fette
+Kokosnussfett;0;Fette
+KokosnussÃ¶l;0;Fette
+KÃ¼rbiskernÃ¶l;0;Fette
+LeinÃ¶l;0;Fette
+LeinsamenÃ¶l;0;Fette
+MaiskeimÃ¶l;0;Fette
+MaisÃ¶l;0;Fette
+Margarine (wenn ohne unvertrÃ¤gliche Zusatzstoffe);0;Fette
+NachtkerzenÃ¶l (Oenothera biennis);0;Fette
+OlivenÃ¶l;0;Fette
+Palmfett;0;Fette
+PalmÃ¶l;0;Fette
+PalmkernÃ¶l;0;Fette
+RapsÃ¶l;0;Fette
+SchwarzkÃ¼mmelÃ¶l (Nigella sativa);0;Fette
+SojaÃ¶l;1;Fette
+SonnenblumenÃ¶l;0;Fette
+WalnussÃ¶l;2;Fette
+Ackerbohne (Vicia faba);2;GemÃ¼se
+Ackersalat;0;GemÃ¼se
+Artischocke;0;GemÃ¼se
+Arugula;2;GemÃ¼se
+Rucola;2;GemÃ¼se
+Aubergine;2;GemÃ¼se
+Avocado;2;GemÃ¼se
+Bambussprossen;?;GemÃ¼se
+Blattsalate;0;GemÃ¼se
+Blattsellerie;0;GemÃ¼se
+Schnittsellerie;0;GemÃ¼se
+Blaukabis;0;GemÃ¼se
+Blaukraut;0;GemÃ¼se
+Rotkohl;0;GemÃ¼se
+Bleichsellerie;0;GemÃ¼se
+Staudensellerie;0;GemÃ¼se
+Blumenkohl;0;GemÃ¼se
+Bohnen allgemein;2;GemÃ¼se
+diverse Arten;2;GemÃ¼se
+Bohnen: Borlotti-Bohnen;2;GemÃ¼se
+Bohnen: Buschbohnen;1;GemÃ¼se
+GrÃ¼ne Bohnen;1;GemÃ¼se
+Braunkohl;1;GemÃ¼se
+GrÃ¼nkohl;1;GemÃ¼se
+Krauskohl;1;GemÃ¼se
+Federkohl;1;GemÃ¼se
+Brennnessel;2;GemÃ¼se
+Broccoli;0;GemÃ¼se
+Brokkoli;0;GemÃ¼se
+BrÃ¼sseler Kohl;1;GemÃ¼se
+Rosenkohl;1;GemÃ¼se
+Buschbohnen;1;GemÃ¼se
+Chayote;?;GemÃ¼se
+ChicorÃ©e (Cichorium intybus);0;GemÃ¼se
+Chilisauce;2;GemÃ¼se
+scharf;2;GemÃ¼se
+fermentiert;2;GemÃ¼se
+Chilischoten;1;GemÃ¼se
+scharf;1;GemÃ¼se
+Chinakohl;0;GemÃ¼se
+Chinesischer Senfkohl;0;GemÃ¼se
+Chinesischer BlÃ¤tterkohl;0;GemÃ¼se
+Pak;0;GemÃ¼se
+Cornichons;2;GemÃ¼se
+eingelegt;2;GemÃ¼se
+Eierfrucht;2;GemÃ¼se
+Eierpflanze;2;GemÃ¼se
+Eisbergsalat;0;GemÃ¼se
+Endiviensalat;0;GemÃ¼se
+Endivie (Cichorium endivia);0;GemÃ¼se
+Erbsen: Gartenerbsen;1;GemÃ¼se
+EssiggemÃ¼se;2;GemÃ¼se
+Essiggurken;2;GemÃ¼se
+Favabohne (Vicia faba);2;GemÃ¼se
+Feldsalat;0;GemÃ¼se
+Fenchel;0;GemÃ¼se
+Fisolen;1;GemÃ¼se
+Buschbohne (Phaseolus vulgaris var. nanus);1;GemÃ¼se
+Gartenerbsen (Pisum sativum = Lathyrus oleraceus);1;GemÃ¼se
+Gartenkresse;?;GemÃ¼se
+Garten-Kresse (Lepidium sativum);?;GemÃ¼se
+Garten-Senfrauke;2;GemÃ¼se
+GemÃ¼se-Eibisch;1;GemÃ¼se
+Okra;1;GemÃ¼se
+GewÃ¼rzgurken;2;GemÃ¼se
+Gurken: Gartengurke;0;GemÃ¼se
+Salatgurke;0;GemÃ¼se
+Kukumer;0;GemÃ¼se
+HerbstrÃ¼be;1;GemÃ¼se
+HÃ¼lsenfrÃ¼chte (Soja;2;GemÃ¼se
+Bohnen;2;GemÃ¼se
+Erbsen;2;GemÃ¼se
+Linsen;2;GemÃ¼se
+...);2;GemÃ¼se
+Kaiserschote;1;GemÃ¼se
+Kappes;0;GemÃ¼se
+Kohl;0;GemÃ¼se
+Kraut;0;GemÃ¼se
+WeiÃŸkohl;0;GemÃ¼se
+Karfiol;0;GemÃ¼se
+Karotte;0;GemÃ¼se
+Kefen;1;GemÃ¼se
+Kelp (groÃŸe Braunalgen;2;GemÃ¼se
+Seetang;2;GemÃ¼se
+Blatttang;2;GemÃ¼se
+Kichererbse;2;GemÃ¼se
+Kiefelerbse;1;GemÃ¼se
+Knoblauch;1;GemÃ¼se
+Knollensellerie;0;GemÃ¼se
+Kohlrabi;1;GemÃ¼se
+Kohlsorten (auÃŸer Rosenkohl;0;GemÃ¼se
+Kohlrabi);0;GemÃ¼se
+Kohlsprossen;1;GemÃ¼se
+Krautstiele (Beta vulgaris subsp. vulgaris);1;GemÃ¼se
+Kren;1;GemÃ¼se
+Meerrettich;1;GemÃ¼se
+Kresse: Gartenkresse (Lepidium sativum);?;GemÃ¼se
+KÃ¼rbisse;0;GemÃ¼se
+div. Sorten;0;GemÃ¼se
+Lauch;1;GemÃ¼se
+Mangold;1;GemÃ¼se
+Melanzani;2;GemÃ¼se
+Melanzana;2;GemÃ¼se
+MÃ¶hre;0;GemÃ¼se
+MohrrÃ¼be;0;GemÃ¼se
+Mungbohnen;?;GemÃ¼se
+Mungobohnen (-keimlinge/-sprossen);?;GemÃ¼se
+NÃ¼sslisalat;0;GemÃ¼se
+NÃ¼ssler;0;GemÃ¼se
+Oliven;2;GemÃ¼se
+Pak Choi;0;GemÃ¼se
+Pak Choy;0;GemÃ¼se
+Pok Choi;0;GemÃ¼se
+Paprika;0;GemÃ¼se
+Peperoni;0;GemÃ¼se
+milde Sorten;0;GemÃ¼se
+Paprika;2;GemÃ¼se
+Peperoni;2;GemÃ¼se
+scharfe Sorten;2;GemÃ¼se
+Paradeiser;2;GemÃ¼se
+Tomaten;2;GemÃ¼se
+Pastinaken;0;GemÃ¼se
+Porree;1;GemÃ¼se
+RÃ¤be;1;GemÃ¼se
+Radieschen und Rettiche (Gattung Raphanus);0;GemÃ¼se
+milde;0;GemÃ¼se
+Radieschen und Rettiche (Gattung Raphanus);1;GemÃ¼se
+scharfe;1;GemÃ¼se
+Randen;0;GemÃ¼se
+Rauke;2;GemÃ¼se
+Rettiche und Radieschen (Gattung Raphanus);0;GemÃ¼se
+Rettiche und Radieschen (Gattung Raphanus);1;GemÃ¼se
+Rote Bete;0;GemÃ¼se
+Rote Beete;0;GemÃ¼se
+Rotkraut;0;GemÃ¼se
+Rukola;2;GemÃ¼se
+RÃ¼ebli;0;GemÃ¼se
+Salat: Blattsalate;0;GemÃ¼se
+Salzgurken;2;GemÃ¼se
+Saubohne (Vicia faba);2;GemÃ¼se
+Sauerkraut;3;GemÃ¼se
+SchmalblÃ¤ttriger Doppelsame;2;GemÃ¼se
+Schweinsbohne (Vicia faba);2;GemÃ¼se
+Sellerie: Knollensellerie (Apium graveolens var.;0;GemÃ¼se
+Sellerie: Schnittsellerie (Apium graveolens var.;0;GemÃ¼se
+Sellerie: Staudensellerie (Apium graveolens var.;0;GemÃ¼se
+Senfkohl;0;GemÃ¼se
+Soja (Sojabohne;2;GemÃ¼se
+Sojamehl);2;GemÃ¼se
+Sojasprossen [irrtÃ¼mliche Bezeichnung. Korrekt:;?;GemÃ¼se
+Spalterbsen;1;GemÃ¼se
+Gartenerbsen;1;GemÃ¼se
+Spargel;0;GemÃ¼se
+SpeiserÃ¼be;1;GemÃ¼se
+Spinat;2;GemÃ¼se
+Sprossenkohl;1;GemÃ¼se
+Stangensellerie;0;GemÃ¼se
+Topinambur;0;GemÃ¼se
+Vogerlsalat;0;GemÃ¼se
+Weisskohl;0;GemÃ¼se
+Weisskabis;0;GemÃ¼se
+Weisskraut;0;GemÃ¼se
+Welschkohl;1;GemÃ¼se
+Welschkraut;1;GemÃ¼se
+Wirsing;1;GemÃ¼se
+Wilde Rauke;2;GemÃ¼se
+Wirz;1;GemÃ¼se
+Wirsingkohl;1;GemÃ¼se
+WÃ¼rzsellerie;0;GemÃ¼se
+Zichorie: Salatzichorie;0;GemÃ¼se
+ChicorÃ©e;0;GemÃ¼se
+Zucchini;0;GemÃ¼se
+Zucchetti;0;GemÃ¼se
+Zuckererbse;1;GemÃ¼se
+Zuckerschote;1;GemÃ¼se
+Zwiebel: alle anderen;1;GemÃ¼se
+hier nicht als vertrÃ¤glich;1;GemÃ¼se
+Zwiebel: Milde Zwiebeln der Cevennen;0;GemÃ¼se
+Zwiebel: Tropea-Zwiebel;0;GemÃ¼se
+Zwiebel: Weisse Zwiebel;0;GemÃ¼se
+WeiÃŸe Zwiebel;0;GemÃ¼se
+Ã„hrige Minze (Mentha spicata);0;GemÃ¼se
+BÃ¤rlauch (Allium ursinum);1;GemÃ¼se
+Basilikum;0;GemÃ¼se
+Bockshornklee;2;GemÃ¼se
+Bohnenkraut (Satureja hortensis;0;GemÃ¼se
+Satureja montana);0;GemÃ¼se
+Dill;1;GemÃ¼se
+Dillkraut;1;GemÃ¼se
+Dillfenchel;1;GemÃ¼se
+Dorst;0;GemÃ¼se
+Dost;0;GemÃ¼se
+Gemeiner Dost;0;GemÃ¼se
+Dostenkraut;0;GemÃ¼se
+Oregano;0;GemÃ¼se
+Echter Dost (Origanum vulgare);0;GemÃ¼se
+Echter Kerbel;0;GemÃ¼se
+Gartenkerbel (Anthriscus cerefolium);0;GemÃ¼se
+Gartenkerbe;0;GemÃ¼se
+Echter Kerbel (Anthriscus cerefolium);0;GemÃ¼se
+GrÃ¼ne Minze (Mentha spicata);0;GemÃ¼se
+Gurkenkraut;1;GemÃ¼se
+Dill (Anethum graveolens);1;GemÃ¼se
+Kerbel;0;GemÃ¼se
+Gartenkerbel (Anthriscus;0;GemÃ¼se
+Kleesorten (Trigonella- und Trifolium-Arten);2;GemÃ¼se
+Krause Minze (Mentha spicata);0;GemÃ¼se
+Marokkanische Minze (Mentha spicata);0;GemÃ¼se
+Minze: GrÃ¼ne Minze (Mentha spicata);0;GemÃ¼se
+MÃ¼llerkraut;0;GemÃ¼se
+Nanaminze (Mentha spicata);0;GemÃ¼se
+Petersilie;0;GemÃ¼se
+Pfefferminze;0;GemÃ¼se
+Rosmarin;0;GemÃ¼se
+Salbei: Echte Salbei;0;GemÃ¼se
+Garten-Salbei;0;GemÃ¼se
+KÃ¼chensalbei;0;GemÃ¼se
+Schabzigerklee;2;GemÃ¼se
+Schnittlauch;1;GemÃ¼se
+Speer-Minze (Mentha spicata;0;GemÃ¼se
+engl.: spearmint);0;GemÃ¼se
+Wohlgemut;0;GemÃ¼se
+Acerola;0;FrÃ¼chte
+Acerolapulver;0;FrÃ¼chte
+Acerolakirsche;0;FrÃ¼chte
+Azerola;0;FrÃ¼chte
+Ananas;2;FrÃ¼chte
+Andenbeere;0;FrÃ¼chte
+Andenkirsche (Physalis peruviana);0;FrÃ¼chte
+Apfel;0;FrÃ¼chte
+Apfel: Golden Delicious;0;FrÃ¼chte
+Apfelsine;3;FrÃ¼chte
+Orange;3;FrÃ¼chte
+Aprikose;0;FrÃ¼chte
+Aronia;?;FrÃ¼chte
+Apfelbeeren;?;FrÃ¼chte
+Filzige Apfelbeere (Aronia;?;FrÃ¼chte
+Babybanane;?;FrÃ¼chte
+Banane;2;FrÃ¼chte
+Dessertbanane;2;FrÃ¼chte
+Obstbanane;2;FrÃ¼chte
+Baumtomate (Solanum betaceum);?;FrÃ¼chte
+Birne;1;FrÃ¼chte
+Birne: Nashi-Birne;?;FrÃ¼chte
+Blaubeere (Vaccinium myrtillus);0;FrÃ¼chte
+Bocksdorn-Beeren;0;FrÃ¼chte
+Goji-Beeren;0;FrÃ¼chte
+Boysenbeere (Rubus ursinus Ã— idaeus);?;FrÃ¼chte
+Brombeeren;0;FrÃ¼chte
+Carambola;0;FrÃ¼chte
+Karambole;0;FrÃ¼chte
+Sternfrucht;0;FrÃ¼chte
+Cassis;0;FrÃ¼chte
+Chinesische Quitte;0;FrÃ¼chte
+Kaki;0;FrÃ¼chte
+Cranberry;0;FrÃ¼chte
+Datteln getrocknet;0;FrÃ¼chte
+Drachenfrucht;0;FrÃ¼chte
+Pitaya;0;FrÃ¼chte
+Pitahaya;0;FrÃ¼chte
+Dreilappige Papau (Asimina triloba;?;FrÃ¼chte
+Indianerbanane);?;FrÃ¼chte
+Erdbeere;2;FrÃ¼chte
+Feigen;0;FrÃ¼chte
+frisch oder getrocknet;0;FrÃ¼chte
+gelbe Granadilla;?;FrÃ¼chte
+Passionsfrucht;?;FrÃ¼chte
+Goiaba;2;FrÃ¼chte
+Guave;2;FrÃ¼chte
+Psidium guajava;2;FrÃ¼chte
+Granatapfel;0;FrÃ¼chte
+Grapefruit;2;FrÃ¼chte
+GrossfrÃ¼chtige Moosbeere;0;FrÃ¼chte
+GroÃŸfrÃ¼chtige Moosbeere;0;FrÃ¼chte
+Guava;2;FrÃ¼chte
+Guayave;2;FrÃ¼chte
+Guayaba;2;FrÃ¼chte
+Hagebutte;1;FrÃ¼chte
+Heidelbeeren;0;FrÃ¼chte
+Himbeeren;2;FrÃ¼chte
+Holler;0;FrÃ¼chte
+Schwarzer Holunder;0;FrÃ¼chte
+Holunderbeeren;0;FrÃ¼chte
+Johannisbeere;0;FrÃ¼chte
+rote;0;FrÃ¼chte
+Jostabeeren;0;FrÃ¼chte
+Jochelbeere;0;FrÃ¼chte
+Joglbeere;0;FrÃ¼chte
+Kakao;2;FrÃ¼chte
+Kakaopulver (Schokolade etc.);2;FrÃ¼chte
+Kakaobutter;0;FrÃ¼chte
+Kakipflaume;0;FrÃ¼chte
+Kaktusfeigen (Opuntia ficus-indica);0;FrÃ¼chte
+Kapstachelbeere (Physalis peruviana);0;FrÃ¼chte
+Physalis;0;FrÃ¼chte
+Karambola;0;FrÃ¼chte
+Kirschen;0;FrÃ¼chte
+SÃ¼ÃŸkirschen;0;FrÃ¼chte
+Kiwi;2;FrÃ¼chte
+Kokosnuss;1;FrÃ¼chte
+Kokosraspel;1;FrÃ¼chte
+Kokosmilch;1;FrÃ¼chte
+Kokoswasser;1;FrÃ¼chte
+Korinthen;0;FrÃ¼chte
+Kranbeere (Vaccinium macrocarpon);0;FrÃ¼chte
+Kronsbeere;0;FrÃ¼chte
+Preiselbeere (Vaccinium vitis-idaea);0;FrÃ¼chte
+Limette;3;FrÃ¼chte
+Limone;2;FrÃ¼chte
+Litchi;0;FrÃ¼chte
+Litschi;0;FrÃ¼chte
+Loganbeere;?;FrÃ¼chte
+Mandarine;2;FrÃ¼chte
+Mango;1;FrÃ¼chte
+Maracuja (Passiflora edulis / flavicarpa);?;FrÃ¼chte
+Marille;0;FrÃ¼chte
+Maulbeere;0;FrÃ¼chte
+Melonen (auÃŸer Wassermelone);0;FrÃ¼chte
+Melonenbirne;0;FrÃ¼chte
+Pepino (Solanum muricatum);0;FrÃ¼chte
+Nashi-Birne;?;FrÃ¼chte
+Nektarinen;0;FrÃ¼chte
+Oemeli;0;FrÃ¼chte
+Sauerkirsche;0;FrÃ¼chte
+Orangen;3;FrÃ¼chte
+Orangenschale;3;FrÃ¼chte
+Papaya;2;FrÃ¼chte
+Paw Paw (Asimina triloba;?;FrÃ¼chte
+Pepino;0;FrÃ¼chte
+Melonenbirne (Solanum muricatum);0;FrÃ¼chte
+Persimone;0;FrÃ¼chte
+Peruanische Blasenkirsche (Physalis peruviana);0;FrÃ¼chte
+Pfirsich;0;FrÃ¼chte
+Pflaumen-Arten;1;FrÃ¼chte
+Physalis (Physalis peruviana);0;FrÃ¼chte
+Kapstachelbeere;0;FrÃ¼chte
+Preiselbeere;0;FrÃ¼chte
+Purpurgranadilla;?;FrÃ¼chte
+Quetsche;1;FrÃ¼chte
+Zwetschge (Prunus domestica subsp.;1;FrÃ¼chte
+Quitten;0;FrÃ¼chte
+Rhabarber;1;FrÃ¼chte
+Ribisel;0;FrÃ¼chte
+Rigatze;0;FrÃ¼chte
+Jostabeere;0;FrÃ¼chte
+Rosinen;0;FrÃ¼chte
+Rote Johannisbeere;0;FrÃ¼chte
+Rote Ribisel;0;FrÃ¼chte
+Sanddorn;0;FrÃ¼chte
+Schattenmorelle;0;FrÃ¼chte
+SchmalblÃ¤ttrige Ã–lweide (Elaeagnus angustifolia);0;FrÃ¼chte
+Schwarze Johannisbeere;0;FrÃ¼chte
+Schwarze Ribisel;0;FrÃ¼chte
+Sharonfrucht;0;FrÃ¼chte
+Stachelbeeren;0;FrÃ¼chte
+Sultaninen;0;FrÃ¼chte
+Tamarillo;?;FrÃ¼chte
+Trauben;0;FrÃ¼chte
+Weintrauben;0;FrÃ¼chte
+Wassermelone;1;FrÃ¼chte
+Weichselkirsche;0;FrÃ¼chte
+Weichsel;0;FrÃ¼chte
+Weinbeeren;0;FrÃ¼chte
+getrocknet (=Rosinen);0;FrÃ¼chte
+Zitrone;2;FrÃ¼chte
+Zitronenschale;2;FrÃ¼chte
+ZitrusfrÃ¼chte;2;FrÃ¼chte
+Zuckerbanane;?;FrÃ¼chte
+Zwetschge;1;FrÃ¼chte
+Zwetschke;1;FrÃ¼chte
+Zwetsche (Prunus domestica;1;FrÃ¼chte
+Chia-Samen;0;FrÃ¼chte
+Mexikanische Chia (Salvia hispanica);0;FrÃ¼chte
+Flohsamen;0;FrÃ¼chte
+Flohsamenschalen;0;FrÃ¼chte
+KÃ¼rbiskerne;0;FrÃ¼chte
+Leinsamen;0;FrÃ¼chte
+Sesam;1;FrÃ¼chte
+Algen und Algenbestandteile;3;FrÃ¼chte
+Backhefe;0;FrÃ¼chte
+BÃ¤ckerhefe (frisch / getrocknet);0;FrÃ¼chte
+Bierhefe (frisch / getrocknet);0;FrÃ¼chte
+Braunalgen;3;FrÃ¼chte
+Algen;3;FrÃ¼chte
+Champignons;1;FrÃ¼chte
+Gemeiner Steinpilz (Boletus edulis);2;FrÃ¼chte
+Gest;0;FrÃ¼chte
+Germ;0;FrÃ¼chte
+Hefe (frisch / getrocknet);0;FrÃ¼chte
+GrÃ¼nalgen;3;FrÃ¼chte
+Kombu-Algen;3;FrÃ¼chte
+Meeresalgen;3;FrÃ¼chte
+Meeralgen;3;FrÃ¼chte
+Morcheln;2;FrÃ¼chte
+Nori-Algen;3;FrÃ¼chte
+Pilze;2;FrÃ¼chte
+Reishi (Ganoderma lingzhi);0;FrÃ¼chte
+Rotalgen;3;FrÃ¼chte
+Schwammerl;2;FrÃ¼chte
+Seetang;3;FrÃ¼chte
+Spirulina (Cyanobakterien: Arthrospira platensis;0;FrÃ¼chte
+A.;0;FrÃ¼chte
+Steinpilze;2;FrÃ¼chte
+Wakame-Algen;3;FrÃ¼chte
+Wasserkefir;1;FrÃ¼chte
+Agavendicksaft;0;FrÃ¼chte
+Agavensirup;0;FrÃ¼chte
+Ahornsirup;0;FrÃ¼chte
+Birkenzucker;0;FrÃ¼chte
+Xylit;0;FrÃ¼chte
+Xylitol;0;FrÃ¼chte
+E967;0;FrÃ¼chte
+Caramel;0;FrÃ¼chte
+Dextrose;0;FrÃ¼chte
+E420;0;FrÃ¼chte
+Sorbit;0;FrÃ¼chte
+Sorbitol;0;FrÃ¼chte
+E953;0;FrÃ¼chte
+Isomalt;0;FrÃ¼chte
+Fruchtzucker;0;FrÃ¼chte
+Fructose;0;FrÃ¼chte
+gebrannter Zucker;0;FrÃ¼chte
+Glucose;0;FrÃ¼chte
+Glucosesirup;0;FrÃ¼chte
+Honig;0;FrÃ¼chte
+Invertzucker;0;FrÃ¼chte
+Invertose;0;FrÃ¼chte
+Invertzuckersirup;0;FrÃ¼chte
+Karamell;0;FrÃ¼chte
+Kristallzucker;0;FrÃ¼chte
+KÃ¼nstliche SÃ¼ssstoffe;1;FrÃ¼chte
+kÃ¼nstliche SÃ¼ÃŸstoffe;1;FrÃ¼chte
+Lactose;0;FrÃ¼chte
+Maltose;0;FrÃ¼chte
+Malzzucker;0;FrÃ¼chte
+rein;0;FrÃ¼chte
+Milchzucker;0;FrÃ¼chte
+Palmzucker;?;FrÃ¼chte
+Rohrzucker;0;FrÃ¼chte
+RÃ¼benzucker;0;FrÃ¼chte
+Saccharose;0;FrÃ¼chte
+Glucitol;0;FrÃ¼chte
+Hexanhexol;0;FrÃ¼chte
+Stevia (Stevia-BlÃ¤tter;0;FrÃ¼chte
+Steviosid flÃ¼ssig/pulverfÃ¶rmig);0;FrÃ¼chte
+SÃ¼ssholz;2;FrÃ¼chte
+SÃ¼ÃŸholz;2;FrÃ¼chte
+Traubenzucker;0;FrÃ¼chte
+Zucker;0;FrÃ¼chte
+Alkoholessig;0;FrÃ¼chte
+Anis;?;FrÃ¼chte
+Bouillon;2;FrÃ¼chte
+Branntweinessig;0;FrÃ¼chte
+BrÃ¼he;2;FrÃ¼chte
+BrÃ¼hwÃ¼rfel/-pulver;2;FrÃ¼chte
+Cumin;2;FrÃ¼chte
+Curcuma;0;FrÃ¼chte
+Curry;2;FrÃ¼chte
+Essig: Aceto Balsamico;3;FrÃ¼chte
+Balsamessig;3;FrÃ¼chte
+Essig: Alkoholessig;0;FrÃ¼chte
+Weingeistessig;0;FrÃ¼chte
+Essig: Apfelessig;1;FrÃ¼chte
+Essig: Rotweinessig;3;FrÃ¼chte
+Essig: Weissweinessig;3;FrÃ¼chte
+Essigessenz;0;FrÃ¼chte
+Fleischextrakt;2;FrÃ¼chte
+Gelbwurz (Curcuma longa);0;FrÃ¼chte
+Gerber-Sumach;0;FrÃ¼chte
+Gerbersumach (Rhus coriaria);0;FrÃ¼chte
+GewÃ¼rznelken;0;FrÃ¼chte
+Nelken;0;FrÃ¼chte
+Hefeextrakt;2;FrÃ¼chte
+Ingwer;1;FrÃ¼chte
+Kardamom;0;FrÃ¼chte
+Koriander;0;FrÃ¼chte
+Echter Koriander;0;FrÃ¼chte
+GewÃ¼rzkoriander;0;FrÃ¼chte
+KreuzkÃ¼mmel (Cuminum cyminum);2;FrÃ¼chte
+Kumin;2;FrÃ¼chte
+KÃ¼mmel: Echter KÃ¼mmel (Carum carvi);0;FrÃ¼chte
+Kurkuma;0;FrÃ¼chte
+LorbeerblÃ¤tter;0;FrÃ¼chte
+Echter Lorbeer (Laurus nobilis);0;FrÃ¼chte
+Edler;0;FrÃ¼chte
+Mohnsamen;1;FrÃ¼chte
+Muskatnuss;1;FrÃ¼chte
+Paprikapulver;0;FrÃ¼chte
+mild;0;FrÃ¼chte
+Paprikapulver;2;FrÃ¼chte
+Pfeffer;2;FrÃ¼chte
+schwarz;2;FrÃ¼chte
+weiÃŸ;2;FrÃ¼chte
+Quendel;0;FrÃ¼chte
+Thymian;0;FrÃ¼chte
+Echter Thymian (Thymus;0;FrÃ¼chte
+SchwarzkÃ¼mmel (Nigella sativa);0;FrÃ¼chte
+Senf;2;FrÃ¼chte
+SenfkÃ¶rner;2;FrÃ¼chte
+Senfsamenpulver;2;FrÃ¼chte
+Sojasauce;3;FrÃ¼chte
+Sternanis;?;FrÃ¼chte
+Sumach;0;FrÃ¼chte
+Sumak: Gerber-Sumach (Rhus coriaria);0;FrÃ¼chte
+Echter Thymian (Thymus vulgaris);0;FrÃ¼chte
+Vanille;1;FrÃ¼chte
+Vanilleschoten;1;FrÃ¼chte
+Vanillepulver;1;FrÃ¼chte
+Vanillezucker;1;FrÃ¼chte
+Vanilleextrakt;1;FrÃ¼chte
+Wacholderbeeren;0;FrÃ¼chte
+WÃ¼rze;2;FrÃ¼chte
+SpeisewÃ¼rze;2;FrÃ¼chte
+SuppenwÃ¼rze (pflanzliches;2;FrÃ¼chte
+Zimt;0;FrÃ¼chte
+Zimtstangen;0;FrÃ¼chte
+Zimtpulver;0;FrÃ¼chte
+Heilquellen-Wasser mit viel;1;GetrÃ¤nke
+Leitungswasser;0;GetrÃ¤nke
+Mineralwasser ohne KohlensÃ¤ure;0;GetrÃ¤nke
+Alkohol;3;GetrÃ¤nke
+rein (Ethanol);3;GetrÃ¤nke
+Alkoholhaltige GetrÃ¤nke;3;GetrÃ¤nke
+Bier;2;GetrÃ¤nke
+Champagner;3;GetrÃ¤nke
+Ethanol;3;GetrÃ¤nke
+Ethylalkohol;3;GetrÃ¤nke
+Rhum;2;GetrÃ¤nke
+SchnÃ¤pse;2;GetrÃ¤nke
+klar (farblos);2;GetrÃ¤nke
+SchnÃ¤pse;3;GetrÃ¤nke
+nicht klar (nicht farblos);3;GetrÃ¤nke
+Sekt;3;GetrÃ¤nke
+Spirituosen;2;GetrÃ¤nke
+Spirituosen;3;GetrÃ¤nke
+Wein;3;GetrÃ¤nke
+Wein;1;GetrÃ¤nke
+histaminfrei (<0.1 mg/l);1;GetrÃ¤nke
+Wein: Rotwein;3;GetrÃ¤nke
+Wein: Schilcherwein;2;GetrÃ¤nke
+Wein: Weisswein;2;GetrÃ¤nke
+WeiÃŸwein;2;GetrÃ¤nke
+Weinbrand;2;GetrÃ¤nke
+Brandy;2;GetrÃ¤nke
+Anistee;0;GetrÃ¤nke
+Brennnesseltee;1;GetrÃ¤nke
+Eisenkraut-Tee;0;GetrÃ¤nke
+Fencheltee;0;GetrÃ¤nke
+GrÃ¼ntee;1;GetrÃ¤nke
+Kamillentee;0;GetrÃ¤nke
+KrÃ¤uterteemischungen aus HeilkrÃ¤utern;1;GetrÃ¤nke
+z.B.;1;GetrÃ¤nke
+KÃ¼mmeltee;0;GetrÃ¤nke
+Echter KÃ¼mmel (Carum carvi);0;GetrÃ¤nke
+LindenblÃ¼tentee;0;GetrÃ¤nke
+Mate Tee;1;GetrÃ¤nke
+Pfefferminztee;0;GetrÃ¤nke
+Rooibostee;0;GetrÃ¤nke
+Salbeitee;0;GetrÃ¤nke
+Schwarztee;2;GetrÃ¤nke
+Verveine-Tee;0;GetrÃ¤nke
+Cranberry Nektar;0;GetrÃ¤nke
+Orangensaft;2;GetrÃ¤nke
+Zitronensaft;3;GetrÃ¤nke
+Zitronensaftkonzentrat;3;GetrÃ¤nke
+Tomatensaft;2;GetrÃ¤nke
+Coca-Cola;2;GetrÃ¤nke
+ColagetrÃ¤nke;2;GetrÃ¤nke
+Energy-Drinks;2;GetrÃ¤nke
+Espresso;1;GetrÃ¤nke
+Kaffee;1;GetrÃ¤nke
+Hafer-Drink;1;GetrÃ¤nke
+Reismilch;1;GetrÃ¤nke
+Reis-Drink;1;GetrÃ¤nke
+Sojamilch;2;GetrÃ¤nke
+Soja-Drink;2;GetrÃ¤nke
+heisse Schokolade;2;GetrÃ¤nke
+heiÃŸe Schokolade;2;GetrÃ¤nke
+HolunderblÃ¼tensirup;0;GetrÃ¤nke
+KakaogetrÃ¤nke;2;GetrÃ¤nke
+LimonadengetrÃ¤nke;1;GetrÃ¤nke
+Ovomaltine;2;GetrÃ¤nke
+SchokoladengetrÃ¤nke;2;GetrÃ¤nke
+2-Phenylphenol;2;GetrÃ¤nke
+E231;2;GetrÃ¤nke
+2-tert-Butylhydrochinon;?;GetrÃ¤nke
+tert-Butylhydrochinon;?;GetrÃ¤nke
+Acid Red 1;2;GetrÃ¤nke
+E128;2;GetrÃ¤nke
+acidum hydrochloricum;0;GetrÃ¤nke
+SalzsÃ¤ure;0;GetrÃ¤nke
+Agar-Agar;1;GetrÃ¤nke
+E406;1;GetrÃ¤nke
+Alginat;1;GetrÃ¤nke
+Propylenglycolalginat;1;GetrÃ¤nke
+E405;1;GetrÃ¤nke
+AlginsÃ¤ure;1;GetrÃ¤nke
+Algin;1;GetrÃ¤nke
+E400;1;GetrÃ¤nke
+Allurarot AC;2;GetrÃ¤nke
+E129;2;GetrÃ¤nke
+Food Red 17;2;GetrÃ¤nke
+CI 16035;2;GetrÃ¤nke
+alpha-Tocopherol;0;GetrÃ¤nke
+Vitamin E;0;GetrÃ¤nke
+E307;0;GetrÃ¤nke
+Aluminium;?;GetrÃ¤nke
+E173;?;GetrÃ¤nke
+Amaranth E123;2;GetrÃ¤nke
+Ammoniumalginat;1;GetrÃ¤nke
+E403;1;GetrÃ¤nke
+Ammoniumcarbonat;0;GetrÃ¤nke
+E503;0;GetrÃ¤nke
+Ammoniumcitrat;1;GetrÃ¤nke
+Triammoniumcitrat;1;GetrÃ¤nke
+E380;1;GetrÃ¤nke
+Anthocyane;0;GetrÃ¤nke
+E163;0;GetrÃ¤nke
+ApfelsÃ¤ure;0;GetrÃ¤nke
+Ã„pfelsÃ¤ure;0;GetrÃ¤nke
+E296;0;GetrÃ¤nke
+Apo-Carotinal;?;GetrÃ¤nke
+Beta-Apo-8-Carotinal;?;GetrÃ¤nke
+E160e;?;GetrÃ¤nke
+8â€²-Apo-Î²-;?;GetrÃ¤nke
+Apo-carotinsÃ¤ureethylester;?;GetrÃ¤nke
+beta-Apo-8â€²-;?;GetrÃ¤nke
+Aroma;1;GetrÃ¤nke
+Aromen;1;GetrÃ¤nke
+Aromastoffe;1;GetrÃ¤nke
+AscorbinsÃ¤ure;0;GetrÃ¤nke
+E300;0;GetrÃ¤nke
+Ascorbylpalmitat;0;GetrÃ¤nke
+E304;0;GetrÃ¤nke
+Azophloxin;2;GetrÃ¤nke
+Azorubin;2;GetrÃ¤nke
+Karmesin;2;GetrÃ¤nke
+E122;2;GetrÃ¤nke
+BenzoesÃ¤ure und deren Salze = Benzoate;2;GetrÃ¤nke
+E210 bis;2;GetrÃ¤nke
+BenzoesÃ¤ure;2;GetrÃ¤nke
+E210;2;GetrÃ¤nke
+Betanin;0;GetrÃ¤nke
+Betanoin;0;GetrÃ¤nke
+Betenrot;0;GetrÃ¤nke
+Beetenrot;0;GetrÃ¤nke
+E162;0;GetrÃ¤nke
+Bienenwachs;0;GetrÃ¤nke
+E901;0;GetrÃ¤nke
+Borax;?;GetrÃ¤nke
+Tinkal;?;GetrÃ¤nke
+Natriumborat;?;GetrÃ¤nke
+Dinatriumtetraborat-;?;GetrÃ¤nke
+BorsÃ¤ure;?;GetrÃ¤nke
+E284;?;GetrÃ¤nke
+Braun FK;2;GetrÃ¤nke
+E154;2;GetrÃ¤nke
+Braun HT;2;GetrÃ¤nke
+Braun HTK;2;GetrÃ¤nke
+E155;2;GetrÃ¤nke
+C.I. 20285;2;GetrÃ¤nke
+C.I. Food;2;GetrÃ¤nke
+Brillantschwarz BN;3;GetrÃ¤nke
+Brillantschwarz FCF;3;GetrÃ¤nke
+Schwarz;3;GetrÃ¤nke
+Butylhydroxyanisol;2;GetrÃ¤nke
+BHA;2;GetrÃ¤nke
+E320;2;GetrÃ¤nke
+Butylhydroxytoluol;2;GetrÃ¤nke
+Butylhydroxytoluen;2;GetrÃ¤nke
+BHT;2;GetrÃ¤nke
+E321;2;GetrÃ¤nke
+Calciumacetat;0;GetrÃ¤nke
+Calciumethanoat;0;GetrÃ¤nke
+Kalziumacetat;0;GetrÃ¤nke
+E262;0;GetrÃ¤nke
+Calciumalginat;1;GetrÃ¤nke
+E404;1;GetrÃ¤nke
+Calciumascorbat;0;GetrÃ¤nke
+Calciumdiascorbat;0;GetrÃ¤nke
+Calcium-L-;0;GetrÃ¤nke
+Calciumbenzoat;2;GetrÃ¤nke
+E213;2;GetrÃ¤nke
+Calciumcarbonat;0;GetrÃ¤nke
+Kalziumkarbonat;0;GetrÃ¤nke
+Kalk;0;GetrÃ¤nke
+E170;0;GetrÃ¤nke
+Calciumcitrat;1;GetrÃ¤nke
+E333;1;GetrÃ¤nke
+Calciumdiglutamat;2;GetrÃ¤nke
+Calciumglutamat;2;GetrÃ¤nke
+E623;2;GetrÃ¤nke
+Calciumhydrogensulfit;2;GetrÃ¤nke
+E227;2;GetrÃ¤nke
+Calciumlactat;0;GetrÃ¤nke
+Kalziumlaktat;0;GetrÃ¤nke
+E327;0;GetrÃ¤nke
+Calciumphosphate;1;GetrÃ¤nke
+E340;1;GetrÃ¤nke
+Calciumpolyphosphat;2;GetrÃ¤nke
+E452;2;GetrÃ¤nke
+Calciumpropionat;?;GetrÃ¤nke
+Calciumdipropionat;?;GetrÃ¤nke
+E282;?;GetrÃ¤nke
+Calciumsorbat;2;GetrÃ¤nke
+E203;2;GetrÃ¤nke
+Calciumsulfit;2;GetrÃ¤nke
+E226;2;GetrÃ¤nke
+Canthaxanthin;?;GetrÃ¤nke
+E161g;?;GetrÃ¤nke
+Capsanthin;0;GetrÃ¤nke
+Paprikaextrakt;0;GetrÃ¤nke
+E160c;0;GetrÃ¤nke
+Carob;2;GetrÃ¤nke
+Carobpulver;2;GetrÃ¤nke
+Carotine;0;GetrÃ¤nke
+Beta-Carotin;0;GetrÃ¤nke
+Î²-Carotin;0;GetrÃ¤nke
+E160a;0;GetrÃ¤nke
+Carrageen;2;GetrÃ¤nke
+Carragaheen;2;GetrÃ¤nke
+E407;2;GetrÃ¤nke
+E407a;2;GetrÃ¤nke
+Carubin;2;GetrÃ¤nke
+Carubenmehl;2;GetrÃ¤nke
+E410;2;GetrÃ¤nke
+Cellulose;0;GetrÃ¤nke
+Cellulosepulver;0;GetrÃ¤nke
+mikrokristalline Cellulose;0;GetrÃ¤nke
+Celluloseethylether;0;GetrÃ¤nke
+Ethylcellulose;0;GetrÃ¤nke
+Ethylzellulose;0;GetrÃ¤nke
+Cellulosemethylether;0;GetrÃ¤nke
+Methylcellulose;0;GetrÃ¤nke
+Chinin (z.B. in Bitterlemon;2;GetrÃ¤nke
+Tonic Water);2;GetrÃ¤nke
+Chinolingelb;3;GetrÃ¤nke
+E104;3;GetrÃ¤nke
+CitronensÃ¤ure E330;1;GetrÃ¤nke
+Cochenille;2;GetrÃ¤nke
+Karmin;2;GetrÃ¤nke
+E120;2;GetrÃ¤nke
+Cochenillerot A;2;GetrÃ¤nke
+Ponceau 4R;2;GetrÃ¤nke
+E124;2;GetrÃ¤nke
+Curcumin;0;GetrÃ¤nke
+E100;0;GetrÃ¤nke
+delta-Tocopherol;0;GetrÃ¤nke
+E309;0;GetrÃ¤nke
+Dimethyldicarbonat;?;GetrÃ¤nke
+Dimethylpyrocarbonat;?;GetrÃ¤nke
+Dimeticon;?;GetrÃ¤nke
+Dimethicone;?;GetrÃ¤nke
+Dimethylpolysiloxan;?;GetrÃ¤nke
+Dodecylgallat;2;GetrÃ¤nke
+E312;2;GetrÃ¤nke
+E101a;1;GetrÃ¤nke
+Riboflavin-5-Phosphat;1;GetrÃ¤nke
+E102;3;GetrÃ¤nke
+Tartrazin;3;GetrÃ¤nke
+E110;3;GetrÃ¤nke
+Gelborange S;3;GetrÃ¤nke
+E1103;0;GetrÃ¤nke
+Invertase;0;GetrÃ¤nke
+Î²-Fructofuranosidase;0;GetrÃ¤nke
+Saccharase;0;GetrÃ¤nke
+E1105;?;GetrÃ¤nke
+Lysozym;?;GetrÃ¤nke
+Muramidase;?;GetrÃ¤nke
+E1200;?;GetrÃ¤nke
+Polydextrose;?;GetrÃ¤nke
+E1201;1;GetrÃ¤nke
+Povidon;1;GetrÃ¤nke
+Polyvinylpyrrolidon;1;GetrÃ¤nke
+Polyvidone;1;GetrÃ¤nke
+1-;1;GetrÃ¤nke
+E1202;1;GetrÃ¤nke
+Polyvinylpolypyrrolidon;1;GetrÃ¤nke
+E123;2;GetrÃ¤nke
+Amaranth;2;GetrÃ¤nke
+E127;3;GetrÃ¤nke
+Erythrosin;3;GetrÃ¤nke
+Rot 2G;2;GetrÃ¤nke
+E131;2;GetrÃ¤nke
+Patentblau V;2;GetrÃ¤nke
+E132;2;GetrÃ¤nke
+Indigokarmin;2;GetrÃ¤nke
+Indigocarmin;2;GetrÃ¤nke
+Indigotin I;2;GetrÃ¤nke
+E133;?;GetrÃ¤nke
+Brillantblau FCF;?;GetrÃ¤nke
+E140;0;GetrÃ¤nke
+Chlorophylle;0;GetrÃ¤nke
+Chlorophylline;0;GetrÃ¤nke
+E141;0;GetrÃ¤nke
+kupferhaltige Komplexe der Chlorophylle und;0;GetrÃ¤nke
+E142;?;GetrÃ¤nke
+GrÃ¼n S;?;GetrÃ¤nke
+BrillantsÃ¤uregrÃ¼n BS;?;GetrÃ¤nke
+C.I. 44090;?;GetrÃ¤nke
+C.I. Acid;?;GetrÃ¤nke
+E150;0;GetrÃ¤nke
+E150a: Zuckercouleur;0;GetrÃ¤nke
+E150b;0;GetrÃ¤nke
+Sulfitlaugen-ZuckerkulÃ¶r;0;GetrÃ¤nke
+E150c;0;GetrÃ¤nke
+Ammoniak-ZuckerkulÃ¶r;0;GetrÃ¤nke
+E150d: Ammoniumsulfit-ZuckerkulÃ¶r;0;GetrÃ¤nke
+E151;3;GetrÃ¤nke
+E153;0;GetrÃ¤nke
+Pflanzenkohle;0;GetrÃ¤nke
+Holzkohle;0;GetrÃ¤nke
+E160b;2;GetrÃ¤nke
+Bixin;2;GetrÃ¤nke
+Norbixin;2;GetrÃ¤nke
+Annatto;2;GetrÃ¤nke
+E160d;?;GetrÃ¤nke
+Lycopin;?;GetrÃ¤nke
+Lycopen;?;GetrÃ¤nke
+Leukopin;?;GetrÃ¤nke
+C.I. 75125;?;GetrÃ¤nke
+C.I.;?;GetrÃ¤nke
+8â€²-Apo-Î²-caroten-8â€²-al;?;GetrÃ¤nke
+E160f;?;GetrÃ¤nke
+E161b;?;GetrÃ¤nke
+Lutein;?;GetrÃ¤nke
+C.I. 40850;?;GetrÃ¤nke
+C.I. Food Orange 8;?;GetrÃ¤nke
+E171;0;GetrÃ¤nke
+Titandioxid;0;GetrÃ¤nke
+Titan(IV)-oxid;0;GetrÃ¤nke
+TitansÃ¤ureanhydrid;0;GetrÃ¤nke
+E172;0;GetrÃ¤nke
+Eisenoxide;0;GetrÃ¤nke
+Eisenhydroxide;0;GetrÃ¤nke
+E174;?;GetrÃ¤nke
+Silber;?;GetrÃ¤nke
+E175;0;GetrÃ¤nke
+Gold;0;GetrÃ¤nke
+E180;2;GetrÃ¤nke
+Litholrubin BK;2;GetrÃ¤nke
+Rubinpigment BK;2;GetrÃ¤nke
+4B-Toner;2;GetrÃ¤nke
+C.I.;2;GetrÃ¤nke
+E200;2;GetrÃ¤nke
+SorbinsÃ¤ure;2;GetrÃ¤nke
+E202;2;GetrÃ¤nke
+Kaliumsorbat;2;GetrÃ¤nke
+E210 bis E213: BenzoesÃ¤ure und deren Salze =;2;GetrÃ¤nke
+E211;2;GetrÃ¤nke
+Natriumbenzoat;2;GetrÃ¤nke
+E212;2;GetrÃ¤nke
+Kaliumbenzoat;2;GetrÃ¤nke
+E214;2;GetrÃ¤nke
+E215;2;GetrÃ¤nke
+Ethylparaben;2;GetrÃ¤nke
+E218;2;GetrÃ¤nke
+E219;2;GetrÃ¤nke
+Methylparaben;2;GetrÃ¤nke
+E220 - E228;2;GetrÃ¤nke
+Sulfite;2;GetrÃ¤nke
+E220;2;GetrÃ¤nke
+Schwefeldioxid;2;GetrÃ¤nke
+E221;2;GetrÃ¤nke
+Natriumsulfit;2;GetrÃ¤nke
+E222;2;GetrÃ¤nke
+Natriumhydrogensulfit;2;GetrÃ¤nke
+Natriumbisulfit;2;GetrÃ¤nke
+E223;2;GetrÃ¤nke
+Natriumdisulfit;2;GetrÃ¤nke
+Natriummetabisulfit;2;GetrÃ¤nke
+E224;2;GetrÃ¤nke
+Kaliumdisulfit;2;GetrÃ¤nke
+Kaliummetabisulfit;2;GetrÃ¤nke
+E225;2;GetrÃ¤nke
+Kaliumsulfit;2;GetrÃ¤nke
+E228;2;GetrÃ¤nke
+Kaliumhydrogensulfit;2;GetrÃ¤nke
+Orthophenylphenol;2;GetrÃ¤nke
+E232;2;GetrÃ¤nke
+Natriumorthophenylphenolat;2;GetrÃ¤nke
+E234;?;GetrÃ¤nke
+Nisin;?;GetrÃ¤nke
+E235;?;GetrÃ¤nke
+Natamycin;?;GetrÃ¤nke
+E239;2;GetrÃ¤nke
+Hexamethylentetramin;2;GetrÃ¤nke
+Urotropin;2;GetrÃ¤nke
+E242;?;GetrÃ¤nke
+E249;?;GetrÃ¤nke
+Kaliumnitrit;?;GetrÃ¤nke
+Salpetrigsaures Kalium;?;GetrÃ¤nke
+E250;0;GetrÃ¤nke
+Natriumnitrit;0;GetrÃ¤nke
+E251;?;GetrÃ¤nke
+Natriumnitrat;?;GetrÃ¤nke
+Natronsalpeter;?;GetrÃ¤nke
+Chilesalpeter;?;GetrÃ¤nke
+E252;?;GetrÃ¤nke
+Kaliumnitrat;?;GetrÃ¤nke
+Salpeter;?;GetrÃ¤nke
+Kalisalpeter;?;GetrÃ¤nke
+E260;0;GetrÃ¤nke
+EssigsÃ¤ure;0;GetrÃ¤nke
+Eisessig;0;GetrÃ¤nke
+E261;0;GetrÃ¤nke
+Kaliumacetat;0;GetrÃ¤nke
+Kaliumethanoat;0;GetrÃ¤nke
+Natriumacetat;0;GetrÃ¤nke
+Natriumethanoat;0;GetrÃ¤nke
+E263;0;GetrÃ¤nke
+E270;0;GetrÃ¤nke
+MilchsÃ¤ure;0;GetrÃ¤nke
+2-HydroxypropansÃ¤ure;0;GetrÃ¤nke
+2-;0;GetrÃ¤nke
+E280;?;GetrÃ¤nke
+PropionsÃ¤ure;?;GetrÃ¤nke
+PropansÃ¤ure;?;GetrÃ¤nke
+EthancarbonsÃ¤ure;?;GetrÃ¤nke
+E281;?;GetrÃ¤nke
+Natriumpropionat;?;GetrÃ¤nke
+E283;?;GetrÃ¤nke
+Kaliumpropionat;?;GetrÃ¤nke
+E285;?;GetrÃ¤nke
+E290;0;GetrÃ¤nke
+Kohlendioxid gasfÃ¶rmig;0;GetrÃ¤nke
+Kohlenstoffdioxid;0;GetrÃ¤nke
+2-HydroxybutandisÃ¤ure;0;GetrÃ¤nke
+E297;?;GetrÃ¤nke
+FumarsÃ¤ure;?;GetrÃ¤nke
+trans-ButendisÃ¤ure;?;GetrÃ¤nke
+trans-;?;GetrÃ¤nke
+Vitamin C;0;GetrÃ¤nke
+E301;0;GetrÃ¤nke
+Natriumascorbat;0;GetrÃ¤nke
+Sodascorbat;0;GetrÃ¤nke
+Mononatrium;0;GetrÃ¤nke
+E302;0;GetrÃ¤nke
+E306;0;GetrÃ¤nke
+Tocopherol;0;GetrÃ¤nke
+tocopherolhaltige;0;GetrÃ¤nke
+Î±-Tocopherol;0;GetrÃ¤nke
+E308;0;GetrÃ¤nke
+gamma-Tocopherol;0;GetrÃ¤nke
+Î³-Tocopherol;0;GetrÃ¤nke
+E310;2;GetrÃ¤nke
+Propylgallat;2;GetrÃ¤nke
+E311;2;GetrÃ¤nke
+Octylgallat;2;GetrÃ¤nke
+Laurylgallat;2;GetrÃ¤nke
+E315;0;GetrÃ¤nke
+IsoascorbinsÃ¤ure;0;GetrÃ¤nke
+ErythorbinsÃ¤ure;0;GetrÃ¤nke
+Isovitamin C;0;GetrÃ¤nke
+E316;0;GetrÃ¤nke
+Natriumisoascorbat;0;GetrÃ¤nke
+Natriumerythorbat;0;GetrÃ¤nke
+E319;?;GetrÃ¤nke
+tert-;?;GetrÃ¤nke
+E322;0;GetrÃ¤nke
+Lecithine;0;GetrÃ¤nke
+Lezithine;0;GetrÃ¤nke
+E325;0;GetrÃ¤nke
+Natriumlactat;0;GetrÃ¤nke
+E326;0;GetrÃ¤nke
+Kaliumlactat;0;GetrÃ¤nke
+E330;1;GetrÃ¤nke
+CitronensÃ¤ure;1;GetrÃ¤nke
+E331;1;GetrÃ¤nke
+Natriumcitrat;1;GetrÃ¤nke
+Trinatriumcitrat;1;GetrÃ¤nke
+Natriumzitrat;1;GetrÃ¤nke
+E332;1;GetrÃ¤nke
+Kaliumcitrat;1;GetrÃ¤nke
+Tricalciumcitrat;1;GetrÃ¤nke
+E334;0;GetrÃ¤nke
+WeinsÃ¤ure;0;GetrÃ¤nke
+2;0;GetrÃ¤nke
+3-DihydroxybernsteinsÃ¤ure;0;GetrÃ¤nke
+3-;0;GetrÃ¤nke
+E335;0;GetrÃ¤nke
+Natriumtartrat;0;GetrÃ¤nke
+E336;0;GetrÃ¤nke
+Weinsteinbackpulver;0;GetrÃ¤nke
+Kaliumtartrat;0;GetrÃ¤nke
+Kaliumphosphate: Kaliumdihydrogenphosphat;1;GetrÃ¤nke
+E341;1;GetrÃ¤nke
+Calciumphosphate:;1;GetrÃ¤nke
+E401;1;GetrÃ¤nke
+Natriumalginat;1;GetrÃ¤nke
+E402;1;GetrÃ¤nke
+Kalziumalginat;1;GetrÃ¤nke
+Karrageen;2;GetrÃ¤nke
+Johannisbrotkernmehl;2;GetrÃ¤nke
+E412;1;GetrÃ¤nke
+Guarkernmehl;1;GetrÃ¤nke
+E413;2;GetrÃ¤nke
+Traganth;2;GetrÃ¤nke
+Tragant;2;GetrÃ¤nke
+E414;1;GetrÃ¤nke
+Gummi arabicum;1;GetrÃ¤nke
+Gummiarabikum;1;GetrÃ¤nke
+E415;0;GetrÃ¤nke
+Xanthan;0;GetrÃ¤nke
+Xantan;0;GetrÃ¤nke
+Xanthangummi;0;GetrÃ¤nke
+E416;1;GetrÃ¤nke
+Karaya;1;GetrÃ¤nke
+Indischer Traganth;1;GetrÃ¤nke
+Karayagummi;1;GetrÃ¤nke
+E421;0;GetrÃ¤nke
+Mannit;0;GetrÃ¤nke
+Mannitol;0;GetrÃ¤nke
+E422;0;GetrÃ¤nke
+Glycerin;0;GetrÃ¤nke
+Glycerol;0;GetrÃ¤nke
+Glyzerin;0;GetrÃ¤nke
+Propan-1;0;GetrÃ¤nke
+3-triol;0;GetrÃ¤nke
+E440;0;GetrÃ¤nke
+Pektin;0;GetrÃ¤nke
+E441;1;GetrÃ¤nke
+Gelatine;1;GetrÃ¤nke
+Polyphosphate: Natrium-;2;GetrÃ¤nke
+Kalium-;2;GetrÃ¤nke
+E460;0;GetrÃ¤nke
+Zellulose;0;GetrÃ¤nke
+E461;0;GetrÃ¤nke
+Methylzellulose;0;GetrÃ¤nke
+E462;0;GetrÃ¤nke
+E463;0;GetrÃ¤nke
+Hydroxypropylcellulose;0;GetrÃ¤nke
+E464;0;GetrÃ¤nke
+Hydroxypropylmethylcellulose;0;GetrÃ¤nke
+Hypromellose;0;GetrÃ¤nke
+E465;0;GetrÃ¤nke
+Ethyl Methylcellulose;0;GetrÃ¤nke
+Ethylmethylcellulose;0;GetrÃ¤nke
+E466;?;GetrÃ¤nke
+Carboxymethylcellulosen;?;GetrÃ¤nke
+Carmellose;?;GetrÃ¤nke
+E500;0;GetrÃ¤nke
+Natriumcarbonat;0;GetrÃ¤nke
+Natriumkarbonat;0;GetrÃ¤nke
+Soda;0;GetrÃ¤nke
+E500ii;0;GetrÃ¤nke
+Natron;0;GetrÃ¤nke
+Natriumhydrogencarbonat;0;GetrÃ¤nke
+E501;0;GetrÃ¤nke
+Kaliumcarbonat;0;GetrÃ¤nke
+Kaliumkarbonat;0;GetrÃ¤nke
+Pottasche;0;GetrÃ¤nke
+kohlensaures;0;GetrÃ¤nke
+E504;0;GetrÃ¤nke
+Magnesiumcarbonat;0;GetrÃ¤nke
+E507;0;GetrÃ¤nke
+ChlorwasserstoffsÃ¤ure;0;GetrÃ¤nke
+acidum;0;GetrÃ¤nke
+E579;0;GetrÃ¤nke
+Eisengluconat;0;GetrÃ¤nke
+E620;2;GetrÃ¤nke
+GlutaminsÃ¤ure;2;GetrÃ¤nke
+(Glutamat);2;GetrÃ¤nke
+E620-E625;2;GetrÃ¤nke
+Glutamate;2;GetrÃ¤nke
+GeschmacksverstÃ¤rker;2;GetrÃ¤nke
+E621;2;GetrÃ¤nke
+Mononatriumglutamat;2;GetrÃ¤nke
+Natriumglutamat;2;GetrÃ¤nke
+E622;2;GetrÃ¤nke
+Monokaliumglutamat;2;GetrÃ¤nke
+Kaliumglutamat;2;GetrÃ¤nke
+E624;2;GetrÃ¤nke
+Monoammoniumglutamat;2;GetrÃ¤nke
+E625;2;GetrÃ¤nke
+Magnesiumdiglutamat;2;GetrÃ¤nke
+Magnesiumglutamat;2;GetrÃ¤nke
+E626;0;GetrÃ¤nke
+Guanosinmonophosphat;0;GetrÃ¤nke
+GuanylsÃ¤ure;0;GetrÃ¤nke
+E650;0;GetrÃ¤nke
+Zinkacetat;0;GetrÃ¤nke
+E900;?;GetrÃ¤nke
+Polydimethylsiloxan;?;GetrÃ¤nke
+PDMS;?;GetrÃ¤nke
+cera flava;0;GetrÃ¤nke
+cera alba;0;GetrÃ¤nke
+E955;0;GetrÃ¤nke
+Sucralose;0;GetrÃ¤nke
+E960;0;GetrÃ¤nke
+Steviosid;0;GetrÃ¤nke
+Steviol-Glykosid;0;GetrÃ¤nke
+Flavinmononukleotid;1;GetrÃ¤nke
+Gelatine E441;1;GetrÃ¤nke
+Gluten;1;GetrÃ¤nke
+Weizenkleber;1;GetrÃ¤nke
+1;0;GetrÃ¤nke
+Guanylat;0;GetrÃ¤nke
+Guaran;1;GetrÃ¤nke
+Methenamin;2;GetrÃ¤nke
+Johannisbrot;2;GetrÃ¤nke
+Johannisbrotpulver;2;GetrÃ¤nke
+Kaftan;2;GetrÃ¤nke
+Bengalsalpeter;?;GetrÃ¤nke
+Kaliumphosphate;1;GetrÃ¤nke
+Kaliumpolyphosphat;2;GetrÃ¤nke
+Kaliumpyrosulfit;2;GetrÃ¤nke
+Kalziumglutamat;2;GetrÃ¤nke
+Karragheen;2;GetrÃ¤nke
+Karubenmehl;2;GetrÃ¤nke
+Kohle;0;GetrÃ¤nke
+KohlensÃ¤ure H2CO3;1;GetrÃ¤nke
+gelÃ¶stes CO2 in;1;GetrÃ¤nke
+KolliphorÂ® EL;?;GetrÃ¤nke
+Cremophor EL;?;GetrÃ¤nke
+Macrogolglycerol;?;GetrÃ¤nke
+Menthol;1;GetrÃ¤nke
+Mineralwasser mit KohlensÃ¤ure;1;GetrÃ¤nke
+modifizierte StÃ¤rke;0;GetrÃ¤nke
+Ammoniumglutamat;2;GetrÃ¤nke
+Natriumcalciumpolyphosphat;2;GetrÃ¤nke
+Natriumpolyphosphat;2;GetrÃ¤nke
+Natriumpyrosulfit;2;GetrÃ¤nke
+Parabene = PHB-Ester;2;GetrÃ¤nke
+E214-E219;2;GetrÃ¤nke
+Methyl-;2;GetrÃ¤nke
+Ethyl-;2;GetrÃ¤nke
+Pektine;0;GetrÃ¤nke
+amidiertes Pektin;0;GetrÃ¤nke
+Salicylat;2;GetrÃ¤nke
+SalicylsÃ¤ure;2;GetrÃ¤nke
+Schwefeldioxid E220;2;GetrÃ¤nke
+Seifenkrautextrakt (als Zutat in Halva);0;GetrÃ¤nke
+Sorbate (=Salze der SorbinsÃ¤ure): Kaliumsorbat;2;GetrÃ¤nke
+StÃ¤rke (KartoffelstÃ¤rke;0;GetrÃ¤nke
+MaisstÃ¤rke;0;GetrÃ¤nke
+ReisstÃ¤rke;0;GetrÃ¤nke
+Sterculia-Gummi;1;GetrÃ¤nke
+Vanillin (synthetisch);0;GetrÃ¤nke
+Vanillinzucker;0;GetrÃ¤nke
+ZitronensÃ¤ure E330;1;GetrÃ¤nke
+Zuckercouleur;0;GetrÃ¤nke
+ZuckerkulÃ¶r;0;GetrÃ¤nke
+E150a;0;GetrÃ¤nke
+Zuckercouleur: Ammoniak-ZuckerkulÃ¶r;0;GetrÃ¤nke
+Zuckercouleur: Ammoniumsulfit-ZuckerkulÃ¶r;0;GetrÃ¤nke
+E150d;0;GetrÃ¤nke
+Zuckercouleur: Sulfitlaugen-ZuckerkulÃ¶r;0;GetrÃ¤nke
+Calcium;1;GetrÃ¤nke
+Kalzium;1;GetrÃ¤nke
+FolsÃ¤ure;2;GetrÃ¤nke
+Folat;2;GetrÃ¤nke
+Vitamin B9;2;GetrÃ¤nke
+GuaranÃ¡ (Paullinia cupana);2;GetrÃ¤nke
+Iod;3;GetrÃ¤nke
+Jod;3;GetrÃ¤nke
+Jodsalz;2;GetrÃ¤nke
+Iodsalz (Jodzusatz in Form von Kaliumiodid;2;GetrÃ¤nke
+Jodtabletten fÃ¼r den atomaren StÃ¶rfall;3;GetrÃ¤nke
+Kaliumiodat;3;GetrÃ¤nke
+Kaliumjodat;3;GetrÃ¤nke
+Kaliumiodid;3;GetrÃ¤nke
+Kaliumjodid;3;GetrÃ¤nke
+Kochsalz iodiert / jodiert;2;GetrÃ¤nke
+Tannenschoss;0;GetrÃ¤nke
+Tannenknospen;0;GetrÃ¤nke
+Theobromin;2;GetrÃ¤nke
+Gerstenmalzmehl;0;GetrÃ¤nke
+Malzmehl;0;GetrÃ¤nke
+Kimchi;2;GetrÃ¤nke
+"Lakritze;2;GetrÃ¤nke
+""BÃ¤rendreck""";2;GetrÃ¤nke
+Marzipan;1;GetrÃ¤nke
+Schokolade;2;GetrÃ¤nke
+braun / schwarz / dunkel;2;GetrÃ¤nke
+Schokolade;1;GetrÃ¤nke
+weiss;1;GetrÃ¤nke
+Seitan;1;GetrÃ¤nke
+Senf (Zubereitung);2;GetrÃ¤nke
+Tofu;2;GetrÃ¤nke
+weiÃŸe Schokolade;1;GetrÃ¤nke
