@@ -200,17 +200,8 @@ internal fun buildNutrientRows(
     return rows
 }
 
-private fun nutrientLabel(key: String): String = when (key) {
-    "kcal" -> "Kalorien"
-    "protein" -> "Eiweiß"
-    "carbs" -> "Kohlenhydrate"
-    "sugar" -> "davon Zucker"
-    "fat" -> "Fett"
-    "satfat" -> "davon gesättigt"
-    "fiber" -> "Ballaststoffe"
-    "salt" -> "Salz"
-    else -> key
-}
+private fun nutrientLabel(key: String): String =
+    de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
 
 @Composable
 private fun CenteredLoader() {

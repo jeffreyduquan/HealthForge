@@ -231,22 +231,18 @@ private fun buildIngredientNutrientRows(
     fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
         if (pinnedKeys.isNotEmpty() && key !in pinnedKeys) return
         val pct = (value / dgeDefault) * 100.0
-        val label = when (key) {
-            "kcal" -> "Kalorien"
-            "protein" -> "Eiweiß"
-            "carbs" -> "Kohlenhydrate"
-            "fat" -> "Fett"
-            "fiber" -> "Ballaststoffe"
-            else -> key
-        }
+        val label = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
         rows.add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))
     }
 
     item.energy_kcal_per_100g?.let { add("kcal", it, "kcal", 2000.0) }
     item.protein_g_per_100g?.let { add("protein", it, "g", 50.0) }
     item.carbs_g_per_100g?.let { add("carbs", it, "g", 260.0) }
+    item.sugar_g_per_100g?.let { add("sugar", it, "g", 50.0) }
     item.fat_g_per_100g?.let { add("fat", it, "g", 65.0) }
+    item.satfat_g_per_100g?.let { add("satfat", it, "g", 20.0) }
     item.fiber_g_per_100g?.let { add("fiber", it, "g", 30.0) }
+    item.salt_g_per_100g?.let { add("salt", it, "g", 5.0) }
 
     // Micronutrients with DGE
     item.micronutrients.entries.forEach { (key, value) ->
