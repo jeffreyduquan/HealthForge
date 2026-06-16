@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -74,6 +73,7 @@ fun ProfileScreen(
     val hm = LocalHmTokens.current
     var showAllergies by remember { mutableStateOf(false) }
     var showGoals by remember { mutableStateOf(false) }
+    var showAppearance by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -125,35 +125,20 @@ fun ProfileScreen(
                 },
             )
 
-            // Allergien — opens ModalBottomSheet
-            SectionPill(label = "ALLERGIEN & INTOLERANZEN")
-            TextButton(onClick = { showAllergies = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("Allergien & Intoleranzen bearbeiten →", color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge)
-            }
-
-            SectionPill(label = "ERSCHEINUNGSBILD")
+            // ── EINSTELLUNGEN ──
+            SectionPill(label = "EINSTELLUNGEN")
             GlassCard(modifier = Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ThemePreference.entries.forEach { t ->
-                        FilterChip(
-                            selected = theme == t,
-                            onClick = { vm.setTheme(t) },
-                            label = {
-                                Text(when (t) {
-                                    ThemePreference.LIGHT -> "Hell"
-                                    ThemePreference.DARK -> "Dunkel"
-                                    ThemePreference.SYSTEM -> "System"
-                                })
-                            },
-                        )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { showAllergies = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Allergien & Intoleranzen")
+                    }
+                    OutlinedButton(onClick = { showAppearance = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Erscheinungsbild")
+                    }
+                    OutlinedButton(onClick = { showGoals = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Tagesziele")
                     }
                 }
-            }
-
-            // Tagesziele — opens ModalBottomSheet
-            SectionPill(label = "TAGESZIELE")
-            TextButton(onClick = { showGoals = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("Tagesziele bearbeiten →", color = hm.fgPrimary, style = MaterialTheme.typography.bodyLarge)
             }
 
             SectionPill(label = "MEHR")
@@ -303,6 +288,32 @@ fun ProfileScreen(
                     }
                 }
                 Spacer(Modifier.height(32.dp))
+            }
+        }
+    }
+    // Erscheinungsbild sheet
+    if (showAppearance) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { showAppearance = false }, sheetState = sheetState, containerColor = hm.background) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                GradientText("Erscheinungsbild", style = MaterialTheme.typography.titleLarge)
+                Text("Theme", color = hm.fgPrimary, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemePreference.entries.forEach { t ->
+                        FilterChip(
+                            selected = theme == t,
+                            onClick = { vm.setTheme(t) },
+                            label = {
+                                Text(when (t) {
+                                    ThemePreference.LIGHT -> "Hell"
+                                    ThemePreference.DARK -> "Dunkel"
+                                    ThemePreference.SYSTEM -> "System"
+                                })
+                            },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
