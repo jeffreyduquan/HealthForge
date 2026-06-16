@@ -160,14 +160,11 @@ class SighiImporter(private val ingredients: IngredientRepository) : Importer {
         var updated = 0; var skipped = 0
         for (e in ingredients.findAll()) {
             val name = normalize(e.nameDe)
-            // P7.S5c: Auch ASCII-Umlaut-Varianten normalisieren (ae→a, oe→o, ue→u),
-            // da viele DB-Namen "Haehnchen" statt "Hähnchen" schreiben.
-            val nameAlt = name.replace("ae", "a").replace("oe", "o").replace("ue", "u")
             if (name.isBlank()) { skipped++; continue }
             // pick best matching rule: max score, ties → longer keyword
             val best = rules
                 .asSequence()
-                .filter { it.normalized.isNotBlank() && (name.contains(it.normalized) || nameAlt.contains(it.normalized)) }
+                .filter { it.normalized.isNotBlank() && name.contains(it.normalized) }
                 .maxWithOrNull(
                     compareBy<Rule>({ it.score }, { it.normalized.length })
                 )
@@ -183,7 +180,11 @@ class SighiImporter(private val ingredients: IngredientRepository) : Importer {
     }
 
     private fun normalize(s: String): String {
-        val lower = s.lowercase().replace('ß', 's').let { it.replace("ss", "ss") } // ß→ss (idempotent)
+        // P7.S5c: Erst ASCII-Umlaute zu echten Umlauten konvertieren,
+        // dann NFD-normalisieren → "Haehnchen" und "Hähnchen" werden beide zu "hahnchen".
+        val lower = s.lowercase()
+            .replace("ae", "ä").replace("oe", "ö").replace("ue", "ü")
+            .replace("ß", "ss")
         val nfd = java.text.Normalizer.normalize(lower, java.text.Normalizer.Form.NFD)
         return nfd.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
     }
