@@ -1,5 +1,7 @@
 package de.healthforge.recipe
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import de.healthforge.ingredient.IngredientEntity
 import de.healthforge.ingredient.IngredientRepository
 import org.springframework.stereotype.Component
@@ -27,6 +29,7 @@ import java.util.UUID
 class RecipeNutritionCompute(
     private val ingredientRepo: IngredientRepository,
 ) {
+    private val objectMapper = jacksonObjectMapper()
 
     fun compute(items: List<RecipeIngredientEntity>): RecipeNutritionDto {
         if (items.isEmpty()) return zero()
@@ -38,8 +41,12 @@ class RecipeNutritionCompute(
         var kcal = BigDecimal.ZERO
         var protein = BigDecimal.ZERO
         var carbs = BigDecimal.ZERO
+        var sugar = BigDecimal.ZERO
         var fat = BigDecimal.ZERO
+        var satfat = BigDecimal.ZERO
         var fiber = BigDecimal.ZERO
+        var salt = BigDecimal.ZERO
+        val micronutrients = mutableMapOf<String, BigDecimal>()
         val missing = mutableListOf<UUID>()
 
         for (it in items) {
@@ -58,16 +65,34 @@ class RecipeNutritionCompute(
             kcal = kcal.add((ing.energyKcalPer100g ?: BigDecimal.ZERO).multiply(factor))
             protein = protein.add((ing.proteinGPer100g ?: BigDecimal.ZERO).multiply(factor))
             carbs = carbs.add((ing.carbsGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            sugar = sugar.add((ing.sugarGPer100g ?: BigDecimal.ZERO).multiply(factor))
             fat = fat.add((ing.fatGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            satfat = satfat.add((ing.satfatGPer100g ?: BigDecimal.ZERO).multiply(factor))
             fiber = fiber.add((ing.fiberGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            salt = salt.add((ing.saltGPer100g ?: BigDecimal.ZERO).multiply(factor))
+
+            // Aggregate micronutrients from JSON
+            try {
+                val micros: Map<String, Double> = objectMapper.readValue(ing.micronutrientsJson)
+                for ((key, value) in micros) {
+                    val scaled = BigDecimal.valueOf(value).multiply(factor)
+                    micronutrients.merge(key, scaled) { a, b -> a.add(b) }
+                }
+            } catch (_: Exception) {
+                // ignore malformed JSON
+            }
         }
 
         return RecipeNutritionDto(
             energyKcal = kcal.setScale(1, RoundingMode.HALF_UP),
             proteinG = protein.setScale(1, RoundingMode.HALF_UP),
             carbsG = carbs.setScale(1, RoundingMode.HALF_UP),
+            sugarG = sugar.setScale(1, RoundingMode.HALF_UP),
             fatG = fat.setScale(1, RoundingMode.HALF_UP),
+            satfatG = satfat.setScale(1, RoundingMode.HALF_UP),
             fiberG = fiber.setScale(1, RoundingMode.HALF_UP),
+            saltG = salt.setScale(1, RoundingMode.HALF_UP),
+            micronutrients = micronutrients.mapValues { (_, v) -> v.setScale(3, RoundingMode.HALF_UP) },
             missingIngredients = missing.distinct(),
         )
     }
@@ -76,8 +101,12 @@ class RecipeNutritionCompute(
         energyKcal = BigDecimal.ZERO,
         proteinG = BigDecimal.ZERO,
         carbsG = BigDecimal.ZERO,
+        sugarG = BigDecimal.ZERO,
         fatG = BigDecimal.ZERO,
+        satfatG = BigDecimal.ZERO,
         fiberG = BigDecimal.ZERO,
+        saltG = BigDecimal.ZERO,
+        micronutrients = emptyMap(),
         missingIngredients = emptyList(),
     )
 
@@ -108,8 +137,11 @@ class RecipeNutritionCompute(
         var kcal = BigDecimal.ZERO
         var protein = BigDecimal.ZERO
         var carbs = BigDecimal.ZERO
+        var sugar = BigDecimal.ZERO
         var fat = BigDecimal.ZERO
+        var satfat = BigDecimal.ZERO
         var fiber = BigDecimal.ZERO
+        var salt = BigDecimal.ZERO
 
         for (it in items) {
             if (it.isOptional) continue
@@ -120,8 +152,11 @@ class RecipeNutritionCompute(
             kcal = kcal.add((ing.energyKcalPer100g ?: BigDecimal.ZERO).multiply(factor))
             protein = protein.add((ing.proteinGPer100g ?: BigDecimal.ZERO).multiply(factor))
             carbs = carbs.add((ing.carbsGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            sugar = sugar.add((ing.sugarGPer100g ?: BigDecimal.ZERO).multiply(factor))
             fat = fat.add((ing.fatGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            satfat = satfat.add((ing.satfatGPer100g ?: BigDecimal.ZERO).multiply(factor))
             fiber = fiber.add((ing.fiberGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            salt = salt.add((ing.saltGPer100g ?: BigDecimal.ZERO).multiply(factor))
         }
 
         if (totalWeight.compareTo(BigDecimal.ZERO) <= 0) return null
@@ -132,8 +167,11 @@ class RecipeNutritionCompute(
             kcalPer100g = kcal.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             proteinPer100g = protein.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             carbsPer100g = carbs.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            sugarPer100g = sugar.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             fatPer100g = fat.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            satfatPer100g = satfat.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             fiberPer100g = fiber.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            saltPer100g = salt.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
         )
     }
 }
@@ -143,6 +181,9 @@ data class RecipeNutritionSummary(
     val kcalPer100g: BigDecimal,
     val proteinPer100g: BigDecimal,
     val carbsPer100g: BigDecimal,
+    val sugarPer100g: BigDecimal,
     val fatPer100g: BigDecimal,
+    val satfatPer100g: BigDecimal,
     val fiberPer100g: BigDecimal,
+    val saltPer100g: BigDecimal,
 )

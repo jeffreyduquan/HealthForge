@@ -73,8 +73,11 @@ class RecipeService(
                 kcalPer100g = summary?.kcalPer100g,
                 proteinPer100g = summary?.proteinPer100g,
                 carbsPer100g = summary?.carbsPer100g,
+                sugarPer100g = summary?.sugarPer100g,
                 fatPer100g = summary?.fatPer100g,
+                satfatPer100g = summary?.satfatPer100g,
                 fiberPer100g = summary?.fiberPer100g,
+                saltPer100g = summary?.saltPer100g,
             )
         }
     }
@@ -228,8 +231,11 @@ class RecipeService(
                 kcalPer100g = summary?.kcalPer100g,
                 proteinPer100g = summary?.proteinPer100g,
                 carbsPer100g = summary?.carbsPer100g,
+                sugarPer100g = summary?.sugarPer100g,
                 fatPer100g = summary?.fatPer100g,
+                satfatPer100g = summary?.satfatPer100g,
                 fiberPer100g = summary?.fiberPer100g,
+                saltPer100g = summary?.saltPer100g,
             )
         }
     }

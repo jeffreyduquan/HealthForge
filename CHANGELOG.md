@@ -2,6 +2,29 @@
 
 ---
 
+## P7.S5b: Expanded Recipe Nutrition (2026-06-16)
+
+**Scope:** Recipes now aggregate ALL nutrient values from their ingredients.
+
+**Touched Docs:**
+- `CHANGELOG.md`: This entry
+- `docs/ReqSpec.md`: REQ-RECIPE-010 expanded (sugar, satfat, salt added)
+
+**Untouched Docs:**
+- `docs/Architecture.md`: No architecture changes
+- `docs/GUI.md`, `docs/UsabilityMap.md`: No UI workflow changes
+- `docs/SprintPlan.md`, `docs/TraceabilityMatrix.md`, `docs/Runbook.md`
+
+**Changes:**
+- Server: `RecipeNutritionDto` + `RecipeNutritionCompute` erweitert um sugar, satfat, salt, micronutrients (Map<String, BigDecimal>)
+- Server: `RecipeNutritionSummary` + `RecipeListItemDto` erweitert (sugar/satfat/salt per 100g)
+- Server: `RecipeService` mapping updated (browse + batch)
+- Android: `RecipeNutritionDto` + `RecipeListItemDto` um 4 neue Felder erweitert
+- Android: `RecipeDetailScreen` zeigt Zucker, gesättigte Fette, Salz + Mikronährstoffe (Vitamine/Mineralien) mit DGE-Progress-Bars
+- Android: `RecipesScreen.buildNutrientRows` + `nutrientLabel` erweitert
+
+---
+
 ## P7.S5: UI Design System Consolidation (2026-06-15/16)
 
 **Scope:** Complete unification of all UI components across the app. ~10 commits.

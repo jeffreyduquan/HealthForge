@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,10 +34,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -150,6 +153,17 @@ fun PlanScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     SectionPill(label = "HOME")
+                    // ── HEUTE-BUTTON (nur sichtbar wenn nicht auf heute) ──
+                    if (state.selectedDay != LocalDate.now()) {
+                        Spacer(Modifier.width(10.dp))
+                        TodayPill(
+                            onClick = {
+                                val today = LocalDate.now()
+                                vm.selectDay(today)
+                                homeVm.setDate(today)
+                            },
+                        )
+                    }
                     Spacer(Modifier.weight(1f))
                     GlassIconTile(
                         onClick = { autoVm.open() },
@@ -352,9 +366,18 @@ private fun DayHeader(date: LocalDate) {
 private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
     val hm = LocalHmTokens.current
     val today = LocalDate.now()
-    val days = (-365..365).map { today.plusDays(it.toLong()) }
+    val days = remember { (-365..365).map { today.plusDays(it.toLong()) } }
+    val todayIndex = 365 // today is at position 365 in the range -365..365
     val fmt = remember { DateTimeFormatter.ofPattern("d.M.") }
+    val listState = rememberLazyListState()
+
+    // Auto-scroll to today on first composition
+    LaunchedEffect(Unit) {
+        listState.scrollToItem(todayIndex)
+    }
+
     LazyRow(
+        state = listState,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -440,6 +463,43 @@ private fun GlassIconTile(
         // contentDescription propagiert über das innere Icon der Caller-Site.
         @Suppress("UNUSED_EXPRESSION") contentDescription
         content()
+    }
+}
+
+/**
+ * TodayPill — accent-gradient pill button that jumps back to today.
+ * Only visible when viewing a past or future day.
+ *
+ * Design: matches DayStrip's selected pill (accentGradient + RoundedCornerShape(20.dp))
+ * with bold "Heute" label in fgPrimary. Subtle violetGlow shadow on the pill.
+ */
+@Composable
+private fun TodayPill(onClick: () -> Unit) {
+    val hm = LocalHmTokens.current
+    val shape = RoundedCornerShape(20.dp)
+    Surface(
+        modifier = Modifier
+            .clip(shape)
+            .clickable(onClick = onClick),
+        shape = shape,
+        color = Color.Transparent,
+        contentColor = hm.fgPrimary,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(hm.accentGradient, shape)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "Heute",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.W700,
+                    letterSpacing = 0.4.sp,
+                ),
+                color = hm.fgPrimary,
+            )
+        }
     }
 }
 

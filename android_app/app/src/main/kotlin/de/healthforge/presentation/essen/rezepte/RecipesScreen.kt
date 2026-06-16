@@ -139,8 +139,11 @@ fun RecipeCard(
         kcal = recipe.kcal_per_100g,
         protein = recipe.protein_per_100g,
         carbs = recipe.carbs_per_100g,
+        sugar = recipe.sugar_per_100g,
         fat = recipe.fat_per_100g,
+        satfat = recipe.satfat_per_100g,
         fiber = recipe.fiber_per_100g,
+        salt = recipe.salt_per_100g,
     )
 
     HfMasterTile(
@@ -171,8 +174,11 @@ internal fun buildNutrientRows(
     kcal: Double?,
     protein: Double?,
     carbs: Double?,
+    sugar: Double?,
     fat: Double?,
+    satfat: Double?,
     fiber: Double?,
+    salt: Double?,
 ): List<MasterTileNutrient> {
     val rows = mutableListOf<MasterTileNutrient>()
 
@@ -185,8 +191,11 @@ internal fun buildNutrientRows(
     kcal?.let { add("kcal", it, "kcal", 2000.0) }
     protein?.let { add("protein", it, "g", 50.0) }
     carbs?.let { add("carbs", it, "g", 260.0) }
+    sugar?.let { add("sugar", it, "g", 50.0) }
     fat?.let { add("fat", it, "g", 65.0) }
+    satfat?.let { add("satfat", it, "g", 20.0) }
     fiber?.let { add("fiber", it, "g", 30.0) }
+    salt?.let { add("salt", it, "g", 5.0) }
 
     return rows
 }
@@ -195,8 +204,11 @@ private fun nutrientLabel(key: String): String = when (key) {
     "kcal" -> "Kalorien"
     "protein" -> "Eiweiß"
     "carbs" -> "Kohlenhydrate"
+    "sugar" -> "davon Zucker"
     "fat" -> "Fett"
+    "satfat" -> "davon gesättigt"
     "fiber" -> "Ballaststoffe"
+    "salt" -> "Salz"
     else -> key
 }
 

@@ -287,7 +287,7 @@ private fun DetailContent(
         val n = recipe.nutrition
         val servings = recipe.servings.coerceAtLeast(1)
         val perServing = { v: Double -> v / servings }
-        HfSectionHeader("Tagesbedarf-Abdeckung (pro Portion)")
+        HfSectionHeader("Nährwerte (pro Portion)")
         HfCard {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 HfNutrientProgressRow("Kalorien", "${perServing(n.energy_kcal).toInt()} kcal",
@@ -296,10 +296,39 @@ private fun DetailContent(
                     perServing(n.protein_g) / 50.0 * 100)
                 HfNutrientProgressRow("Kohlenhydrate", "${formatNutrientValue(perServing(n.carbs_g))} g",
                     perServing(n.carbs_g) / 260.0 * 100)
+                HfNutrientProgressRow("davon Zucker", "${formatNutrientValue(perServing(n.sugar_g))} g",
+                    perServing(n.sugar_g) / 50.0 * 100)
                 HfNutrientProgressRow("Fett", "${formatNutrientValue(perServing(n.fat_g))} g",
                     perServing(n.fat_g) / 65.0 * 100)
+                HfNutrientProgressRow("davon gesättigt", "${formatNutrientValue(perServing(n.satfat_g))} g",
+                    perServing(n.satfat_g) / 20.0 * 100)
                 HfNutrientProgressRow("Ballaststoffe", "${formatNutrientValue(perServing(n.fiber_g))} g",
                     perServing(n.fiber_g) / 30.0 * 100)
+                HfNutrientProgressRow("Salz", "${formatNutrientValue(perServing(n.salt_g))} g",
+                    perServing(n.salt_g) / 5.0 * 100)
+            }
+        }
+
+        // ── Mikronährstoffe (Vitamine & Mineralien) ──
+        if (n.micronutrients.isNotEmpty()) {
+            HfSectionHeader("Mikronährstoffe (pro Portion)")
+            HfCard {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    n.micronutrients.entries
+                        .sortedBy { it.key }
+                        .forEach { (key, value) ->
+                            val perServ = value / servings
+                            val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)
+                            val label = nutrient?.displayDe ?: key
+                            val unit = nutrient?.unit?.label ?: ""
+                            val dge = nutrient?.defaultPerDay ?: 1.0
+                            HfNutrientProgressRow(
+                                label = label,
+                                value = "${formatNutrientValue(perServ)} $unit",
+                                pct = (perServ / dge * 100).coerceAtMost(200.0),
+                            )
+                        }
+                }
             }
         }
 

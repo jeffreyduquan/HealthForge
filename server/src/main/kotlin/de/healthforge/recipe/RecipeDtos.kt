@@ -66,8 +66,12 @@ data class RecipeNutritionDto(
     @JsonProperty("energy_kcal") val energyKcal: BigDecimal,
     @JsonProperty("protein_g") val proteinG: BigDecimal,
     @JsonProperty("carbs_g") val carbsG: BigDecimal,
+    @JsonProperty("sugar_g") val sugarG: BigDecimal,
     @JsonProperty("fat_g") val fatG: BigDecimal,
+    @JsonProperty("satfat_g") val satfatG: BigDecimal,
     @JsonProperty("fiber_g") val fiberG: BigDecimal,
+    @JsonProperty("salt_g") val saltG: BigDecimal,
+    @JsonProperty("micronutrients") val micronutrients: Map<String, BigDecimal>,
     @JsonProperty("missing_ingredients") val missingIngredients: List<UUID>,
 )
 
@@ -90,8 +94,11 @@ data class RecipeListItemDto(
     @JsonProperty("kcal_per_100g") val kcalPer100g: BigDecimal?,
     @JsonProperty("protein_per_100g") val proteinPer100g: BigDecimal?,
     @JsonProperty("carbs_per_100g") val carbsPer100g: BigDecimal?,
+    @JsonProperty("sugar_per_100g") val sugarPer100g: BigDecimal?,
     @JsonProperty("fat_per_100g") val fatPer100g: BigDecimal?,
+    @JsonProperty("satfat_per_100g") val satfatPer100g: BigDecimal?,
     @JsonProperty("fiber_per_100g") val fiberPer100g: BigDecimal?,
+    @JsonProperty("salt_per_100g") val saltPer100g: BigDecimal?,
 )
 
 data class RecipeDetailDto(

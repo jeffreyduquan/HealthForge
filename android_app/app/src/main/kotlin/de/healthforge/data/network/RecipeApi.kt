@@ -16,8 +16,12 @@ data class RecipeNutritionDto(
     val energy_kcal: Double,
     val protein_g: Double,
     val carbs_g: Double,
+    val sugar_g: Double = 0.0,
     val fat_g: Double,
+    val satfat_g: Double = 0.0,
     val fiber_g: Double,
+    val salt_g: Double = 0.0,
+    val micronutrients: Map<String, Double> = emptyMap(),
     val missing_ingredients: List<String> = emptyList(),
 )
 
@@ -59,8 +63,11 @@ data class RecipeListItemDto(
     val kcal_per_100g: Double? = null,
     val protein_per_100g: Double? = null,
     val carbs_per_100g: Double? = null,
+    val sugar_per_100g: Double? = null,
     val fat_per_100g: Double? = null,
+    val satfat_per_100g: Double? = null,
     val fiber_per_100g: Double? = null,
+    val salt_per_100g: Double? = null,
 )
 
 @JsonClass(generateAdapter = true)

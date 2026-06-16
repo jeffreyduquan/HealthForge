@@ -148,7 +148,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | REQ-RECIPE-007 | Recipe nutrition SHALL be computed live from its ingredients (no stored nutrition block on the recipe row). |
 | REQ-RECIPE-008 | Editing a recipe SHALL be restricted to its owner. |
 | REQ-RECIPE-009 | Deleting a recipe SHALL not break historical Intake-Log entries on the client: the client snapshots the title at intake time. |
-| REQ-RECIPE-010 | (P7.S5) Recipe list items SHALL include per-100g nutrition (kcal, protein, carbs, fat, fiber) for MasterTile progress bars. Total weight SHALL be computed from ingredient quantities. |
+| REQ-RECIPE-010 | (P7.S5) Recipe list items SHALL include per-100g nutrition (kcal, protein, carbs, sugar, fat, satfat, fiber, salt) for MasterTile progress bars. Total weight SHALL be computed from ingredient quantities. |
 | REQ-RECIPE-011 | (P7.S5) Recipe list DTOs SHALL be served with nutrition summary via `RecipeNutritionCompute.computeSummary()`. |
 
 ### 5.5a Unified Design System (P7.S5 — 2026-06-15)
