@@ -118,13 +118,30 @@ fun IngredientDetailScreen(
 
                 HorizontalDivider(color = hm.fgTertiary.copy(alpha = 0.3f))
 
-                // ── TAGESBEDARF-ABDECKUNG (DGE Progress Bars) ──
-                val dgeRows = buildDgeRows(item)
-                if (dgeRows.isNotEmpty()) {
-                    HfSectionHeader("Tagesbedarf-Abdeckung")
+                // ── NÄHRWERTE (pro 100 g) ──
+                val macroRows = buildMacroRows(item)
+                if (macroRows.isNotEmpty()) {
+                    HfSectionHeader("Nährwerte (pro 100 g)")
                     HfCard {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            dgeRows.forEach { (label, value, pct) ->
+                            macroRows.forEach { (label, value, pct) ->
+                                HfNutrientProgressRow(
+                                    label = label,
+                                    value = value,
+                                    percentDge = pct,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ── MIKRONÄHRSTOFFE (pro 100 g) ──
+                val microRows = buildMicroRows(item)
+                if (microRows.isNotEmpty()) {
+                    HfSectionHeader("Mikronährstoffe (pro 100 g)")
+                    HfCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            microRows.forEach { (label, value, pct) ->
                                 HfNutrientProgressRow(
                                     label = label,
                                     value = value,
@@ -198,10 +215,10 @@ fun IngredientDetailScreen(
 }
 
 /**
- * Build list of (label, value, percentDge) for all nutrients that have DGE references.
- * Sorted by % DGE descending so most impactful nutrients appear first.
+ * Build macro nutrient rows (kcal, protein, carbs, sugar, fat, satfat, fiber, salt).
+ * Fixed order — matches RecipeDetailScreen.
  */
-private fun buildDgeRows(item: IngredientDto): List<Triple<String, String, Double>> {
+private fun buildMacroRows(item: IngredientDto): List<Triple<String, String, Double>> {
     val rows = mutableListOf<Triple<String, String, Double>>()
 
     fun add(key: String, value: Double, unit: String) {
@@ -221,7 +238,17 @@ private fun buildDgeRows(item: IngredientDto): List<Triple<String, String, Doubl
     item.fiber_g_per_100g?.let { add("fiber", it, "g") }
     item.salt_g_per_100g?.let { add("salt", it, "g") }
 
-    item.micronutrients.entries.forEach { (key, value) ->
+    return rows
+}
+
+/**
+ * Build micronutrient rows (vitamins + minerals).
+ * Sorted by key — matches RecipeDetailScreen.
+ */
+private fun buildMicroRows(item: IngredientDto): List<Triple<String, String, Double>> {
+    val rows = mutableListOf<Triple<String, String, Double>>()
+
+    item.micronutrients.entries.sortedBy { it.key }.forEach { (key, value) ->
         val nutrient = NutrientCatalog.byKeyOrNull(key) ?: return@forEach
         val dge = nutrient.defaultPerDay
         if (dge > 0) {
@@ -230,7 +257,5 @@ private fun buildDgeRows(item: IngredientDto): List<Triple<String, String, Doubl
         }
     }
 
-    // Sort: highest % DGE first
-    rows.sortByDescending { it.third }
     return rows
 }
