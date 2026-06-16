@@ -128,4 +128,5 @@ data class RecipeDetailDto(
     // P7.S5 — Aggregated from ingredients
     @JsonProperty("allergens") val allergens: List<String>,
     @JsonProperty("fodmap_flags") val fodmapFlags: List<String>,
+    @JsonProperty("histamine_score") val histamineScore: Short?,
 )

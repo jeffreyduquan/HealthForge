@@ -106,6 +106,7 @@ class RecipeService(
             else ingredientRepo.findAllById(ingIds).associateBy { it.id }
         val allAllergens = ingById.values.flatMap { parseJsonArray(it.allergensJson) }.distinct().sorted()
         val allFodmap = ingById.values.flatMap { parseJsonArray(it.fodmapFlagsJson) }.distinct().sorted()
+        val histamineMax: Short? = ingById.values.mapNotNull { it.histamineScore?.toInt() }.maxOrNull()?.toShort()
         return RecipeDetailDto(
             id = r.id,
             title = r.title,
@@ -132,6 +133,7 @@ class RecipeService(
             nutrition = nutrition,
             allergens = allAllergens,
             fodmapFlags = allFodmap,
+            histamineScore = histamineMax,
             likeCount = likeRepo.countByRecipeId(id),
             likedByMe = likeRepo.existsByRecipeIdAndUserId(id, viewerId),
             communityRecommendCount = ratingRepo.countByRecipeIdAndValue(id, CommunityRatingValue.RECOMMEND.name),

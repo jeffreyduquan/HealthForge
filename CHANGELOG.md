@@ -2,6 +2,24 @@
 
 ---
 
+## P7.S5c: FODMAP + Histamin für Rezepte, IngredientDetail erweitert (2026-06-16)
+
+**Scope:** Rezepte zeigen jetzt FODMAP-Flags + Histamin-Score (MAX der Zutaten). Lebensmittel-Detail zeigt alle Makros (inkl. Zucker, gesättigte Fette, Salz).
+
+**Touched Docs:**
+- `CHANGELOG.md`: This entry
+
+**Untouched Docs:**
+- `docs/ReqSpec.md`, `docs/Architecture.md`, `docs/GUI.md`: No requirement changes
+
+**Changes:**
+- Server: `RecipeDetailDto` + `histamineScore` (Short?, MAX der ingredients)
+- Server: `RecipeService.detail()` berechnet Histamin-MAX
+- Android: `RecipeDetailDto` + `histamine_score`, `RecipeDetailScreen` zeigt Histamin
+- Android: `IngredientDetailScreen.buildDgeRows()` erweitert um sugar, satfat, salt
+
+---
+
 ## P7.S5b: Expanded Recipe Nutrition (2026-06-16)
 
 **Scope:** Recipes now aggregate ALL nutrient values from their ingredients.

@@ -215,8 +215,11 @@ private fun buildDgeRows(item: IngredientDto): List<Triple<String, String, Doubl
     item.energy_kcal_per_100g?.let { add("kcal", it, "kcal") }
     item.protein_g_per_100g?.let { add("protein", it, "g") }
     item.carbs_g_per_100g?.let { add("carbs", it, "g") }
+    item.sugar_g_per_100g?.let { add("sugar", it, "g") }
     item.fat_g_per_100g?.let { add("fat", it, "g") }
+    item.satfat_g_per_100g?.let { add("satfat", it, "g") }
     item.fiber_g_per_100g?.let { add("fiber", it, "g") }
+    item.salt_g_per_100g?.let { add("salt", it, "g") }
 
     item.micronutrients.entries.forEach { (key, value) ->
         val nutrient = NutrientCatalog.byKeyOrNull(key) ?: return@forEach

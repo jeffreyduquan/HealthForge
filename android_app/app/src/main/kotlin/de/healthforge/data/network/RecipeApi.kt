@@ -98,6 +98,7 @@ data class RecipeDetailDto(
     // P7.S5 — Aggregated from ingredients
     val allergens: List<String> = emptyList(),
     val fodmap_flags: List<String> = emptyList(),
+    val histamine_score: Int? = null,
 )
 
 @JsonClass(generateAdapter = true)

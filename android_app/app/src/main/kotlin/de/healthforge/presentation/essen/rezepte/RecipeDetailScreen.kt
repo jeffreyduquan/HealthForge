@@ -360,6 +360,18 @@ private fun DetailContent(
                 }
             }
         }
+        recipe.histamine_score?.let { score ->
+            HfSectionHeader("Histamin (SIGHI)")
+            Text(
+                "Max: $score / 3",
+                style = MaterialTheme.typography.titleMedium,
+                color = when {
+                    score <= 1 -> de.healthforge.presentation.theme.StatusGood
+                    score == 2 -> hm.fgSecondary
+                    else -> de.healthforge.presentation.theme.StatusOverUl
+                },
+            )
+        }
 
         // Zutaten
         HfSectionHeader("Zutaten")
