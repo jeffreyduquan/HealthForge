@@ -99,6 +99,8 @@ data class RecipeListItemDto(
     @JsonProperty("satfat_per_100g") val satfatPer100g: BigDecimal?,
     @JsonProperty("fiber_per_100g") val fiberPer100g: BigDecimal?,
     @JsonProperty("salt_per_100g") val saltPer100g: BigDecimal?,
+    /** P7.S5c — Per-100g micronutrients for pinned-nutrient cards (only computed when requested). */
+    @JsonProperty("micronutrients_per_100g") val micronutrientsPer100g: Map<String, BigDecimal>? = null,
 )
 
 data class RecipeDetailDto(

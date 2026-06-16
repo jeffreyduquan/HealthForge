@@ -142,6 +142,7 @@ class RecipeNutritionCompute(
         var satfat = BigDecimal.ZERO
         var fiber = BigDecimal.ZERO
         var salt = BigDecimal.ZERO
+        val microTotals = mutableMapOf<String, BigDecimal>()
 
         for (it in items) {
             if (it.isOptional) continue
@@ -157,6 +158,14 @@ class RecipeNutritionCompute(
             satfat = satfat.add((ing.satfatGPer100g ?: BigDecimal.ZERO).multiply(factor))
             fiber = fiber.add((ing.fiberGPer100g ?: BigDecimal.ZERO).multiply(factor))
             salt = salt.add((ing.saltGPer100g ?: BigDecimal.ZERO).multiply(factor))
+            // Aggregate micronutrients
+            try {
+                val micros: Map<String, Double> = objectMapper.readValue(ing.micronutrientsJson)
+                for ((key, value) in micros) {
+                    val scaled = BigDecimal.valueOf(value).multiply(factor)
+                    microTotals.merge(key, scaled) { a, b -> a.add(b) }
+                }
+            } catch (_: Exception) { }
         }
 
         if (totalWeight.compareTo(BigDecimal.ZERO) <= 0) return null
@@ -172,6 +181,7 @@ class RecipeNutritionCompute(
             satfatPer100g = satfat.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             fiberPer100g = fiber.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
             saltPer100g = salt.multiply(factor100).setScale(1, RoundingMode.HALF_UP),
+            micronutrientsPer100g = microTotals.mapValues { (_, v) -> v.multiply(factor100).setScale(3, RoundingMode.HALF_UP) }.filterValues { it > BigDecimal.ZERO },
         )
     }
 }
@@ -186,4 +196,5 @@ data class RecipeNutritionSummary(
     val satfatPer100g: BigDecimal,
     val fiberPer100g: BigDecimal,
     val saltPer100g: BigDecimal,
+    val micronutrientsPer100g: Map<String, BigDecimal>,
 )

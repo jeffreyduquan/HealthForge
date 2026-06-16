@@ -68,6 +68,7 @@ data class RecipeListItemDto(
     val satfat_per_100g: Double? = null,
     val fiber_per_100g: Double? = null,
     val salt_per_100g: Double? = null,
+    val micronutrients_per_100g: Map<String, Double>? = null,
 )
 
 @JsonClass(generateAdapter = true)

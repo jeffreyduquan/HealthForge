@@ -78,6 +78,7 @@ class RecipeService(
                 satfatPer100g = summary?.satfatPer100g,
                 fiberPer100g = summary?.fiberPer100g,
                 saltPer100g = summary?.saltPer100g,
+                micronutrientsPer100g = summary?.micronutrientsPer100g,
             )
         }
     }
@@ -238,6 +239,7 @@ class RecipeService(
                 satfatPer100g = summary?.satfatPer100g,
                 fiberPer100g = summary?.fiberPer100g,
                 saltPer100g = summary?.saltPer100g,
+                micronutrientsPer100g = summary?.micronutrientsPer100g,
             )
         }
     }

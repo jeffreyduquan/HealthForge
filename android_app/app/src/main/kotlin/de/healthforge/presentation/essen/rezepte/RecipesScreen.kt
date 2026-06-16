@@ -144,6 +144,7 @@ fun RecipeCard(
         satfat = recipe.satfat_per_100g,
         fiber = recipe.fiber_per_100g,
         salt = recipe.salt_per_100g,
+        micronutrients = recipe.micronutrients_per_100g,
     )
 
     HfMasterTile(
@@ -179,6 +180,7 @@ internal fun buildNutrientRows(
     satfat: Double?,
     fiber: Double?,
     salt: Double?,
+    micronutrients: Map<String, Double>?,
 ): List<MasterTileNutrient> {
     val rows = mutableListOf<MasterTileNutrient>()
 
@@ -196,6 +198,15 @@ internal fun buildNutrientRows(
     satfat?.let { add("satfat", it, "g", 20.0) }
     fiber?.let { add("fiber", it, "g", 30.0) }
     salt?.let { add("salt", it, "g", 5.0) }
+
+    // Micronutrients from per-100g summary (only shown when pinned)
+    micronutrients?.entries?.forEach { (key, value) ->
+        val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+        val dge = nutrient.defaultPerDay
+        if (dge > 0) {
+            add(key, value, nutrient.unit.label, dge)
+        }
+    }
 
     return rows
 }
