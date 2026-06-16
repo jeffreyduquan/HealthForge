@@ -160,11 +160,14 @@ class SighiImporter(private val ingredients: IngredientRepository) : Importer {
         var updated = 0; var skipped = 0
         for (e in ingredients.findAll()) {
             val name = normalize(e.nameDe)
+            // P7.S5c: Auch ASCII-Umlaut-Varianten normalisieren (ae→a, oe→o, ue→u),
+            // da viele DB-Namen "Haehnchen" statt "Hähnchen" schreiben.
+            val nameAlt = name.replace("ae", "a").replace("oe", "o").replace("ue", "u")
             if (name.isBlank()) { skipped++; continue }
             // pick best matching rule: max score, ties → longer keyword
             val best = rules
                 .asSequence()
-                .filter { it.normalized.isNotBlank() && name.contains(it.normalized) }
+                .filter { it.normalized.isNotBlank() && (name.contains(it.normalized) || nameAlt.contains(it.normalized)) }
                 .maxWithOrNull(
                     compareBy<Rule>({ it.score }, { it.normalized.length })
                 )
