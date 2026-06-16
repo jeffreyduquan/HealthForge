@@ -117,6 +117,7 @@ fun PlanScreen(
     val homeState by homeVm.state.collectAsStateWithLifecycle()
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
+    var scrollToTodayTrigger by remember { mutableIntStateOf(0) }
 
     // Sync date PlanViewModel ↔ HomeViewModel
     LaunchedEffect(state.selectedDay) { homeVm.setDate(state.selectedDay) }
@@ -161,6 +162,7 @@ fun PlanScreen(
                                 val today = LocalDate.now()
                                 vm.selectDay(today)
                                 homeVm.setDate(today)
+                                scrollToTodayTrigger++
                             },
                         )
                     }
@@ -179,7 +181,7 @@ fun PlanScreen(
 
             // ── TAG & HEUTE-INTAKES ──
             item(key = "day_strip") {
-                DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) })
+                DayStrip(selected = state.selectedDay, onPick = { d -> vm.selectDay(d); homeVm.setDate(d) }, scrollToTodayTrigger = scrollToTodayTrigger)
             }
 
             item(key = "day_header") {
@@ -363,7 +365,7 @@ private fun DayHeader(date: LocalDate) {
  *  - Sonst  → Glass-Pill (verticalGradient + 1dp glassBorder Hairline).
  */
 @Composable
-private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
+private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit, scrollToTodayTrigger: Int = 0) {
     val hm = LocalHmTokens.current
     val today = LocalDate.now()
     val days = remember { (-365..365).map { today.plusDays(it.toLong()) } }
@@ -371,8 +373,8 @@ private fun DayStrip(selected: LocalDate, onPick: (LocalDate) -> Unit) {
     val fmt = remember { DateTimeFormatter.ofPattern("d.M.") }
     val listState = rememberLazyListState()
 
-    // Auto-scroll to today on first composition
-    LaunchedEffect(Unit) {
+    // Scroll to today on first composition AND when trigger changes (Heute button)
+    LaunchedEffect(scrollToTodayTrigger) {
         listState.scrollToItem(todayIndex)
     }
 
