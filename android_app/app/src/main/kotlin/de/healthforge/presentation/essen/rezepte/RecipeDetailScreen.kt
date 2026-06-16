@@ -325,7 +325,7 @@ private fun DetailContent(
                             HfNutrientProgressRow(
                                 label = label,
                                 value = "${formatNutrientValue(perServ)} $unit",
-                                pct = (perServ / dge * 100).coerceAtMost(200.0),
+                                percentDge = (perServ / dge * 100).coerceAtMost(200.0),
                             )
                         }
                 }
