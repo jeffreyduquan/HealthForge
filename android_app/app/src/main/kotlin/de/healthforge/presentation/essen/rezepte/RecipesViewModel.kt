@@ -47,7 +47,7 @@ class RecipeBrowseViewModel @Inject constructor(
 
     val pinnedKeys: StateFlow<List<String>> = profileRepo.observe()
         .map { HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NutrientCatalog.defaultPinnedKeys)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init { refresh() }
 

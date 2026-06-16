@@ -229,7 +229,7 @@ private fun buildIngredientNutrientRows(
     val rows = mutableListOf<MasterTileNutrient>()
 
     fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
-        if (pinnedKeys.isNotEmpty() && key !in pinnedKeys) return
+        if (key !in pinnedKeys) return
         val pct = (value / dgeDefault) * 100.0
         val label = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
         rows.add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))

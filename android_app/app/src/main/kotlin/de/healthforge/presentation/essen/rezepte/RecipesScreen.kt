@@ -185,7 +185,7 @@ internal fun buildNutrientRows(
     val rows = mutableListOf<MasterTileNutrient>()
 
     fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
-        if (pinnedKeys.isNotEmpty() && key !in pinnedKeys) return
+        if (key !in pinnedKeys) return
         val pct = (value / dgeDefault) * 100.0
         rows.add(MasterTileNutrient(key, nutrientLabel(key), "${formatNutrientValue(value)} $unit", pct))
     }
