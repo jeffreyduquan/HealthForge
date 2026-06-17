@@ -26,9 +26,13 @@ import {
 import {
   approveIngredient,
   listIngredientQueue,
-  rejectIngredient,
+  deleteIngredient,
+  updateIngredient,
+  getIngredient,
   type IngredientQueueEntry,
+  type IngredientCrud,
 } from '../api/client';
+import IngredientDetailDialog from '../components/IngredientDetailDialog';
 
 type Confirm =
   | { kind: 'approve'; row: IngredientQueueEntry }
@@ -39,6 +43,7 @@ export default function IngredientQueuePage() {
   const [confirm, setConfirm] = useState<Confirm | null>(null);
   const [rejectNote, setRejectNote] = useState('');
   const [snack, setSnack] = useState<string | null>(null);
+  const [detailIngredient, setDetailIngredient] = useState<IngredientCrud | null>(null);
 
   const q = useQuery({ queryKey: ['ingredient-queue'], queryFn: listIngredientQueue });
 
@@ -46,20 +51,35 @@ export default function IngredientQueuePage() {
     mutationFn: (id: string) => approveIngredient(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ingredient-queue'] });
-      setSnack('Ingredient genehmigt');
+      setSnack('✅ Zutat genehmigt');
     },
     onError: () => setSnack('Genehmigung fehlgeschlagen'),
   });
 
   const rejectM = useMutation({
-    mutationFn: ({ id, note }: { id: string; note: string }) =>
-      rejectIngredient(id, note.trim() ? note.trim() : undefined),
+    mutationFn: (id: string) => deleteIngredient(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ingredient-queue'] });
-      setSnack('Ingredient abgelehnt');
+      setSnack('🗑 Zutat gelöscht');
     },
-    onError: () => setSnack('Ablehnung fehlgeschlagen'),
+    onError: () => setSnack('Löschen fehlgeschlagen'),
   });
+
+  const handleRowClick = async (row: IngredientQueueEntry) => {
+    try {
+      const full = await getIngredient(row.id);
+      setDetailIngredient(full);
+    } catch {
+      setSnack('Konnte Zutat nicht laden');
+    }
+  };
+
+  const performConfirm = () => {
+    if (!confirm) return;
+    if (confirm.kind === 'approve') approveM.mutate(confirm.row.id);
+    if (confirm.kind === 'reject') rejectM.mutate(confirm.row.id);
+    setConfirm(null);
+  };
 
   const performConfirm = () => {
     if (!confirm) return;
@@ -90,14 +110,18 @@ export default function IngredientQueuePage() {
             </TableHead>
             <TableBody>
               {q.data.map((r) => (
-                <TableRow key={r.id} hover>
+                <TableRow
+                  key={r.id} hover
+                  onClick={() => handleRowClick(r)}
+                  sx={{ cursor: 'pointer' }}
+                >
                   <TableCell>{new Date(r.created_at).toLocaleString('de-DE')}</TableCell>
                   <TableCell><Chip size="small" color="warning" label={r.status} /></TableCell>
                   <TableCell>{r.submitter_email ?? r.submitted_by ?? '—'}</TableCell>
                   <TableCell>{r.name_de}</TableCell>
                   <TableCell>{r.brand ?? '—'}</TableCell>
                   <TableCell>{r.barcode ?? '—'}</TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                       <Button size="small" color="success" variant="contained"
                         onClick={() => { setRejectNote(''); setConfirm({ kind: 'approve', row: r }); }}>
@@ -122,7 +146,7 @@ export default function IngredientQueuePage() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            {confirm && `"${confirm.row.name_de}" wird ${confirm.kind === 'approve' ? 'global sichtbar' : 'als REJECTED markiert'}.`}
+            {confirm && `"${confirm.row.name_de}" wird ${confirm.kind === 'approve' ? 'genehmigt und ist dann global sichtbar' : 'komplett aus der Datenbank gelöscht'}.`}
           </DialogContentText>
           {confirm?.kind === 'reject' && (
             <TextField
@@ -143,6 +167,18 @@ export default function IngredientQueuePage() {
       </Dialog>
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} message={snack ?? ''} />
+
+      <IngredientDetailDialog
+        ingredient={detailIngredient}
+        onClose={() => setDetailIngredient(null)}
+        onSave={(id, data) => {
+          updateIngredient(id, data).then(() => {
+            qc.invalidateQueries({ queryKey: ['ingredient-queue'] });
+            setSnack('✅ Zutat gespeichert');
+            setDetailIngredient(null);
+          }).catch(() => setSnack('Fehler beim Speichern'));
+        }}
+      />
     </Box>
   );
 }
