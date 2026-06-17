@@ -77,13 +77,13 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
   const removeMicro = (i: number) => setMicros(micros.filter((_, idx) => idx !== i));
   const updateMicroKey = (i: number, k: string) => {
     const m = [...micros];
-    m[i] = { ...m[i], key: k };
-    setMicros(m);
+    const item = m[i];
+    if (item) { m[i] = { key: k, value: item.value }; setMicros(m); }
   };
   const updateMicroVal = (i: number, v: string) => {
     const m = [...micros];
-    m[i] = { ...m[i], value: v };
-    setMicros(m);
+    const item = m[i];
+    if (item) { m[i] = { key: item.key, value: v }; setMicros(m); }
   };
 
   const handleSave = () => {

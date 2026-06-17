@@ -46,10 +46,14 @@ export default function SupplementDetailDialog({ supplement, onClose, onSave }: 
   const addMicro = () => setMicros([...micros, { key: '', value: '' }]);
   const removeMicro = (i: number) => setMicros(micros.filter((_, idx) => idx !== i));
   const updateMicroKey = (i: number, k: string) => {
-    const m = [...micros]; m[i] = { ...m[i], key: k }; setMicros(m);
+    const m = [...micros];
+    const item = m[i];
+    if (item) { m[i] = { key: k, value: item.value }; setMicros(m); }
   };
   const updateMicroVal = (i: number, v: string) => {
-    const m = [...micros]; m[i] = { ...m[i], value: v }; setMicros(m);
+    const m = [...micros];
+    const item = m[i];
+    if (item) { m[i] = { key: item.key, value: v }; setMicros(m); }
   };
 
   const handleSave = () => {
