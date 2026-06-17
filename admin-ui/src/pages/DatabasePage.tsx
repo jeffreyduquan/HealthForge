@@ -44,6 +44,7 @@ import {
   listAllRecipes,
   updateRecipe,
   deleteRecipeCrud,
+  createRecipe,
   type IngredientCrud,
   type SupplementCrud,
   type RecipeCrud,
@@ -131,6 +132,11 @@ export default function DatabasePage() {
   const deleteRecM = useMutation({
     mutationFn: (id: string) => deleteRecipeCrud(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['crud-recipes'] }); setDeleteConfirm(null); setSnack('✅ Rezept gelöscht'); },
+    onError: (e) => setSnack('❌ Fehler: ' + (e as Error).message),
+  });
+  const createRecM = useMutation({
+    mutationFn: (data: Record<string, unknown>) => createRecipe(data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['crud-recipes'] }); setSnack('✅ Rezept erstellt'); },
     onError: (e) => setSnack('❌ Fehler: ' + (e as Error).message),
   });
 
@@ -385,10 +391,10 @@ export default function DatabasePage() {
         open={showRecipeWizard}
         onClose={() => setShowRecipeWizard(false)}
         onSave={(data) => {
-          // Recipe creation uses a different API — for now just show snack
-          setSnack('⚠️ Rezept-Erstellung via Admin-CRUD noch nicht implementiert');
+          createRecM.mutate(data);
           setShowRecipeWizard(false);
         }}
+        saving={createRecM.isPending}
       />
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} message={snack ?? ''} />

@@ -61,7 +61,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
       cook_minutes: cookMinutes ? parseInt(cookMinutes) : null,
       slot_tags: selectedSlots,
       visibility,
-      status: 'APPROVED',
+      status: 'PUBLISHED',
     };
     onSave(data);
   };

@@ -529,3 +529,8 @@ export async function updateRecipe(id: string, input: Partial<RecipeCrud>): Prom
 export async function deleteRecipeCrud(id: string): Promise<void> {
   await api.delete(`/admin/v1/crud/recipes/${id}`);
 }
+
+export async function createRecipe(data: Record<string, unknown>): Promise<{ id: string }> {
+  const { data: result } = await api.post<{ id: string }>('/admin/v1/crud/recipes', data);
+  return result;
+}

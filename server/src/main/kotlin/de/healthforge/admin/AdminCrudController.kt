@@ -10,6 +10,8 @@ import de.healthforge.ingredient.IngredientSource
 import de.healthforge.ingredient.IngredientStatus
 import de.healthforge.recipe.RecipeRepo
 import de.healthforge.recipe.RecipeEntity
+import de.healthforge.recipe.RecipeStatus
+import de.healthforge.recipe.RecipeVisibility
 import de.healthforge.supplement.PublicSupplementEntity
 import de.healthforge.supplement.PublicSupplementRepository
 import org.springframework.http.HttpStatus
@@ -314,6 +316,7 @@ class AdminCrudController(
         recipe.servings = req.servings
         recipe.prepMinutes = req.prepMinutes
         recipe.cookMinutes = req.cookMinutes
+        req.slotTags?.let { recipe.slotTags = it.map { s -> s.trim().uppercase() }.toTypedArray() }
         recipe.status = req.status
         recipe.visibility = req.visibility
         recipe.updatedAt = Instant.now()
@@ -326,6 +329,37 @@ class AdminCrudController(
             targetId = id.toString(),
         )
         return recipe.toRecipeCrudDto()
+    }
+
+    @PostMapping("/recipes")
+    @Transactional
+    fun createRecipe(
+        @AuthenticationPrincipal principal: AuthPrincipal?,
+        @RequestBody req: RecipeCrudInput,
+    ): ResponseEntity<Map<String, UUID>> {
+        val p = require(principal)
+        val recipe = RecipeEntity(
+            id = UUID.randomUUID(),
+            authorId = p.userId,
+            title = req.title.trim(),
+            description = req.description?.trim()?.ifEmpty { null },
+            servings = req.servings.coerceAtLeast(1),
+            prepMinutes = req.prepMinutes.coerceAtLeast(0),
+            cookMinutes = req.cookMinutes?.coerceAtLeast(0),
+            slotTags = req.slotTags?.map { it.trim().uppercase() }?.toTypedArray() ?: emptyArray(),
+            status = req.status.takeIf { it.isNotBlank() } ?: RecipeStatus.PUBLISHED.name,
+            visibility = req.visibility.takeIf { it.isNotBlank() } ?: RecipeVisibility.PUBLIC.name,
+            isOfficial = false,
+        )
+        recipeRepo.save(recipe)
+        auditService.record(
+            action = "RECIPE_ADMIN_CREATE",
+            actorUserId = p.userId,
+            actorKind = de.healthforge.common.ActorKind.ADMIN,
+            targetType = "RECIPE",
+            targetId = recipe.id.toString(),
+        )
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapOf("id" to recipe.id))
     }
 
     @DeleteMapping("/recipes/{id}")
@@ -475,6 +509,7 @@ data class RecipeCrudInput(
     val servings: Int = 1,
     @JsonProperty("prep_minutes") val prepMinutes: Int = 0,
     @JsonProperty("cook_minutes") val cookMinutes: Int? = null,
+    @JsonProperty("slot_tags") val slotTags: List<String>? = null,
     val status: String = "PUBLISHED",
     val visibility: String = "PUBLIC",
 )
