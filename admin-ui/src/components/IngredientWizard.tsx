@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Box,
-  Button,
   Chip,
   Dialog,
   Grid,
@@ -10,9 +9,9 @@ import {
   TextField,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
-import { defaultMicronutrients } from '../api/nutrientDefaults';
+import { ALL_MICRONUTRIENT_KEYS } from '../api/nutrientDefaults';
 
-const STEP_LABELS = ['Name', 'Nährwerte', 'Diäten & Histamin', 'Vorschau'];
+const STEP_LABELS = ['Name', 'Nährwerte', 'Mikronährstoffe', 'Diäten & Histamin', 'Vorschau'];
 
 const ALLERGENS: { code: string; label: string }[] = [
   { code: 'GLUTEN', label: 'Gluten' }, { code: 'CRUSTACEANS', label: 'Krebstiere' },
@@ -48,11 +47,11 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
   const [protein, setProtein] = useState(0);
   const [carbs, setCarbs] = useState(0);
   const [fat, setFat] = useState(0);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [sugar, setSugar] = useState(0);
   const [satfat, setSatfat] = useState(0);
   const [fiber, setFiber] = useState(0);
   const [salt, setSalt] = useState(0);
+  const [micros, setMicros] = useState<Record<string, number>>({});
 
   const [histamineScore, setHistamineScore] = useState<number | null>(null);
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -61,6 +60,8 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
   const canStep0 = nameDe.trim().length >= 2;
 
   const handleSave = () => {
+    const microObj: Record<string, number> = {};
+    Object.entries(micros).forEach(([k, v]) => { if (v) microObj[k] = v; });
     onSave({
       name_de: nameDe.trim(),
       brand: brand.trim() || null,
@@ -68,15 +69,15 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
       energy_kcal_per_100g: kcal > 0 ? kcal : null,
       protein_g_per_100g: protein > 0 ? protein : null,
       carbs_g_per_100g: carbs > 0 ? carbs : null,
-      sugar_g_per_100g: showAdvanced && sugar > 0 ? sugar : null,
+      sugar_g_per_100g: sugar > 0 ? sugar : null,
       fat_g_per_100g: fat > 0 ? fat : null,
-      satfat_g_per_100g: showAdvanced && satfat > 0 ? satfat : null,
-      fiber_g_per_100g: showAdvanced && fiber > 0 ? fiber : null,
-      salt_g_per_100g: showAdvanced && salt > 0 ? salt : null,
+      satfat_g_per_100g: satfat > 0 ? satfat : null,
+      fiber_g_per_100g: fiber > 0 ? fiber : null,
+      salt_g_per_100g: salt > 0 ? salt : null,
       histamine_score: histamineScore,
       allergens_json: JSON.stringify(selectedAllergens),
       fodmap_flags_json: JSON.stringify(selectedFodmaps),
-      micronutrients_json: JSON.stringify(defaultMicronutrients()),
+      micronutrients_json: JSON.stringify(microObj),
     });
   };
 
@@ -85,16 +86,16 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
   const toggleFodmap = (c: string) =>
     setSelectedFodmaps((p) => p.includes(c) ? p.filter((x) => x !== c) : [...p, c]);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
   const handleBack = () => { if (step === 0) onClose(); else setStep((s) => s - 1); };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <WizardLayout
         title="Lebensmittel vorschlagen"
-        step={step} totalSteps={4} stepLabels={STEP_LABELS}
+        step={step} totalSteps={5} stepLabels={STEP_LABELS}
         onBack={handleBack} onNext={handleNext} onSave={handleSave}
-        canNext={(step === 0 && canStep0) || step === 1 || step === 2}
+        canNext={(step === 0 && canStep0) || step === 1 || step === 2 || step === 3}
         canSave={canStep0} saving={saving}
       >
         {step === 0 && (
@@ -133,6 +134,10 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
               ['Protein', `${protein.toFixed(1)} g`, protein, setProtein, 0, 100],
               ['Kohlenhydrate', `${carbs.toFixed(1)} g`, carbs, setCarbs, 0, 100],
               ['Fett', `${fat.toFixed(1)} g`, fat, setFat, 0, 100],
+              ['Zucker', `${sugar.toFixed(1)} g`, sugar, setSugar, 0, 100],
+              ['Ges. Fettsäuren', `${satfat.toFixed(1)} g`, satfat, setSatfat, 0, 100],
+              ['Ballaststoffe', `${fiber.toFixed(1)} g`, fiber, setFiber, 0, 30],
+              ['Salz', `${salt.toFixed(1)} g`, salt, setSalt, 0, 10],
             ].map(([label, display, val, setter, min, max]) => (
               <Grid item xs={12} key={label as string}>
                 <SliderRow label={label as string} display={display as string}
@@ -140,27 +145,31 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
                   min={min as number} max={max as number} />
               </Grid>
             ))}
-            <Grid item xs={12}>
-              <Button variant="outlined" fullWidth onClick={() => setShowAdvanced(!showAdvanced)}>
-                {showAdvanced ? 'Weitere Felder ausblenden' : 'Zucker, Ballaststoffe, Salz…'}
-              </Button>
-            </Grid>
-            {showAdvanced && [
-              ['Zucker', sugar, setSugar, 0, 100],
-              ['Ges. Fettsäuren', satfat, setSatfat, 0, 100],
-              ['Ballaststoffe', fiber, setFiber, 0, 30],
-              ['Salz', salt, setSalt, 0, 10],
-            ].map(([label, val, setter, min, max]) => (
-              <Grid item xs={12} key={label as string}>
-                <SliderRow label={label as string} display={`${(val as number).toFixed(1)} g`}
-                  value={val as number} onChange={setter as (v: number) => void}
-                  min={min as number} max={max as number} />
-              </Grid>
-            ))}
           </Grid>
         )}
 
+        {/* STEP 2: Mikronährstoffe */}
         {step === 2 && (
+          <Grid container spacing={1}>
+            {ALL_MICRONUTRIENT_KEYS.map((key) => {
+              const val = micros[key] ?? 0;
+              return (
+                <Grid item xs={6} sm={4} key={key}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ width: 90, textAlign: 'right' }}>{key}:</Typography>
+                    <TextField size="small" type="number" value={val || ''}
+                      onChange={(e) => setMicros({ ...micros, [key]: Number(e.target.value) || 0 })}
+                      inputProps={{ step: 0.1, min: 0 }}
+                      sx={{ flex: 1 }} />
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+        )}
+
+        {/* STEP 3: Diäten & Histamin */}
+        {step === 3 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Diäten & Histamin</Typography>
@@ -202,7 +211,8 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {step === 3 && (
+        {/* STEP 4: Vorschau */}
+        {step === 4 && (
           <Box>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>Vorschau</Typography>
             <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2 }}>

@@ -9,9 +9,9 @@ import {
   Typography,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
-import { defaultMicronutrients } from '../api/nutrientDefaults';
+import { ALL_MICRONUTRIENT_KEYS } from '../api/nutrientDefaults';
 
-const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Vorschau'];
+const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Mikronährstoffe', 'Vorschau'];
 
 const UNIT_OPTIONS = ['Tablette', 'Kapsel', 'ml', 'g', 'Portion'];
 
@@ -38,6 +38,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+  const [micros, setMicros] = useState<Record<string, number>>({});
 
   const canStep0 = nameDe.trim().length >= 2;
   const canStep1 = defaultDose.trim().length > 0 && parseFloat(defaultDose) > 0;
@@ -52,13 +53,13 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
       protein_per_dose: protein ? parseFloat(protein) : null,
       carbs_per_dose: carbs ? parseFloat(carbs) : null,
       fat_per_dose: fat ? parseFloat(fat) : null,
-      micronutrients_json: JSON.stringify(defaultMicronutrients()),
+      micronutrients_json: JSON.stringify(micros),
       notes: null,
     };
     onSave(data);
   };
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
   const handleBack = () => {
     if (step === 0) onClose();
     else setStep((s) => s - 1);
@@ -69,7 +70,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
       <WizardLayout
         title="Neues Supplement"
         step={step}
-        totalSteps={4}
+        totalSteps={5}
         stepLabels={STEP_LABELS}
         onBack={handleBack}
         onNext={handleNext}
@@ -77,7 +78,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
         canNext={
           (step === 0 && canStep0) ||
           (step === 1 && canStep1) ||
-          step === 2
+          step === 2 || step === 3
         }
         canSave={canStep0 && canStep1}
         saving={saving}
@@ -172,8 +173,27 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 3: Vorschau */}
+        {/* STEP 3: Mikronährstoffe */}
         {step === 3 && (
+          <Grid container spacing={1}>
+            {ALL_MICRONUTRIENT_KEYS.map((key) => {
+              const val = micros[key] ?? 0;
+              return (
+                <Grid item xs={6} sm={4} key={key}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="caption" sx={{ width: 90, textAlign: 'right' }}>{key}:</Typography>
+                    <TextField size="small" type="number" value={val || ''}
+                      onChange={(e) => setMicros({ ...micros, [key]: Number(e.target.value) || 0 })}
+                      inputProps={{ step: 0.1, min: 0 }} sx={{ flex: 1 }} />
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+        )}
+
+        {/* STEP 4: Vorschau */}
+        {step === 4 && (
           <Box>
             <Typography variant="h6" gutterBottom>{nameDe || '(kein Name)'}</Typography>
             {brand && <Typography color="text.secondary">{brand}</Typography>}
