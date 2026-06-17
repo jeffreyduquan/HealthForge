@@ -81,13 +81,6 @@ export default function IngredientQueuePage() {
     setConfirm(null);
   };
 
-  const performConfirm = () => {
-    if (!confirm) return;
-    if (confirm.kind === 'approve') approveM.mutate(confirm.row.id);
-    if (confirm.kind === 'reject') rejectM.mutate({ id: confirm.row.id, note: rejectNote });
-    setConfirm(null);
-  };
-
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>Ingredient-Queue</Typography>

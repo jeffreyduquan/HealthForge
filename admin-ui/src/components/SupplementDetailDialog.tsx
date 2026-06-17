@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { SupplementCrud } from '../api/client';
+import { buildFullMicronutrients } from '../api/nutrientDefaults';
 
 const UNIT_OPTIONS = ['Tablette', 'Kapsel', 'ml', 'g', 'Portion'];
 
@@ -35,10 +36,8 @@ export default function SupplementDetailDialog({ supplement, onClose, onSave }: 
 
   // ── Mikronährstoffe ──
   const [micros, setMicros] = useState<{ key: string; value: string }[]>(() => {
-    try {
-      const obj = JSON.parse(supplement.micronutrients_json ?? '{}');
-      return Object.entries(obj).map(([k, v]) => ({ key: k, value: String(v) }));
-    } catch { return []; }
+    const full = buildFullMicronutrients(supplement.micronutrients_json);
+    return Object.entries(full).map(([k, v]) => ({ key: k, value: String(v) }));
   });
 
   const [warningAccepted, setWarningAccepted] = useState(false);

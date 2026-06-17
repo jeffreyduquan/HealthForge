@@ -10,6 +10,7 @@ import {
   TextField,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
+import { defaultMicronutrients } from '../api/nutrientDefaults';
 
 const STEP_LABELS = ['Name', 'Nährwerte', 'Diäten & Histamin', 'Vorschau'];
 
@@ -75,7 +76,7 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
       histamine_score: histamineScore,
       allergens_json: JSON.stringify(selectedAllergens),
       fodmap_flags_json: JSON.stringify(selectedFodmaps),
-      micronutrients_json: '{}',
+      micronutrients_json: JSON.stringify(defaultMicronutrients()),
     });
   };
 

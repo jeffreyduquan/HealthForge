@@ -9,6 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
+import { defaultMicronutrients } from '../api/nutrientDefaults';
 
 const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Vorschau'];
 
@@ -51,7 +52,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
       protein_per_dose: protein ? parseFloat(protein) : null,
       carbs_per_dose: carbs ? parseFloat(carbs) : null,
       fat_per_dose: fat ? parseFloat(fat) : null,
-      micronutrients_json: '{}',
+      micronutrients_json: JSON.stringify(defaultMicronutrients()),
       notes: null,
     };
     onSave(data);

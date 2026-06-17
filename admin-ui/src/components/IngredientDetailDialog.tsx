@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { IngredientCrud } from '../api/client';
+import { buildFullMicronutrients } from '../api/nutrientDefaults';
 
 const ALLERGENS = [
   'GLUTEN', 'CRUSTACEANS', 'EGGS', 'FISH', 'PEANUT', 'SOY',
@@ -53,10 +54,8 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
 
   // ── Mikronährstoffe ──
   const [micros, setMicros] = useState<{ key: string; value: string }[]>(() => {
-    try {
-      const obj = JSON.parse(ingredient.micronutrients_json ?? '{}');
-      return Object.entries(obj).map(([k, v]) => ({ key: k, value: String(v) }));
-    } catch { return []; }
+    const full = buildFullMicronutrients(ingredient.micronutrients_json);
+    return Object.entries(full).map(([k, v]) => ({ key: k, value: String(v) }));
   });
 
   // ── Diäten ──
