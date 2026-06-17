@@ -1,24 +1,33 @@
 import { useState } from 'react';
 import {
   Box,
+  Button,
   Chip,
   Dialog,
   Grid,
-  MenuItem,
-  TextField,
+  Slider,
   Typography,
+  TextField,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
 
-const STEP_LABELS = ['Name', 'Nährwerte', 'Mikronährstoffe', 'Vorschau'];
+const STEP_LABELS = ['Name', 'Nährwerte', 'Diäten & Histamin', 'Vorschau'];
 
-const ALLERGENS = [
-  'GLUTEN', 'CRUSTACEANS', 'EGGS', 'FISH', 'PEANUT', 'SOY',
-  'MILK', 'NUTS', 'CELERY', 'MUSTARD', 'SESAME', 'SULPHITES',
-  'LUPIN', 'MOLLUSCS',
+const ALLERGENS: { code: string; label: string }[] = [
+  { code: 'GLUTEN', label: 'Gluten' }, { code: 'CRUSTACEANS', label: 'Krebstiere' },
+  { code: 'EGGS', label: 'Eier' }, { code: 'FISH', label: 'Fisch' },
+  { code: 'PEANUT', label: 'Erdnuss' }, { code: 'SOY', label: 'Soja' },
+  { code: 'MILK', label: 'Milch' }, { code: 'NUTS', label: 'Schalenfrüchte' },
+  { code: 'CELERY', label: 'Sellerie' }, { code: 'MUSTARD', label: 'Senf' },
+  { code: 'SESAME', label: 'Sesam' }, { code: 'SULPHITES', label: 'Sulphite' },
+  { code: 'LUPIN', label: 'Lupine' }, { code: 'MOLLUSCS', label: 'Weichtiere' },
 ];
 
-const FODMAPS = ['FRUCTOSE', 'LACTOSE', 'FRUCTANS', 'GOS', 'POLYOLS'];
+const FODMAPS: { code: string; label: string }[] = [
+  { code: 'FRUCTOSE', label: 'Fructose' }, { code: 'LACTOSE', label: 'Lactose' },
+  { code: 'FRUCTANS', label: 'Fructane' }, { code: 'GOS', label: 'GOS' },
+  { code: 'POLYOLS', label: 'Polyole' },
+];
 
 interface Props {
   open: boolean;
@@ -30,238 +39,215 @@ interface Props {
 export default function IngredientWizard({ open, onClose, onSave, saving }: Props) {
   const [step, setStep] = useState(0);
 
-  // Step 0: Name
   const [nameDe, setNameDe] = useState('');
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
 
-  // Step 1: Macros
-  const [kcal, setKcal] = useState('');
-  const [protein, setProtein] = useState('');
-  const [carbs, setCarbs] = useState('');
-  const [sugar, setSugar] = useState('');
-  const [fat, setFat] = useState('');
-  const [satfat, setSatfat] = useState('');
-  const [fiber, setFiber] = useState('');
-  const [salt, setSalt] = useState('');
+  const [kcal, setKcal] = useState(0);
+  const [protein, setProtein] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [fat, setFat] = useState(0);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [sugar, setSugar] = useState(0);
+  const [satfat, setSatfat] = useState(0);
+  const [fiber, setFiber] = useState(0);
+  const [salt, setSalt] = useState(0);
 
-  // Step 2: Micronutrients + allergens
-  const [histamineScore, setHistamineScore] = useState('');
+  const [histamineScore, setHistamineScore] = useState<number | null>(null);
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [selectedFodmaps, setSelectedFodmaps] = useState<string[]>([]);
 
   const canStep0 = nameDe.trim().length >= 2;
 
-  // Toggle allergen
-  const toggleAllergen = (a: string) => {
-    setSelectedAllergens((prev) =>
-      prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]
-    );
-  };
-
-  const toggleFodmap = (f: string) => {
-    setSelectedFodmaps((prev) =>
-      prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]
-    );
-  };
-
   const handleSave = () => {
-    const data: Record<string, unknown> = {
+    onSave({
       name_de: nameDe.trim(),
       brand: brand.trim() || null,
       barcode: barcode.trim() || null,
-      energy_kcal_per_100g: kcal ? parseFloat(kcal) : null,
-      protein_g_per_100g: protein ? parseFloat(protein) : null,
-      carbs_g_per_100g: carbs ? parseFloat(carbs) : null,
-      sugar_g_per_100g: sugar ? parseFloat(sugar) : null,
-      fat_g_per_100g: fat ? parseFloat(fat) : null,
-      satfat_g_per_100g: satfat ? parseFloat(satfat) : null,
-      fiber_g_per_100g: fiber ? parseFloat(fiber) : null,
-      salt_g_per_100g: salt ? parseFloat(salt) : null,
-      histamine_score: histamineScore ? parseInt(histamineScore) : null,
+      energy_kcal_per_100g: kcal > 0 ? kcal : null,
+      protein_g_per_100g: protein > 0 ? protein : null,
+      carbs_g_per_100g: carbs > 0 ? carbs : null,
+      sugar_g_per_100g: showAdvanced && sugar > 0 ? sugar : null,
+      fat_g_per_100g: fat > 0 ? fat : null,
+      satfat_g_per_100g: showAdvanced && satfat > 0 ? satfat : null,
+      fiber_g_per_100g: showAdvanced && fiber > 0 ? fiber : null,
+      salt_g_per_100g: showAdvanced && salt > 0 ? salt : null,
+      histamine_score: histamineScore,
       allergens_json: JSON.stringify(selectedAllergens),
       fodmap_flags_json: JSON.stringify(selectedFodmaps),
       micronutrients_json: '{}',
-      source: 'MANUAL',
-    };
-    onSave(data);
+    });
   };
+
+  const toggleAllergen = (c: string) =>
+    setSelectedAllergens((p) => p.includes(c) ? p.filter((x) => x !== c) : [...p, c]);
+  const toggleFodmap = (c: string) =>
+    setSelectedFodmaps((p) => p.includes(c) ? p.filter((x) => x !== c) : [...p, c]);
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 3));
-  const handleBack = () => {
-    if (step === 0) onClose();
-    else setStep((s) => s - 1);
-  };
+  const handleBack = () => { if (step === 0) onClose(); else setStep((s) => s - 1); };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <WizardLayout
-        title="Neue Zutat"
-        step={step}
-        totalSteps={4}
-        stepLabels={STEP_LABELS}
-        onBack={handleBack}
-        onNext={handleNext}
-        onSave={handleSave}
-        canNext={
-          (step === 0 && canStep0) ||
-          step === 1 ||
-          step === 2
-        }
-        canSave={canStep0}
-        saving={saving}
+        title="Lebensmittel vorschlagen"
+        step={step} totalSteps={4} stepLabels={STEP_LABELS}
+        onBack={handleBack} onNext={handleNext} onSave={handleSave}
+        canNext={(step === 0 && canStep0) || step === 1 || step === 2}
+        canSave={canStep0} saving={saving}
       >
-        {/* STEP 0: Name + Brand + Barcode */}
         {step === 0 && (
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Name (Deutsch)"
-                    value={nameDe}
-                    onChange={(e) => setNameDe(e.target.value)}
-                    placeholder="z.B. Apfel, Brot, Tomate…"
-                    required
-                    autoFocus
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Marke"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="Optional"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Barcode"
-                    value={barcode}
-                    onChange={(e) => setBarcode(e.target.value)}
-                    placeholder="Optional"
-                  />
-                </Grid>
-              </Grid>
-            )}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Was möchtest du eintragen?</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Vorschläge sind nur für dich sichtbar, bis ein Admin sie freigibt.
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label="Name (Deutsch) *" value={nameDe}
+                onChange={(e) => setNameDe(e.target.value)} autoFocus />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label="Marke (optional)" value={brand}
+                onChange={(e) => setBrand(e.target.value)} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label="Barcode (optional)" value={barcode}
+                onChange={(e) => setBarcode(e.target.value)} />
+            </Grid>
+          </Grid>
+        )}
 
-            {/* STEP 1: Nährwerte */}
-            {step === 1 && (
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    Nährwerte (pro 100 g)
-                  </Typography>
-                </Grid>
-                {[
-                  ['kcal', 'Kalorien (kcal)', kcal, setKcal],
-                  ['protein', 'Eiweiß (g)', protein, setProtein],
-                  ['carbs', 'Kohlenhydrate (g)', carbs, setCarbs],
-                  ['sugar', 'Zucker (g)', sugar, setSugar],
-                  ['fat', 'Fett (g)', fat, setFat],
-                  ['satfat', 'Gesättigte Fette (g)', satfat, setSatfat],
-                  ['fiber', 'Ballaststoffe (g)', fiber, setFiber],
-                  ['salt', 'Salz (g)', salt, setSalt],
-                ].map(([, label, val, setter]) => (
-                  <Grid item xs={6} sm={4} md={3} key={label as string}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label={label as string}
-                      value={val as string}
-                      onChange={(e) => (setter as (v: string) => void)(e.target.value)}
-                      type="number"
-                      inputProps={{ step: 0.1, min: 0 }}
-                    />
-                  </Grid>
+        {step === 1 && (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Nährwerte pro 100 g</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Schiebe die Regler. Genauere Werte kannst du später verbessern.
+              </Typography>
+            </Grid>
+            {[
+              ['Kalorien', `${Math.round(kcal)} kcal`, kcal, setKcal, 0, 900],
+              ['Protein', `${protein.toFixed(1)} g`, protein, setProtein, 0, 100],
+              ['Kohlenhydrate', `${carbs.toFixed(1)} g`, carbs, setCarbs, 0, 100],
+              ['Fett', `${fat.toFixed(1)} g`, fat, setFat, 0, 100],
+            ].map(([label, display, val, setter, min, max]) => (
+              <Grid item xs={12} key={label as string}>
+                <SliderRow label={label as string} display={display as string}
+                  value={val as number} onChange={setter as (v: number) => void}
+                  min={min as number} max={max as number} />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Button variant="outlined" fullWidth onClick={() => setShowAdvanced(!showAdvanced)}>
+                {showAdvanced ? 'Weitere Felder ausblenden' : 'Zucker, Ballaststoffe, Salz…'}
+              </Button>
+            </Grid>
+            {showAdvanced && [
+              ['Zucker', sugar, setSugar, 0, 100],
+              ['Ges. Fettsäuren', satfat, setSatfat, 0, 100],
+              ['Ballaststoffe', fiber, setFiber, 0, 30],
+              ['Salz', salt, setSalt, 0, 10],
+            ].map(([label, val, setter, min, max]) => (
+              <Grid item xs={12} key={label as string}>
+                <SliderRow label={label as string} display={`${(val as number).toFixed(1)} g`}
+                  value={val as number} onChange={setter as (v: number) => void}
+                  min={min as number} max={max as number} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+
+        {step === 2 && (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Diäten & Histamin</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" fontWeight={600} gutterBottom>Histamin-Stufe (SIGHI)</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {[0, 1, 2, 3].map((s) => (
+                  <Chip key={s} size="small"
+                    label={['0 — unbedenklich', '1 — niedrig', '2 — mittel', '3 — hoch'][s]}
+                    onClick={() => setHistamineScore(histamineScore === s ? null : s)}
+                    color={histamineScore === s ? 'warning' : 'default'}
+                    variant={histamineScore === s ? 'filled' : 'outlined'} />
                 ))}
-              </Grid>
-            )}
-
-            {/* STEP 2: Mikronährstoffe + Allergene */}
-            {step === 2 && (
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    size="small"
-                    label="Histamin-Score (SIGHI)"
-                    value={histamineScore}
-                    onChange={(e) => setHistamineScore(e.target.value)}
-                  >
-                    <MenuItem value="">Keine Angabe</MenuItem>
-                    {[0, 1, 2, 3].map((s) => (
-                      <MenuItem key={s} value={s}>{s}</MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" gutterBottom>Allergene (EU-14)</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {ALLERGENS.map((a) => (
-                      <Chip
-                        key={a}
-                        label={a}
-                        onClick={() => toggleAllergen(a)}
-                        color={selectedAllergens.includes(a) ? 'error' : 'default'}
-                        variant={selectedAllergens.includes(a) ? 'filled' : 'outlined'}
-                        size="small"
-                      />
-                    ))}
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" gutterBottom>FODMAP</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {FODMAPS.map((f) => (
-                      <Chip
-                        key={f}
-                        label={f}
-                        onClick={() => toggleFodmap(f)}
-                        color={selectedFodmaps.includes(f) ? 'warning' : 'default'}
-                        variant={selectedFodmaps.includes(f) ? 'filled' : 'outlined'}
-                        size="small"
-                      />
-                    ))}
-                  </Box>
-                </Grid>
-              </Grid>
-            )}
-
-            {/* STEP 3: Vorschau */}
-            {step === 3 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>{nameDe || '(kein Name)'}</Typography>
-                {brand && <Typography color="text.secondary">{brand}</Typography>}
-                {barcode && <Typography variant="caption">Barcode: {barcode}</Typography>}
-
-                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {kcal && <Chip label={`${kcal} kcal`} size="small" color="primary" variant="outlined" />}
-                  {protein && <Chip label={`${protein}g Eiweiß`} size="small" variant="outlined" />}
-                  {carbs && <Chip label={`${carbs}g KH`} size="small" variant="outlined" />}
-                  {fat && <Chip label={`${fat}g Fett`} size="small" variant="outlined" />}
-                  {histamineScore && <Chip label={`SIGHI ${histamineScore}`} size="small" color="warning" />}
-                </Box>
-
-                {selectedAllergens.length > 0 && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="caption">Allergene:</Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                      {selectedAllergens.map((a) => (
-                        <Chip key={a} label={a} size="small" color="error" />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-
-                <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
-                  Quelle: MANUAL — wird direkt in die Datenbank eingetragen.
-                </Typography>
               </Box>
-            )}
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" fontWeight={600} gutterBottom>Allergene (EU-14)</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {ALLERGENS.map(({ code, label }) => (
+                  <Chip key={code} size="small" label={label}
+                    onClick={() => toggleAllergen(code)}
+                    color={selectedAllergens.includes(code) ? 'error' : 'default'}
+                    variant={selectedAllergens.includes(code) ? 'filled' : 'outlined'} />
+                ))}
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" fontWeight={600} gutterBottom>FODMAP-Flags</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {FODMAPS.map(({ code, label }) => (
+                  <Chip key={code} size="small" label={label}
+                    onClick={() => toggleFodmap(code)}
+                    color={selectedFodmaps.includes(code) ? 'warning' : 'default'}
+                    variant={selectedFodmaps.includes(code) ? 'filled' : 'outlined'} />
+                ))}
+              </Box>
+            </Grid>
+          </Grid>
+        )}
+
+        {step === 3 && (
+          <Box>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom>Vorschau</Typography>
+            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2 }}>
+              <Typography fontWeight={600}>{nameDe || '(kein Name)'}</Typography>
+              {brand && <Typography variant="body2" color="text.secondary">{brand}</Typography>}
+              {barcode && <Typography variant="body2" color="text.secondary">Barcode: {barcode}</Typography>}
+              <Typography variant="body2" fontWeight={600} sx={{ mt: 1 }}>Pro 100 g:</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {Math.round(kcal)} kcal — {protein.toFixed(1)} g P / {carbs.toFixed(1)} g KH / {fat.toFixed(1)} g F
+              </Typography>
+              {histamineScore !== null && (
+                <Typography variant="body2" color="text.secondary">Histamin: {histamineScore} / 3</Typography>
+              )}
+              {selectedAllergens.length > 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  Allergene: {selectedAllergens.map((c) => ALLERGENS.find((a) => a.code === c)?.label ?? c).join(', ')}
+                </Typography>
+              )}
+              {selectedFodmaps.length > 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  FODMAP: {selectedFodmaps.map((c) => FODMAPS.find((f) => f.code === c)?.label ?? c).join(', ')}
+                </Typography>
+              )}
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Direkt in Datenbank (Status APPROVED).
+              </Typography>
+            </Box>
+          </Box>
+        )}
       </WizardLayout>
     </Dialog>
+  );
+}
+
+function SliderRow({ label, display, value, onChange, min, max }: {
+  label: string; display: string; value: number;
+  onChange: (v: number) => void; min: number; max: number;
+}) {
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        <Typography variant="body2" color="text.secondary">{display}</Typography>
+      </Box>
+      <Slider value={value} onChange={(_, v) => onChange(v as number)}
+        min={min} max={max} step={0.1} size="small" />
+    </Box>
   );
 }
