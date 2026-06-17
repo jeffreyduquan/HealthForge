@@ -61,7 +61,7 @@ class AdminCrudController(
         return all
             .filter { q == null || it.nameDe.contains(q, ignoreCase = true) || (it.barcode?.contains(q, ignoreCase = true) == true) }
             .drop(offset)
-            .take(limit.coerceIn(1, 500))
+            .take(limit.coerceIn(1, 5_000))
             .map { it.toIngredientCrudDto() }
     }
 

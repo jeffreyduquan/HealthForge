@@ -435,7 +435,7 @@ export interface IngredientCrud {
 }
 
 export async function listAllIngredients(q?: string): Promise<IngredientCrud[]> {
-  const { data } = await api.get<IngredientCrud[]>('/admin/v1/crud/ingredients', { params: { q, limit: 500 } });
+  const { data } = await api.get<IngredientCrud[]>('/admin/v1/crud/ingredients', { params: { q, limit: 5000 } });
   return data;
 }
 
