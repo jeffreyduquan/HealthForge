@@ -59,7 +59,7 @@ class LebensmittelViewModel @Inject constructor(
 
     val pinnedKeys: StateFlow<List<String>> = profile.observe()
         .map { de.healthforge.presentation.home.HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), de.healthforge.domain.nutrition.NutrientCatalog.defaultPinnedKeys)
 
     init {
         // Hydrate the default filter state from the user's profile (REQ-QUALITY-FIX-001).

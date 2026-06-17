@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.healthforge.data.db.entities.IntakeEntryEntity
 import de.healthforge.data.db.entities.IntakeSourceType
+import de.healthforge.data.db.entities.AllergenType
+import de.healthforge.data.db.entities.FodmapType
 import de.healthforge.data.network.RecipeDetailDto
 import de.healthforge.data.network.RecipeListItemDto
 import de.healthforge.data.network.GroupSummaryDto
@@ -15,11 +17,18 @@ import de.healthforge.data.repository.RecipeRepository
 import de.healthforge.data.repository.ProfileRepository
 import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.presentation.home.HomeViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,31 +43,74 @@ data class RecipeBrowseUiState(
     val prepMaxMinutes: Int? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val applyProfileFilters: Boolean = true,
+    val excludedAllergens: Set<AllergenType> = emptySet(),
+    val excludedFodmap: Set<FodmapType> = emptySet(),
 )
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class RecipeBrowseViewModel @Inject constructor(
     private val repo: RecipeRepository,
-    private val profileRepo: de.healthforge.data.repository.ProfileRepository,
+    private val profileRepo: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipeBrowseUiState())
     val state: StateFlow<RecipeBrowseUiState> = _state.asStateFlow()
 
+    private val queryFlow = MutableStateFlow("")
+    private var searchJob: Job? = null
+
     val pinnedKeys: StateFlow<List<String>> = profileRepo.observe()
         .map { HomeViewModel.parsePinnedKeys(it.profile?.pinnedNutrientsJson) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NutrientCatalog.defaultPinnedKeys)
 
-    init { refresh() }
+    init {
+        // Hydrate profile filter state
+        viewModelScope.launch {
+            val full = profileRepo.observe().first()
+            _state.update { it.copy(
+                excludedAllergens = full.allergies,
+                excludedFodmap = full.intolerances,
+            ) }
+            refresh()
+        }
+        // Debounced search on query changes
+        queryFlow
+            .debounce(300)
+            .distinctUntilChanged()
+            .onEach { refresh() }
+            .launchIn(viewModelScope)
+    }
 
     fun setQuery(q: String) {
         _state.update { it.copy(query = q) }
+        queryFlow.value = q
     }
 
     fun toggleSlot(slot: String) {
         _state.update {
             val next = it.slotFilter.toMutableSet().apply { if (!add(slot)) remove(slot) }
             it.copy(slotFilter = next)
+        }
+        refresh()
+    }
+
+    fun toggleApplyProfileFilters() {
+        _state.update { it.copy(applyProfileFilters = !it.applyProfileFilters) }
+        refresh()
+    }
+
+    fun toggleAllergen(a: AllergenType) {
+        _state.update {
+            it.copy(excludedAllergens = if (a in it.excludedAllergens) it.excludedAllergens - a else it.excludedAllergens + a)
+        }
+        refresh()
+    }
+
+    fun toggleFodmap(f: FodmapType) {
+        _state.update {
+            it.copy(excludedFodmap = if (f in it.excludedFodmap) it.excludedFodmap - f else it.excludedFodmap + f)
         }
         refresh()
     }
@@ -72,10 +124,14 @@ class RecipeBrowseViewModel @Inject constructor(
         val s = _state.value
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
+            val excludeAllergens = if (s.applyProfileFilters)
+                s.excludedAllergens.map { it.name } + s.excludedFodmap.map { it.name }
+            else emptyList()
             val result = repo.browse(
                 q = s.query,
                 slot = s.slotFilter.toList(),
                 prepMax = s.prepMaxMinutes,
+                excludeAllergens = excludeAllergens.takeIf { it.isNotEmpty() },
                 scope = "PUBLIC_OR_MINE",
             )
             result.fold(

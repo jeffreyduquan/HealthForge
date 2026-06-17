@@ -339,6 +339,7 @@ class HomeViewModel @Inject constructor(
                     snapshotProteinPer100g = dto.protein_g_per_100g,
                     snapshotCarbsPer100g = dto.carbs_g_per_100g,
                     snapshotFatPer100g = dto.fat_g_per_100g,
+                    consumed = false,
                 )
             )
             // Also create a MealPlanItem so it appears in Plan (REQ-PLAN-QUICK-001)
@@ -392,8 +393,11 @@ class HomeViewModel @Inject constructor(
                 loggedAt = System.currentTimeMillis(), dayDateIso = day.toString(),
                 sourceType = IntakeSourceType.RECIPE, sourceId = recipe.id,
                 portionGrams = (recipe.servings * 100).toDouble(), snapshotName = recipe.title,
-                snapshotKcalPer100g = null, snapshotProteinPer100g = null,
-                snapshotCarbsPer100g = null, snapshotFatPer100g = null,
+                snapshotKcalPer100g = recipe.kcal_per_100g,
+                snapshotProteinPer100g = recipe.protein_per_100g,
+                snapshotCarbsPer100g = recipe.carbs_per_100g,
+                snapshotFatPer100g = recipe.fat_per_100g,
+                consumed = false,
             ))
             // Add to plan
             val slots = planRepo.observeSlotsForDay(day).first()
@@ -403,10 +407,10 @@ class HomeViewModel @Inject constructor(
                 slotId = quickSlot, sourceType = IntakeSourceType.RECIPE,
                 sourceId = recipe.id, amount = recipe.servings.toDouble(),
                 snapshotName = recipe.title,
-                snapshotKcalPer100g = null,
-                snapshotProteinPer100g = null,
-                snapshotCarbsPer100g = null,
-                snapshotFatPer100g = null,
+                snapshotKcalPer100g = recipe.kcal_per_100g,
+                snapshotProteinPer100g = recipe.protein_per_100g,
+                snapshotCarbsPer100g = recipe.carbs_per_100g,
+                snapshotFatPer100g = recipe.fat_per_100g,
             ))
             closeQuickAdd()
         }
@@ -424,6 +428,7 @@ class HomeViewModel @Inject constructor(
                 snapshotProteinPer100g = sup.proteinPerDose,
                 snapshotCarbsPer100g = sup.carbsPerDose,
                 snapshotFatPer100g = sup.fatPerDose,
+                consumed = false,
             ))
             val slots = planRepo.observeSlotsForDay(day).first()
             val quickSlot = slots.firstOrNull { it.slotType == "QUICK" }?.id

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -183,7 +184,6 @@ fun HfNutrientProgressRow(
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -193,11 +193,14 @@ fun HfNutrientProgressRow(
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.width(8.dp))
+            // Fixed-width columns for value + % so all rows align uniformly
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = hm.fgPrimary,
+                textAlign = TextAlign.End,
+                modifier = Modifier.widthIn(min = 72.dp),
             )
             Spacer(Modifier.width(8.dp))
             Text(
@@ -205,6 +208,8 @@ fun HfNutrientProgressRow(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = barColor,
+                textAlign = TextAlign.End,
+                modifier = Modifier.widthIn(min = 36.dp),
             )
         }
         Spacer(Modifier.height(4.dp))

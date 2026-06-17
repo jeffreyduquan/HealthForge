@@ -84,7 +84,7 @@ fun RecipesScreen(
             placeholder = "Rezepte suchen…",
             showFilterIcon = true,
             onFilterClick = { showFilters = true },
-            filterCount = state.slotFilter.size,
+            filterCount = state.slotFilter.size + state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
         )
         Spacer(Modifier.height(4.dp))
 
@@ -108,11 +108,13 @@ fun RecipesScreen(
 
     if (showFilters) {
         HfFilterDialog(
-            excludedAllergens = emptySet(),
-            excludedFodmap = emptySet(),
-            onToggleAllergen = {},
-            onToggleFodmap = {},
+            excludedAllergens = state.excludedAllergens,
+            excludedFodmap = state.excludedFodmap,
+            onToggleAllergen = vm::toggleAllergen,
+            onToggleFodmap = vm::toggleFodmap,
             onDismiss = { showFilters = false },
+            applyProfileFilters = state.applyProfileFilters,
+            onToggleProfileFilters = vm::toggleApplyProfileFilters,
             slotOptions = SLOT_OPTIONS,
             selectedSlots = state.slotFilter,
             onToggleSlot = vm::toggleSlot,

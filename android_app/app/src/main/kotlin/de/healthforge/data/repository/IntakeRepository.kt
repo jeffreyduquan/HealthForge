@@ -31,7 +31,8 @@ class IntakeRepository @Inject constructor(
     fun observeTotalsForDay(day: LocalDate): Flow<DayNutrientTotals> =
         dao.observeForDay(day.toString()).map { entries ->
             entries.filter { it.consumed }.fold(DayNutrientTotals.ZERO) { acc, e ->
-                val f = e.portionGrams / 100.0
+                // Supplements store per-dose values, not per-100g → multiplier = 1.0
+                val f = if (e.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else e.portionGrams / 100.0
                 DayNutrientTotals(
                     kcal = acc.kcal + (e.snapshotKcalPer100g ?: 0.0) * f,
                     proteinG = acc.proteinG + (e.snapshotProteinPer100g ?: 0.0) * f,
@@ -52,7 +53,8 @@ class IntakeRepository @Inject constructor(
             for (e in entries) {
                 if (!e.consumed) continue
                 dates.add(e.dayDateIso)
-                val f = e.portionGrams / 100.0
+                // Supplements store per-dose values, not per-100g → multiplier = 1.0
+                val f = if (e.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else e.portionGrams / 100.0
                 val prev = map.getOrDefault(e.dayDateIso, DayNutrientTotals.ZERO)
                 map[e.dayDateIso] = DayNutrientTotals(
                     kcal = prev.kcal + (e.snapshotKcalPer100g ?: 0.0) * f,

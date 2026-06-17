@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -102,12 +103,13 @@ fun SupplementsScreen(
                 }
             }
         } else {
-            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
                 HfSearchBar(
                     query = query,
                     onQueryChange = { query = it },
                     placeholder = "Supplements suchen…",
                 )
+                Spacer(Modifier.height(4.dp))
                 if (filtered.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -122,7 +124,7 @@ fun SupplementsScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(items = filtered, key = { it.id }) { sup ->

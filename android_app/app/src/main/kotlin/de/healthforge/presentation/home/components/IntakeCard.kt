@@ -241,7 +241,8 @@ fun computePinnedNutrients(
     pinnedKeys: List<String>,
     ingredientDto: IngredientDto? = null,
 ): List<Pair<String, String>> {
-    val f = entry.portionGrams / 100.0
+    // Supplements store per-dose values, not per-100g → multiplier = 1.0
+    val f = if (entry.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else entry.portionGrams / 100.0
     return pinnedKeys.mapNotNull { key ->
         // Try snapshot fields first, then micronutrients from DTO
         val value: Double? = when (key) {
@@ -276,7 +277,8 @@ fun computePinnedNutrientBars(
     pinnedKeys: List<String>,
     ingredientDto: IngredientDto? = null,
 ): List<Triple<String, String, Double>> {
-    val f = entry.portionGrams / 100.0
+    // Supplements store per-dose values, not per-100g → multiplier = 1.0
+    val f = if (entry.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else entry.portionGrams / 100.0
     return pinnedKeys.mapNotNull { key ->
         val dge = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.defaultPerDay ?: return@mapNotNull null
         if (dge <= 0) return@mapNotNull null
