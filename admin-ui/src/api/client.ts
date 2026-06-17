@@ -501,12 +501,14 @@ export interface RecipeCrud {
   id: string;
   title: string;
   description: string | null;
+  image_key: string | null;
   status: string;
   visibility: string;
   authorId: string | null;
   servings: number;
   prep_minutes: number;
   cook_minutes: number | null;
+  slot_tags: string[];
   created_at: string;
   updated_at: string;
 }

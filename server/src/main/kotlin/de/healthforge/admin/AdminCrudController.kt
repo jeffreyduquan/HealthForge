@@ -523,19 +523,22 @@ data class RecipeCrudDto(
     val id: UUID,
     val title: String,
     val description: String?,
+    @JsonProperty("image_key") val imageKey: String?,
     val status: String,
     val visibility: String,
     val authorId: UUID,
     val servings: Int,
     @JsonProperty("prep_minutes") val prepMinutes: Int,
     @JsonProperty("cook_minutes") val cookMinutes: Int?,
+    @JsonProperty("slot_tags") val slotTags: List<String>,
     @JsonProperty("created_at") val createdAt: String,
     @JsonProperty("updated_at") val updatedAt: String,
 )
 
 private fun RecipeEntity.toRecipeCrudDto() = RecipeCrudDto(
-    id = id, title = title, description = description,
+    id = id, title = title, description = description, imageKey = imageKey,
     status = status, visibility = visibility, authorId = authorId,
     servings = servings, prepMinutes = prepMinutes, cookMinutes = cookMinutes,
+    slotTags = slotTags.toList(),
     createdAt = createdAt.toString(), updatedAt = updatedAt.toString(),
 )

@@ -53,6 +53,7 @@ import IngredientWizard from '../components/IngredientWizard';
 import SupplementWizard from '../components/SupplementWizard';
 import RecipeWizard from '../components/RecipeWizard';
 import IngredientDetailDialog from '../components/IngredientDetailDialog';
+import RecipeDetailDialog from '../components/RecipeDetailDialog';
 
 type TabValue = 'ingredients' | 'supplements' | 'recipes';
 
@@ -67,6 +68,7 @@ export default function DatabasePage() {
   const [search, setSearch] = useState('');
   const [editDialog, setEditDialog] = useState<EditDialog | null>(null);
   const [detailIngredient, setDetailIngredient] = useState<IngredientCrud | null>(null);
+  const [detailRecipe, setDetailRecipe] = useState<RecipeCrud | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ tab: TabValue; id: string; label: string } | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const [warningAccepted, setWarningAccepted] = useState(false);
@@ -303,7 +305,12 @@ export default function DatabasePage() {
                 </TableHead>
                 <TableBody>
                   {filteredRecipes.map((r) => (
-                    <TableRow key={r.id} hover>
+                    <TableRow
+                      key={r.id}
+                      hover
+                      onClick={() => setDetailRecipe(r)}
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <TableCell>{r.title}</TableCell>
                       <TableCell><Chip size="small" label={r.status} color={r.status === 'PUBLISHED' ? 'success' : r.status === 'PENDING_REVIEW' ? 'warning' : 'error'} /></TableCell>
                       <TableCell>{r.visibility}</TableCell>
@@ -407,6 +414,14 @@ export default function DatabasePage() {
         onSave={(id, data) => {
           setSnack('⏳ Speichere…');
           updateIngM.mutate({ id, data });
+        }}
+      />
+      <RecipeDetailDialog
+        recipe={detailRecipe}
+        onClose={() => setDetailRecipe(null)}
+        onSave={(id, data) => {
+          setSnack('⏳ Speichere…');
+          updateRecM.mutate({ id, data });
         }}
       />
     </Box>
