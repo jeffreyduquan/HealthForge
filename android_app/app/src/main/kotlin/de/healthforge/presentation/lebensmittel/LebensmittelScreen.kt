@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
@@ -35,7 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -62,7 +61,6 @@ import de.healthforge.presentation.common.components.HfMasterTile
 import de.healthforge.presentation.common.components.HfSearchBar
 import de.healthforge.presentation.common.components.MasterTileNutrient
 import de.healthforge.presentation.common.components.formatNutrientValue
-import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.LocalHmTokens
 
 /**
@@ -104,30 +102,34 @@ fun LebensmittelScreen(
     // Load ingredient ratings on first composition
     LaunchedEffect(Unit) { vm.refreshRatings() }
 
-    Scaffold(
-        floatingActionButton = {
-            GradientFab(
-                onClick = { onSuggestIngredient(state.query) },
-                size = 56.dp,
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Lebensmittel vorschlagen", tint = hm.fgPrimary)
-            }
-        },
-    ) { padding ->
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
             .padding(horizontal = 16.dp),
     ) {
-        HfSearchBar(
-            query = state.query,
-            onQueryChange = vm::onQueryChanged,
-            placeholder = "Apfel, Brot, Tomate…",
-            showFilterIcon = true,
-            onFilterClick = { showFilters = true },
-            filterCount = state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
-        )
+        // Search bar row: search field + filter + suggest button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            HfSearchBar(
+                query = state.query,
+                onQueryChange = vm::onQueryChanged,
+                placeholder = "Apfel, Brot, Tomate…",
+                showFilterIcon = true,
+                onFilterClick = { showFilters = true },
+                filterCount = state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = { onSuggestIngredient(state.query) }) {
+                Icon(
+                    Icons.Filled.AutoAwesome,
+                    contentDescription = "Lebensmittel vorschlagen",
+                    tint = hm.ambientViolet,
+                )
+            }
+        }
 
         // Filter row removed — everything in filter dialog
         Spacer(Modifier.height(4.dp))
@@ -161,7 +163,6 @@ fun LebensmittelScreen(
             }
         }
     }
-    } // Scaffold
 
     if (showFilters) {
         HfFilterDialog(

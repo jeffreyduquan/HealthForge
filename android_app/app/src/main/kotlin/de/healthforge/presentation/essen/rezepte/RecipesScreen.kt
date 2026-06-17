@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
@@ -29,12 +29,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
-import de.healthforge.presentation.theme.GradientFab
 import de.healthforge.presentation.theme.LocalHmTokens
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -70,22 +69,30 @@ fun RecipesScreen(
     val pinnedKeys by vm.pinnedKeys.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
 
-    Scaffold(
-        floatingActionButton = {
-            GradientFab(onClick = onCreate, size = 56.dp) {
-                Icon(Icons.Filled.Add, contentDescription = "Rezept anlegen", tint = LocalHmTokens.current.fgPrimary)
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        // Search bar row: search field + filter + suggest button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            HfSearchBar(
+                query = state.query,
+                onQueryChange = vm::setQuery,
+                placeholder = "Rezepte suchen…",
+                showFilterIcon = true,
+                onFilterClick = { showFilters = true },
+                filterCount = state.slotFilter.size + state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = onCreate) {
+                Icon(
+                    Icons.Filled.AutoAwesome,
+                    contentDescription = "Rezept anlegen",
+                    tint = LocalHmTokens.current.ambientViolet,
+                )
             }
-        },
-    ) { padding ->
-    Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-        HfSearchBar(
-            query = state.query,
-            onQueryChange = vm::setQuery,
-            placeholder = "Rezepte suchen…",
-            showFilterIcon = true,
-            onFilterClick = { showFilters = true },
-            filterCount = state.slotFilter.size + state.excludedAllergens.size + state.excludedFodmap.size + (if (state.applyProfileFilters) 1 else 0),
-        )
+        }
         Spacer(Modifier.height(4.dp))
 
         when {
@@ -103,7 +110,6 @@ fun RecipesScreen(
                 }
             }
         }
-    }
     }
 
     if (showFilters) {
