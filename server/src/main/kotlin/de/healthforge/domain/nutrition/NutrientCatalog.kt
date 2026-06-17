@@ -1,5 +1,7 @@
 package de.healthforge.domain.nutrition
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+
 /**
  * P7.S1 Server-Mirror des Nährstoff-Katalogs (REQ-NUTRIENT-CATALOG-001).
  *
@@ -96,4 +98,21 @@ object NutrientCatalog {
     fun ofCategory(c: Category): List<Nutrient> = all.filter { it.category == c }
 
     val defaultPinnedKeys: List<String> = listOf("kcal", "protein", "carbs", "fat", "water")
+
+    /** All micronutrient keys (vitamins + minerals) that MUST be present in every ingredient/supplement. */
+    val allMicronutrientKeys: List<String> = (vitamins + minerals).map { it.key }
+
+    /** Generate a full micronutrients_json with all keys set to 0, merged with existing values. */
+    fun fullMicronutrientsJson(existingJson: String?): String {
+        val mapper = jacksonObjectMapper()
+        val defaults = allMicronutrientKeys.associateWith { 0.0 }.toMutableMap()
+        if (!existingJson.isNullOrBlank() && existingJson != "{}") {
+            runCatching {
+                @Suppress("UNCHECKED_CAST")
+                val existing: Map<String, Any> = mapper.readValue(existingJson, Map::class.java) as Map<String, Any>
+                existing.forEach { (k, v) -> defaults[k] = (v as? Number)?.toDouble() ?: 0.0 }
+            }
+        }
+        return mapper.writeValueAsString(defaults)
+    }
 }

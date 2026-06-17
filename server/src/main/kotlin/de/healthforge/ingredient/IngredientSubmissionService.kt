@@ -1,5 +1,6 @@
 package de.healthforge.ingredient
 
+import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.auth.UserRepository
 import de.healthforge.common.ApiException
 import org.springframework.http.HttpStatus
@@ -79,6 +80,7 @@ class IngredientSubmissionService(
             histamineScore = input.histamineScore,
             allergensJson = toJsonArray(input.allergens),
             fodmapFlagsJson = toJsonArray(input.fodmapFlags),
+            micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(null),
             locked = false,
             status = IngredientStatus.PENDING.name,
             submittedBy = userId,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import de.healthforge.auth.AuthPrincipal
 import de.healthforge.common.ApiException
 import de.healthforge.common.AuditLogService
+import de.healthforge.domain.nutrition.NutrientCatalog
 import de.healthforge.ingredient.IngredientEntity
 import de.healthforge.ingredient.IngredientRepository
 import de.healthforge.ingredient.IngredientSource
@@ -128,7 +129,7 @@ class AdminCrudController(
             histamineScore = req.histamineScore,
             allergensJson = req.allergensJson ?: "[]",
             fodmapFlagsJson = req.fodmapFlagsJson ?: "[]",
-            micronutrientsJson = req.micronutrientsJson ?: "{}",
+            micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(req.micronutrientsJson),
             status = IngredientStatus.APPROVED.name,
             locked = req.locked ?: false,
         )
@@ -209,7 +210,7 @@ class AdminCrudController(
         sup.proteinPerDose = req.proteinPerDose
         sup.carbsPerDose = req.carbsPerDose
         sup.fatPerDose = req.fatPerDose
-        sup.micronutrientsJson = req.micronutrientsJson
+        sup.micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(req.micronutrientsJson)
         sup.notes = req.notes?.trim()?.ifEmpty { null }
         supplementRepo.save(sup)
         auditService.record(
@@ -239,7 +240,7 @@ class AdminCrudController(
             proteinPerDose = req.proteinPerDose,
             carbsPerDose = req.carbsPerDose,
             fatPerDose = req.fatPerDose,
-            micronutrientsJson = req.micronutrientsJson,
+            micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(req.micronutrientsJson),
             notes = req.notes?.trim()?.ifEmpty { null },
         )
         supplementRepo.save(sup)
@@ -402,7 +403,7 @@ class AdminCrudController(
         ing.histamineScore = req.histamineScore
         ing.allergensJson = req.allergensJson ?: "[]"
         ing.fodmapFlagsJson = req.fodmapFlagsJson ?: "[]"
-        ing.micronutrientsJson = req.micronutrientsJson ?: "{}"
+        ing.micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(req.micronutrientsJson)
         req.status?.let { ing.status = it }
         ing.locked = req.locked ?: ing.locked
     }

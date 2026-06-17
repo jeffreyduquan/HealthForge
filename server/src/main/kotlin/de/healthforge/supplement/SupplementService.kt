@@ -2,6 +2,7 @@ package de.healthforge.supplement
 
 import de.healthforge.auth.UserRepository
 import de.healthforge.common.ApiException
+import de.healthforge.domain.nutrition.NutrientCatalog
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,7 +44,7 @@ class SupplementService(
                 proteinPerDose = input.proteinPerDose,
                 carbsPerDose = input.carbsPerDose,
                 fatPerDose = input.fatPerDose,
-                micronutrientsJson = input.micronutrientsJson,
+                micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(input.micronutrientsJson),
                 notes = input.notes,
             ),
         )
@@ -99,7 +100,7 @@ class SupplementService(
                 proteinPerDose = s.proteinPerDose,
                 carbsPerDose = s.carbsPerDose,
                 fatPerDose = s.fatPerDose,
-                micronutrientsJson = s.micronutrientsJson,
+                micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(s.micronutrientsJson),
                 notes = s.notes,
                 createdBy = s.proposerId,
             ),
