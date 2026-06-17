@@ -259,10 +259,9 @@ private fun buildIngredientNutrientRows(
 }
 
 /** Map technical data-source codes to user-friendly labels. */
-private fun friendlySource(source: String): String = when (source) {
-    "USDA_FDG" -> "USDA"
-    "USDA" -> "USDA"
-    "OFF" -> "Open Food Facts"
-    "USER" -> "Nutzer"
+private fun friendlySource(source: String): String = when {
+    source.startsWith("USDA", ignoreCase = true) -> "USDA"
+    source == "OFF" -> "Open Food Facts"
+    source == "USER" -> "Nutzer"
     else -> source
 }
