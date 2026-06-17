@@ -11,6 +11,7 @@ import de.healthforge.data.network.AuthApi
 import de.healthforge.data.network.AuthInterceptor
 import de.healthforge.data.network.GroupApi
 import de.healthforge.data.network.IngredientApi
+import de.healthforge.data.network.MeApi
 import de.healthforge.data.network.MediaApi
 import de.healthforge.data.network.RecipeApi
 import de.healthforge.data.network.ReleaseApi
@@ -72,6 +73,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRecipeApi(retrofit: Retrofit): RecipeApi = retrofit.create(RecipeApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMeApi(retrofit: Retrofit): MeApi = retrofit.create(MeApi::class.java)
 
     @Provides
     @Singleton

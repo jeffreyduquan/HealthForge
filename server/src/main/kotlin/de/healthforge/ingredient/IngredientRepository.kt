@@ -11,6 +11,7 @@ interface IngredientRepository : JpaRepository<IngredientEntity, UUID> {
     fun findByBarcode(barcode: String): Optional<IngredientEntity>
     fun findBySourceAndSourceId(source: IngredientSource, sourceId: String): Optional<IngredientEntity>
     fun findAllByStatusOrderByCreatedAtAsc(status: String): List<IngredientEntity>
+    fun findAllBySubmittedByOrderByCreatedAtDesc(submittedBy: UUID): List<IngredientEntity>
 }
 
 /**

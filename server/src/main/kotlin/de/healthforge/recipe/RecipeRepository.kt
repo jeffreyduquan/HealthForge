@@ -9,6 +9,7 @@ import java.util.UUID
 interface RecipeRepo : JpaRepository<RecipeEntity, UUID> {
     fun findByIdAndStatus(id: UUID, status: String): RecipeEntity?
     fun findAllByAuthorIdAndStatusOrderByCreatedAtDesc(authorId: UUID, status: String): List<RecipeEntity>
+    fun findAllByAuthorIdOrderByCreatedAtDesc(authorId: UUID): List<RecipeEntity>
     fun findAllByStatusOrderByCreatedAtAsc(status: String): List<RecipeEntity>
     fun findAllByStatusInOrderByCreatedAtAsc(statuses: List<String>): List<RecipeEntity>
 }

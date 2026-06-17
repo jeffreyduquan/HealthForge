@@ -64,6 +64,7 @@ fun ProfileScreen(
     onOpenSymptomManager: () -> Unit = {},
     onOpenExport: () -> Unit = {},
     onOpenInsights: () -> Unit = {},
+    onOpenSubmissions: () -> Unit = {},
     vm: ProfileViewModel = hiltViewModel(),
 ) {
     val full by vm.profile.collectAsStateWithLifecycle()
@@ -155,6 +156,9 @@ fun ProfileScreen(
                     }
                     OutlinedButton(onClick = onOpenInsights, modifier = Modifier.fillMaxWidth()) {
                         Text("Erkenntnisse")
+                    }
+                    OutlinedButton(onClick = onOpenSubmissions, modifier = Modifier.fillMaxWidth()) {
+                        Text("Meine Vorschläge")
                     }
 
                     // === In-App Update ===

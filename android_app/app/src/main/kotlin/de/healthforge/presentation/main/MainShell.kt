@@ -43,6 +43,7 @@ import de.healthforge.presentation.plan.PlanScreen
 import de.healthforge.presentation.insights.InsightsScreen
 import de.healthforge.presentation.profile.ExportScreen
 import de.healthforge.presentation.profile.ProfileScreen
+import de.healthforge.presentation.profile.SubmissionsScreen
 import de.healthforge.presentation.supplements.SupplementDetailScreen
 import de.healthforge.presentation.supplements.SupplementWizardScreen
 
@@ -83,6 +84,7 @@ object MainRoutes {
     const val SHOPPING_LIST = "main/shopping-list"
     const val EXPORT = "main/export"
     const val INSIGHTS = "main/insights"
+    const val SUBMISSIONS = "main/submissions"
     /** REQ-INGREDIENT-DETAIL-001 — Full-screen ingredient detail (replaces ModalBottomSheet). */
     const val INGREDIENT_DETAIL = "main/ingredient-detail"
     const val INGREDIENT_DETAIL_ARG = "id"
@@ -220,6 +222,7 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                     onOpenSymptomManager = { navController.navigate(MainRoutes.SYMPTOM_MANAGER) },
                     onOpenExport = { navController.navigate(MainRoutes.EXPORT) },
                     onOpenInsights = { navController.navigate(MainRoutes.INSIGHTS) },
+                    onOpenSubmissions = { navController.navigate(MainRoutes.SUBMISSIONS) },
                 )
             }
             composable(MainRoutes.INTAKE_HISTORY) {
@@ -396,6 +399,9 @@ fun MainShell(onRestartOnboarding: () -> Unit) {
                         navController.navigate(MainRoutes.recipeDetail(id))
                     },
                 )
+            }
+            composable(MainRoutes.SUBMISSIONS) {
+                SubmissionsScreen(onBack = { navController.popBackStack() })
             }
         }
     }
