@@ -48,6 +48,9 @@ import {
   type SupplementCrud,
   type RecipeCrud,
 } from '../api/client';
+import IngredientWizard from '../components/IngredientWizard';
+import SupplementWizard from '../components/SupplementWizard';
+import RecipeWizard from '../components/RecipeWizard';
 
 type TabValue = 'ingredients' | 'supplements' | 'recipes';
 
@@ -65,6 +68,10 @@ export default function DatabasePage() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ tab: TabValue; id: string; label: string } | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const [warningAccepted, setWarningAccepted] = useState(false);
+  // Wizard visibility
+  const [showIngredientWizard, setShowIngredientWizard] = useState(false);
+  const [showSupplementWizard, setShowSupplementWizard] = useState(false);
+  const [showRecipeWizard, setShowRecipeWizard] = useState(false);
 
   // === Queries ===
   const ingQ = useQuery({
@@ -163,7 +170,11 @@ export default function DatabasePage() {
         />
         <Button
           variant="contained" startIcon={<AddIcon />}
-          onClick={() => handleEdit(tab, null)}
+          onClick={() => {
+            if (tab === 'ingredients') setShowIngredientWizard(true);
+            else if (tab === 'supplements') setShowSupplementWizard(true);
+            else if (tab === 'recipes') setShowRecipeWizard(true);
+          }}
         >
           Neu
         </Button>
@@ -350,6 +361,35 @@ export default function DatabasePage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* === Creation Wizards === */}
+      <IngredientWizard
+        open={showIngredientWizard}
+        onClose={() => setShowIngredientWizard(false)}
+        onSave={(data) => {
+          createIngM.mutate(data);
+          setShowIngredientWizard(false);
+        }}
+        saving={createIngM.isPending}
+      />
+      <SupplementWizard
+        open={showSupplementWizard}
+        onClose={() => setShowSupplementWizard(false)}
+        onSave={(data) => {
+          createSupM.mutate(data);
+          setShowSupplementWizard(false);
+        }}
+        saving={createSupM.isPending}
+      />
+      <RecipeWizard
+        open={showRecipeWizard}
+        onClose={() => setShowRecipeWizard(false)}
+        onSave={(data) => {
+          // Recipe creation uses a different API — for now just show snack
+          setSnack('⚠️ Rezept-Erstellung via Admin-CRUD noch nicht implementiert');
+          setShowRecipeWizard(false);
+        }}
+      />
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} message={snack ?? ''} />
 
