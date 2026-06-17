@@ -1,24 +1,17 @@
 import { useState } from 'react';
 import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  Grid,
-  MenuItem,
-  Slider,
-  TextField,
-  Typography,
+  Box, Checkbox, Chip, Dialog, FormControlLabel, Grid,
+  Slider, TextField, Typography,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
 
-const STEP_LABELS = ['Name', 'Mahlzeit', 'Portionen', 'Zubereitung', 'Status', 'Vorschau'];
+const STEP_LABELS = ['Name & Foto', 'Mahlzeit', 'Zutaten', 'Portionen & Zeit', 'Zubereitung', 'Vorschau'];
 
 const SLOTS = [
-  { code: 'BREAKFAST', label: 'Frühstück' },
-  { code: 'LUNCH', label: 'Mittagessen' },
-  { code: 'DINNER', label: 'Abendessen' },
-  { code: 'SNACK', label: 'Snack' },
+  { code: 'BREAKFAST', label: '🌅 Frühstück' },
+  { code: 'LUNCH', label: '☀️ Mittagessen' },
+  { code: 'DINNER', label: '🌙 Abendessen' },
+  { code: 'SNACK', label: '🍿 Snack' },
 ];
 
 interface Props {
@@ -31,35 +24,46 @@ interface Props {
 export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
   const [step, setStep] = useState(0);
 
+  // Step 0: Name + Foto
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [imageKey, setImageKey] = useState('');
 
+  // Step 1: Mahlzeit
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
 
+  // Step 2: Zutaten (freitext, kein Server-Search im Admin)
+  const [ingredientsText, setIngredientsText] = useState('');
+
+  // Step 3: Portionen + Zeit (sliders like app)
   const [servings, setServings] = useState(2);
   const [prepMinutes, setPrepMinutes] = useState(30);
   const [cookMinutes, setCookMinutes] = useState(0);
 
-  const [stepsText, setStepsText] = useState('');
+  // Step 4: Zubereitung
+  const [instructionsText, setInstructionsText] = useState('');
 
-  const [visibility, setVisibility] = useState('PUBLIC');
-
+  // Validation
   const canStep0 = title.trim().length >= 2;
+  const canStep1 = selectedSlots.length > 0;
+  const canStep2 = true; // ingredients are optional for admin
+  const canStep3 = prepMinutes > 0;
+  const canAdvance = (s: number) =>
+    (s === 0 && canStep0) || (s === 1 && canStep1) ||
+    (s === 2 && canStep2) || (s === 3 && canStep3) || s === 4;
 
-  const toggleSlot = (s: string) =>
-    setSelectedSlots((p) => p.includes(s) ? p.filter((x) => x !== s) : [...p, s]);
+  const toggleSlot = (code: string) =>
+    setSelectedSlots((p) => p.includes(code) ? p.filter((x) => x !== code) : [...p, code]);
 
   const handleSave = () => {
     onSave({
       title: title.trim(),
-      description: description.trim() || null,
       image_key: imageKey.trim() || null,
+      description: instructionsText.trim() || null,
       slot_tags: selectedSlots,
       servings,
       prep_minutes: prepMinutes,
       cook_minutes: cookMinutes > 0 ? cookMinutes : null,
-      visibility,
+      visibility: 'PUBLIC',
       status: 'PUBLISHED',
     });
   };
@@ -73,114 +77,125 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
         title="Rezept erstellen"
         step={step} totalSteps={6} stepLabels={STEP_LABELS}
         onBack={handleBack} onNext={handleNext} onSave={handleSave}
-        canNext={
-          (step === 0 && canStep0) ||
-          (step >= 1 && step <= 4)
-        }
-        canSave={canStep0} saving={saving}
+        canNext={canAdvance(step)}
+        canSave={canStep0 && canStep1 && canStep3} saving={saving}
       >
-        {/* Step 0: Name */}
+        {/* Step 0: Name + Foto */}
         {step === 0 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Wie heißt dein Rezept?</Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Titel *" value={title}
+              <TextField fullWidth label="Name *" value={title}
                 onChange={(e) => setTitle(e.target.value)} autoFocus />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField fullWidth label="Beschreibung (optional)" value={description}
-                onChange={(e) => setDescription(e.target.value)} multiline minRows={2} />
             </Grid>
             <Grid item xs={12}>
               <TextField fullWidth label="Bild-Key (optional)" value={imageKey}
                 onChange={(e) => setImageKey(e.target.value)}
                 placeholder="z.B. recipes/abc123.jpg" />
             </Grid>
+            <Grid item xs={12}>
+              {imageKey.trim() ? (
+                <Typography variant="body2" color="text.secondary">📷 Bild hinterlegt: {imageKey.trim()}</Typography>
+              ) : (
+                <Typography variant="body2" color="error">Bitte wähle ein Foto aus (Pflicht in der App)</Typography>
+              )}
+            </Grid>
           </Grid>
         )}
 
         {/* Step 1: Mahlzeit */}
         {step === 1 && (
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Für welche Mahlzeit?</Typography>
-              <Typography variant="body2" color="text.secondary">Mehrfachauswahl möglich.</Typography>
+              <Typography variant="body2" color="text.secondary">Wähle mindestens eine Mahlzeit aus.</Typography>
+            </Grid>
+            {SLOTS.map(({ code, label }) => (
+              <Grid item xs={12} key={code}>
+                <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1 }}>
+                  <FormControlLabel
+                    control={<Checkbox checked={selectedSlots.includes(code)}
+                      onChange={() => toggleSlot(code)} />}
+                    label={<Typography fontWeight={600}>{label}</Typography>}
+                  />
+                </Box>
+              </Grid>
+            ))}
+            {selectedSlots.length === 0 && (
+              <Grid item xs={12}>
+                <Typography variant="body2" color="error">Bitte wähle mindestens eine Mahlzeit</Typography>
+              </Grid>
+            )}
+          </Grid>
+        )}
+
+        {/* Step 2: Zutaten */}
+        {step === 2 && (
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Was kommt rein?</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Gib die Zutaten als Freitext ein (Admin-Ansicht).
+              </Typography>
             </Grid>
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {SLOTS.map(({ code, label }) => (
-                  <Chip key={code} label={label}
-                    onClick={() => toggleSlot(code)}
-                    color={selectedSlots.includes(code) ? 'primary' : 'default'}
-                    variant={selectedSlots.includes(code) ? 'filled' : 'outlined'} />
-                ))}
-              </Box>
+              <TextField fullWidth label="Zutatenliste" value={ingredientsText}
+                onChange={(e) => setIngredientsText(e.target.value)}
+                multiline minRows={4}
+                placeholder="200g Mehl&#10;2 Eier&#10;100ml Milch&#10;…" />
             </Grid>
           </Grid>
         )}
 
-        {/* Step 2: Portionen + Zeit */}
-        {step === 2 && (
+        {/* Step 3: Portionen + Zeit */}
+        {step === 3 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Portionen & Zeit</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="body2" gutterBottom>
-                Portionen: <strong>{servings}</strong>
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography fontWeight={600}>Portionen</Typography>
+                <Typography color="text.secondary">{servings}</Typography>
+              </Box>
               <Slider value={servings} onChange={(_, v) => setServings(v as number)}
-                min={1} max={12} step={1} marks valueLabelDisplay="auto" />
+                min={1} max={20} step={1} marks valueLabelDisplay="auto" />
             </Grid>
-            <Grid item xs={6}>
-              <TextField fullWidth label="Zubereitungszeit (min)" value={prepMinutes}
-                onChange={(e) => setPrepMinutes(Number(e.target.value) || 0)}
-                type="number" inputProps={{ min: 1 }} required />
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography fontWeight={600}>Zubereitungszeit</Typography>
+                <Typography color="text.secondary">{prepMinutes} min</Typography>
+              </Box>
+              <Slider value={prepMinutes} onChange={(_, v) => setPrepMinutes(Math.round((v as number) / 5) * 5)}
+                min={0} max={240} step={5} valueLabelDisplay="auto" />
             </Grid>
-            <Grid item xs={6}>
-              <TextField fullWidth label="Kochzeit (min)" value={cookMinutes}
-                onChange={(e) => setCookMinutes(Number(e.target.value) || 0)}
-                type="number" inputProps={{ min: 0 }} />
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography fontWeight={600}>Kochzeit (optional)</Typography>
+                <Typography color="text.secondary">{cookMinutes > 0 ? `${cookMinutes} min` : '—'}</Typography>
+              </Box>
+              <Slider value={cookMinutes} onChange={(_, v) => setCookMinutes(Math.round((v as number) / 5) * 5)}
+                min={0} max={240} step={5} valueLabelDisplay="auto" />
             </Grid>
           </Grid>
         )}
 
-        {/* Step 3: Zubereitung */}
-        {step === 3 && (
+        {/* Step 4: Zubereitung */}
+        {step === 4 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Zubereitung</Typography>
               <Typography variant="body2" color="text.secondary">
-                Schritt für Schritt beschreiben (optional).
+                Schritt für Schritt empfohlen. Du kannst weitere Schritte hinzufügen.
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Zubereitungsschritte" value={stepsText}
-                onChange={(e) => setStepsText(e.target.value)}
-                multiline minRows={4} placeholder="1. Zutaten vorbereiten&#10;2. …" />
-            </Grid>
-          </Grid>
-        )}
-
-        {/* Step 4: Status */}
-        {step === 4 && (
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={600}>Sichtbarkeit</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField select fullWidth label="Sichtbarkeit" value={visibility}
-                onChange={(e) => setVisibility(e.target.value)}>
-                <MenuItem value="PUBLIC">Öffentlich</MenuItem>
-                <MenuItem value="PRIVATE">Privat</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary">
-                Admin erstellte Rezepte erhalten Status PUBLISHED.
-              </Typography>
+              <TextField fullWidth label="Zubereitungsschritte" value={instructionsText}
+                onChange={(e) => setInstructionsText(e.target.value)}
+                multiline minRows={5}
+                placeholder="1. Zutaten vorbereiten&#10;2. Alles vermengen&#10;3. Bei 180°C backen&#10;…" />
             </Grid>
           </Grid>
         )}
@@ -190,22 +205,40 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
           <Box>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>Vorschau</Typography>
             <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2 }}>
-              <Typography fontWeight={600}>{title || '(kein Titel)'}</Typography>
-              {description && <Typography variant="body2" color="text.secondary">{description}</Typography>}
+              <Typography variant="h6" fontWeight={600}>{title || '(kein Titel)'}</Typography>
+
+              {imageKey.trim() && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  📷 Bild: {imageKey.trim()}
+                </Typography>
+              )}
+
               <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 <Chip label={`${servings} Portionen`} size="small" color="primary" variant="outlined" />
-                <Chip label={`${prepMinutes} min`} size="small" variant="outlined" />
-                {cookMinutes > 0 && <Chip label={`${cookMinutes} min Kochzeit`} size="small" variant="outlined" />}
+                <Chip label={`⏱ ${prepMinutes} min`} size="small" variant="outlined" />
+                {cookMinutes > 0 && <Chip label={`🔥 ${cookMinutes} min`} size="small" variant="outlined" />}
                 {selectedSlots.map((s) => (
                   <Chip key={s} size="small" color="secondary"
                     label={SLOTS.find((o) => o.code === s)?.label ?? s} />
                 ))}
-                <Chip label={visibility === 'PUBLIC' ? 'Öffentlich' : 'Privat'} size="small" />
               </Box>
-              {stepsText && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  📝 Zubereitung ist hinterlegt.
-                </Typography>
+
+              {ingredientsText.trim() && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" fontWeight={600}>Zutaten:</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {ingredientsText.trim()}
+                  </Typography>
+                </Box>
+              )}
+
+              {instructionsText.trim() && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" fontWeight={600}>Zubereitung:</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {instructionsText.trim()}
+                  </Typography>
+                </Box>
               )}
             </Box>
           </Box>
