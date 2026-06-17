@@ -403,6 +403,7 @@ class AdminCrudController(
         ing.allergensJson = req.allergensJson ?: "[]"
         ing.fodmapFlagsJson = req.fodmapFlagsJson ?: "[]"
         ing.micronutrientsJson = req.micronutrientsJson ?: "{}"
+        req.status?.let { ing.status = it }
         ing.locked = req.locked ?: ing.locked
     }
 }
@@ -427,6 +428,7 @@ data class IngredientCrudInput(
     @JsonProperty("allergens_json") val allergensJson: String? = null,
     @JsonProperty("fodmap_flags_json") val fodmapFlagsJson: String? = null,
     @JsonProperty("micronutrients_json") val micronutrientsJson: String? = null,
+    val status: String? = null,
     val locked: Boolean? = null,
 )
 
