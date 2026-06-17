@@ -40,7 +40,7 @@ object DatabaseModule {
         val factory = SupportOpenHelperFactory(passphrase)
         return Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DB_NAME)
             .openHelperFactory(factory)
-            .addMigrations(AppDatabase.MIGRATION_8_9)
+            .addMigrations(AppDatabase.MIGRATION_8_9, AppDatabase.MIGRATION_9_10)
             .addCallback(LogDefaultSymptomSeed.callback())
             .fallbackToDestructiveMigration()  // P1 only; remove from P2
             .build()

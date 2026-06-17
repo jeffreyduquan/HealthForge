@@ -182,6 +182,7 @@ fun HfNutrientProgressRow(
     val trackColor = hm.barTrack
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+        // Row: Label left, % badge far right
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -193,40 +194,38 @@ fun HfNutrientProgressRow(
                 modifier = Modifier.weight(1f, fill = false),
             )
             Spacer(Modifier.width(8.dp))
-            // Fixed-width columns for value + % so all rows align uniformly
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = hm.fgPrimary,
-                textAlign = TextAlign.End,
-                modifier = Modifier.widthIn(min = 72.dp),
-            )
-            Spacer(Modifier.width(8.dp))
             Text(
                 text = "${pct.roundToInt()}%",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = barColor,
-                textAlign = TextAlign.End,
-                modifier = Modifier.widthIn(min = 36.dp),
             )
         }
         Spacer(Modifier.height(4.dp))
-        // Progress bar
+        // Progress bar with value overlaid at right edge
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
+                .height(20.dp)
+                .clip(RoundedCornerShape(4.dp))
                 .background(trackColor),
+            contentAlignment = Alignment.CenterEnd,
         ) {
+            // Filled portion
             Box(
                 modifier = Modifier
                     .fillMaxWidth(stageProgress.toFloat().coerceIn(0f, 1f))
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
                     .background(barColor),
+            )
+            // Value text overlaid on the right edge of the bar
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = hm.fgPrimary,
+                modifier = Modifier.padding(end = 6.dp),
             )
         }
     }

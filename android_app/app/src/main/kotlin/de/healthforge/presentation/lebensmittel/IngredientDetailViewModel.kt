@@ -70,6 +70,14 @@ class IngredientDetailViewModel @Inject constructor(
     fun addToPlan(grams: Double) {
         val item = _state.value.item ?: return
         viewModelScope.launch {
+            // Build full micronutrient snapshot: vitamins + minerals + secondary macros
+            val micro = mutableMapOf<String, Double>()
+            micro.putAll(item.micronutrients)
+            item.sugar_g_per_100g?.let { micro["sugar"] = it }
+            item.fiber_g_per_100g?.let { micro["fiber"] = it }
+            item.salt_g_per_100g?.let { micro["salt"] = it }
+            item.satfat_g_per_100g?.let { micro["satfat"] = it }
+            val microJson = if (micro.isNotEmpty()) org.json.JSONObject(micro).toString() else null
             intakeRepo.add(IntakeEntryEntity(
                 loggedAt = System.currentTimeMillis(),
                 dayDateIso = java.time.LocalDate.now().toString(),
@@ -82,6 +90,8 @@ class IngredientDetailViewModel @Inject constructor(
                 snapshotProteinPer100g = item.protein_g_per_100g,
                 snapshotCarbsPer100g = item.carbs_g_per_100g,
                 snapshotFatPer100g = item.fat_g_per_100g,
+                snapshotMicronutrientsJson = microJson,
+                consumed = false,
             ))
             _state.update { it.copy(showAddToPlan = false, navigateHome = true) }
         }

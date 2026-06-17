@@ -69,6 +69,9 @@ data class RecipeListItemDto(
     val fiber_per_100g: Double? = null,
     val salt_per_100g: Double? = null,
     val micronutrients_per_100g: Map<String, Double>? = null,
+    // P7.S5b — For client-side allergen/FODMAP filtering
+    val allergens: List<String> = emptyList(),
+    val fodmap_flags: List<String> = emptyList(),
 )
 
 @JsonClass(generateAdapter = true)

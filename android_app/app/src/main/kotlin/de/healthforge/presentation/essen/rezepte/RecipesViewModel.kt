@@ -135,7 +135,19 @@ class RecipeBrowseViewModel @Inject constructor(
                 scope = "PUBLIC_OR_MINE",
             )
             result.fold(
-                onSuccess = { list -> _state.update { it.copy(items = list, isLoading = false) } },
+                onSuccess = { list ->
+                    // Client-side filter fallback
+                    val filtered = if (s.applyProfileFilters && (s.excludedAllergens.isNotEmpty() || s.excludedFodmap.isNotEmpty())) {
+                        list.filter { recipe ->
+                            val itemAllergens = recipe.allergens.map { it.uppercase() }.toSet()
+                            val itemFodmap = recipe.fodmap_flags.map { it.uppercase() }.toSet()
+                            val blocked = s.excludedAllergens.any { it.name in itemAllergens } ||
+                                s.excludedFodmap.any { it.name in itemFodmap }
+                            !blocked
+                        }
+                    } else list
+                    _state.update { it.copy(items = filtered, isLoading = false) }
+                },
                 onFailure = { e -> _state.update { it.copy(isLoading = false, error = e.message ?: "Fehler") } },
             )
         }
@@ -288,6 +300,16 @@ class RecipeDetailViewModel @Inject constructor(
     fun addToPlan(grams: Double) {
         val r = _state.value.recipe ?: return
         viewModelScope.launch {
+            val n = r.nutrition
+            val f = 100.0 / grams
+            // Build full micronutrient snapshot (all per-100g)
+            val micro = mutableMapOf<String, Double>()
+            n.micronutrients.forEach { (k, v) -> if (v > 0) micro[k] = v * f }
+            if (n.sugar_g > 0) micro["sugar"] = n.sugar_g * f
+            if (n.fiber_g > 0) micro["fiber"] = n.fiber_g * f
+            if (n.salt_g > 0) micro["salt"] = n.salt_g * f
+            if (n.satfat_g > 0) micro["satfat"] = n.satfat_g * f
+            val microJson = if (micro.isNotEmpty()) org.json.JSONObject(micro).toString() else null
             intakeRepo.add(IntakeEntryEntity(
                 loggedAt = System.currentTimeMillis(),
                 dayDateIso = java.time.LocalDate.now().toString(),
@@ -295,10 +317,12 @@ class RecipeDetailViewModel @Inject constructor(
                 sourceId = r.id,
                 portionGrams = grams,
                 snapshotName = r.title,
-                snapshotKcalPer100g = null,
-                snapshotProteinPer100g = null,
-                snapshotCarbsPer100g = null,
-                snapshotFatPer100g = null,
+                snapshotKcalPer100g = n.energy_kcal * f,
+                snapshotProteinPer100g = n.protein_g * f,
+                snapshotCarbsPer100g = n.carbs_g * f,
+                snapshotFatPer100g = n.fat_g * f,
+                snapshotMicronutrientsJson = microJson,
+                consumed = false,
             ))
             _state.update { it.copy(showAddToPlan = false, navigateHome = true, message = "Zum Plan hinzugefügt") }
         }

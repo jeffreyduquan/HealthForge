@@ -32,6 +32,8 @@ data class IntakeEntryEntity(
     val snapshotProteinPer100g: Double? = null,
     val snapshotCarbsPer100g: Double? = null,
     val snapshotFatPer100g: Double? = null,
+    /** P7.S5b: Full micronutrient snapshot (vitamins + minerals) as JSON map for pinned nutrient bars. */
+    val snapshotMicronutrientsJson: String? = null,
     val consumed: Boolean = true,
 )
 

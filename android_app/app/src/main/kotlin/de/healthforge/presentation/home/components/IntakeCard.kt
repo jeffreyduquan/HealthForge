@@ -241,21 +241,36 @@ fun computePinnedNutrients(
     pinnedKeys: List<String>,
     ingredientDto: IngredientDto? = null,
 ): List<Pair<String, String>> {
-    // Supplements store per-dose values, not per-100g → multiplier = 1.0
     val f = if (entry.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else entry.portionGrams / 100.0
+
+    // Parse micronutrient snapshot
+    val microSnapshot: Map<String, Double> = runCatching {
+        val json = entry.snapshotMicronutrientsJson
+        if (json.isNullOrBlank()) emptyMap()
+        else {
+            val obj = org.json.JSONObject(json)
+            obj.keys().asSequence().mapNotNull { k ->
+                obj.optDouble(k, Double.NaN).takeIf { !it.isNaN() }?.let { k to it }
+            }.toMap()
+        }
+    }.getOrDefault(emptyMap())
+
     return pinnedKeys.mapNotNull { key ->
-        // Try snapshot fields first, then micronutrients from DTO
         val value: Double? = when (key) {
             "kcal" -> (entry.snapshotKcalPer100g ?: 0.0) * f
             "protein" -> (entry.snapshotProteinPer100g ?: 0.0) * f
             "carbs" -> (entry.snapshotCarbsPer100g ?: 0.0) * f
             "fat" -> (entry.snapshotFatPer100g ?: 0.0) * f
-            "sugar" -> ingredientDto?.sugar_g_per_100g?.times(f)
-            "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
-            "salt" -> ingredientDto?.salt_g_per_100g?.times(f)
-            "satfat" -> ingredientDto?.satfat_g_per_100g?.times(f)
-            "water" -> null // skip water on cards
-            else -> ingredientDto?.micronutrients?.get(key)?.times(f)
+            "water" -> null
+            else -> microSnapshot[key]?.times(f)
+                ?: ingredientDto?.micronutrients?.get(key)?.times(f)
+                ?: when (key) {
+                    "sugar" -> ingredientDto?.sugar_g_per_100g?.times(f)
+                    "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
+                    "salt" -> ingredientDto?.salt_g_per_100g?.times(f)
+                    "satfat" -> ingredientDto?.satfat_g_per_100g?.times(f)
+                    else -> null
+                }
         }
         value?.let { v ->
             val label = nutrientLabelDe(key)
@@ -271,7 +286,7 @@ fun computePinnedNutrients(
     }
 }
 
-/** P7.S5: Compute nutrients with DGE percentages for progress bars. */
+/** P7.S5b: Unified nutrient bars — reads ALL nutrients from snapshots, same logic for food/recipe/supplement. */
 fun computePinnedNutrientBars(
     entry: IntakeEntryEntity,
     pinnedKeys: List<String>,
@@ -279,18 +294,40 @@ fun computePinnedNutrientBars(
 ): List<Triple<String, String, Double>> {
     // Supplements store per-dose values, not per-100g → multiplier = 1.0
     val f = if (entry.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else entry.portionGrams / 100.0
+
+    // Parse micronutrient snapshot (unified source for vitamins, minerals, sugar, fiber, etc.)
+    val microSnapshot: Map<String, Double> = runCatching {
+        val json = entry.snapshotMicronutrientsJson
+        if (json.isNullOrBlank()) emptyMap()
+        else {
+            val obj = org.json.JSONObject(json)
+            obj.keys().asSequence().mapNotNull { k ->
+                obj.optDouble(k, Double.NaN).takeIf { !it.isNaN() }?.let { k to it }
+            }.toMap()
+        }
+    }.getOrDefault(emptyMap())
+
     return pinnedKeys.mapNotNull { key ->
         val dge = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.defaultPerDay ?: return@mapNotNull null
         if (dge <= 0) return@mapNotNull null
 
         val value: Double? = when (key) {
+            // Primary macros from dedicated snapshot fields
             "kcal" -> (entry.snapshotKcalPer100g ?: 0.0) * f
             "protein" -> (entry.snapshotProteinPer100g ?: 0.0) * f
             "carbs" -> (entry.snapshotCarbsPer100g ?: 0.0) * f
             "fat" -> (entry.snapshotFatPer100g ?: 0.0) * f
-            "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
             "water" -> null
-            else -> ingredientDto?.micronutrients?.get(key)?.times(f)
+            // Everything else: unified from snapshotMicronutrientsJson or fallback ingredientDto
+            else -> microSnapshot[key]?.times(f)
+                ?: ingredientDto?.micronutrients?.get(key)?.times(f)
+                ?: when (key) {
+                    "sugar" -> ingredientDto?.sugar_g_per_100g?.times(f)
+                    "fiber" -> ingredientDto?.fiber_g_per_100g?.times(f)
+                    "salt" -> ingredientDto?.salt_g_per_100g?.times(f)
+                    "satfat" -> ingredientDto?.satfat_g_per_100g?.times(f)
+                    else -> null
+                }
         }
         value?.takeIf { it > 0 }?.let { v ->
             val pct = (v / dge) * 100.0

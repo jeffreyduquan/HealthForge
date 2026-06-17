@@ -58,6 +58,8 @@ class SupplementDetailViewModel @Inject constructor(
                 snapshotProteinPer100g = sup.proteinPerDose,
                 snapshotCarbsPer100g = sup.carbsPerDose,
                 snapshotFatPer100g = sup.fatPerDose,
+                snapshotMicronutrientsJson = sup.micronutrientsJson,
+                consumed = false,
             ))
             _state.update { it.copy(showAddToPlan = false, navigateHome = true) }
         }

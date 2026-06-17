@@ -117,7 +117,17 @@ class LebensmittelViewModel @Inject constructor(
             val excludeFodmap = if (s.applyProfileFilters) s.excludedFodmap else emptySet()
             ingredients.search(trimmed, 50, excludeAllergens, excludeFodmap)
                 .onSuccess { list ->
-                    _state.value = _state.value.copy(results = list, loading = false)
+                    // Client-side filter fallback (belt-and-suspenders with server)
+                    val filtered = if (s.applyProfileFilters && (excludeAllergens.isNotEmpty() || excludeFodmap.isNotEmpty())) {
+                        list.filter { item ->
+                            val itemAllergens = item.allergens.map { it.uppercase() }.toSet()
+                            val itemFodmap = item.fodmap_flags.map { it.uppercase() }.toSet()
+                            val blocked = excludeAllergens.any { it.name in itemAllergens } ||
+                                excludeFodmap.any { it.name in itemFodmap }
+                            !blocked
+                        }
+                    } else list
+                    _state.value = _state.value.copy(results = filtered, loading = false)
                 }
                 .onFailure { t ->
                     _state.value = _state.value.copy(
