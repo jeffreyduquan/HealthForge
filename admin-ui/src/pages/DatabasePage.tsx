@@ -54,6 +54,7 @@ import SupplementWizard from '../components/SupplementWizard';
 import RecipeWizard from '../components/RecipeWizard';
 import IngredientDetailDialog from '../components/IngredientDetailDialog';
 import RecipeDetailDialog from '../components/RecipeDetailDialog';
+import SupplementDetailDialog from '../components/SupplementDetailDialog';
 
 type TabValue = 'ingredients' | 'supplements' | 'recipes';
 
@@ -69,6 +70,7 @@ export default function DatabasePage() {
   const [editDialog, setEditDialog] = useState<EditDialog | null>(null);
   const [detailIngredient, setDetailIngredient] = useState<IngredientCrud | null>(null);
   const [detailRecipe, setDetailRecipe] = useState<RecipeCrud | null>(null);
+  const [detailSupplement, setDetailSupplement] = useState<SupplementCrud | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ tab: TabValue; id: string; label: string } | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
   const [warningAccepted, setWarningAccepted] = useState(false);
@@ -260,7 +262,11 @@ export default function DatabasePage() {
                 </TableHead>
                 <TableBody>
                   {filteredSupplements.map((r) => (
-                    <TableRow key={r.id} hover>
+                    <TableRow
+                      key={r.id} hover
+                      onClick={() => setDetailSupplement(r)}
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <TableCell>{r.name_de}</TableCell>
                       <TableCell>{r.brand ?? '—'}</TableCell>
                       <TableCell>{r.unit_label}</TableCell>
@@ -422,6 +428,14 @@ export default function DatabasePage() {
         onSave={(id, data) => {
           setSnack('⏳ Speichere…');
           updateRecM.mutate({ id, data });
+        }}
+      />
+      <SupplementDetailDialog
+        supplement={detailSupplement}
+        onClose={() => setDetailSupplement(null)}
+        onSave={(id, data) => {
+          setSnack('⏳ Speichere…');
+          updateSupM.mutate({ id, data });
         }}
       />
     </Box>
