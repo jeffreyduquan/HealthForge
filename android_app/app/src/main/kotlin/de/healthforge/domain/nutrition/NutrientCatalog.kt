@@ -112,4 +112,7 @@ object NutrientCatalog {
 
     /** Default-Pin-Set nach Onboarding (REQ-HOME-NUTRIENT-LIST-001). */
     val defaultPinnedKeys: List<String> = listOf("kcal", "protein", "carbs", "fat", "water")
+
+    /** All micronutrient keys (vitamins + minerals). */
+    val allMicronutrientKeys: List<String> = (vitamins + minerals).map { it.key }
 }

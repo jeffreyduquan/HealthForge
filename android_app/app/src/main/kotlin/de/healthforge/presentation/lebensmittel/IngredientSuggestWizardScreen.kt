@@ -34,6 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -194,6 +197,27 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
         OptionalSliderField("Ges. Fettsäuren", s.satfatG, 0f, 100f, "g", vm::setSatfat)
         OptionalSliderField("Ballaststoffe", s.fiberG, 0f, 30f, "g", vm::setFiber)
         OptionalSliderField("Salz", s.saltG, 0f, 10f, "g", vm::setSalt)
+
+        // Mikronährstoffe (Vitamine & Mineralstoffe)
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = vm::toggleMicronutrients, modifier = Modifier.fillMaxWidth()) {
+            Text(if (s.showMicronutrients) "Vitamine & Mineralstoffe ausblenden" else "Vitamine & Mineralstoffe (${s.micronutrients.size} gesetzt)")
+        }
+        if (s.showMicronutrients) {
+            val keys = de.healthforge.domain.nutrition.NutrientCatalog.allMicronutrientKeys
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                keys.forEach { key ->
+                    val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+                    val value = s.micronutrients[key] ?: 0f
+                    MicroField(
+                        label = nutrient.displayDe,
+                        unit = nutrient.unit.label,
+                        value = value,
+                        onChange = { vm.setMicronutrient(key, it) },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -382,5 +406,28 @@ private fun OptionalSliderField(
                     .padding(2.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun MicroField(label: String, unit: String, value: Float, onChange: (Float) -> Unit) {
+    val hm = LocalHmTokens.current
+    var text by remember(value) { mutableStateOf(if (value > 0f) "%.1f".format(value) else "") }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
+        OutlinedTextField(
+            value = text,
+            onValueChange = { t ->
+                text = t
+                t.toFloatOrNull()?.let { onChange(it.coerceAtLeast(0f)) }
+            },
+            singleLine = true,
+            modifier = Modifier.weight(1f).height(48.dp),
+            textStyle = MaterialTheme.typography.bodySmall,
+        )
+        Text(unit, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall, color = hm.fgTertiary)
     }
 }

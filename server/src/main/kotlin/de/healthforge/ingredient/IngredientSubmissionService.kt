@@ -80,7 +80,11 @@ class IngredientSubmissionService(
             histamineScore = input.histamineScore,
             allergensJson = toJsonArray(input.allergens),
             fodmapFlagsJson = toJsonArray(input.fodmapFlags),
-            micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(null),
+            micronutrientsJson = NutrientCatalog.fullMicronutrientsJson(
+                if (input.micronutrients.isNotEmpty())
+                    com.fasterxml.jackson.module.kotlin.jacksonObjectMapper().writeValueAsString(input.micronutrients)
+                else null
+            ),
             locked = false,
             status = IngredientStatus.PENDING.name,
             submittedBy = userId,

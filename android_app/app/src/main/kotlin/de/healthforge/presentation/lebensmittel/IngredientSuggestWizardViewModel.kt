@@ -32,6 +32,8 @@ data class IngredientWizardState(
     val satfatG: Float? = null,
     val fiberG: Float? = null,
     val saltG: Float? = null,
+    val showMicronutrients: Boolean = false,
+    val micronutrients: Map<String, Float> = emptyMap(),
     val histamineScore: Int? = null,
     val allergens: Set<AllergenType> = emptySet(),
     val fodmap: Set<FodmapType> = emptySet(),
@@ -80,6 +82,10 @@ class IngredientSuggestWizardViewModel @Inject constructor(
     fun setSatfat(v: Float?) = _state.update { it.copy(satfatG = v) }
     fun setFiber(v: Float?) = _state.update { it.copy(fiberG = v) }
     fun setSalt(v: Float?) = _state.update { it.copy(saltG = v) }
+    fun toggleMicronutrients() = _state.update { it.copy(showMicronutrients = !it.showMicronutrients) }
+    fun setMicronutrient(key: String, value: Float) = _state.update {
+        it.copy(micronutrients = it.micronutrients.toMutableMap().also { m -> m[key] = value })
+    }
     fun setHistamine(v: Int?) = _state.update { it.copy(histamineScore = v) }
     fun toggleAllergen(a: AllergenType) = _state.update {
         it.copy(allergens = if (a in it.allergens) it.allergens - a else it.allergens + a)
@@ -108,6 +114,7 @@ class IngredientSuggestWizardViewModel @Inject constructor(
                 histamine_score = s.histamineScore,
                 allergens = s.allergens.map { it.name },
                 fodmap_flags = s.fodmap.map { it.name },
+                micronutrients = s.micronutrients.mapValues { it.value.toDouble() },
             )
             ingredients.suggest(req)
                 .onSuccess { _state.update { it.copy(submitting = false, done = true) } }

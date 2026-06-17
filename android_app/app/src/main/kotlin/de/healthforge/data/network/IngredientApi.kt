@@ -72,6 +72,7 @@ data class IngredientSuggestRequest(
     val histamine_score: Int? = null,
     val allergens: List<String> = emptyList(),
     val fodmap_flags: List<String> = emptyList(),
+    val micronutrients: Map<String, Double> = emptyMap(),
 )
 
 @JsonClass(generateAdapter = true)

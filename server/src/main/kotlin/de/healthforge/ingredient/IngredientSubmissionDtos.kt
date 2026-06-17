@@ -27,6 +27,7 @@ data class IngredientSuggestionInput(
     @JsonProperty("histamine_score") val histamineScore: Short? = null,
     val allergens: List<String> = emptyList(),
     @JsonProperty("fodmap_flags") val fodmapFlags: List<String> = emptyList(),
+    val micronutrients: Map<String, Double> = emptyMap(),
 )
 
 data class IngredientSuggestionCreatedResponse(val id: UUID, val status: String)
