@@ -171,9 +171,22 @@ private fun SupplementRow(
     }
 
     val nutrients = buildList {
-        if (pinnedKeys.isEmpty() || "protein" in pinnedKeys) sup.proteinPerDose?.let { add(MasterTileNutrient("protein", "Eiweiß", "${formatNutrientValue(it)} g", it / 50.0 * 100)) }
-        if (pinnedKeys.isEmpty() || "carbs" in pinnedKeys) sup.carbsPerDose?.let { add(MasterTileNutrient("carbs", "Kohlenhydrate", "${formatNutrientValue(it)} g", it / 260.0 * 100)) }
-        if (pinnedKeys.isEmpty() || "fat" in pinnedKeys) sup.fatPerDose?.let { add(MasterTileNutrient("fat", "Fett", "${formatNutrientValue(it)} g", it / 65.0 * 100)) }
+        val nCat = de.healthforge.domain.nutrition.NutrientCatalog
+        // Pre-map available values
+        val vals = mutableMapOf<String, Pair<Double, String>>()
+        sup.kcalPerDose?.let { vals["kcal"] = it to "kcal" }
+        sup.proteinPerDose?.let { vals["protein"] = it to "g" }
+        sup.carbsPerDose?.let { vals["carbs"] = it to "g" }
+        sup.fatPerDose?.let { vals["fat"] = it to "g" }
+        // Emit in pinnedKeys order
+        for (key in pinnedKeys) {
+            val (value, unit) = vals[key] ?: continue
+            val dge = nCat.byKeyOrNull(key)?.defaultPerDay ?: 1.0
+            if (dge <= 0) continue
+            val pct = (value / dge) * 100.0
+            val label = nCat.byKeyOrNull(key)?.displayDe ?: key
+            add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))
+        }
     }
 
     HfMasterTile(

@@ -182,50 +182,50 @@ fun HfNutrientProgressRow(
     val trackColor = hm.barTrack
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-        // Row: Label left, % badge far right
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = hm.fgSecondary,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            Spacer(Modifier.width(8.dp))
+        // Row: Label + value left, % centered
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Left: Label + gram value
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.CenterStart),
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = hm.fgSecondary,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = hm.fgPrimary,
+                )
+            }
+            // Center: % badge
             Text(
                 text = "${pct.roundToInt()}%",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = barColor,
+                modifier = Modifier.align(Alignment.Center),
             )
         }
         Spacer(Modifier.height(4.dp))
-        // Progress bar with value overlaid at right edge
+        // Progress bar filling left to right
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
                 .background(trackColor),
-            contentAlignment = Alignment.CenterEnd,
         ) {
-            // Filled portion
             Box(
                 modifier = Modifier
                     .fillMaxWidth(stageProgress.toFloat().coerceIn(0f, 1f))
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
                     .background(barColor),
-            )
-            // Value text overlaid on the right edge of the bar
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = hm.fgPrimary,
-                modifier = Modifier.padding(end = 6.dp),
             )
         }
     }

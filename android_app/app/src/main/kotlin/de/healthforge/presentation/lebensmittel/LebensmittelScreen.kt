@@ -221,38 +221,34 @@ private fun IngredientRow(
     )
 }
 
-/** Build MasterTileNutrient list from IngredientDto, filtered to pinned keys. */
+/** Build MasterTileNutrient list from IngredientDto, in pinnedKeys order. */
 private fun buildIngredientNutrientRows(
     item: IngredientDto,
     pinnedKeys: List<String>,
 ): List<MasterTileNutrient> {
-    val rows = mutableListOf<MasterTileNutrient>()
-
-    fun add(key: String, value: Double, unit: String, dgeDefault: Double) {
-        if (key !in pinnedKeys) return
-        val pct = (value / dgeDefault) * 100.0
-        val label = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
-        rows.add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))
-    }
-
-    item.energy_kcal_per_100g?.let { add("kcal", it, "kcal", 2000.0) }
-    item.protein_g_per_100g?.let { add("protein", it, "g", 50.0) }
-    item.carbs_g_per_100g?.let { add("carbs", it, "g", 260.0) }
-    item.sugar_g_per_100g?.let { add("sugar", it, "g", 50.0) }
-    item.fat_g_per_100g?.let { add("fat", it, "g", 65.0) }
-    item.satfat_g_per_100g?.let { add("satfat", it, "g", 20.0) }
-    item.fiber_g_per_100g?.let { add("fiber", it, "g", 30.0) }
-    item.salt_g_per_100g?.let { add("salt", it, "g", 5.0) }
-
-    // Micronutrients with DGE
+    // Pre-compute value map for all known nutrients
+    val valueMap = mutableMapOf<String, Pair<Double, String>>() // key -> (value, unit)
+    fun put(key: String, value: Double, unit: String) { valueMap[key] = value to unit }
+    item.energy_kcal_per_100g?.let { put("kcal", it, "kcal") }
+    item.protein_g_per_100g?.let { put("protein", it, "g") }
+    item.carbs_g_per_100g?.let { put("carbs", it, "g") }
+    item.sugar_g_per_100g?.let { put("sugar", it, "g") }
+    item.fat_g_per_100g?.let { put("fat", it, "g") }
+    item.satfat_g_per_100g?.let { put("satfat", it, "g") }
+    item.fiber_g_per_100g?.let { put("fiber", it, "g") }
+    item.salt_g_per_100g?.let { put("salt", it, "g") }
     item.micronutrients.entries.forEach { (key, value) ->
         val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-        val dge = nutrient.defaultPerDay
-        if (dge > 0) {
-            add(key, value, nutrient.unit.label, dge)
-        }
+        put(key, value, nutrient.unit.label)
     }
 
-    rows.sortByDescending { it.percentDge }
-    return rows
+    // Emit in pinnedKeys order
+    return pinnedKeys.mapNotNull { key ->
+        val (value, unit) = valueMap[key] ?: return@mapNotNull null
+        val dge = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.defaultPerDay ?: 1.0
+        if (dge <= 0) return@mapNotNull null
+        val pct = (value / dge) * 100.0
+        val label = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
+        MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct)
+    }
 }
