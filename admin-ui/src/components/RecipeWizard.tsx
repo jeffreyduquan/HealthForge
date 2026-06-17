@@ -33,6 +33,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [imageKey, setImageKey] = useState('');
 
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
 
@@ -53,6 +54,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
     onSave({
       title: title.trim(),
       description: description.trim() || null,
+      image_key: imageKey.trim() || null,
       slot_tags: selectedSlots,
       servings,
       prep_minutes: prepMinutes,
@@ -90,6 +92,11 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
             <Grid item xs={12}>
               <TextField fullWidth label="Beschreibung (optional)" value={description}
                 onChange={(e) => setDescription(e.target.value)} multiline minRows={2} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label="Bild-Key (optional)" value={imageKey}
+                onChange={(e) => setImageKey(e.target.value)}
+                placeholder="z.B. recipes/abc123.jpg" />
             </Grid>
           </Grid>
         )}

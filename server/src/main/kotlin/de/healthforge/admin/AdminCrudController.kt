@@ -313,6 +313,7 @@ class AdminCrudController(
         }
         recipe.title = req.title.trim()
         recipe.description = req.description?.trim()?.ifEmpty { null }
+        req.imageKey?.let { recipe.imageKey = it.trim().ifEmpty { null } }
         recipe.servings = req.servings
         recipe.prepMinutes = req.prepMinutes
         recipe.cookMinutes = req.cookMinutes
@@ -343,6 +344,7 @@ class AdminCrudController(
             authorId = p.userId,
             title = req.title.trim(),
             description = req.description?.trim()?.ifEmpty { null },
+            imageKey = req.imageKey?.trim()?.ifEmpty { null },
             servings = req.servings.coerceAtLeast(1),
             prepMinutes = req.prepMinutes.coerceAtLeast(0),
             cookMinutes = req.cookMinutes?.coerceAtLeast(0),
@@ -506,6 +508,7 @@ private fun PublicSupplementEntity.toSupplementCrudDto() = SupplementCrudDto(
 data class RecipeCrudInput(
     val title: String,
     val description: String? = null,
+    @JsonProperty("image_key") val imageKey: String? = null,
     val servings: Int = 1,
     @JsonProperty("prep_minutes") val prepMinutes: Int = 0,
     @JsonProperty("cook_minutes") val cookMinutes: Int? = null,
