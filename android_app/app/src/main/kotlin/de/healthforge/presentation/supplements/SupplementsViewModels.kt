@@ -166,6 +166,7 @@ data class SupplementEditState(
     val carbs: String = "",
     val fat: String = "",
     val notes: String = "",
+    val micronutrients: Map<String, String> = emptyMap(),
     val reminders: List<SupplementReminderEntity> = emptyList(),
     val saving: Boolean = false,
     val saved: Boolean = false,
@@ -214,6 +215,9 @@ class SupplementEditViewModel @Inject constructor(
     fun setCarbs(v: String) { _state.value = _state.value.copy(carbs = v) }
     fun setFat(v: String) { _state.value = _state.value.copy(fat = v) }
     fun setNotes(v: String) { _state.value = _state.value.copy(notes = v) }
+    fun setMicronutrient(key: String, value: String) {
+        _state.value = _state.value.copy(micronutrients = _state.value.micronutrients.toMutableMap().also { it[key] = value })
+    }
 
     fun save() {
         val s = _state.value
@@ -238,6 +242,8 @@ class SupplementEditViewModel @Inject constructor(
                     carbsPerDose = s.carbs.replace(',', '.').toDoubleOrNull(),
                     fatPerDose = s.fat.replace(',', '.').toDoubleOrNull(),
                     notes = s.notes.trim().ifEmpty { null },
+                    micronutrientsJson = if (s.micronutrients.any { it.value.isNotBlank() })
+                        org.json.JSONObject(s.micronutrients.filter { it.value.isNotBlank() }).toString() else null,
                     createdAt = 0L,
                     updatedAt = 0L,
                 )

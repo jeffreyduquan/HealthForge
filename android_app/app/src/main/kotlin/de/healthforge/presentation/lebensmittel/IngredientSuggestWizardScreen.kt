@@ -189,34 +189,29 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
     SliderField("Protein", "${"%.1f".format(s.proteinG)} g", s.proteinG, 0f, 100f, vm::setProtein)
     SliderField("Kohlenhydrate", "${"%.1f".format(s.carbsG)} g", s.carbsG, 0f, 100f, vm::setCarbs)
     SliderField("Fett", "${"%.1f".format(s.fatG)} g", s.fatG, 0f, 100f, vm::setFat)
-    OutlinedButton(onClick = vm::toggleAdvanced, modifier = Modifier.fillMaxWidth()) {
-        Text(if (s.showAdvancedNutrients) "Weitere Felder ausblenden" else "Zucker, Ballaststoffe, Salz…")
-    }
-    if (s.showAdvancedNutrients) {
-        OptionalSliderField("Zucker", s.sugarG, 0f, 100f, "g", vm::setSugar)
-        OptionalSliderField("Ges. Fettsäuren", s.satfatG, 0f, 100f, "g", vm::setSatfat)
-        OptionalSliderField("Ballaststoffe", s.fiberG, 0f, 30f, "g", vm::setFiber)
-        OptionalSliderField("Salz", s.saltG, 0f, 10f, "g", vm::setSalt)
+    // Advanced macros — always visible
+    OptionalSliderField("Zucker", s.sugarG, 0f, 100f, "g", vm::setSugar)
+    OptionalSliderField("Ges. Fettsäuren", s.satfatG, 0f, 100f, "g", vm::setSatfat)
+    OptionalSliderField("Ballaststoffe", s.fiberG, 0f, 30f, "g", vm::setFiber)
+    OptionalSliderField("Salz", s.saltG, 0f, 10f, "g", vm::setSalt)
 
-        // Mikronährstoffe (Vitamine & Mineralstoffe)
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = vm::toggleMicronutrients, modifier = Modifier.fillMaxWidth()) {
-            Text(if (s.showMicronutrients) "Vitamine & Mineralstoffe ausblenden" else "Vitamine & Mineralstoffe (${s.micronutrients.size} gesetzt)")
+    // Vitamine & Mineralstoffe — always visible
+    Spacer(Modifier.height(8.dp))
+    GradientText("Vitamine", style = MaterialTheme.typography.titleSmall)
+    val vitaminKeys = de.healthforge.domain.nutrition.NutrientCatalog.vitamins.map { it.key }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        vitaminKeys.forEach { key ->
+            val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+            MicroField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: 0f) { vm.setMicronutrient(key, it) }
         }
-        if (s.showMicronutrients) {
-            val keys = de.healthforge.domain.nutrition.NutrientCatalog.allMicronutrientKeys
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                keys.forEach { key ->
-                    val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-                    val value = s.micronutrients[key] ?: 0f
-                    MicroField(
-                        label = nutrient.displayDe,
-                        unit = nutrient.unit.label,
-                        value = value,
-                        onChange = { vm.setMicronutrient(key, it) },
-                    )
-                }
-            }
+    }
+    Spacer(Modifier.height(8.dp))
+    GradientText("Mineralstoffe", style = MaterialTheme.typography.titleSmall)
+    val mineralKeys = de.healthforge.domain.nutrition.NutrientCatalog.minerals.map { it.key }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        mineralKeys.forEach { key ->
+            val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+            MicroField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: 0f) { vm.setMicronutrient(key, it) }
         }
     }
 }

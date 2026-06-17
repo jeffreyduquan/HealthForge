@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -147,6 +148,45 @@ fun SupplementWizardScreen(
                                     value = s.notes, onValueChange = vm::setNotes,
                                     label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
                                 )
+                            }
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+                        GradientText("Vitamine", style = MaterialTheme.typography.titleSmall)
+                        val vitaminKeys = de.healthforge.domain.nutrition.NutrientCatalog.vitamins.map { it.key }
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            vitaminKeys.forEach { key ->
+                                val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(nutrient.displayDe, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall)
+                                    OutlinedTextField(
+                                        value = s.micronutrients[key] ?: "",
+                                        onValueChange = { vm.setMicronutrient(key, it) },
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f).height(48.dp),
+                                        textStyle = MaterialTheme.typography.bodySmall,
+                                    )
+                                    Text(nutrient.unit.label, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        GradientText("Mineralstoffe", style = MaterialTheme.typography.titleSmall)
+                        val mineralKeys = de.healthforge.domain.nutrition.NutrientCatalog.minerals.map { it.key }
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            mineralKeys.forEach { key ->
+                                val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(nutrient.displayDe, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall)
+                                    OutlinedTextField(
+                                        value = s.micronutrients[key] ?: "",
+                                        onValueChange = { vm.setMicronutrient(key, it) },
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f).height(48.dp),
+                                        textStyle = MaterialTheme.typography.bodySmall,
+                                    )
+                                    Text(nutrient.unit.label, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
                             }
                         }
                     }

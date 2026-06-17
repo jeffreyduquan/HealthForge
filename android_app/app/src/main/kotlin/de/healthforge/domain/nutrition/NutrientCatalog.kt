@@ -56,7 +56,7 @@ object NutrientCatalog {
     )
 
     // ─── Vitamine (DGE Erwachsene m/w-Durchschnitt) ───────────────────────────
-    private val vitamins = listOf(
+    val vitamins = listOf(
         Nutrient("vitamin_a",  "Vitamin A",   Unit.UG, Category.VITAMIN,  900.0,  300.0, 3000.0),
         Nutrient("vitamin_d",  "Vitamin D",   Unit.UG, Category.VITAMIN,   20.0,    5.0,  100.0),
         Nutrient("vitamin_e",  "Vitamin E",   Unit.MG, Category.VITAMIN,   13.0,    4.0,  300.0),
@@ -73,7 +73,7 @@ object NutrientCatalog {
     )
 
     // ─── Mineralstoffe ────────────────────────────────────────────────────────
-    private val minerals = listOf(
+    val minerals = listOf(
         Nutrient("calcium",   "Calcium",     Unit.MG, Category.MINERAL, 1000.0,  200.0, 2500.0),
         Nutrient("eisen",     "Eisen",       Unit.MG, Category.MINERAL,   14.0,    3.0,  100.0),
         Nutrient("magnesium", "Magnesium",   Unit.MG, Category.MINERAL,  350.0,   80.0, 1000.0),

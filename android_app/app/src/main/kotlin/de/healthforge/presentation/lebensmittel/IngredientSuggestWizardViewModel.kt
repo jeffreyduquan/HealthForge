@@ -27,12 +27,10 @@ data class IngredientWizardState(
     val proteinG: Float = 5f,
     val carbsG: Float = 10f,
     val fatG: Float = 5f,
-    val showAdvancedNutrients: Boolean = true,
     val sugarG: Float? = null,
     val satfatG: Float? = null,
     val fiberG: Float? = null,
     val saltG: Float? = null,
-    val showMicronutrients: Boolean = false,
     val micronutrients: Map<String, Float> = emptyMap(),
     val histamineScore: Int? = null,
     val allergens: Set<AllergenType> = emptySet(),
@@ -77,12 +75,10 @@ class IngredientSuggestWizardViewModel @Inject constructor(
     fun setProtein(v: Float) = _state.update { it.copy(proteinG = v) }
     fun setCarbs(v: Float) = _state.update { it.copy(carbsG = v) }
     fun setFat(v: Float) = _state.update { it.copy(fatG = v) }
-    fun toggleAdvanced() = _state.update { it.copy(showAdvancedNutrients = !it.showAdvancedNutrients) }
     fun setSugar(v: Float?) = _state.update { it.copy(sugarG = v) }
     fun setSatfat(v: Float?) = _state.update { it.copy(satfatG = v) }
     fun setFiber(v: Float?) = _state.update { it.copy(fiberG = v) }
     fun setSalt(v: Float?) = _state.update { it.copy(saltG = v) }
-    fun toggleMicronutrients() = _state.update { it.copy(showMicronutrients = !it.showMicronutrients) }
     fun setMicronutrient(key: String, value: Float) = _state.update {
         it.copy(micronutrients = it.micronutrients.toMutableMap().also { m -> m[key] = value })
     }
