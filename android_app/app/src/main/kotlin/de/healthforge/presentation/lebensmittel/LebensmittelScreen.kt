@@ -197,7 +197,6 @@ private fun IngredientRow(
     pinnedKeys: List<String> = emptyList(),
 ) {
     val hm = LocalHmTokens.current
-    val sourceLabel = friendlySource(item.source)
     val subtitle = buildString {
         item.brand?.takeIf { it.isNotBlank() }?.let { append(it) }
     }
@@ -209,8 +208,8 @@ private fun IngredientRow(
 
     HfMasterTile(
         title = item.name_de,
-        subtitle = subtitle.ifBlank { sourceLabel },
-        sourceBadge = sourceLabel,
+        subtitle = subtitle.ifBlank { "" },
+        sourceBadge = null,
         nutrients = nutrients,
         nutrientLabel = "PRO 100 G",
         liked = isLiked,
@@ -256,12 +255,4 @@ private fun buildIngredientNutrientRows(
 
     rows.sortByDescending { it.percentDge }
     return rows
-}
-
-/** Map technical data-source codes to user-friendly labels. */
-private fun friendlySource(source: String): String = when {
-    source.startsWith("USDA", ignoreCase = true) -> "USDA"
-    source == "OFF" -> "Open Food Facts"
-    source == "USER" -> "Nutzer"
-    else -> source
 }
