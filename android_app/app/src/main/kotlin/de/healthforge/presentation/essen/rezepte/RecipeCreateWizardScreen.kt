@@ -375,7 +375,7 @@ private fun StepIngredients(s: RecipeEditUiState, vm: RecipeEditViewModel) {
                     }
                 }
                 // Menge als Slider — Einheit fix auf g
-                NutrientSliderBar("Menge", line.quantity.replace(',', '.').toFloatOrNull() ?: 100f, "g", 0f, 1000f,
+                NutrientSliderBar("Menge", line.quantity.replace(',', '.').toFloatOrNull() ?: 100f, "g", 0f, 1000f, nonLinear = true,
                     onChange = { vm.updateIngredientQuantity(idx, if (it > 0f) "%.0f".format(it) else "100") }
                 )
             }

@@ -210,17 +210,18 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" fontWeight={600}>Menge</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {line.quantity || '100'} g
+                        {Math.round(gramsFromSlider(Number(line.quantity) || 100) || 0)} g
                       </Typography>
                     </Box>
                     <Slider
-                      value={Number(line.quantity) || 100}
+                      value={sliderFromGrams(Number(line.quantity) || 100)}
                       onChange={(_, v) => {
+                        const g = Math.round(gramsFromSlider(v as number));
                         const next = [...ingredients];
-                        next[idx] = { ...line, quantity: String(Math.round(v as number)), unit: 'g' };
+                        next[idx] = { ...line, quantity: String(g), unit: 'g' };
                         setIngredients(next);
                       }}
-                      min={0} max={1000} step={10}
+                      min={0} max={1} step={0.01}
                       size="small"
                     />
                   </Box>
@@ -358,4 +359,14 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
       </WizardLayout>
     </Dialog>
   );
+}
+
+/** Quadratic mapping: slider 0..1 → grams 0..1000 (finer at low end). */
+function gramsFromSlider(t: number): number {
+  return t * t * 1000;
+}
+
+/** Inverse: grams → slider position 0..1. */
+function sliderFromGrams(g: number): number {
+  return Math.sqrt(Math.max(0, g) / 1000);
 }

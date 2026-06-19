@@ -51,6 +51,7 @@ import kotlin.math.roundToInt
  * @param max        Slider maximum
  * @param onChange   Called on drag release with new value
  * @param dgeTarget  Optional DGE reference for % and Lv-Badge
+ * @param nonLinear  If true, scale is quadratic (finer at low end). Slider goes 0..1 internally.
  */
 @Composable
 fun NutrientSliderBar(
@@ -61,13 +62,26 @@ fun NutrientSliderBar(
     max: Float,
     modifier: Modifier = Modifier,
     dgeTarget: Float? = null,
+    nonLinear: Boolean = false,
     onChange: (Float) -> Unit,
 ) {
     val hm = LocalHmTokens.current
-    var sliderVal by remember(value) { mutableFloatStateOf(value) }
 
+    // For non-linear: internal slider is 0..1, display = min + position² * range
     val range = max - min
-    val frac = if (range > 0f) ((sliderVal - min) / range).coerceIn(0f, 1f) else 0f
+    val internalMax = if (nonLinear) 1f else max
+    val sliderPos = if (nonLinear && range > 0f) {
+        kotlin.math.sqrt(((value - min) / range).coerceIn(0f, 1f))
+    } else value
+    var sliderVal by remember(value) { mutableFloatStateOf(sliderPos) }
+
+    val displayValue = if (nonLinear && range > 0f) {
+        min + (sliderVal * sliderVal) * range
+    } else sliderVal
+
+    val frac = if (nonLinear) sliderVal.coerceIn(0f, 1f)
+               else if (range > 0f) ((sliderVal - min) / range).coerceIn(0f, 1f)
+               else 0f
 
     val stage: Int
     val pctInt: Int?
@@ -76,7 +90,7 @@ fun NutrientSliderBar(
     val trackTint: Color
 
     if (dgeTarget != null && dgeTarget > 0f) {
-        val pct = (sliderVal / dgeTarget * 100.0).coerceIn(0.0, 999.0)
+        val pct = (displayValue / dgeTarget * 100.0).coerceIn(0.0, 999.0)
         stage = (pct / 100.0).toInt()
         val withinStage = (pct % 100.0) / 100.0
         pctInt = (withinStage * 100).roundToInt()
@@ -105,7 +119,7 @@ fun NutrientSliderBar(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = if (sliderVal > 0f) "${"%.1f".format(sliderVal)} $unit" else "— $unit",
+                text = if (displayValue > 0f) "${"%.0f".format(displayValue)} $unit" else "— $unit",
                 style = MaterialTheme.typography.bodySmall,
                 color = hm.fgSecondary,
             )
@@ -156,8 +170,13 @@ fun NutrientSliderBar(
             Slider(
                 value = sliderVal,
                 onValueChange = { sliderVal = it },
-                onValueChangeFinished = { onChange(sliderVal) },
-                valueRange = min..max,
+                onValueChangeFinished = {
+                    val result = if (nonLinear && range > 0f) {
+                        min + (sliderVal * sliderVal) * range
+                    } else sliderVal
+                    onChange(result)
+                },
+                valueRange = 0f..internalMax,
                 colors = SliderDefaults.colors(
                     thumbColor = accent ?: hm.ambientViolet,
                     activeTrackColor = Color.Transparent,
