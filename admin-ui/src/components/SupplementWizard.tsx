@@ -9,9 +9,20 @@ import {
   Typography,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
-import { ALL_MICRONUTRIENT_KEYS } from '../api/nutrientDefaults';
 
-// P7.S5 — Micro metadata (shared with IngredientWizard)
+// P7.S5 — Vitamin/Mineral keys matching App NutrientCatalog
+const VITAMIN_KEYS2 = [
+  'vitamin_a', 'vitamin_d', 'vitamin_e', 'vitamin_k',
+  'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b5',
+  'vitamin_b6', 'vitamin_b7', 'vitamin_b9', 'vitamin_b12',
+  'vitamin_c',
+];
+const MINERAL_KEYS2 = [
+  'calcium', 'eisen', 'magnesium', 'zink', 'kupfer',
+  'mangan', 'selen', 'jod', 'kalium', 'natrium', 'phosphor',
+];
+
+// P7.S5 — Micro metadata
 const MICRO_META2: Record<string, [number, number, string]> = {
   vitamin_a: [0, 3000, 'µg'], vitamin_d: [0, 100, 'µg'], vitamin_e: [0, 50, 'mg'],
   vitamin_k: [0, 200, 'µg'], vitamin_b1: [0, 10, 'mg'], vitamin_b2: [0, 10, 'mg'],
@@ -34,7 +45,7 @@ const MICRO_LABEL2: Record<string, string> = {
   kalium: 'Kalium', natrium: 'Natrium', phosphor: 'Phosphor',
 };
 
-const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Mikronährstoffe', 'Vorschau'];
+const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Vorschau'];
 
 const UNIT_OPTIONS = ['Tablette', 'Kapsel', 'ml', 'g', 'Portion'];
 
@@ -82,7 +93,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
     onSave(data);
   };
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
   const handleBack = () => {
     if (step === 0) onClose();
     else setStep((s) => s - 1);
@@ -93,7 +104,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
       <WizardLayout
         title="Neues Supplement"
         step={step}
-        totalSteps={5}
+        totalSteps={4}
         stepLabels={STEP_LABELS}
         onBack={handleBack}
         onNext={handleNext}
@@ -101,7 +112,7 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
         canNext={
           (step === 0 && canStep0) ||
           (step === 1 && canStep1) ||
-          step === 2 || step === 3
+          step === 2
         }
         canSave={canStep0 && canStep1}
         saving={saving}
@@ -164,10 +175,14 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
                 required
               />
             </Grid>
+            <Grid item xs={12}>
+              <MacroSliderRow label="Kalorien" value={kcal} onChange={setKcal}
+                min={0} max={500} unit="kcal" />
+            </Grid>
           </Grid>
         )}
 
-        {/* STEP 2: Nährwerte — P7.S5: Slider statt TextField */}
+        {/* STEP 2: Nährwerte + Vitamine + Mineralstoffe */}
         {step === 2 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -179,7 +194,6 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
               </Typography>
             </Grid>
             {[
-              ['Kalorien', kcal, setKcal, 0, 500, 'kcal'],
               ['Eiweiß', protein, setProtein, 0, 100, 'g'],
               ['Kohlenhydrate', carbs, setCarbs, 0, 100, 'g'],
               ['Fett', fat, setFat, 0, 100, 'g'],
@@ -194,19 +208,32 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
                 />
               </Grid>
             ))}
-          </Grid>
-        )}
 
-        {/* STEP 3: Mikronährstoffe — P7.S5: Slider statt TextField */}
-        {step === 3 && (
-          <Grid container spacing={1.5}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={600}>Mikronährstoffe pro Dosis</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Schiebe die Regler. Nur Werte &gt; 0 werden gespeichert.
-              </Typography>
+            {/* Vitamine */}
+            <Grid item xs={12} sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600} color="primary">Vitamine</Typography>
             </Grid>
-            {ALL_MICRONUTRIENT_KEYS.map((key) => {
+            {VITAMIN_KEYS2.map((key) => {
+              const val = micros[key] ?? 0;
+              const meta = MICRO_META2[key] ?? [0, 100, 'mg'];
+              return (
+                <Grid item xs={12} key={key}>
+                  <MicroSliderRow2
+                    label={MICRO_LABEL2[key] ?? key}
+                    unit={meta[2]}
+                    value={val}
+                    onChange={(v) => setMicros({ ...micros, [key]: v })}
+                    min={meta[0]} max={meta[1]}
+                  />
+                </Grid>
+              );
+            })}
+
+            {/* Mineralstoffe */}
+            <Grid item xs={12} sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600} color="primary">Mineralstoffe</Typography>
+            </Grid>
+            {MINERAL_KEYS2.map((key) => {
               const val = micros[key] ?? 0;
               const meta = MICRO_META2[key] ?? [0, 100, 'mg'];
               return (
@@ -224,8 +251,8 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 4: Vorschau */}
-        {step === 4 && (
+        {/* STEP 3: Vorschau */}
+        {step === 3 && (
           <Box>
             <Typography variant="h6" gutterBottom>{nameDe || '(kein Name)'}</Typography>
             {brand && <Typography color="text.secondary">{brand}</Typography>}
