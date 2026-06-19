@@ -9,9 +9,20 @@ import {
   TextField,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
-import { ALL_MICRONUTRIENT_KEYS } from '../api/nutrientDefaults';
 
-const STEP_LABELS = ['Name', 'Nährwerte', 'Mikronährstoffe', 'Diäten & Histamin', 'Vorschau'];
+const STEP_LABELS = ['Name', 'Nährwerte', 'Diäten & Histamin', 'Vorschau'];
+
+const VITAMIN_KEYS = [
+  'vitamin_a', 'vitamin_d', 'vitamin_e', 'vitamin_k',
+  'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b5',
+  'vitamin_b6', 'vitamin_b7', 'vitamin_b9', 'vitamin_b12',
+  'vitamin_c',
+];
+
+const MINERAL_KEYS = [
+  'calcium', 'eisen', 'magnesium', 'zink', 'kupfer',
+  'mangan', 'selen', 'jod', 'kalium', 'natrium', 'phosphor',
+];
 
 const ALLERGENS: { code: string; label: string }[] = [
   { code: 'GLUTEN', label: 'Gluten' }, { code: 'CRUSTACEANS', label: 'Krebstiere' },
@@ -86,16 +97,16 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
   const toggleFodmap = (c: string) =>
     setSelectedFodmaps((p) => p.includes(c) ? p.filter((x) => x !== c) : [...p, c]);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 4));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
   const handleBack = () => { if (step === 0) onClose(); else setStep((s) => s - 1); };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <WizardLayout
         title="Lebensmittel vorschlagen"
-        step={step} totalSteps={5} stepLabels={STEP_LABELS}
+        step={step} totalSteps={4} stepLabels={STEP_LABELS}
         onBack={handleBack} onNext={handleNext} onSave={handleSave}
-        canNext={(step === 0 && canStep0) || step === 1 || step === 2 || step === 3}
+        canNext={(step === 0 && canStep0) || step === 1 || step === 2}
         canSave={canStep0} saving={saving}
       >
         {step === 0 && (
@@ -145,19 +156,32 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
                   min={min as number} max={max as number} />
               </Grid>
             ))}
-          </Grid>
-        )}
 
-        {/* STEP 2: Mikronährstoffe — P7.S5: Slider statt TextField */}
-        {step === 2 && (
-          <Grid container spacing={1.5}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={600}>Mikronährstoffe pro 100 g</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Schiebe die Regler. Nur Werte &gt; 0 werden gespeichert.
-              </Typography>
+            {/* Vitamine */}
+            <Grid item xs={12} sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600} color="primary">Vitamine</Typography>
             </Grid>
-            {ALL_MICRONUTRIENT_KEYS.map((key) => {
+            {VITAMIN_KEYS.map((key) => {
+              const val = micros[key] ?? 0;
+              const meta = MICRO_META[key] ?? [0, 100, 'mg'];
+              return (
+                <Grid item xs={12} key={key}>
+                  <MicroSliderRow
+                    label={MICRO_LABEL[key] ?? key}
+                    unit={meta[2]}
+                    value={val}
+                    onChange={(v) => setMicros({ ...micros, [key]: v })}
+                    min={meta[0]} max={meta[1]}
+                  />
+                </Grid>
+              );
+            })}
+
+            {/* Mineralstoffe */}
+            <Grid item xs={12} sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600} color="primary">Mineralstoffe</Typography>
+            </Grid>
+            {MINERAL_KEYS.map((key) => {
               const val = micros[key] ?? 0;
               const meta = MICRO_META[key] ?? [0, 100, 'mg'];
               return (
@@ -175,8 +199,8 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 3: Diäten & Histamin */}
-        {step === 3 && (
+        {/* STEP 2: Diäten & Histamin */}
+        {step === 2 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Diäten & Histamin</Typography>
@@ -218,8 +242,8 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 4: Vorschau */}
-        {step === 4 && (
+        {/* STEP 3: Vorschau */}
+        {step === 3 && (
           <Box>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>Vorschau</Typography>
             <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2 }}>
@@ -244,7 +268,7 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
                 </Typography>
               )}
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Direkt in Datenbank (Status APPROVED).
+                Nach &quot;Speichern&quot; wird das Lebensmittel direkt in der Datenbank angelegt (Status APPROVED).
               </Typography>
             </Box>
           </Box>
