@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
-  Box, Checkbox, Chip, Dialog, FormControlLabel, Grid,
-  Slider, TextField, Typography,
+  Box, Button, Checkbox, Chip, Dialog, FormControlLabel, Grid,
+  IconButton, Slider, TextField, Typography,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import WizardLayout from './WizardLayout';
 
 const STEP_LABELS = ['Name & Foto', 'Mahlzeit', 'Zutaten', 'Portionen & Zeit', 'Zubereitung', 'Vorschau'];
@@ -21,6 +23,21 @@ interface Props {
   saving?: boolean;
 }
 
+interface IngredientLine {
+  name: string;
+  quantity: string;
+  unit: string;
+}
+
+interface IngredientSuggestion {
+  name_de: string;
+  energy_kcal_per_100g?: number;
+}
+
+interface StepLine {
+  text: string;
+}
+
 export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
   const [step, setStep] = useState(0);
 
@@ -31,21 +48,34 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
   // Step 1: Mahlzeit
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
 
-  // Step 2: Zutaten (freitext, kein Server-Search im Admin)
-  const [ingredientsText, setIngredientsText] = useState('');
+  // Step 2: Zutaten (search from API + quantity/unit)
+  const [ingredientQuery, setIngredientQuery] = useState('');
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<IngredientSuggestion[]>([]);
+  const [ingredients, setIngredients] = useState<IngredientLine[]>([]);
+
+  const searchIngredients = useCallback(async (q: string) => {
+    if (q.trim().length < 1) { setIngredientSuggestions([]); return; }
+    try {
+      const res = await fetch(`/v1/ingredients?q=${encodeURIComponent(q)}&limit=8`);
+      if (res.ok) {
+        const data: IngredientSuggestion[] = await res.json();
+        setIngredientSuggestions(data);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   // Step 3: Portionen + Zeit (sliders like app)
   const [servings, setServings] = useState(2);
   const [prepMinutes, setPrepMinutes] = useState(30);
   const [cookMinutes, setCookMinutes] = useState(0);
 
-  // Step 4: Zubereitung
-  const [instructionsText, setInstructionsText] = useState('');
+  // Step 4: Zubereitung (numbered steps)
+  const [steps, setSteps] = useState<StepLine[]>([{ text: '' }]);
 
   // Validation
-  const canStep0 = title.trim().length >= 2;
+  const canStep0 = title.trim().length >= 2 && imageKey.trim().length > 0;
   const canStep1 = selectedSlots.length > 0;
-  const canStep2 = true; // ingredients are optional for admin
+  const canStep2 = ingredients.length > 0;
   const canStep3 = prepMinutes > 0;
   const canAdvance = (s: number) =>
     (s === 0 && canStep0) || (s === 1 && canStep1) ||
@@ -55,16 +85,18 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
     setSelectedSlots((p) => p.includes(code) ? p.filter((x) => x !== code) : [...p, code]);
 
   const handleSave = () => {
+    const instrText = steps.map((s, i) => `${i + 1}. ${s.text}`).join('\n');
     onSave({
       title: title.trim(),
-      image_key: imageKey.trim() || null,
-      description: instructionsText.trim() || null,
+      image_key: imageKey.trim(),
+      description: instrText || null,
       slot_tags: selectedSlots,
       servings,
       prep_minutes: prepMinutes,
       cook_minutes: cookMinutes > 0 ? cookMinutes : null,
       visibility: 'PUBLIC',
       status: 'PUBLISHED',
+      ingredient_lines: ingredients.filter((i) => i.name),
     });
   };
 
@@ -78,7 +110,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
         step={step} totalSteps={6} stepLabels={STEP_LABELS}
         onBack={handleBack} onNext={handleNext} onSave={handleSave}
         canNext={canAdvance(step)}
-        canSave={canStep0 && canStep1 && canStep3} saving={saving}
+        canSave={canStep0 && canStep1 && canStep2 && canStep3} saving={saving}
       >
         {/* Step 0: Name + Foto */}
         {step === 0 && (
@@ -91,15 +123,15 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
                 onChange={(e) => setTitle(e.target.value)} autoFocus />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Bild-Key (optional)" value={imageKey}
+              <TextField fullWidth label="Bild-Key *" value={imageKey}
                 onChange={(e) => setImageKey(e.target.value)}
-                placeholder="z.B. recipes/abc123.jpg" />
+                placeholder="z.B. recipes/abc123.jpg" required />
             </Grid>
             <Grid item xs={12}>
               {imageKey.trim() ? (
                 <Typography variant="body2" color="text.secondary">📷 Bild hinterlegt: {imageKey.trim()}</Typography>
               ) : (
-                <Typography variant="body2" color="error">Bitte wähle ein Foto aus (Pflicht in der App)</Typography>
+                <Typography variant="body2" color="error">Bitte wähle ein Foto aus (Pflicht)</Typography>
               )}
             </Grid>
           </Grid>
@@ -131,21 +163,70 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
           </Grid>
         )}
 
-        {/* Step 2: Zutaten */}
+        {/* Step 2: Zutaten — Suche aus DB */}
         {step === 2 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Was kommt rein?</Typography>
               <Typography variant="body2" color="text.secondary">
-                Gib die Zutaten als Freitext ein (Admin-Ansicht).
+                Such ein Lebensmittel und füge es hinzu. Dann Menge und Einheit anpassen.
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Zutatenliste" value={ingredientsText}
-                onChange={(e) => setIngredientsText(e.target.value)}
-                multiline minRows={4}
-                placeholder="200g Mehl&#10;2 Eier&#10;100ml Milch&#10;…" />
+              <TextField fullWidth label="Lebensmittel suchen…" value={ingredientQuery}
+                onChange={(e) => { setIngredientQuery(e.target.value); searchIngredients(e.target.value); }}
+                autoFocus />
             </Grid>
+            {ingredientSuggestions.map((ing, i) => (
+              <Grid item xs={12} key={i}>
+                <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, cursor: 'pointer' }}
+                  onClick={() => {
+                    setIngredients([...ingredients, { name: ing.name_de, quantity: '', unit: 'g' }]);
+                    setIngredientQuery('');
+                    setIngredientSuggestions([]);
+                  }}>
+                  <Typography fontWeight={600}>{ing.name_de}</Typography>
+                  {ing.energy_kcal_per_100g && (
+                    <Typography variant="body2" color="text.secondary">
+                      {Math.round(ing.energy_kcal_per_100g)} kcal / 100 g
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            ))}
+            {ingredients.length > 0 && (
+              <Grid item xs={12}>
+                <Typography fontWeight={600} sx={{ mt: 1 }}>Hinzugefügt ({ingredients.length})</Typography>
+              </Grid>
+            )}
+            {ingredients.map((line, idx) => (
+              <Grid item xs={12} key={idx}>
+                <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography fontWeight={600}>{line.name}</Typography>
+                    <IconButton size="small" onClick={() => setIngredients(ingredients.filter((_, i) => i !== idx))}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                    <TextField size="small" label="Menge" value={line.quantity}
+                      onChange={(e) => {
+                        const next = [...ingredients];
+                        next[idx] = { ...line, quantity: e.target.value };
+                        setIngredients(next);
+                      }}
+                      sx={{ flex: 1 }} />
+                    <TextField size="small" label="Einheit" value={line.unit}
+                      onChange={(e) => {
+                        const next = [...ingredients];
+                        next[idx] = { ...line, unit: e.target.value };
+                        setIngredients(next);
+                      }}
+                      sx={{ width: 110 }} />
+                  </Box>
+                </Box>
+              </Grid>
+            ))}
           </Grid>
         )}
 
@@ -182,20 +263,47 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
           </Grid>
         )}
 
-        {/* Step 4: Zubereitung */}
+        {/* Step 4: Zubereitung — nummerierte Schritte */}
         {step === 4 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Zubereitung</Typography>
               <Typography variant="body2" color="text.secondary">
-                Schritt für Schritt empfohlen. Du kannst weitere Schritte hinzufügen.
+                Schritt für Schritt. Du kannst weitere Schritte hinzufügen.
               </Typography>
             </Grid>
+            {steps.map((s, idx) => (
+              <Grid item xs={12} key={idx}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <Box sx={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    bgcolor: 'primary.main', color: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: 14, mt: 1, flexShrink: 0,
+                  }}>
+                    {idx + 1}
+                  </Box>
+                  <TextField fullWidth label={`Schritt ${idx + 1}`} value={s.text}
+                    onChange={(e) => {
+                      const next = [...steps];
+                      next[idx] = { text: e.target.value };
+                      setSteps(next);
+                    }}
+                    multiline minRows={2}
+                    sx={{ flex: 1 }} />
+                  {steps.length > 1 && (
+                    <IconButton onClick={() => setSteps(steps.filter((_, i) => i !== idx))} sx={{ mt: 1 }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </Box>
+              </Grid>
+            ))}
             <Grid item xs={12}>
-              <TextField fullWidth label="Zubereitungsschritte" value={instructionsText}
-                onChange={(e) => setInstructionsText(e.target.value)}
-                multiline minRows={5}
-                placeholder="1. Zutaten vorbereiten&#10;2. Alles vermengen&#10;3. Bei 180°C backen&#10;…" />
+              <Button startIcon={<AddIcon />} onClick={() => setSteps([...steps, { text: '' }])}
+                variant="outlined" fullWidth>
+                Weiterer Schritt
+              </Button>
             </Grid>
           </Grid>
         )}
@@ -223,21 +331,25 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
                 ))}
               </Box>
 
-              {ingredientsText.trim() && (
+              {ingredients.filter(i => i.name).length > 0 && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" fontWeight={600}>Zutaten:</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {ingredientsText.trim()}
-                  </Typography>
+                  {ingredients.filter(i => i.name).map((line, i) => (
+                    <Typography key={i} variant="body2" color="text.secondary">
+                      • {line.name}{line.quantity ? ` — ${line.quantity} ${line.unit}` : ''}
+                    </Typography>
+                  ))}
                 </Box>
               )}
 
-              {instructionsText.trim() && (
+              {steps.some(s => s.text.trim()) && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" fontWeight={600}>Zubereitung:</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {instructionsText.trim()}
-                  </Typography>
+                  {steps.filter(s => s.text.trim()).map((s, i) => (
+                    <Typography key={i} variant="body2" color="text.secondary">
+                      {i + 1}. {s.text.trim()}
+                    </Typography>
+                  ))}
                 </Box>
               )}
             </Box>
