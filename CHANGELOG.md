@@ -2,6 +2,29 @@
 
 ---
 
+## P7.S5d: Progress-Bar-Vereinheitlichung & Wasser-Alarm-Fix (2026-06-19)
+
+### Progress-Bar Redesign
+- **HfNutrientProgressRow unified** mit PinnedNutrientRow-Design: 8dp Canvas bar, 10-stage waterStageGradient, Lv-Badge, Wert/Ziel-Format, % rechts (vorher: 4dp Box, 3 Farben grün/gelb/rot, % zentriert, kein Ziel).
+- **WaterStageSlider**: Flüssigkeits-Wellen-Animation (Sinuswelle 3.5s Fill / 7s Defizit) + Impuls bei Value-Change. Defizit-Zone jetzt Soft Coral (#FF6B6B) statt Hart-Rot.
+- **InsightsScreen**: LinearProgressIndicator → HfNutrientProgressRow (einheitlich mit Home).
+- **MasterTileNutrient**: neues `targetValue`-Feld → alle Listen zeigen jetzt "18.5 / 50 g" Format.
+- **IntakeCard**: computePinnedNutrientBars liefert jetzt `NutrientBarInfo` mit targetValue.
+
+### Wasser-Alarm Fix
+- **Bug #1 (kritisch)**: `WaterReminderScheduler.schedule()` wurde nie im `HomeViewModel.init{}` aufgerufen → Alarm nie gesetzt. Jetzt bei Start wenn `enabled`.
+- **Bug #2 (mittel)**: POST_NOTIFICATIONS-Permission nie für Wasser-Toggle abgefragt. `RequestNotificationPermissionEffect` jetzt in PlanScreen integriert.
+
+### Touched Docs (Regel 2)
+- **CHANGELOG.md** — dieser Eintrag.
+- **GUI.md** §8 — HfNutrientProgressRow-Eintrag aktualisiert (4dp→8dp, 3 Farben→10-Stage).
+- **ReqSpec.md** §5.5a — REQ-DESIGN-002 aktualisiert (4dp→8dp, Lv-Badge, Wert/Ziel).
+- **Architecture.md** — untouched (WaterDeficitScheduler-Referenz weiterhin akkurat).
+- **UsabilityMap.md** — untouched.
+- **SprintPlan.md** — untouched (P7.S3.b-Notizen historisch).
+
+---
+
 ## P7.S5c: FODMAP + Histamin für Rezepte, IngredientDetail erweitert (2026-06-16)
 
 **Scope:** Rezepte zeigen jetzt FODMAP-Flags + Histamin-Score (MAX der Zutaten). Lebensmittel-Detail zeigt alle Makros (inkl. Zucker, gesättigte Fette, Salz).

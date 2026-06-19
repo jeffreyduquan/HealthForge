@@ -156,7 +156,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | Req | Statement |
 |---|---|
 | REQ-DESIGN-001 | The app SHALL use a **single Master Tile** component (`HfMasterTile`) for all food/recipe/supplement list items across Home, Essen, and Gruppen tabs. |
-| REQ-DESIGN-002 | The Master Tile SHALL display the user's **pinned nutrients** as compact horizontal progress bars (4dp, stage-colored) with DGE-percentage labels. |
+| REQ-DESIGN-002 | P7.S5 Unified: The Master Tile SHALL display the user's **pinned nutrients** as horizontal progress bars (8dp Canvas, 10-stage gradient via waterStageGradient, Lv-Badge at stage ≥1) with DGE-percentage labels and value/target display. Identical to PinnedNutrientRow design. |
 | REQ-DESIGN-003 | Nutrient progress bars SHALL be normalized: Lebensmittel per 100g, Rezepte per 100g (computed), Supplements per dose. |
 | REQ-DESIGN-004 | All Essen sub-tabs SHALL use an identical search bar layout (`HfSearchBar`) with consistent styling. |
 | REQ-DESIGN-005 | All detail screens (ingredient, recipe, supplement) SHALL use a consistent `HfDetailTopBar` + sticky purple `HfAddToHomeButton` bottom bar. |

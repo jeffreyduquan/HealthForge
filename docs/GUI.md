@@ -301,7 +301,7 @@ für alle Screens. Definiert in `presentation/common/components/`.
 | `HfCard` | Master-Card (16dp Radius, HmTokens, clickable). Ersetzt GlassCard, NeoCard, ElevatedCard, Card. |
 | `HfSectionHeader` | Einheitlicher Section-Header (uppercase, semiBold, fgTertiary). Ersetzt SectionPill + NeoSectionLabel. |
 | `HfValueRow` | Label-Value-Zeile (SpaceBetween). Ersetzt MacroRow ×2 + NutriRow. |
-| `HfNutrientProgressRow` | Nährwert-Zeile mit 4dp DGE-Progress-Bar (Stage-Farben: grün/gelb/rot). |
+| `HfNutrientProgressRow` | P7.S5 Unified: Nährwert-Zeile mit 8dp Canvas DGE-Progress-Bar (10-Stage Gradient via waterStageGradient), Lv-Badge ab Stufe ≥1, Wert/Ziel-Format, % rechts. Layout identisch zu PinnedNutrientRow. |
 | `HfAddToHomeButton` | Sticky Bottom-Bar, lilafarbener Accent-Gradient, "ZUM HOME-SCREEN HINZUFÜGEN". |
 | `HfRatingBar` | Einheitliches Rating: Like (Heart) + Community Recommend/Not (ThumbUp/ThumbDown) als FilterChips. |
 | `HfSearchBar` | Einheitliche Suchleiste: OutlinedTextField + Search-Icon leading + optionales Filter-Icon. |
