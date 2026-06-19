@@ -176,10 +176,6 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
                 required
               />
             </Grid>
-            <Grid item xs={12}>
-              <MacroSliderRow label="Kalorien" value={kcal} onChange={setKcal}
-                min={0} max={500} unit="kcal" />
-            </Grid>
           </Grid>
         )}
 
@@ -193,6 +189,10 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
               <Typography variant="body2" color="text.secondary">
                 Schiebe die Regler.
               </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <MacroSliderRow label="Kalorien" value={kcal} onChange={setKcal}
+                min={0} max={500} unit="kcal" />
             </Grid>
             {[
               ['Eiweiß', protein, setProtein, 0, 100, 'g'],

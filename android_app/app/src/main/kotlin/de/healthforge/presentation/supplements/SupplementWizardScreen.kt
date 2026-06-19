@@ -121,7 +121,6 @@ fun SupplementWizardScreen(
                                         label = { Text("Einheit (z.B. Tabl.)") }, singleLine = true, modifier = Modifier.weight(1f),
                                     )
                                 }
-                                NutrientSliderField("kcal", s.kcal, "kcal", 0f, 500f, vm::setKcal)
                             }
                         }
                     }
@@ -130,6 +129,7 @@ fun SupplementWizardScreen(
                         HfSectionHeader("Pro Dosis (optional)")
                         HfCard {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                NutrientSliderField("Kalorien", s.kcal, "kcal", 0f, 500f, vm::setKcal)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     NutrientSliderField("Eiweiß", s.protein, "g", 0f, 100f, vm::setProtein)
                                     NutrientSliderField("KH", s.carbs, "g", 0f, 100f, vm::setCarbs)
