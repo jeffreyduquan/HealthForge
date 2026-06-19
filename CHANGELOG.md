@@ -15,16 +15,21 @@
 - **Bug #1 (kritisch)**: `WaterReminderScheduler.schedule()` wurde nie im `HomeViewModel.init{}` aufgerufen → Alarm nie gesetzt. Jetzt bei Start wenn `enabled`.
 - **Bug #2 (mittel)**: POST_NOTIFICATIONS-Permission nie für Wasser-Toggle abgefragt. `RequestNotificationPermissionEffect` jetzt in PlanScreen integriert.
 
-### Slider-Progress-Bars für ALLE Nährwert-Felder (Admin + App)
-- **Admin IngredientWizard**: Mikronährstoffe (22 Keys) TextField → MicroSliderRow.
-- **Admin SupplementWizard**: Makros + Mikronährstoffe TextField → MacroSliderRow + MicroSliderRow2.
-- **App SupplementWizardScreen**: kcal/protein/carbs/fat + Vitamine/Mineralien OutlinedTextField → NutrientSliderField + MicroSliderField.
-- **App IngredientSuggestWizardScreen**: MicroField OutlinedTextField → Slider.
+### Wizard-Vereinheitlichung (Admin = App)
+- **Admin IngredientWizard**: 5→4 Steps, Vitamine+Mineralien in Step 1, identisch zur App.
+- **Admin SupplementWizard**: 5→4 Steps, kcal→Step 2, identisch zur App.
+- **Admin RecipeWizard**: Foto-Pflicht, Zutaten-Suche via API, nummerierte Schritte, identisch zur App.
+
+### Slider-Progress-Bars für ALLE Nährwert-Felder
+- **Admin Wizards**: Alle Makros+Micros TextField → SliderRow/MicroSliderRow.
+- **App Wizards**: Alle TextFields → NutrientSliderBar (8dp Canvas + Slider overlay).
+- **Admin Detail-Dialogs**: IngredientDetailDialog + SupplementDetailDialog → Slider.
+- **NutrientSliderBar**: Neue Shared-Komponente — Progress-Bar + Slider kombiniert (wie WaterStageSlider).
 
 ### Touched Docs (Regel 2)
 - **CHANGELOG.md** — dieser Eintrag.
-- **GUI.md** §8 — HfNutrientProgressRow-Eintrag aktualisiert (4dp→8dp, 3 Farben→10-Stage).
-- **ReqSpec.md** §5.5a — REQ-DESIGN-002 aktualisiert (4dp→8dp, Lv-Badge, Wert/Ziel).
+- **GUI.md** §8 — HfNutrientProgressRow aktualisiert.
+- **ReqSpec.md** §5.5a — REQ-DESIGN-002 aktualisiert.
 - **Architecture.md** — untouched.
 - **UsabilityMap.md** — untouched.
 - **SprintPlan.md** — untouched.
