@@ -6,6 +6,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import WizardLayout from './WizardLayout';
+import { api } from '../api/client';
 
 const STEP_LABELS = ['Name & Foto', 'Mahlzeit', 'Zutaten', 'Portionen & Zeit', 'Zubereitung', 'Vorschau'];
 
@@ -56,11 +57,8 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
   const searchIngredients = useCallback(async (q: string) => {
     if (q.trim().length < 1) { setIngredientSuggestions([]); return; }
     try {
-      const res = await fetch(`/v1/ingredients?q=${encodeURIComponent(q)}&limit=8`);
-      if (res.ok) {
-        const data: IngredientSuggestion[] = await res.json();
-        setIngredientSuggestions(data);
-      }
+      const { data } = await api.get<IngredientSuggestion[]>(`/v1/ingredients?q=${encodeURIComponent(q)}&limit=8`);
+      setIngredientSuggestions(data);
     } catch { /* ignore */ }
   }, []);
 
