@@ -5,26 +5,29 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Flame body (Forge 🔥) -->
+    <!-- Pulse Leaf — HealthForge icon P7.S5 -->
+
+    <!-- Leaf body -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,12 C76,40 86,62 74,80 C66,90 56,94 54,94 C52,94 42,90 34,80 C22,62 32,40 54,12 Z" />
+        android:fillAlpha="0.92"
+        android:pathData="M54,88 C38,80 24,62 20,44 C18,36 22,24 30,20 C38,16 44,24 46,30 C48,24 54,16 62,20 C70,24 74,36 72,44 C68,62 54,80 54,88 Z" />
 
-    <!-- Health cross inside flame -->
+    <!-- Center vein -->
     <path
         android:fillColor="@android:color/transparent"
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="3.5"
-        android:strokeLineJoin="round"
+        android:strokeWidth="1.8"
         android:strokeLineCap="round"
-        android:pathData="M54,52 L54,76" />
+        android:pathData="M54,24 L54,82" />
 
+    <!-- EKG / Pulse line across center -->
     <path
         android:fillColor="@android:color/transparent"
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="3.5"
+        android:strokeWidth="2.5"
         android:strokeLineJoin="round"
         android:strokeLineCap="round"
-        android:pathData="M42,64 L66,64" />
+        android:pathData="M30,52 L42,52 L46,38 L50,66 L54,52 L66,52" />
 
 </vector>
