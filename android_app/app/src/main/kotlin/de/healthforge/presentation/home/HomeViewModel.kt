@@ -135,6 +135,13 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, DailyTargets.FALLBACK)
 
     init {
+        // P7.S5 Fix — Schedule water reminder on start if enabled.
+        // Previously schedule() was only called on manual toggle or BootReceiver,
+        // so the alarm was never set on fresh install.
+        if (waterReminderPrefs.enabled) {
+            waterReminderScheduler.schedule()
+        }
+
         // Recompute totals + water + entries whenever date changes.
         dateFlow
             .onEach { d -> _state.value = _state.value.copy(date = d) }

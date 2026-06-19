@@ -1,5 +1,12 @@
 package de.healthforge.presentation.home.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,13 +36,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.healthforge.presentation.theme.DeficitCoral
 import de.healthforge.presentation.theme.LocalHmTokens
-import de.healthforge.presentation.theme.StatusOverUl
+import kotlin.math.PI
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * P7.S3a v2 / REQ-HOME-WATER-BAR-001 — Wasser-Zeile in der PinnedNutrientCard.
@@ -133,6 +144,36 @@ fun WaterStageSlider(
     val gradient = remember(displayedStage) { waterStageGradient(displayedStage) }
     val accent = remember(displayedStage) { waterStageAccent(displayedStage) }
 
+    // ─── Wave Animation (P7.S5 redesign) ─────────────────────────────────
+    val infiniteTransition = rememberInfiniteTransition()
+
+    // Fill wave: 3.5s period (midpoint of 3–4s), drives sine phase 0→2π
+    val fillWavePhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+    )
+
+    // Deficit wave: 7s period (slower, more subtle)
+    val deficitWavePhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(7000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+    )
+
+    // Impulse on value change: briefly scales amplitude to ~1.8× then decays
+    val impulseAmplitude = remember { Animatable(1f) }
+    LaunchedEffect(relativeMl) {
+        impulseAmplitude.snapTo(1.8f)
+        impulseAmplitude.animateTo(1f, animationSpec = tween(600))
+    }
+
     // Ghost-Marker-Position innerhalb der angezeigten Stufe (oder null).
     val ghostInStage: Float? = run {
         val stageStart = displayedStage * safeGoal
@@ -205,32 +246,54 @@ fun WaterStageSlider(
                 val w = size.width
                 val h = size.height
                 val corner = CornerRadius(h / 2f, h / 2f)
-                // Track-Farbe: Akzent der Vorgängerstufe × 0.25 Alpha — zeigt
-                // "wo komme ich her". Stufe 0 → neutraler `hm.barTrack`.
+                // Wave amplitude: 1.5dp → ~4.5px at 160dpi, capped at 25% bar height
+                val baseWaveAmp = (1.5f * density).coerceAtMost(h * 0.25f)
+
+                // Track-Farbe: Akzent der Vorgängerstufe × 0.25 Alpha
                 val trackColor = waterStageTrackColor(displayedStage) ?: hm.barTrack
                 drawRoundRect(color = trackColor, size = Size(w, h), cornerRadius = corner)
-                // Defizit-Rot: zwischen aktueller Füllung und Ghost-Soll, wenn
-                // Soll vor uns liegt (current < ghost) UND beide im selben
-                // sichtbaren Stufen-Bereich.
+
+                // ── Defizit-Zone (Soft Coral) mit dezenter Welle ──
                 if (ghostInStage != null && frac < ghostInStage) {
-                    val redStart = w * frac
-                    val redEnd = w * ghostInStage
-                    drawRoundRect(
-                        color = StatusOverUl.copy(alpha = 0.55f),
-                        topLeft = Offset(redStart, 0f),
-                        size = Size((redEnd - redStart).coerceAtLeast(0f), h),
-                        cornerRadius = corner,
-                    )
+                    val defStart = w * frac
+                    val defEnd = w * ghostInStage
+                    val defWidth = (defEnd - defStart).coerceAtLeast(0f)
+                    if (defWidth > 0f) {
+                        val defAmp = baseWaveAmp * 0.5f // dezenter
+                        val defPath = buildWavyRectPath(
+                            left = defStart, top = 0f,
+                            width = defWidth, height = h,
+                            amplitude = defAmp,
+                            phase = deficitWavePhase,
+                            cornerRadius = corner,
+                            density = density,
+                        )
+                        drawPath(
+                            path = defPath,
+                            color = DeficitCoral.copy(alpha = 0.45f),
+                        )
+                    }
                 }
+
+                // ── Fill (Gradient) mit Welle + Impuls ──
                 val fillW = (w * frac).coerceIn(0f, w)
                 if (fillW > 0f) {
-                    drawRoundRect(
-                        brush = gradient,
-                        topLeft = Offset(0f, 0f),
-                        size = Size(fillW, h),
+                    val fillAmp = baseWaveAmp * impulseAmplitude.value
+                    val fillPath = buildWavyRectPath(
+                        left = 0f, top = 0f,
+                        width = fillW, height = h,
+                        amplitude = fillAmp,
+                        phase = fillWavePhase,
                         cornerRadius = corner,
+                        density = density,
+                    )
+                    drawPath(
+                        path = fillPath,
+                        brush = gradient,
                     )
                 }
+
+                // ── Ghost-Marker (weiße vertikale Linie) ──
                 ghostInStage?.let { gf ->
                     val gx = w * gf
                     drawLine(
@@ -291,5 +354,89 @@ fun WaterStageSlider(
                 )
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave path builder — P7.S5 liquid animation
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Builds a [Path] for a rounded rectangle whose **top edge** undulates with
+ * a sine wave, giving a "liquid surface" effect.
+ *
+ * The left & right edges remain rounded (clipped to [cornerRadius]), and the
+ * bottom edge is a straight line with rounded corners.
+ *
+ * @param left         x-offset of the rect within the Canvas.
+ * @param top          y-offset (always 0 for our bar).
+ * @param width        total width of the filled/deficit area.
+ * @param height       bar height (8dp).
+ * @param amplitude    peak deviation of the sine wave in px.
+ * @param phase        current phase of the infinite animation (0..2π).
+ * @param cornerRadius corner rounding for bottom-left and bottom-right.
+ * @param density      display density for converting dp→px constraints.
+ */
+private fun buildWavyRectPath(
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float,
+    amplitude: Float,
+    phase: Float,
+    cornerRadius: CornerRadius,
+    density: Float,
+): Path {
+    val right = left + width
+    val bottom = top + height
+    val r = cornerRadius.x.coerceAtMost(height / 2f).coerceAtMost(width / 2f)
+    // Number of wave segments — one per ~8dp gives smooth look without over-sampling
+    val segmentDp = 8f
+    val segments = (width / (segmentDp * density)).toInt().coerceAtLeast(4)
+
+    return Path().apply {
+        // Start at bottom-left corner (after rounding)
+        moveTo(left + r, bottom)
+
+        // Bottom edge: straight line to bottom-right corner
+        lineTo(right - r, bottom)
+
+        // Bottom-right rounded corner
+        arcTo(
+            rect = Rect(right - 2 * r, bottom - 2 * r, right, bottom),
+            startAngleDegrees = 270f,
+            sweepAngleDegrees = 90f,
+            forceMoveTo = false,
+        )
+
+        // Right edge: straight up (no wave on sides)
+
+        // Top-right rounded corner
+        arcTo(
+            rect = Rect(right - 2 * r, top, right, top + 2 * r),
+            startAngleDegrees = 0f,
+            sweepAngleDegrees = -90f,
+            forceMoveTo = false,
+        )
+
+        // Top edge: sine wave from right to left
+        val stepX = width / segments
+        for (i in segments downTo 1) {
+            val x = left + i * stepX
+            val t = (i.toFloat() / segments) * (2f * PI).toFloat()
+            val y = top + sin(t + phase) * amplitude
+            lineTo(x, y)
+        }
+
+        // Top-left rounded corner
+        lineTo(left + r, top)
+        arcTo(
+            rect = Rect(left, top, left + 2 * r, top + 2 * r),
+            startAngleDegrees = 270f,
+            sweepAngleDegrees = -90f,
+            forceMoveTo = false,
+        )
+
+        close()
     }
 }

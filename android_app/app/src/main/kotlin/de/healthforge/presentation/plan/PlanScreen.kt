@@ -81,6 +81,7 @@ import de.healthforge.presentation.home.components.PinnedNutrientCard
 import de.healthforge.presentation.home.components.PinnedNutrientEntry
 import de.healthforge.presentation.home.components.Sparkline
 import de.healthforge.presentation.home.components.SupplementChecklist
+import de.healthforge.notification.RequestNotificationPermissionEffect
 import de.healthforge.presentation.home.components.WaterStageSlider
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
@@ -118,6 +119,13 @@ fun PlanScreen(
     val hm = LocalHmTokens.current
     val snackbar = remember { SnackbarHostState() }
     var scrollToTodayTrigger by remember { mutableIntStateOf(0) }
+
+    // P7.S5 Fix — POST_NOTIFICATIONS permission for water reminder toggle (API 33+).
+    var requestWaterNotifPerm by remember { mutableStateOf(false) }
+    RequestNotificationPermissionEffect(trigger = requestWaterNotifPerm) { granted ->
+        if (granted) homeVm.setWaterReminderEnabled(true)
+        requestWaterNotifPerm = false
+    }
 
     // Sync date PlanViewModel ↔ HomeViewModel
     LaunchedEffect(state.selectedDay) { homeVm.setDate(state.selectedDay) }
@@ -266,7 +274,11 @@ fun PlanScreen(
                         Column {
                             WaterStageSlider(
                                 homeState.waterMl, homeState.waterGhostMl, homeState.targets.waterMl,
-                                homeState.waterReminderEnabled, homeVm::setWaterMl, homeVm::setWaterReminderEnabled,
+                                homeState.waterReminderEnabled, homeVm::setWaterMl,
+                                onToggleReminder = { enabled ->
+                                    if (enabled) requestWaterNotifPerm = true
+                                    else homeVm.setWaterReminderEnabled(false)
+                                },
                             )
                             val wv = homeState.waterTrend.entries.sortedBy { it.key }.map { it.value.toDouble() }
                             if (wv.size >= 2) {

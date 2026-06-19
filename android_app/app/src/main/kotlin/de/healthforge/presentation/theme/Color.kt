@@ -18,6 +18,9 @@ val StatusOverUl       = Color(0xFFFF5470)
 val StatusRelax        = Color(0xFFFFB454)
 val StatusGood         = Color(0xFF22D3A6)
 
+/** Soft Coral — deficit zone in WaterStageSlider (P7.S5 redesign). */
+val DeficitCoral        = Color(0xFFFF6B6B)
+
 /** Linear-Gradient for primary actions (FAB / Button-Background / Section-Pill-Strip). */
 val AccentGradient = Brush.linearGradient(listOf(AmbientViolet, AmbientCyan))
 

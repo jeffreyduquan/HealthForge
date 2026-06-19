@@ -15,7 +15,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.domain.insights.CorrelationResult
 import de.healthforge.domain.insights.INSIGHT_MIN_LOG_DAYS
+import de.healthforge.presentation.common.components.HfNutrientProgressRow
 import de.healthforge.domain.insights.InsightsReport
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -162,8 +162,10 @@ private fun LockedPane(padding: PaddingValues, currentLogDays: Int) {
                 "bevor Korrelationen berechnet werden. Aktuell: $currentLogDays Tage.",
             style = MaterialTheme.typography.bodyMedium,
         )
-        LinearProgressIndicator(
-            progress = { (currentLogDays.toFloat() / INSIGHT_MIN_LOG_DAYS).coerceIn(0f, 1f) },
+        HfNutrientProgressRow(
+            label = "Log-Tage",
+            value = "$currentLogDays / $INSIGHT_MIN_LOG_DAYS",
+            percentDge = (currentLogDays.toDouble() / INSIGHT_MIN_LOG_DAYS) * 100.0,
         )
     }
 }
