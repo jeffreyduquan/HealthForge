@@ -148,20 +148,27 @@ export default function IngredientWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 2: Mikronährstoffe */}
+        {/* STEP 2: Mikronährstoffe — P7.S5: Slider statt TextField */}
         {step === 2 && (
-          <Grid container spacing={1}>
+          <Grid container spacing={1.5}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Mikronährstoffe pro 100 g</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Schiebe die Regler. Nur Werte &gt; 0 werden gespeichert.
+              </Typography>
+            </Grid>
             {ALL_MICRONUTRIENT_KEYS.map((key) => {
               const val = micros[key] ?? 0;
+              const meta = MICRO_META[key] ?? [0, 100, 'mg'];
               return (
-                <Grid item xs={6} sm={4} key={key}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ width: 90, textAlign: 'right' }}>{key}:</Typography>
-                    <TextField size="small" type="number" value={val || ''}
-                      onChange={(e) => setMicros({ ...micros, [key]: Number(e.target.value) || 0 })}
-                      inputProps={{ step: 0.1, min: 0 }}
-                      sx={{ flex: 1 }} />
-                  </Box>
+                <Grid item xs={12} key={key}>
+                  <MicroSliderRow
+                    label={MICRO_LABEL[key] ?? key}
+                    unit={meta[2]}
+                    value={val}
+                    onChange={(v) => setMicros({ ...micros, [key]: v })}
+                    min={meta[0]} max={meta[1]}
+                  />
                 </Grid>
               );
             })}
@@ -262,3 +269,46 @@ function SliderRow({ label, display, value, onChange, min, max }: {
     </Box>
   );
 }
+
+/** P7.S5 — Slider for micronutrients replacing TextField. */
+function MicroSliderRow({ label, unit, value, onChange, min, max }: {
+  label: string; unit: string; value: number;
+  onChange: (v: number) => void; min: number; max: number;
+}) {
+  const display = value > 0 ? `${value.toFixed(1)} ${unit}` : `— ${unit}`;
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        <Typography variant="body2" color="text.secondary">{display}</Typography>
+      </Box>
+      <Slider value={value} onChange={(_, v) => onChange(v as number)}
+        min={min} max={max} step={0.1} size="small" />
+    </Box>
+  );
+}
+
+/** Lookup for micro range: [min, max, unit] per NutrientCatalog key. */
+const MICRO_META: Record<string, [number, number, string]> = {
+  vitamin_a: [0, 3000, 'µg'], vitamin_d: [0, 100, 'µg'], vitamin_e: [0, 50, 'mg'],
+  vitamin_k: [0, 200, 'µg'], vitamin_b1: [0, 10, 'mg'], vitamin_b2: [0, 10, 'mg'],
+  vitamin_b3: [0, 50, 'mg'], vitamin_b5: [0, 20, 'mg'], vitamin_b6: [0, 10, 'mg'],
+  vitamin_b7: [0, 200, 'µg'], vitamin_b9: [0, 1000, 'µg'], vitamin_b12: [0, 20, 'µg'],
+  vitamin_c: [0, 500, 'mg'],
+  calcium: [0, 2000, 'mg'], eisen: [0, 30, 'mg'], magnesium: [0, 800, 'mg'],
+  zink: [0, 30, 'mg'], kupfer: [0, 5, 'mg'], mangan: [0, 10, 'mg'],
+  selen: [0, 200, 'µg'], jod: [0, 300, 'µg'], kalium: [0, 5000, 'mg'],
+  natrium: [0, 3000, 'mg'], phosphor: [0, 2000, 'mg'],
+};
+
+/** Display name lookup for micro keys. */
+const MICRO_LABEL: Record<string, string> = {
+  vitamin_a: 'Vitamin A', vitamin_d: 'Vitamin D', vitamin_e: 'Vitamin E',
+  vitamin_k: 'Vitamin K', vitamin_b1: 'Vitamin B1', vitamin_b2: 'Vitamin B2',
+  vitamin_b3: 'Vitamin B3', vitamin_b5: 'Vitamin B5', vitamin_b6: 'Vitamin B6',
+  vitamin_b7: 'Vitamin B7', vitamin_b9: 'Vitamin B9', vitamin_b12: 'Vitamin B12',
+  vitamin_c: 'Vitamin C',
+  calcium: 'Calcium', eisen: 'Eisen', magnesium: 'Magnesium', zink: 'Zink',
+  kupfer: 'Kupfer', mangan: 'Mangan', selen: 'Selen', jod: 'Jod',
+  kalium: 'Kalium', natrium: 'Natrium', phosphor: 'Phosphor',
+};

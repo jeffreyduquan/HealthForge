@@ -1,15 +1,38 @@
 import { useState } from 'react';
 import {
   Box,
-  Chip,
   Dialog,
   Grid,
   MenuItem,
+  Slider,
   TextField,
   Typography,
 } from '@mui/material';
 import WizardLayout from './WizardLayout';
 import { ALL_MICRONUTRIENT_KEYS } from '../api/nutrientDefaults';
+
+// P7.S5 — Micro metadata (shared with IngredientWizard)
+const MICRO_META2: Record<string, [number, number, string]> = {
+  vitamin_a: [0, 3000, 'µg'], vitamin_d: [0, 100, 'µg'], vitamin_e: [0, 50, 'mg'],
+  vitamin_k: [0, 200, 'µg'], vitamin_b1: [0, 10, 'mg'], vitamin_b2: [0, 10, 'mg'],
+  vitamin_b3: [0, 50, 'mg'], vitamin_b5: [0, 20, 'mg'], vitamin_b6: [0, 10, 'mg'],
+  vitamin_b7: [0, 200, 'µg'], vitamin_b9: [0, 1000, 'µg'], vitamin_b12: [0, 20, 'µg'],
+  vitamin_c: [0, 500, 'mg'],
+  calcium: [0, 2000, 'mg'], eisen: [0, 30, 'mg'], magnesium: [0, 800, 'mg'],
+  zink: [0, 30, 'mg'], kupfer: [0, 5, 'mg'], mangan: [0, 10, 'mg'],
+  selen: [0, 200, 'µg'], jod: [0, 300, 'µg'], kalium: [0, 5000, 'mg'],
+  natrium: [0, 3000, 'mg'], phosphor: [0, 2000, 'mg'],
+};
+const MICRO_LABEL2: Record<string, string> = {
+  vitamin_a: 'Vitamin A', vitamin_d: 'Vitamin D', vitamin_e: 'Vitamin E',
+  vitamin_k: 'Vitamin K', vitamin_b1: 'Vitamin B1', vitamin_b2: 'Vitamin B2',
+  vitamin_b3: 'Vitamin B3', vitamin_b5: 'Vitamin B5', vitamin_b6: 'Vitamin B6',
+  vitamin_b7: 'Vitamin B7', vitamin_b9: 'Vitamin B9', vitamin_b12: 'Vitamin B12',
+  vitamin_c: 'Vitamin C',
+  calcium: 'Calcium', eisen: 'Eisen', magnesium: 'Magnesium', zink: 'Zink',
+  kupfer: 'Kupfer', mangan: 'Mangan', selen: 'Selen', jod: 'Jod',
+  kalium: 'Kalium', natrium: 'Natrium', phosphor: 'Phosphor',
+};
 
 const STEP_LABELS = ['Name', 'Dosierung', 'Nährwerte', 'Mikronährstoffe', 'Vorschau'];
 
@@ -33,11 +56,11 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
   const [unitLabel, setUnitLabel] = useState('Tablette');
   const [defaultDose, setDefaultDose] = useState('1');
 
-  // Step 2: Nährwerte (per dose)
-  const [kcal, setKcal] = useState('');
-  const [protein, setProtein] = useState('');
-  const [carbs, setCarbs] = useState('');
-  const [fat, setFat] = useState('');
+  // Step 2: Nährwerte (per dose) — P7.S5: numbers for sliders
+  const [kcal, setKcal] = useState(0);
+  const [protein, setProtein] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [fat, setFat] = useState(0);
   const [micros, setMicros] = useState<Record<string, number>>({});
 
   const canStep0 = nameDe.trim().length >= 2;
@@ -49,10 +72,10 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
       brand: brand.trim() || null,
       unit_label: unitLabel,
       default_dose: parseFloat(defaultDose),
-      kcal_per_dose: kcal ? parseFloat(kcal) : null,
-      protein_per_dose: protein ? parseFloat(protein) : null,
-      carbs_per_dose: carbs ? parseFloat(carbs) : null,
-      fat_per_dose: fat ? parseFloat(fat) : null,
+      kcal_per_dose: kcal > 0 ? kcal : null,
+      protein_per_dose: protein > 0 ? protein : null,
+      carbs_per_dose: carbs > 0 ? carbs : null,
+      fat_per_dose: fat > 0 ? fat : null,
       micronutrients_json: JSON.stringify(micros),
       notes: null,
     };
@@ -144,48 +167,57 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
           </Grid>
         )}
 
-        {/* STEP 2: Nährwerte */}
+        {/* STEP 2: Nährwerte — P7.S5: Slider statt TextField */}
         {step === 2 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>
                 Nährwerte (pro Dosis)
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Schiebe die Regler.
+              </Typography>
             </Grid>
             {[
-              ['kcal', 'Kalorien (kcal)', kcal, setKcal],
-              ['protein', 'Eiweiß (g)', protein, setProtein],
-              ['carbs', 'Kohlenhydrate (g)', carbs, setCarbs],
-              ['fat', 'Fett (g)', fat, setFat],
-            ].map(([, label, val, setter]) => (
-              <Grid item xs={6} key={label as string}>
-                <TextField
-                  fullWidth
-                  size="small"
+              ['Kalorien', kcal, setKcal, 0, 500, 'kcal'],
+              ['Eiweiß', protein, setProtein, 0, 100, 'g'],
+              ['Kohlenhydrate', carbs, setCarbs, 0, 100, 'g'],
+              ['Fett', fat, setFat, 0, 100, 'g'],
+            ].map(([label, val, setter, min, max, unit]) => (
+              <Grid item xs={12} key={label as string}>
+                <MacroSliderRow
                   label={label as string}
-                  value={val as string}
-                  onChange={(e) => (setter as (v: string) => void)(e.target.value)}
-                  type="number"
-                  inputProps={{ step: 0.1, min: 0 }}
+                  value={val as number}
+                  onChange={setter as (v: number) => void}
+                  min={min as number} max={max as number}
+                  unit={unit as string}
                 />
               </Grid>
             ))}
           </Grid>
         )}
 
-        {/* STEP 3: Mikronährstoffe */}
+        {/* STEP 3: Mikronährstoffe — P7.S5: Slider statt TextField */}
         {step === 3 && (
-          <Grid container spacing={1}>
+          <Grid container spacing={1.5}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight={600}>Mikronährstoffe pro Dosis</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Schiebe die Regler. Nur Werte &gt; 0 werden gespeichert.
+              </Typography>
+            </Grid>
             {ALL_MICRONUTRIENT_KEYS.map((key) => {
               const val = micros[key] ?? 0;
+              const meta = MICRO_META2[key] ?? [0, 100, 'mg'];
               return (
-                <Grid item xs={6} sm={4} key={key}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ width: 90, textAlign: 'right' }}>{key}:</Typography>
-                    <TextField size="small" type="number" value={val || ''}
-                      onChange={(e) => setMicros({ ...micros, [key]: Number(e.target.value) || 0 })}
-                      inputProps={{ step: 0.1, min: 0 }} sx={{ flex: 1 }} />
-                  </Box>
+                <Grid item xs={12} key={key}>
+                  <MicroSliderRow2
+                    label={MICRO_LABEL2[key] ?? key}
+                    unit={meta[2]}
+                    value={val}
+                    onChange={(v) => setMicros({ ...micros, [key]: v })}
+                    min={meta[0]} max={meta[1]}
+                  />
                 </Grid>
               );
             })}
@@ -208,5 +240,41 @@ export default function SupplementWizard({ open, onClose, onSave, saving }: Prop
         )}
       </WizardLayout>
     </Dialog>
+  );
+}
+
+/** P7.S5 — Macro slider row for SupplementWizard. */
+function MacroSliderRow({ label, value, onChange, min, max, unit }: {
+  label: string; value: number; onChange: (v: number) => void;
+  min: number; max: number; unit: string;
+}) {
+  const display = value > 0 ? `${value.toFixed(1)} ${unit}` : `— ${unit}`;
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        <Typography variant="body2" color="text.secondary">{display}</Typography>
+      </Box>
+      <Slider value={value} onChange={(_, v) => onChange(v as number)}
+        min={min} max={max} step={0.1} size="small" />
+    </Box>
+  );
+}
+
+/** P7.S5 — Micro slider row for SupplementWizard. */
+function MicroSliderRow2({ label, unit, value, onChange, min, max }: {
+  label: string; unit: string; value: number;
+  onChange: (v: number) => void; min: number; max: number;
+}) {
+  const display = value > 0 ? `${value.toFixed(1)} ${unit}` : `— ${unit}`;
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        <Typography variant="body2" color="text.secondary">{display}</Typography>
+      </Box>
+      <Slider value={value} onChange={(_, v) => onChange(v as number)}
+        min={min} max={max} step={0.1} size="small" />
+    </Box>
   );
 }
