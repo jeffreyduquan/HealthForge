@@ -2,11 +2,9 @@ import { useState } from 'react';
 import {
   Accordion, AccordionSummary, AccordionDetails,
   Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  Grid, IconButton, MenuItem, TextField, Typography,
+  Grid, MenuItem, Slider, TextField, Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import type { IngredientCrud } from '../api/client';
 import { buildFullMicronutrients } from '../api/nutrientDefaults';
 
@@ -43,19 +41,19 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
   const [locked, setLocked] = useState(ingredient.locked);
 
   // ── Makros ──
-  const [kcal, setKcal] = useState(ingredient.energy_kcal_per_100g ?? '');
-  const [protein, setProtein] = useState(ingredient.protein_g_per_100g ?? '');
-  const [carbs, setCarbs] = useState(ingredient.carbs_g_per_100g ?? '');
-  const [sugar, setSugar] = useState(ingredient.sugar_g_per_100g ?? '');
-  const [fat, setFat] = useState(ingredient.fat_g_per_100g ?? '');
-  const [satfat, setSatfat] = useState(ingredient.satfat_g_per_100g ?? '');
-  const [fiber, setFiber] = useState(ingredient.fiber_g_per_100g ?? '');
-  const [salt, setSalt] = useState(ingredient.salt_g_per_100g ?? '');
+  const [kcal, setKcal] = useState(ingredient.energy_kcal_per_100g ?? 0);
+  const [protein, setProtein] = useState(ingredient.protein_g_per_100g ?? 0);
+  const [carbs, setCarbs] = useState(ingredient.carbs_g_per_100g ?? 0);
+  const [sugar, setSugar] = useState(ingredient.sugar_g_per_100g ?? 0);
+  const [fat, setFat] = useState(ingredient.fat_g_per_100g ?? 0);
+  const [satfat, setSatfat] = useState(ingredient.satfat_g_per_100g ?? 0);
+  const [fiber, setFiber] = useState(ingredient.fiber_g_per_100g ?? 0);
+  const [salt, setSalt] = useState(ingredient.salt_g_per_100g ?? 0);
 
   // ── Mikronährstoffe ──
-  const [micros, setMicros] = useState<{ key: string; value: string }[]>(() => {
+  const [micros, setMicros] = useState<Record<string, number>>(() => {
     const full = buildFullMicronutrients(ingredient.micronutrients_json);
-    return Object.entries(full).map(([k, v]) => ({ key: k, value: String(v) }));
+    return full;
   });
 
   // ── Diäten ──
@@ -72,57 +70,28 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
   const toggleChip = (list: string[], setter: (v: string[]) => void, code: string) =>
     setter(list.includes(code) ? list.filter((x) => x !== code) : [...list, code]);
 
-  const addMicro = () => setMicros([...micros, { key: '', value: '' }]);
-  const removeMicro = (i: number) => setMicros(micros.filter((_, idx) => idx !== i));
-  const updateMicroKey = (i: number, k: string) => {
-    const m = [...micros];
-    const item = m[i];
-    if (item) { m[i] = { key: k, value: item.value }; setMicros(m); }
-  };
-  const updateMicroVal = (i: number, v: string) => {
-    const m = [...micros];
-    const item = m[i];
-    if (item) { m[i] = { key: item.key, value: v }; setMicros(m); }
-  };
-
   const handleSave = () => {
     if (!warningAccepted) return;
-    // Build micronutrients JSON from key-value pairs
-    const microObj: Record<string, number> = {};
-    micros.forEach(({ key, value }) => {
-      if (key.trim() && value) microObj[key.trim()] = Number(value);
-    });
     onSave(ingredient.id, {
       name_de: nameDe,
       brand: brand || null,
       barcode: barcode || null,
       status,
       locked,
-      energy_kcal_per_100g: kcal !== '' ? Number(kcal) : null,
-      protein_g_per_100g: protein !== '' ? Number(protein) : null,
-      carbs_g_per_100g: carbs !== '' ? Number(carbs) : null,
-      sugar_g_per_100g: sugar !== '' ? Number(sugar) : null,
-      fat_g_per_100g: fat !== '' ? Number(fat) : null,
-      satfat_g_per_100g: satfat !== '' ? Number(satfat) : null,
-      fiber_g_per_100g: fiber !== '' ? Number(fiber) : null,
-      salt_g_per_100g: salt !== '' ? Number(salt) : null,
+      energy_kcal_per_100g: kcal > 0 ? kcal : null,
+      protein_g_per_100g: protein > 0 ? protein : null,
+      carbs_g_per_100g: carbs > 0 ? carbs : null,
+      sugar_g_per_100g: sugar > 0 ? sugar : null,
+      fat_g_per_100g: fat > 0 ? fat : null,
+      satfat_g_per_100g: satfat > 0 ? satfat : null,
+      fiber_g_per_100g: fiber > 0 ? fiber : null,
+      salt_g_per_100g: salt > 0 ? salt : null,
       histamine_score: histScore !== '' ? Number(histScore) : null,
       allergens_json: JSON.stringify(allergens),
       fodmap_flags_json: JSON.stringify(fodmaps),
-      micronutrients_json: JSON.stringify(microObj),
+      micronutrients_json: JSON.stringify(micros),
     });
   };
-
-  const macroFields: [string, string, string, (v: string) => void][] = [
-    ['energy_kcal_per_100g', 'Kalorien (kcal)', String(kcal), setKcal],
-    ['protein_g_per_100g', 'Protein (g)', String(protein), setProtein],
-    ['carbs_g_per_100g', 'Kohlenhydrate (g)', String(carbs), setCarbs],
-    ['sugar_g_per_100g', 'Zucker (g)', String(sugar), setSugar],
-    ['fat_g_per_100g', 'Fett (g)', String(fat), setFat],
-    ['satfat_g_per_100g', 'Ges. Fettsäuren (g)', String(satfat), setSatfat],
-    ['fiber_g_per_100g', 'Ballaststoffe (g)', String(fiber), setFiber],
-    ['salt_g_per_100g', 'Salz (g)', String(salt), setSalt],
-  ];
 
   return (
     <Dialog open={!!ingredient} onClose={onClose} maxWidth="md" fullWidth>
@@ -173,44 +142,54 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
           </AccordionSummary>
           <AccordionDetails>
             <Grid container spacing={1.5}>
-              {macroFields.map(([key, label, val, setter]) => (
-                <Grid item xs={6} sm={4} md={3} key={key}>
-                  <TextField fullWidth size="small" label={label} value={val}
-                    onChange={(e) => setter(e.target.value)}
-                    type="number" inputProps={{ step: 0.1 }} />
+              {[
+                ['Kalorien', kcal, setKcal, 0, 900, 'kcal'],
+                ['Protein', protein, setProtein, 0, 100, 'g'],
+                ['Kohlenhydrate', carbs, setCarbs, 0, 100, 'g'],
+                ['Zucker', sugar, setSugar, 0, 100, 'g'],
+                ['Fett', fat, setFat, 0, 100, 'g'],
+                ['Ges. Fettsäuren', satfat, setSatfat, 0, 100, 'g'],
+                ['Ballaststoffe', fiber, setFiber, 0, 30, 'g'],
+                ['Salz', salt, setSalt, 0, 10, 'g'],
+              ].map(([label, val, setter, min, max, unit]) => (
+                <Grid item xs={12} key={label as string}>
+                  <DetailSliderRow label={label as string} value={val as number}
+                    onChange={setter as (v: number) => void}
+                    min={min as number} max={max as number} unit={unit as string} />
                 </Grid>
               ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
 
-        {/* ── Mikronährstoffe ── */}
-        <Accordion>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography fontWeight={600}>Mikronährstoffe ({micros.length})</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1}>
-              {micros.map((m, i) => (
-                <Grid item xs={12} key={i}>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField size="small" label="Key" value={m.key}
-                      onChange={(e) => updateMicroKey(i, e.target.value)}
-                      placeholder="z.B. vitamin_c" sx={{ width: 180 }} />
-                    <TextField size="small" label="Wert / 100g" value={m.value}
-                      onChange={(e) => updateMicroVal(i, e.target.value)}
-                      type="number" inputProps={{ step: 0.01 }} sx={{ flex: 1 }} />
-                    <IconButton size="small" color="error" onClick={() => removeMicro(i)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </Grid>
-              ))}
-              <Grid item xs={12}>
-                <Button size="small" startIcon={<AddIcon />} onClick={addMicro}>
-                  Mikronährstoff hinzufügen
-                </Button>
+              {/* Vitamine */}
+              <Grid item xs={12} sx={{ mt: 1 }}>
+                <Typography variant="subtitle2" fontWeight={600} color="primary">Vitamine</Typography>
               </Grid>
+              {VITAMIN_KEYS.map((key) => {
+                const val = micros[key] ?? 0;
+                const meta = MICRO_META[key] ?? [0, 100, 'mg'];
+                return (
+                  <Grid item xs={12} key={key}>
+                    <DetailSliderRow label={MICRO_LABEL[key] ?? key} value={val}
+                      onChange={(v) => setMicros({ ...micros, [key]: v })}
+                      min={meta[0]} max={meta[1]} unit={meta[2]} />
+                  </Grid>
+                );
+              })}
+
+              {/* Mineralstoffe */}
+              <Grid item xs={12} sx={{ mt: 1 }}>
+                <Typography variant="subtitle2" fontWeight={600} color="primary">Mineralstoffe</Typography>
+              </Grid>
+              {MINERAL_KEYS.map((key) => {
+                const val = micros[key] ?? 0;
+                const meta = MICRO_META[key] ?? [0, 100, 'mg'];
+                return (
+                  <Grid item xs={12} key={key}>
+                    <DetailSliderRow label={MICRO_LABEL[key] ?? key} value={val}
+                      onChange={(v) => setMicros({ ...micros, [key]: v })}
+                      min={meta[0]} max={meta[1]} unit={meta[2]} />
+                  </Grid>
+                );
+              })}
             </Grid>
           </AccordionDetails>
         </Accordion>
@@ -277,5 +256,56 @@ export default function IngredientDetailDialog({ ingredient, onClose, onSave }: 
         )}
       </DialogActions>
     </Dialog>
+  );
+}
+
+// ── P7.S5 — Shared helpers ──
+
+const VITAMIN_KEYS = [
+  'vitamin_a', 'vitamin_d', 'vitamin_e', 'vitamin_k',
+  'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b5',
+  'vitamin_b6', 'vitamin_b7', 'vitamin_b9', 'vitamin_b12',
+  'vitamin_c',
+];
+const MINERAL_KEYS = [
+  'calcium', 'eisen', 'magnesium', 'zink', 'kupfer',
+  'mangan', 'selen', 'jod', 'kalium', 'natrium', 'phosphor',
+];
+const MICRO_META: Record<string, [number, number, string]> = {
+  vitamin_a: [0, 3000, 'µg'], vitamin_d: [0, 100, 'µg'], vitamin_e: [0, 50, 'mg'],
+  vitamin_k: [0, 200, 'µg'], vitamin_b1: [0, 10, 'mg'], vitamin_b2: [0, 10, 'mg'],
+  vitamin_b3: [0, 50, 'mg'], vitamin_b5: [0, 20, 'mg'], vitamin_b6: [0, 10, 'mg'],
+  vitamin_b7: [0, 200, 'µg'], vitamin_b9: [0, 1000, 'µg'], vitamin_b12: [0, 20, 'µg'],
+  vitamin_c: [0, 500, 'mg'],
+  calcium: [0, 2000, 'mg'], eisen: [0, 30, 'mg'], magnesium: [0, 800, 'mg'],
+  zink: [0, 30, 'mg'], kupfer: [0, 5, 'mg'], mangan: [0, 10, 'mg'],
+  selen: [0, 200, 'µg'], jod: [0, 300, 'µg'], kalium: [0, 5000, 'mg'],
+  natrium: [0, 3000, 'mg'], phosphor: [0, 2000, 'mg'],
+};
+const MICRO_LABEL: Record<string, string> = {
+  vitamin_a: 'Vitamin A', vitamin_d: 'Vitamin D', vitamin_e: 'Vitamin E',
+  vitamin_k: 'Vitamin K', vitamin_b1: 'Vitamin B1', vitamin_b2: 'Vitamin B2',
+  vitamin_b3: 'Vitamin B3', vitamin_b5: 'Vitamin B5', vitamin_b6: 'Vitamin B6',
+  vitamin_b7: 'Vitamin B7', vitamin_b9: 'Vitamin B9', vitamin_b12: 'Vitamin B12',
+  vitamin_c: 'Vitamin C',
+  calcium: 'Calcium', eisen: 'Eisen', magnesium: 'Magnesium', zink: 'Zink',
+  kupfer: 'Kupfer', mangan: 'Mangan', selen: 'Selen', jod: 'Jod',
+  kalium: 'Kalium', natrium: 'Natrium', phosphor: 'Phosphor',
+};
+
+function DetailSliderRow({ label, value, onChange, min, max, unit }: {
+  label: string; value: number; onChange: (v: number) => void;
+  min: number; max: number; unit: string;
+}) {
+  const display = value > 0 ? `${value.toFixed(1)} ${unit}` : `— ${unit}`;
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        <Typography variant="body2" color="text.secondary">{display}</Typography>
+      </Box>
+      <Slider value={value} onChange={(_, v) => onChange(v as number)}
+        min={min} max={max} step={0.1} size="small" />
+    </Box>
   );
 }
