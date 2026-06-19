@@ -188,13 +188,13 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
         style = MaterialTheme.typography.bodySmall,
     )
     NutrientSliderBar("Kalorien", s.kcal, "kcal", 0f, 900f, onChange = vm::setKcal)
-    NutrientSliderBar("Protein", s.proteinG, "g", 0f, 100f, onChange = vm::setProtein)
-    NutrientSliderBar("Kohlenhydrate", s.carbsG, "g", 0f, 100f, onChange = vm::setCarbs)
-    NutrientSliderBar("Fett", s.fatG, "g", 0f, 100f, onChange = vm::setFat)
-    NutrientSliderBar("Zucker", s.sugarG ?: 0f, "g", 0f, 100f, onChange = { vm.setSugar(if (it > 0f) it else null) })
-    NutrientSliderBar("Ges. Fettsäuren", s.satfatG ?: 0f, "g", 0f, 100f, onChange = { vm.setSatfat(if (it > 0f) it else null) })
-    NutrientSliderBar("Ballaststoffe", s.fiberG ?: 0f, "g", 0f, 30f, onChange = { vm.setFiber(if (it > 0f) it else null) })
-    NutrientSliderBar("Salz", s.saltG ?: 0f, "g", 0f, 10f, onChange = { vm.setSalt(if (it > 0f) it else null) })
+    NutrientSliderBar("Protein", s.proteinG, "g", 0f, 100f, nonLinear = true, onChange = vm::setProtein)
+    NutrientSliderBar("Kohlenhydrate", s.carbsG, "g", 0f, 100f, nonLinear = true, onChange = vm::setCarbs)
+    NutrientSliderBar("Fett", s.fatG, "g", 0f, 100f, nonLinear = true, onChange = vm::setFat)
+    NutrientSliderBar("Zucker", s.sugarG ?: 0f, "g", 0f, 100f, nonLinear = true, onChange = { vm.setSugar(if (it > 0f) it else null) })
+    NutrientSliderBar("Ges. Fettsäuren", s.satfatG ?: 0f, "g", 0f, 100f, nonLinear = true, onChange = { vm.setSatfat(if (it > 0f) it else null) })
+    NutrientSliderBar("Ballaststoffe", s.fiberG ?: 0f, "g", 0f, 30f, nonLinear = true, onChange = { vm.setFiber(if (it > 0f) it else null) })
+    NutrientSliderBar("Salz", s.saltG ?: 0f, "g", 0f, 10f, nonLinear = true, onChange = { vm.setSalt(if (it > 0f) it else null) })
 
     // Vitamine & Mineralstoffe — always visible
     Spacer(Modifier.height(8.dp))

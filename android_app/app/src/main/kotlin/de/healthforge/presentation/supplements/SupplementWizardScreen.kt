@@ -132,10 +132,10 @@ fun SupplementWizardScreen(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 NutrientSliderBar("Kalorien", s.kcal.replace(',', '.').toFloatOrNull() ?: 0f, "kcal", 0f, 500f, onChange = { vm.setKcal(if (it > 0f) "%.1f".format(it) else "") })
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    NutrientSliderBar("Eiweiß", s.protein.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setProtein(if (it > 0f) "%.1f".format(it) else "") })
-                                    NutrientSliderBar("KH", s.carbs.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setCarbs(if (it > 0f) "%.1f".format(it) else "") })
+                                    NutrientSliderBar("Eiweiß", s.protein.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, nonLinear = true, onChange = { vm.setProtein(if (it > 0f) "%.1f".format(it) else "") })
+                                    NutrientSliderBar("KH", s.carbs.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, nonLinear = true, onChange = { vm.setCarbs(if (it > 0f) "%.1f".format(it) else "") })
                                 }
-                                NutrientSliderBar("Fett", s.fat.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setFat(if (it > 0f) "%.1f".format(it) else "") })
+                                NutrientSliderBar("Fett", s.fat.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, nonLinear = true, onChange = { vm.setFat(if (it > 0f) "%.1f".format(it) else "") })
                             }
                         }
 
