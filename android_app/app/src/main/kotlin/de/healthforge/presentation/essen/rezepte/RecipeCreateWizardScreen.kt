@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import de.healthforge.data.repository.MediaRepository
+import de.healthforge.presentation.common.components.NutrientSliderBar
 import de.healthforge.presentation.common.PhotoSourceDialog
 import de.healthforge.presentation.lebensmittel.StepDotsRow
 import de.healthforge.presentation.lebensmittel.WizardNav
@@ -373,23 +374,10 @@ private fun StepIngredients(s: RecipeEditUiState, vm: RecipeEditViewModel) {
                         Icon(Icons.Filled.Close, contentDescription = "Entfernen", tint = hm.fgSecondary)
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = line.quantity,
-                        onValueChange = { vm.updateIngredientQuantity(idx, it) },
-                        label = { Text("Menge") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    OutlinedTextField(
-                        value = line.unit,
-                        onValueChange = { vm.updateIngredientUnit(idx, it) },
-                        label = { Text("Einheit") },
-                        singleLine = true,
-                        modifier = Modifier.width(110.dp),
-                    )
-                }
+                // Menge als Slider — Einheit fix auf g
+                NutrientSliderBar("Menge", line.quantity.replace(',', '.').toFloatOrNull() ?: 100f, "g", 10f, 2000f,
+                    onChange = { vm.updateIngredientQuantity(idx, if (it > 0f) "%.0f".format(it) else "100") }
+                )
             }
         }
         Spacer(Modifier.height(6.dp))
@@ -400,45 +388,14 @@ private fun StepIngredients(s: RecipeEditUiState, vm: RecipeEditViewModel) {
 private fun StepPortionsTime(s: RecipeEditUiState, vm: RecipeEditViewModel) {
     val hm = LocalHmTokens.current
     GradientText("Portionen & Zeit", style = MaterialTheme.typography.headlineSmall)
-    Column {
-        Row {
-            Text("Portionen", color = hm.fgPrimary, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f))
-            Text("${s.servings}", color = hm.fgSecondary)
-        }
-        Slider(
-            value = s.servings.toFloat(),
-            onValueChange = { vm.setServings(it.roundToInt()) },
-            valueRange = 1f..20f,
-            steps = 18,
-        )
-    }
+    NutrientSliderBar("Portionen", s.servings.toFloat(), "Port.", 1f, 20f,
+        onChange = { vm.setServings(it.roundToInt()) })
     val prepMin = s.prepMinutes.toIntOrNull() ?: 30
-    Column {
-        Row {
-            Text("Zubereitungszeit", color = hm.fgPrimary, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f))
-            Text("$prepMin min", color = hm.fgSecondary)
-        }
-        Slider(
-            value = prepMin.toFloat(),
-            onValueChange = { vm.setPrep((it.roundToInt() / 5 * 5).toString()) },
-            valueRange = 0f..240f,
-        )
-    }
+    NutrientSliderBar("Zubereitungszeit", prepMin.toFloat(), "min", 0f, 240f,
+        onChange = { vm.setPrep((it.roundToInt() / 5 * 5).toString()) })
     val cookMin = s.cookMinutes.toIntOrNull()
-    Column {
-        Row {
-            Text("Kochzeit (optional)", color = hm.fgPrimary, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f))
-            Text(cookMin?.let { "$it min" } ?: "—", color = hm.fgSecondary)
-        }
-        Slider(
-            value = (cookMin ?: 0).toFloat(),
-            onValueChange = { vm.setCook((it.roundToInt() / 5 * 5).toString()) },
-            valueRange = 0f..240f,
-        )
-    }
+    NutrientSliderBar("Kochzeit", (cookMin ?: 0).toFloat(), "min", 0f, 240f,
+        onChange = { vm.setCook(if (it > 0f) (it.roundToInt() / 5 * 5).toString() else "") })
 }
 
 @Composable

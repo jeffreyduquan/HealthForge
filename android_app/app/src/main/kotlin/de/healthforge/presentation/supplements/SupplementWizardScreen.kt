@@ -136,10 +136,6 @@ fun SupplementWizardScreen(
                                     NutrientSliderBar("KH", s.carbs.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setCarbs(if (it > 0f) "%.1f".format(it) else "") })
                                 }
                                 NutrientSliderBar("Fett", s.fat.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setFat(if (it > 0f) "%.1f".format(it) else "") })
-                                OutlinedTextField(
-                                    value = s.notes, onValueChange = vm::setNotes,
-                                    label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
-                                )
                             }
                         }
 
