@@ -59,6 +59,7 @@ data class MasterTileNutrient(
     val label: String,
     val value: String,
     val percentDge: Double,
+    val targetValue: String? = null,
 )
 
 @Composable
@@ -169,6 +170,7 @@ fun HfMasterTile(
                             label = nut.label,
                             value = nut.value,
                             percentDge = nut.percentDge,
+                            targetValue = nut.targetValue,
                         )
                     }
                 }

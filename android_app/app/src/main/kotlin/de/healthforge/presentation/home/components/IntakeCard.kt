@@ -203,11 +203,12 @@ fun IntakeCard(
                 val nutrientRows = computePinnedNutrientBars(entry, pinnedKeys, ingredientDto)
                 if (nutrientRows.isNotEmpty()) {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        nutrientRows.forEach { (label, value, pct) ->
+                        nutrientRows.forEach { row ->
                             de.healthforge.presentation.common.components.HfNutrientProgressRow(
-                                label = label,
-                                value = value,
-                                percentDge = pct,
+                                label = row.label,
+                                value = row.value,
+                                percentDge = row.percentDge,
+                                targetValue = row.targetValue,
                             )
                         }
                     }
@@ -291,7 +292,7 @@ fun computePinnedNutrientBars(
     entry: IntakeEntryEntity,
     pinnedKeys: List<String>,
     ingredientDto: IngredientDto? = null,
-): List<Triple<String, String, Double>> {
+): List<NutrientBarInfo> {
     // Supplements store per-dose values, not per-100g → multiplier = 1.0
     val f = if (entry.sourceType == IntakeSourceType.SUPPLEMENT) 1.0 else entry.portionGrams / 100.0
 
@@ -334,7 +335,8 @@ fun computePinnedNutrientBars(
             val label = nutrientLabelDe(key)
             val unit = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.unit?.label ?: ""
             val formatted = de.healthforge.presentation.common.components.formatNutrientValue(v)
-            Triple(label, "$formatted $unit", pct)
+            val targetFormatted = de.healthforge.presentation.common.components.formatNutrientValue(dge)
+            NutrientBarInfo(label, "$formatted $unit", pct, targetValue = "$targetFormatted $unit")
         }
     }
 }
@@ -377,6 +379,14 @@ private fun nutrientLabelDe(key: String): String = when (key) {
     "chloride" -> "Chlorid"
     else -> key.take(6)
 }
+
+/** Result of [computePinnedNutrientBars] — label, value, %DGE and optional target. */
+data class NutrientBarInfo(
+    val label: String,
+    val value: String,
+    val percentDge: Double,
+    val targetValue: String? = null,
+)
 
 /**
  * Dotted "+" add button — navigates to Essen tab.

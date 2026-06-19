@@ -1,5 +1,6 @@
 package de.healthforge.presentation.common.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -32,8 +35,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.healthforge.domain.nutrition.NutrientCatalog
+import de.healthforge.presentation.home.components.waterStageAccent
+import de.healthforge.presentation.home.components.waterStageGradient
+import de.healthforge.presentation.home.components.waterStageTrackColor
 import de.healthforge.presentation.theme.LocalHmTokens
 import de.healthforge.presentation.theme.ManropeFamily
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 // =============================================================================
@@ -153,19 +160,25 @@ fun HfValueRow(
 // HfNutrientProgressRow — Value + DGE Progress Bar
 // ─────────────────────────────────────────────────────────────────────────────
 /**
- * Nutrient row with a compact horizontal progress bar showing % of daily goal
- * (DGE Referenzwert). Used in ALL detail screens (ingredient, recipe, supplement).
+ * Nutrient row with a horizontal progress bar showing % of daily goal
+ * (DGE Referenzwert). Used in ALL screens — Home, Essen, Detail, Insights.
  *
- * Layout:
- *   Eiweiß                    18.5 g   25%
- *   ▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░
+ * Design unified with PinnedNutrientRow (P7.S5):
+ *   8dp Canvas bar with 10-stage gradient, Lv-Badge, right-aligned %.
  *
- * Bar color uses [waterStageGradient] from HmTokens for consistency with Home.
- * Bar height: 4dp. Track: hm.barTrack. Corner radius: 2dp.
+ * Layout with targetValue:
+ *   Eiweiß                    72 / 120 g  Lv 0  60%
+ *   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░
  *
- * @param label  Nutrient display name (e.g. "Eiweiß")
- * @param value  Formatted value string (e.g. "18.5 g")
- * @param percentDge 0..100+ percentage of daily goal
+ * Layout without targetValue:
+ *   Eiweiß                    18.5 g          60%
+ *   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░
+ *
+ * @param label       Nutrient display name (e.g. "Eiweiß")
+ * @param value       Formatted value string (e.g. "18.5 g")
+ * @param percentDge  0..100+ percentage of daily goal
+ * @param targetValue Optional target string for "value / target" display
+ * @param modifier
  */
 @Composable
 fun HfNutrientProgressRow(
@@ -173,75 +186,91 @@ fun HfNutrientProgressRow(
     value: String,
     percentDge: Double,
     modifier: Modifier = Modifier,
+    targetValue: String? = null,
 ) {
     val hm = LocalHmTokens.current
     val pct = percentDge.coerceIn(0.0, 999.0)
     val stage = (pct / 100.0).toInt() // 0=0-99%, 1=100-199%, etc.
-    val stageProgress = (pct % 100.0).coerceIn(0.0, 100.0) / 100.0
-    val barColor = waterStageColor(stage)
-    val trackColor = hm.barTrack
+    val frac = ((pct % 100.0) / 100.0).coerceIn(0.0, 1.0)
+    val pctInt = (frac * 100).roundToInt()
+
+    val accent = waterStageAccent(stage)
+    val gradient = waterStageGradient(stage)
+    val trackTint = waterStageTrackColor(stage) ?: hm.barTrack
 
     Column(modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-        // Row: Label + value left, % centered
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // Left: Label + gram value
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.align(Alignment.CenterStart),
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = hm.fgSecondary,
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = hm.fgPrimary,
-                )
-            }
-            // Center: % badge
+        // Header: Label + value/target + Lv-Badge + %
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                text = "${pct.roundToInt()}%",
-                style = MaterialTheme.typography.labelMedium,
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = hm.fgPrimary,
                 fontWeight = FontWeight.SemiBold,
-                color = barColor,
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = if (targetValue != null) "$value / $targetValue" else value,
+                style = MaterialTheme.typography.bodySmall,
+                color = hm.fgSecondary,
+            )
+            if (stage >= 1) {
+                Spacer(Modifier.width(6.dp))
+                NutrientStageBadge(stage = stage, color = accent)
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "$pctInt%",
+                style = MaterialTheme.typography.labelSmall,
+                color = hm.fgTertiary,
             )
         }
         Spacer(Modifier.height(4.dp))
-        // Progress bar filling left to right
-        Box(
+        // Canvas bar — 8dp, gradient fill, stage-colored track
+        Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(trackColor),
+                .height(8.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(stageProgress.toFloat().coerceIn(0f, 1f))
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(barColor),
-            )
+            val w = size.width
+            val h = size.height
+            val corner = CornerRadius(h / 2f, h / 2f)
+            drawRoundRect(color = trackTint, size = Size(w, h), cornerRadius = corner)
+            val fillW = (w * frac.toFloat()).coerceAtMost(w)
+            if (fillW > 0f) {
+                drawRoundRect(
+                    brush = gradient,
+                    size = Size(fillW, h),
+                    cornerRadius = corner,
+                )
+            }
         }
     }
 }
 
 /**
- * Stage-based bar color — mirrors [waterStageGradient] logic from Home.
- * Stage 0: green (StatusGood), Stage 1: yellow (StatusRelax), Stage 2+: red (StatusOverUl).
+ * Lv-Badge — kleiner Pill rechts vom Wert. Nur für Stufen ≥ 1.
+ * Identisch zu PinnedNutrientCard.StageBadge.
  */
 @Composable
-private fun waterStageColor(stage: Int): Color {
-    val hm = LocalHmTokens.current
-    return when {
-        stage <= 0 -> de.healthforge.presentation.theme.StatusGood
-        stage == 1 -> de.healthforge.presentation.theme.StatusRelax
-        else -> de.healthforge.presentation.theme.StatusOverUl
+private fun NutrientStageBadge(stage: Int, color: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.18f))
+            .border(1.dp, color.copy(alpha = 0.6f), RoundedCornerShape(50))
+            .padding(horizontal = 6.dp, vertical = 1.dp),
+    ) {
+        Text(
+            text = "Lv $stage",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.6.sp,
+            ),
+            color = color,
+        )
     }
 }
 

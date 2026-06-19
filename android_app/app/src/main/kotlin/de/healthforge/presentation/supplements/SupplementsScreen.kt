@@ -185,7 +185,8 @@ private fun SupplementRow(
             if (dge <= 0) continue
             val pct = (value / dge) * 100.0
             val label = nCat.byKeyOrNull(key)?.displayDe ?: key
-            add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct))
+            add(MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct,
+                targetValue = "${formatNutrientValue(dge)} $unit"))
         }
     }
 

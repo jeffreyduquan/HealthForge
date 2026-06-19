@@ -213,7 +213,8 @@ internal fun buildNutrientRows(
         if (dge <= 0) return@mapNotNull null
         val pct = (value / dge) * 100.0
         val label = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key)?.displayDe ?: key
-        MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct)
+        MasterTileNutrient(key, label, "${formatNutrientValue(value)} $unit", pct,
+            targetValue = "${formatNutrientValue(dge)} $unit")
     }
 }
 
