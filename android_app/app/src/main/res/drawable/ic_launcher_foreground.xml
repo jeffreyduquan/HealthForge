@@ -5,29 +5,34 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Pulse Leaf — HealthForge icon P7.S5 -->
+    <!-- Ring H — HealthForge P7.S5 -->
 
-    <!-- Leaf body -->
+    <!-- Outer ring -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:pathData="M54,24 A30,30 0 1,1 54,84 A30,30 0 1,1 54,24 Z" />
+
+    <!-- Left H pillar -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillAlpha="0.92"
-        android:pathData="M54,88 C38,80 24,62 20,44 C18,36 22,24 30,20 C38,16 44,24 46,30 C48,24 54,16 62,20 C70,24 74,36 72,44 C68,62 54,80 54,88 Z" />
+        android:pathData="M38,33 L44,33 L44,67 L38,67 Z" />
 
-    <!-- Center vein -->
+    <!-- Right H pillar -->
     <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.8"
-        android:strokeLineCap="round"
-        android:pathData="M54,24 L54,82" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,33 L70,33 L70,67 L64,67 Z" />
 
-    <!-- EKG / Pulse line across center -->
+    <!-- H bridge -->
     <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="2.5"
-        android:strokeLineJoin="round"
-        android:strokeLineCap="round"
-        android:pathData="M30,52 L42,52 L46,38 L50,66 L54,52 L66,52" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,47 L70,47 L70,53 L38,53 Z" />
+
+    <!-- Center glow dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.7"
+        android:pathData="M52,48 A2,2 0 1,1 56,48 A2,2 0 1,1 52,48 Z" />
 
 </vector>
