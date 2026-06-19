@@ -167,7 +167,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
             <Grid item xs={12}>
               <Typography variant="subtitle1" fontWeight={600}>Was kommt rein?</Typography>
               <Typography variant="body2" color="text.secondary">
-                Such ein Lebensmittel und füge es hinzu. Dann Menge und Einheit anpassen.
+                Such ein Lebensmittel und füge es hinzu. Dann die Menge in Gramm anpassen.
               </Typography>
             </Grid>
             <Grid item xs={12}>
@@ -206,21 +206,23 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                    <TextField size="small" label="Menge" value={line.quantity}
-                      onChange={(e) => {
+                  <Box sx={{ mt: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" fontWeight={600}>Menge</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {line.quantity || '100'} g
+                      </Typography>
+                    </Box>
+                    <Slider
+                      value={Number(line.quantity) || 100}
+                      onChange={(_, v) => {
                         const next = [...ingredients];
-                        next[idx] = { ...line, quantity: e.target.value };
+                        next[idx] = { ...line, quantity: String(Math.round(v as number)), unit: 'g' };
                         setIngredients(next);
                       }}
-                      sx={{ flex: 1 }} />
-                    <TextField size="small" label="Einheit" value={line.unit}
-                      onChange={(e) => {
-                        const next = [...ingredients];
-                        next[idx] = { ...line, unit: e.target.value };
-                        setIngredients(next);
-                      }}
-                      sx={{ width: 110 }} />
+                      min={0} max={1000} step={10}
+                      size="small"
+                    />
                   </Box>
                 </Box>
               </Grid>
@@ -334,7 +336,7 @@ export default function RecipeWizard({ open, onClose, onSave, saving }: Props) {
                   <Typography variant="body2" fontWeight={600}>Zutaten:</Typography>
                   {ingredients.filter(i => i.name).map((line, i) => (
                     <Typography key={i} variant="body2" color="text.secondary">
-                      • {line.name}{line.quantity ? ` — ${line.quantity} ${line.unit}` : ''}
+                      • {line.name}{line.quantity ? ` — ${line.quantity} g` : ''}
                     </Typography>
                   ))}
                 </Box>
