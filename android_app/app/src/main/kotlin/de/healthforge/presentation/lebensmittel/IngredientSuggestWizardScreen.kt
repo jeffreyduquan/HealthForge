@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -407,22 +408,19 @@ private fun OptionalSliderField(
 @Composable
 private fun MicroField(label: String, unit: String, value: Float, onChange: (Float) -> Unit) {
     val hm = LocalHmTokens.current
-    var text by remember(value) { mutableStateOf(if (value > 0f) "%.1f".format(value) else "") }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall, color = hm.fgSecondary)
-        OutlinedTextField(
-            value = text,
-            onValueChange = { t ->
-                text = t
-                t.toFloatOrNull()?.let { onChange(it.coerceAtLeast(0f)) }
-            },
-            singleLine = true,
-            modifier = Modifier.weight(1f).height(48.dp),
-            textStyle = MaterialTheme.typography.bodySmall,
+    var sliderVal by remember(value) { mutableFloatStateOf(value) }
+    val max = if (unit == "µg") 1000f else 100f
+    Column {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(label, color = hm.fgPrimary, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Text(
+                if (sliderVal > 0f) "${"%.1f".format(sliderVal)} $unit" else "— $unit",
+                color = hm.fgSecondary,
+            )
+        }
+        Slider(value = sliderVal, onValueChange = { sliderVal = it },
+            valueRange = 0f..max,
+            onValueChangeFinished = { onChange(sliderVal) },
         )
-        Text(unit, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall, color = hm.fgTertiary)
     }
 }

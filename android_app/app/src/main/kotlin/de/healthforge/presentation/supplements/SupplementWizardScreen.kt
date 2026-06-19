@@ -21,11 +21,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -118,10 +121,7 @@ fun SupplementWizardScreen(
                                         label = { Text("Einheit (z.B. Tabl.)") }, singleLine = true, modifier = Modifier.weight(1f),
                                     )
                                 }
-                                OutlinedTextField(
-                                    value = s.kcal, onValueChange = vm::setKcal,
-                                    label = { Text("kcal pro Dosis (optional)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-                                )
+                                NutrientSliderField("kcal", s.kcal, "kcal", 0f, 500f, vm::setKcal)
                             }
                         }
                     }
@@ -131,19 +131,10 @@ fun SupplementWizardScreen(
                         HfCard {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OutlinedTextField(
-                                        value = s.protein, onValueChange = vm::setProtein,
-                                        label = { Text("Eiweiss (g)") }, singleLine = true, modifier = Modifier.weight(1f),
-                                    )
-                                    OutlinedTextField(
-                                        value = s.carbs, onValueChange = vm::setCarbs,
-                                        label = { Text("KH (g)") }, singleLine = true, modifier = Modifier.weight(1f),
-                                    )
+                                    NutrientSliderField("Eiweiß", s.protein, "g", 0f, 100f, vm::setProtein)
+                                    NutrientSliderField("KH", s.carbs, "g", 0f, 100f, vm::setCarbs)
                                 }
-                                OutlinedTextField(
-                                    value = s.fat, onValueChange = vm::setFat,
-                                    label = { Text("Fett (g)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-                                )
+                                NutrientSliderField("Fett", s.fat, "g", 0f, 100f, vm::setFat)
                                 OutlinedTextField(
                                     value = s.notes, onValueChange = vm::setNotes,
                                     label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
@@ -157,17 +148,7 @@ fun SupplementWizardScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             vitaminKeys.forEach { key ->
                                 val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(nutrient.displayDe, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall)
-                                    OutlinedTextField(
-                                        value = s.micronutrients[key] ?: "",
-                                        onValueChange = { vm.setMicronutrient(key, it) },
-                                        singleLine = true,
-                                        modifier = Modifier.weight(1f).height(48.dp),
-                                        textStyle = MaterialTheme.typography.bodySmall,
-                                    )
-                                    Text(nutrient.unit.label, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
+                                MicroSliderField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: "") { vm.setMicronutrient(key, it) }
                             }
                         }
                         Spacer(Modifier.height(8.dp))
@@ -176,17 +157,7 @@ fun SupplementWizardScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             mineralKeys.forEach { key ->
                                 val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(nutrient.displayDe, modifier = Modifier.width(140.dp), style = MaterialTheme.typography.bodySmall)
-                                    OutlinedTextField(
-                                        value = s.micronutrients[key] ?: "",
-                                        onValueChange = { vm.setMicronutrient(key, it) },
-                                        singleLine = true,
-                                        modifier = Modifier.weight(1f).height(48.dp),
-                                        textStyle = MaterialTheme.typography.bodySmall,
-                                    )
-                                    Text(nutrient.unit.label, modifier = Modifier.padding(start = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
+                                MicroSliderField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: "") { vm.setMicronutrient(key, it) }
                             }
                         }
                     }
@@ -223,5 +194,54 @@ fun SupplementWizardScreen(
                 onSubmit = { vm.save() },
             )
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P7.S5 — Slider helpers (String↔Float bridge, no ViewModel refactor needed)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun NutrientSliderField(
+    label: String, stringValue: String, unit: String,
+    min: Float, max: Float, onChange: (String) -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val floatVal = stringValue.replace(',', '.').toFloatOrNull() ?: 0f
+    var sliderVal by remember(stringValue) { mutableFloatStateOf(floatVal) }
+    Column {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(label, color = hm.fgPrimary, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Text(
+                if (sliderVal > 0f) "${"%.1f".format(sliderVal)} $unit" else "— $unit",
+                color = hm.fgSecondary,
+            )
+        }
+        Slider(value = sliderVal, onValueChange = { sliderVal = it },
+            valueRange = min..max,
+            onValueChangeFinished = { onChange(if (sliderVal > 0f) "%.1f".format(sliderVal) else "") },
+        )
+    }
+}
+
+@Composable
+private fun MicroSliderField(
+    label: String, unit: String, stringValue: String, onChange: (String) -> Unit,
+) {
+    val hm = LocalHmTokens.current
+    val floatVal = stringValue.replace(',', '.').toFloatOrNull() ?: 0f
+    var sliderVal by remember(stringValue) { mutableFloatStateOf(floatVal) }
+    Column {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(label, color = hm.fgPrimary, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Text(
+                if (sliderVal > 0f) "${"%.1f".format(sliderVal)} $unit" else "— $unit",
+                color = hm.fgSecondary,
+            )
+        }
+        Slider(value = sliderVal, onValueChange = { sliderVal = it },
+            valueRange = 0f..(if (unit == "µg") 1000f else 100f),
+            onValueChangeFinished = { onChange(if (sliderVal > 0f) "%.1f".format(sliderVal) else "") },
+        )
     }
 }
