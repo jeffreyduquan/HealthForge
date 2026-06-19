@@ -255,7 +255,7 @@ fun HfNutrientProgressRow(
  * Identisch zu PinnedNutrientCard.StageBadge.
  */
 @Composable
-private fun NutrientStageBadge(stage: Int, color: Color) {
+internal fun NutrientStageBadge(stage: Int, color: Color) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))

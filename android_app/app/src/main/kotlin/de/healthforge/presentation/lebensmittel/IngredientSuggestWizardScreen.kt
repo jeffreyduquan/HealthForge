@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.data.db.entities.AllergenType
 import de.healthforge.data.db.entities.FodmapType
+import de.healthforge.presentation.common.components.NutrientSliderBar
 import de.healthforge.presentation.theme.AmbientBackdrop
 import de.healthforge.presentation.theme.GlassCard
 import de.healthforge.presentation.theme.GradientButton
@@ -186,15 +187,14 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
         color = hm.fgSecondary,
         style = MaterialTheme.typography.bodySmall,
     )
-    SliderField("Kalorien", "${s.kcal.roundToInt()} kcal", s.kcal, 0f, 900f, vm::setKcal)
-    SliderField("Protein", "${"%.1f".format(s.proteinG)} g", s.proteinG, 0f, 100f, vm::setProtein)
-    SliderField("Kohlenhydrate", "${"%.1f".format(s.carbsG)} g", s.carbsG, 0f, 100f, vm::setCarbs)
-    SliderField("Fett", "${"%.1f".format(s.fatG)} g", s.fatG, 0f, 100f, vm::setFat)
-    // Advanced macros — always visible
-    OptionalSliderField("Zucker", s.sugarG, 0f, 100f, "g", vm::setSugar)
-    OptionalSliderField("Ges. Fettsäuren", s.satfatG, 0f, 100f, "g", vm::setSatfat)
-    OptionalSliderField("Ballaststoffe", s.fiberG, 0f, 30f, "g", vm::setFiber)
-    OptionalSliderField("Salz", s.saltG, 0f, 10f, "g", vm::setSalt)
+    NutrientSliderBar("Kalorien", s.kcal, "kcal", 0f, 900f, onChange = vm::setKcal)
+    NutrientSliderBar("Protein", s.proteinG, "g", 0f, 100f, onChange = vm::setProtein)
+    NutrientSliderBar("Kohlenhydrate", s.carbsG, "g", 0f, 100f, onChange = vm::setCarbs)
+    NutrientSliderBar("Fett", s.fatG, "g", 0f, 100f, onChange = vm::setFat)
+    NutrientSliderBar("Zucker", s.sugarG ?: 0f, "g", 0f, 100f, onChange = { vm.setSugar(if (it > 0f) it else null) })
+    NutrientSliderBar("Ges. Fettsäuren", s.satfatG ?: 0f, "g", 0f, 100f, onChange = { vm.setSatfat(if (it > 0f) it else null) })
+    NutrientSliderBar("Ballaststoffe", s.fiberG ?: 0f, "g", 0f, 30f, onChange = { vm.setFiber(if (it > 0f) it else null) })
+    NutrientSliderBar("Salz", s.saltG ?: 0f, "g", 0f, 10f, onChange = { vm.setSalt(if (it > 0f) it else null) })
 
     // Vitamine & Mineralstoffe — always visible
     Spacer(Modifier.height(8.dp))
@@ -203,7 +203,7 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         vitaminKeys.forEach { key ->
             val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-            MicroField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: 0f) { vm.setMicronutrient(key, it) }
+            NutrientSliderBar(nutrient.displayDe, s.micronutrients[key] ?: 0f, nutrient.unit.label, 0f, if (nutrient.unit.label == "µg") 1000f else 100f, onChange = { vm.setMicronutrient(key, it) })
         }
     }
     Spacer(Modifier.height(8.dp))
@@ -212,7 +212,7 @@ private fun StepNutrients(s: IngredientWizardState, vm: IngredientSuggestWizardV
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         mineralKeys.forEach { key ->
             val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-            MicroField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: 0f) { vm.setMicronutrient(key, it) }
+            NutrientSliderBar(nutrient.displayDe, s.micronutrients[key] ?: 0f, nutrient.unit.label, 0f, if (nutrient.unit.label == "µg") 1000f else 100f, onChange = { vm.setMicronutrient(key, it) })
         }
     }
 }

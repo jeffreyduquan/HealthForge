@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.healthforge.presentation.common.components.HfCard
 import de.healthforge.presentation.common.components.HfSectionHeader
+import de.healthforge.presentation.common.components.NutrientSliderBar
 import de.healthforge.presentation.lebensmittel.StepDotsRow
 import de.healthforge.presentation.lebensmittel.WizardNav
 import de.healthforge.presentation.theme.AmbientBackdrop
@@ -129,12 +130,12 @@ fun SupplementWizardScreen(
                         HfSectionHeader("Pro Dosis (optional)")
                         HfCard {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                NutrientSliderField("Kalorien", s.kcal, "kcal", 0f, 500f, vm::setKcal)
+                                NutrientSliderBar("Kalorien", s.kcal.replace(',', '.').toFloatOrNull() ?: 0f, "kcal", 0f, 500f, onChange = { vm.setKcal(if (it > 0f) "%.1f".format(it) else "") })
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    NutrientSliderField("Eiweiß", s.protein, "g", 0f, 100f, vm::setProtein)
-                                    NutrientSliderField("KH", s.carbs, "g", 0f, 100f, vm::setCarbs)
+                                    NutrientSliderBar("Eiweiß", s.protein.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setProtein(if (it > 0f) "%.1f".format(it) else "") })
+                                    NutrientSliderBar("KH", s.carbs.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setCarbs(if (it > 0f) "%.1f".format(it) else "") })
                                 }
-                                NutrientSliderField("Fett", s.fat, "g", 0f, 100f, vm::setFat)
+                                NutrientSliderBar("Fett", s.fat.replace(',', '.').toFloatOrNull() ?: 0f, "g", 0f, 100f, onChange = { vm.setFat(if (it > 0f) "%.1f".format(it) else "") })
                                 OutlinedTextField(
                                     value = s.notes, onValueChange = vm::setNotes,
                                     label = { Text("Notizen") }, modifier = Modifier.fillMaxWidth(),
@@ -148,7 +149,8 @@ fun SupplementWizardScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             vitaminKeys.forEach { key ->
                                 val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-                                MicroSliderField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: "") { vm.setMicronutrient(key, it) }
+                                val v = (s.micronutrients[key] ?: "").replace(',', '.').toFloatOrNull() ?: 0f
+                                NutrientSliderBar(nutrient.displayDe, v, nutrient.unit.label, 0f, if (nutrient.unit.label == "µg") 1000f else 100f, onChange = { vm.setMicronutrient(key, if (it > 0f) "%.1f".format(it) else "") })
                             }
                         }
                         Spacer(Modifier.height(8.dp))
@@ -157,7 +159,8 @@ fun SupplementWizardScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             mineralKeys.forEach { key ->
                                 val nutrient = de.healthforge.domain.nutrition.NutrientCatalog.byKeyOrNull(key) ?: return@forEach
-                                MicroSliderField(nutrient.displayDe, nutrient.unit.label, s.micronutrients[key] ?: "") { vm.setMicronutrient(key, it) }
+                                val v = (s.micronutrients[key] ?: "").replace(',', '.').toFloatOrNull() ?: 0f
+                                NutrientSliderBar(nutrient.displayDe, v, nutrient.unit.label, 0f, if (nutrient.unit.label == "µg") 1000f else 100f, onChange = { vm.setMicronutrient(key, if (it > 0f) "%.1f".format(it) else "") })
                             }
                         }
                     }
