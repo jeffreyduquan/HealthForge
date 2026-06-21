@@ -47,60 +47,153 @@ private fun classpathReader(path: String): BufferedReader? = try {
 }
 
 /**
- * Skeleton importer for the German Bundeslebensmittelschlüssel (BLS).
+ * BLS 4.0 Importer (Bundeslebensmittelschlüssel, CC BY 4.0).
  *
- * Expected CSV columns (semicolon-separated, no header tolerated by row 1 check):
- *   sbls;name;kcal;protein;carb;fat;fiber;salt
+ * Liest die als CSV exportierte BLS-4.0-Hauptdatei (Komma-separiert, quoted).
+ * Jede Zeile wird als RAW-Ingredient importiert.
  *
- * Until a licensed seed file is placed at `resources/seed/bls.csv`, this importer
- * returns [Counts.skipped]. The licensing constraints are documented in P1.S4 backlog.
+ * CSV-Format (via Google Sheets export aus BLS_4_0_Daten_2025_DE.xlsx):
+ *   BLS Code,Lebensmittelbezeichnung,Food name,ENERCJ,... (Header-basiert)
  *
- * @deprecated P7.S2 Slice 3a (2026-05-28) — Superseded by [de.healthforge.etl.usda.UsdaFdcImporter]
- *   als kanonischem Lebensmittel-Korpus (REQ-DATA-SOURCE-001). BLS bleibt aus
- *   Lizenzgründen ungenutzt; Bean bleibt registriert für historische `etl_runs`-Rows.
- *   Manuelle `POST /admin/v1/etl/run?source=BLS` Triggers loggen eine Warnung im Orchestrator.
+ * Macro-Mapping (direkte Spalten):
+ *   ENERCC → energyKcalPer100g, PROT625 → proteinGPer100g, FAT → fatGPer100g,
+ *   CHO → carbsGPer100g, FIBT → fiberGPer100g
+ *
+ * Micro-Mapping (→ micronutrients_json):
+ *   VITAA→vitamin_a, VITD→vitamin_d, TOCPHA→vitamin_e, VITK1→vitamin_k,
+ *   THIA→vitamin_b1, RIBF→vitamin_b2, NIA→vitamin_b3, PANTAC→vitamin_b5,
+ *   VITB6C→vitamin_b6, FOL→vitamin_b9, VITB12→vitamin_b12, VITC→vitamin_c,
+ *   CA→calcium, FE→eisen, K→kalium, CU→kupfer, MG→magnesium,
+ *   MN→mangan, NA→natrium, P→phosphor, SE→selen, ZN→zink
+ *
+ * Wert-Konventionen:
+ *  - Deutsche Dezimalkommas: "11,45" → 11.45
+ *  - <LOQ / <LOD → null (unter Nachweisgrenze)
+ *  - "-" → null (kein Wert)
+ *  - Leer → null
  */
-@Deprecated(
-    message = "BLS-Importer wird durch UsdaFdcImporter abgelöst (P7.S2). Nicht für neuen Code verwenden.",
-    level = DeprecationLevel.WARNING,
-)
 @Component
 class BlsImporter(private val ingredients: IngredientRepository) : Importer {
     override val source = EtlSource.BLS
-    override fun seedResourcePath() = "seed/bls.csv"
+    override fun seedResourcePath() = "seed/bls_4_0.csv"
+
+    companion object {
+        val BLS_TO_MICRO: Map<String, String> = mapOf(
+            "VITAA" to "vitamin_a",    // RAE [µg]
+            "VITD" to "vitamin_d",     // [µg]
+            "TOCPHA" to "vitamin_e",   // Alpha-Tocopherol [mg]
+            "VITK1" to "vitamin_k",    // Phyllochinon [µg]
+            "THIA" to "vitamin_b1",    // Thiamin [mg]
+            "RIBF" to "vitamin_b2",    // Riboflavin [mg]
+            "NIA" to "vitamin_b3",     // Niacin [mg]
+            "PANTAC" to "vitamin_b5",  // Pantothensäure [mg]
+            "VITB6C" to "vitamin_b6",  // [mg]
+            "FOL" to "vitamin_b9",     // Folat [µg]
+            "VITB12" to "vitamin_b12", // [µg]
+            "VITC" to "vitamin_c",     // [mg]
+            "CA" to "calcium",         // [mg]
+            "FE" to "eisen",           // [mg]
+            "K" to "kalium",           // [mg]
+            "CU" to "kupfer",          // [mg]
+            "MG" to "magnesium",       // [mg]
+            "MN" to "mangan",          // [mg]
+            "NA" to "natrium",         // [mg]
+            "P" to "phosphor",         // [mg]
+            "SE" to "selen",           // [µg]
+            "ZN" to "zink",            // [mg]
+        )
+        val MACRO_CODES = setOf("ENERCC", "PROT625", "FAT", "CHO", "FIBT")
+    }
 
     @Transactional
     override fun import(): Counts {
         val reader = classpathReader(seedResourcePath()) ?: return Counts.skipped
         var inserted = 0; var updated = 0; var skipped = 0
+
         reader.useLines { lines ->
-            lines.drop(1).forEach { raw ->
-                val cols = raw.split(';')
-                if (cols.size < 8) { skipped++; return@forEach }
-                val sourceId = cols[0].trim()
-                val name = cols[1].trim().ifBlank { return@forEach.also { skipped++ } }
+            val iter = lines.iterator()
+            if (!iter.hasNext()) return@useLines
+            val header = parseCsvLine(iter.next())
+            val colIndex = header.withIndex().associate { (i, h) -> h.trim() to i }
+
+            val idxCode = colIndex["BLS Code"] ?: -1
+            val idxNameDe = colIndex["Lebensmittelbezeichnung"] ?: -1
+            if (idxCode < 0 || idxNameDe < 0) {
+                LOG.warn("BLS 4.0: 'BLS Code'/'Lebensmittelbezeichnung' nicht im Header — Abbruch")
+                return@useLines
+            }
+
+            val macroIdx = MACRO_CODES.mapNotNull { code ->
+                colIndex[code]?.let { code to it }
+            }.toMap()
+
+            val microIdx = BLS_TO_MICRO.mapNotNull { (blsCode, ourKey) ->
+                colIndex[blsCode]?.let { blsCode to (ourKey to it) }
+            }.toMap()
+
+            LOG.info("BLS 4.0: {} Macro-Spalten, {} von {} Micro-Spalten gemappt",
+                macroIdx.size, microIdx.size, BLS_TO_MICRO.size)
+
+            for (raw in iter) {
+                if (raw.isBlank()) continue
+                val cols = parseCsvLine(raw)
+                val sourceId = cols.getOrNull(idxCode)?.trim().orEmpty()
+                val nameDe = cols.getOrNull(idxNameDe)?.trim().orEmpty()
+                if (sourceId.isEmpty() || nameDe.isEmpty()) { skipped++; continue }
+
                 val existing = ingredients.findBySourceAndSourceId(IngredientSource.BLS, sourceId)
                 val entity = existing.orElseGet {
-                    IngredientEntity(
-                        nameDe = name,
-                        source = IngredientSource.BLS,
-                        sourceId = sourceId,
-                    )
+                    IngredientEntity(nameDe = nameDe, source = IngredientSource.BLS, sourceId = sourceId)
                 }
-                entity.nameDe = name
-                entity.energyKcalPer100g = cols[2].toBigDecimalOrNull()
-                entity.proteinGPer100g = cols[3].toBigDecimalOrNull()
-                entity.carbsGPer100g = cols[4].toBigDecimalOrNull()
-                entity.fatGPer100g = cols[5].toBigDecimalOrNull()
-                entity.fiberGPer100g = cols[6].toBigDecimalOrNull()
-                entity.saltGPer100g = cols[7].toBigDecimalOrNull()
+                entity.nameDe = nameDe
+                entity.energyKcalPer100g = macroIdx["ENERCC"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.proteinGPer100g    = macroIdx["PROT625"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.fatGPer100g        = macroIdx["FAT"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.carbsGPer100g      = macroIdx["CHO"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.fiberGPer100g      = macroIdx["FIBT"]?.let { parseBLS(cols.getOrNull(it)) }
+
+                val micros = mutableMapOf<String, Double>()
+                for ((_, pair) in microIdx) {
+                    val (ourKey, idx) = pair
+                    val num = parseBLS(cols.getOrNull(idx)) ?: continue
+                    if (num > BigDecimal.ZERO) micros[ourKey] = num.toDouble()
+                }
+                if (micros.isNotEmpty()) {
+                    entity.micronutrientsJson = micros.entries.joinToString(
+                        prefix = "{", postfix = "}"
+                    ) { (k, v) -> "\"$k\":$v" }
+                }
+
                 entity.locked = true
                 entity.updatedAt = Instant.now()
                 ingredients.save(entity)
                 if (existing.isPresent) updated++ else inserted++
             }
         }
+        LOG.info("BLS 4.0: {} inserted, {} updated, {} skipped", inserted, updated, skipped)
         return Counts(inserted, updated, skipped)
+    }
+
+    private fun parseCsvLine(line: String): List<String> {
+        val result = mutableListOf<String>()
+        val curr = StringBuilder()
+        var inQ = false
+        for (ch in line) {
+            when {
+                ch == '"' -> inQ = !inQ
+                ch == ',' && !inQ -> { result += curr.toString(); curr.clear() }
+                else -> curr.append(ch)
+            }
+        }
+        result += curr.toString()
+        return result
+    }
+
+    private fun parseBLS(raw: String?): BigDecimal? {
+        if (raw == null) return null
+        val s = raw.trim().removeSurrounding("\"")
+        if (s.isEmpty() || s == "-" || s.startsWith("<")) return null
+        return s.replace(',', '.').toBigDecimalOrNull()
     }
 }
 
