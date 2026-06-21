@@ -199,6 +199,48 @@ Mapping: Severity 1 → statusGood, 2 → statusGood @ 80%, 3 → statusRelax, 4
 - Search-Bar sticky oben.
 - Pre-Selection-Mode (F-007): nav-arg `preselect=true` → FAB wird zu „Auswählen" und Tap auf Item liefert Result-Callback an aufrufenden Screen.
 
+---
+
+## 7. Branding & App Icon (LOCKED P7.S5 — 2026-06-21)
+
+### 7.1 Icon-Konzept
+
+Das App-Icon ist ein abstraktes **„H"** (HealthForge) aus zwei vertikalen Pillars
+und einer horizontalen Brücke. Es nutzt die vollen App-Farben:
+
+| Element | Farbe | Token |
+|---|---|---|
+| Linker Pillar | `#7C5CFF` → `#5B3FD9` | `ambientViolet` |
+| Rechter Pillar | `#4DD0E1` → `#26A5B3` | `ambientCyan` |
+| Brücke | `#7C5CFF` → `#22D3A6` → `#4DD0E1` | Dreifach-Gradient (Violet→Teal→Cyan) |
+| Center Dot | `#FFFFFF` @ 85% + `#22D3A6` Halo @ 35% | Pulse im Kreuzungspunkt |
+| Background (Dark) | `#070A12` radial nach `#1A1040` | `background` + AmbientGlow |
+| Background (Light) | `#F4F5F8` | `background` (Clean-Path) |
+| Glass-Effekt (Dark) | `#F5F7FA` @ 12%→4% + `#FFFFFF` @ 8% Border | `glassFill` + `glassBorder` |
+| Ring / Outer Border | `#A78BFA` (Dark) / — (Light) | Violet-Tönung, 4.5dp Stroke |
+| Corner Accents | `#7C5CFF` (top-left), `#22D3A6` (bottom-right) @ 25-30% | Subtile Eckmarkierungen |
+
+### 7.2 Dateien
+
+| Datei | Zweck |
+|---|---|
+| `icon-hf-glass.svg` | Dark/Hero-Variante mit Glas-Effekt (Master) |
+| `icon-hf-light.svg` | Light/Clean-Variante ohne Glas |
+| `icon-preview.svg` | Legacy v1 (ersetzt) |
+| `icon-preview-2.svg` | Legacy v2 (ersetzt) |
+| `android_app/.../ic_launcher_background_gradient.xml` | Android Adaptive Icon — Radial-Gradient `#7C5CFF` → `#22D3A6` → `#070A12` |
+| `android_app/.../ic_launcher_foreground.xml` | Android Adaptive Icon — H+Circle in `#A78BFA`/`#7C5CFF`/`#4DD0E1`/`#22D3A6` |
+| `android_app/.../values/ic_launcher_background.xml` | Legacy Fallback-Farbe: `#070A12` |
+
+### 7.3 Design-Regeln
+
+1. **Kein Text im Icon** — das H-Motiv steht für sich.
+2. **24dp Corner-Radius** auf dem Icon-Hintergrund (Matches Histamind-Shape-Tokens §4).
+3. **3-Farben-Akzent**: Violet (`#7C5CFF`), Cyan (`#4DD0E1`), Teal (`#22D3A6`) MÜSSEN alle sichtbar sein.
+4. **Glass-Effekt nur im Dark-Mode** (analog zu GlassCard §5.1).
+5. **Center-Pulse**: Weißer Punkt + Teal-Halo symbolisiert Vitalität/Lebendigkeit.
+6. **Adaptive Icon Safety**: Alle Elemente innerhalb des 72dp Safe-Zone (33% Inset vom 108dp Viewport).
+
 ### 6.5 Log (P6.S6)
 
 - SegmentedTabs „Einträge" / „Insights".

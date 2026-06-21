@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <defs>
+    <linearGradient id="pillarL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="15%" stop-color="#8B6FEE"/>
+      <stop offset="35%" stop-color="#7C5CFF"/>
+      <stop offset="70%" stop-color="#6A4AE6"/>
+      <stop offset="100%" stop-color="#4A30B8"/>
+    </linearGradient>
+    <linearGradient id="pillarR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#80DEEA"/>
+      <stop offset="15%" stop-color="#5CD5E4"/>
+      <stop offset="35%" stop-color="#4DD0E1"/>
+      <stop offset="70%" stop-color="#38B8CB"/>
+      <stop offset="100%" stop-color="#1E8A9C"/>
+    </linearGradient>
+    <linearGradient id="bridgeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7C5CFF"/>
+      <stop offset="28%" stop-color="#5348D4"/>
+      <stop offset="50%" stop-color="#22D3A6"/>
+      <stop offset="72%" stop-color="#37C4C9"/>
+      <stop offset="100%" stop-color="#4DD0E1"/>
+    </linearGradient>
+    <linearGradient id="pillarHighlight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bridgeHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1B1F26" flood-opacity="0.10"/>
+    </filter>
+    <filter id="tealGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="108" height="108" rx="24" fill="#F4F5F8"/>
+
+  <!-- Card surface -->
+  <rect x="14" y="14" width="80" height="80" rx="18"
+        fill="#FFFFFF"
+        stroke="#1B1F26" stroke-opacity="0.07" stroke-width="0.8"
+        filter="url(#cardShadow)"/>
+
+  <!-- Left Pillar -->
+  <rect x="24" y="24" width="15" height="60" rx="7.5" fill="url(#pillarL)"/>
+  <rect x="24" y="24" width="15" height="60" rx="7.5" fill="url(#pillarHighlight)"/>
+
+  <!-- Right Pillar -->
+  <rect x="69" y="24" width="15" height="60" rx="7.5" fill="url(#pillarR)"/>
+  <rect x="69" y="24" width="15" height="60" rx="7.5" fill="url(#pillarHighlight)"/>
+
+  <!-- Bridge -->
+  <rect x="24" y="46" width="60" height="15" rx="7.5" fill="url(#bridgeGrad)"/>
+  <rect x="24" y="46" width="60" height="15" rx="7.5" fill="url(#bridgeHighlight)"/>
+
+  <!-- Center Pulse -->
+  <circle cx="54" cy="53.5" r="5" fill="#22D3A6" opacity="0.22" filter="url(#tealGlow)"/>
+  <circle cx="54" cy="53.5" r="2.8" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="54" cy="53.5" r="1.2" fill="#FFFFFF" opacity="1"/>
+
+  <!-- Corner Accents -->
+  <rect x="16" y="16" width="14" height="2.5" rx="1.25" fill="#7C5CFF" opacity="0.25"/>
+  <rect x="78" y="89.5" width="14" height="2.5" rx="1.25" fill="#22D3A6" opacity="0.25"/>
+</svg>

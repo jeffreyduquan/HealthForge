@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <defs>
+    <radialGradient id="bgDeep" cx="54" cy="48" r="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A1040"/>
+      <stop offset="30%" stop-color="#0E1224"/>
+      <stop offset="70%" stop-color="#080C18"/>
+      <stop offset="100%" stop-color="#070A12"/>
+    </radialGradient>
+    <radialGradient id="ambViolet" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambCyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#4DD0E1" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#4DD0E1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambTeal" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#22D3A6" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#22D3A6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pillarL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="10%" stop-color="#8B6FEE"/>
+      <stop offset="30%" stop-color="#7C5CFF"/>
+      <stop offset="65%" stop-color="#6A4AE6"/>
+      <stop offset="100%" stop-color="#4A30B8"/>
+    </linearGradient>
+    <linearGradient id="pillarLHighlight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="pillarR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#80DEEA"/>
+      <stop offset="10%" stop-color="#5CD5E4"/>
+      <stop offset="30%" stop-color="#4DD0E1"/>
+      <stop offset="65%" stop-color="#38B8CB"/>
+      <stop offset="100%" stop-color="#1E8A9C"/>
+    </linearGradient>
+    <linearGradient id="pillarRHighlight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bridgeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7C5CFF"/>
+      <stop offset="28%" stop-color="#5348D4"/>
+      <stop offset="50%" stop-color="#22D3A6"/>
+      <stop offset="72%" stop-color="#37C4C9"/>
+      <stop offset="100%" stop-color="#4DD0E1"/>
+    </linearGradient>
+    <linearGradient id="bridgeHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glassFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5F7FA" stop-opacity="0.09"/>
+      <stop offset="45%" stop-color="#F5F7FA" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#F5F7FA" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.45"/>
+      <stop offset="35%" stop-color="#22D3A6" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#4DD0E1" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="surfaceFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141A26" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#141A26" stop-opacity="0.20"/>
+    </linearGradient>
+    <filter id="pillarGlowL" x="-35%" y="-25%" width="170%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.49  0 0 0 0 0.36  0 0 0 0 1.0  0 0 0 0.30 0"/>
+      <feMerge><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pillarGlowR" x="-35%" y="-25%" width="170%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.30  0 0 0 0 0.82  0 0 0 0 0.88  0 0 0 0.25 0"/>
+      <feMerge><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tealHalo" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+    </filter>
+    <filter id="softShadow" x="-25%" y="-15%" width="150%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- LAYER 0: Deep Background -->
+  <rect width="108" height="108" rx="24" fill="url(#bgDeep)"/>
+
+  <!-- Ambient glow blobs -->
+  <circle cx="20" cy="88" r="46" fill="url(#ambViolet)"/>
+  <circle cx="88" cy="20" r="40" fill="url(#ambCyan)"/>
+  <circle cx="54" cy="96" r="34" fill="url(#ambTeal)"/>
+
+  <!-- LAYER 1: Glass Surface behind H -->
+  <rect x="16" y="16" width="76" height="76" rx="18"
+        fill="url(#surfaceFill)"
+        stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="0.8"
+        filter="url(#softShadow)"/>
+
+  <!-- LAYER 2: Subtle decorative ring -->
+  <circle cx="54" cy="50" r="32" fill="none"
+          stroke="url(#ringGrad)" stroke-width="1.2"/>
+
+  <!-- LAYER 3: The H -->
+  <g filter="url(#pillarGlowL)">
+    <rect x="24" y="24" width="15" height="60" rx="7.5" fill="url(#pillarL)"/>
+    <rect x="24" y="24" width="15" height="60" rx="7.5" fill="url(#pillarLHighlight)"/>
+    <rect x="24.5" y="27" width="2" height="54" rx="1" fill="#FFFFFF" opacity="0.10"/>
+  </g>
+
+  <g filter="url(#pillarGlowR)">
+    <rect x="69" y="24" width="15" height="60" rx="7.5" fill="url(#pillarR)"/>
+    <rect x="69" y="24" width="15" height="60" rx="7.5" fill="url(#pillarRHighlight)"/>
+    <rect x="69.5" y="27" width="2" height="54" rx="1" fill="#FFFFFF" opacity="0.10"/>
+  </g>
+
+  <rect x="24" y="46" width="60" height="15" rx="7.5"
+        fill="url(#bridgeGrad)" filter="url(#softShadow)"/>
+  <rect x="24" y="46" width="60" height="15" rx="7.5" fill="url(#bridgeHighlight)"/>
+  <rect x="27" y="47" width="54" height="1.5" rx="0.75" fill="#FFFFFF" opacity="0.12"/>
+
+  <!-- LAYER 4: Center Pulse -->
+  <circle cx="54" cy="53.5" r="5.5" fill="#22D3A6" opacity="0.22" filter="url(#tealHalo)"/>
+  <circle cx="54" cy="53.5" r="3" fill="#FFFFFF" opacity="0.88"/>
+  <circle cx="54" cy="53.5" r="1.2" fill="#FFFFFF" opacity="1"/>
+
+  <!-- LAYER 5: Top Glass Overlay -->
+  <rect x="16" y="16" width="76" height="76" rx="18"
+        fill="url(#glassFill)" pointer-events="none"/>
+
+  <!-- LAYER 6: Corner Accents -->
+  <rect x="18" y="18" width="14" height="2.5" rx="1.25" fill="#7C5CFF" opacity="0.30"/>
+  <rect x="76" y="87.5" width="14" height="2.5" rx="1.25" fill="#22D3A6" opacity="0.30"/>
+</svg>
