@@ -1,0 +1,255 @@
+bls_code,name_de,type,allergens,sighi,fodmap
+# === KATEGORIE C: Getreide & Getreideprodukte ===
+C131000,"Hafer ganzes Korn, roh",RAW,[GLUTEN],0,[FRUCTAN]
+C133000,"Hafer Flocken",RAW,[GLUTEN],0,[FRUCTAN]
+C141000,"Gerste ganzes Korn, roh",RAW,[GLUTEN],0,[FRUCTAN]
+C243000,"Gerste Mehl",RAW,[GLUTEN],0,[FRUCTAN]
+C341000,"Mais roh",RAW,[],0,[]
+C443000,"Mais Mehl",RAW,[],0,[]
+C352000,"Reis poliert, roh",RAW,[],0,[]
+C359000,"Reis parboiled, poliert, roh",RAW,[],0,[]
+# === KATEGORIE E: Teigwaren ===
+E401000,"Teigwaren eifrei, roh",RAW,[GLUTEN],0,[]
+E510000,"Vollkornteigwaren eifrei, roh",RAW,[GLUTEN],0,[FRUCTAN]
+# === KATEGORIE F: Obst ===
+F301100,"Erdbeere roh",RAW,[],2,"[FRUCTAN,SORBIT]"
+F302100,"Himbeere roh",RAW,[],2,[FRUCTAN]
+F331100,"Maulbeere roh",RAW,[],0,[]
+# === KATEGORIE G: Gemüse ===
+G130100,"Rucola roh",RAW,[],0,[]
+G420100,"Stielmus/Rübstiel, roh",RAW,[],0,[]
+G541100,"Gemüsepaprika grün, roh",RAW,[],0,[FRUCTAN]
+G543100,"Gemüsepaprika rot, roh",RAW,[],0,[FRUCTAN]
+G611100,"Kohlrübe/Steckrübe, roh",RAW,[],0,[]
+G660100,"Knollensellerie roh",RAW,[],0,[MANNIT]
+G614100,"Weiße Rübe/Wasserrübe/Herbstrübe, roh",RAW,[],0,[]
+# === KATEGORIE H: Sprossen, Tofu ===
+H640100,"Alfalfasprossen/Alfalfakeimlinge, roh",RAW,[],0,[]
+H662100,"Linsensprossen/Linsenkeimlinge, roh",RAW,[],0,[GOS]
+H861000,"Tofu",RAW,[SOY],0,[GOS]
+H861100,"Seidentofu",RAW,[SOY],0,[GOS]
+# === KATEGORIE M: Milchprodukte ===
+M012100,"Roquefort mind. 50 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+M5B1600,"Gorgonzola mind. 48 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+M881000,"Milchpulver mit hohem Fettgehalt (Sahnepulver, Rahmpulver)",RAW,[LACTOSE],0,[LACTOSE]
+M882000,"Vollmilchpulver",RAW,[LACTOSE],0,[LACTOSE]
+M884000,"Magermilchpulver",RAW,[LACTOSE],0,[LACTOSE]
+M886000,"Buttermilchpulver",RAW,[LACTOSE],0,[LACTOSE]
+# === KATEGORIE N: Kaffeeersatz ===
+N500900,"Kaffeeersatzpulver",COMPOSED,,,
+N540900,"Zichorienkaffeepulver",RAW,[],0,[FRUCTAN]
+# === KATEGORIE P: Alkoholische Getränke ===
+P353100,"Apfelwein",RAW,[],3,"[FRUCTAN,SORBIT]"
+P752100,"Obstbrand/Obstwasser",RAW,[],3,[]
+P712000,"Wodka",RAW,[GLUTEN],3,[]
+P741000,"Rum 37,5/40 % vol",RAW,[],3,[]
+# === KATEGORIE S: Süßungsmittel ===
+S120000,"Honig",RAW,[],0,[FRUCTAN]
+S121000,"Blütenhonig (Nektarhonig)",RAW,[],0,[FRUCTAN]
+# === KATEGORIE T: Fisch (roh) ===
+T102100,"Hering roh",RAW,[FISH],0,[]
+T302100,"Steinbutt roh",RAW,[FISH],0,[]
+T306100,"Heilbutt/Weißer Heilbutt, roh",RAW,[FISH],0,[]
+T501100,"Karpfen roh",RAW,[FISH],0,[]
+T502100,"Blei/Brachsen/Brasse, roh",RAW,[FISH],0,[]
+T601100,"Barsch/Flussbarsch, roh",RAW,[FISH],0,[]
+T615100,"Rotbarsch/Goldbarsch, roh",RAW,[FISH],0,[]
+T730100,"Hummer roh",RAW,[CRUSTACEAN],0,[]
+T753100,"Garnele/Granat/Krabbe, roh",RAW,[CRUSTACEAN],0,[]
+T780100,"Europäische Auster roh",RAW,[MOLLUSC],0,[]
+T792100,"Miesmuschel roh",RAW,[MOLLUSC],0,[]
+# === KATEGORIE U: Schwein, Schaf (roh) ===
+U505100,"Schwein Fettwamme, geringer Magerfleischanteil roh",RAW,[],0,[]
+U805800,"Schaf Fettgewebe, intermuskulär roh",RAW,[],0,[]
+U852100,"Schaf Brust, mittelfett, roh",RAW,[],0,[]
+U853100,"Schaf Brust, fett, roh",RAW,[],0,[]
+U861100,"Schaf Bug/Schulter, mager, roh",RAW,[],0,[]
+U891100,"Schaf Hinterhaxe, mager, roh",RAW,[],0,[]
+# === KATEGORIE V: Kaninchen, Wild, Innereien ===
+V132100,"Kaninchen Fleisch, roh",RAW,[],0,[]
+V232100,"Hase Fleisch, roh",RAW,[],0,[]
+V523100,"Schwein Hirn, roh",RAW,[],0,[]
+V524100,"Schaf Hirn, roh",RAW,[],0,[]
+# === KATEGORIE C (Fortsetzung — verstreut): Getreide ===
+C232000,"Hafer Schrot",RAW,[GLUTEN],0,[FRUCTAN]
+C137000,"Hafer Grütze",RAW,[GLUTEN],0,[FRUCTAN]
+C233000,"Hafer Mehl",RAW,[GLUTEN],0,[FRUCTAN]
+C138000,"Hafer Kleie",RAW,[GLUTEN],0,[FRUCTAN]
+C148000,"Gerste Graupen",RAW,[GLUTEN],0,[FRUCTAN]
+C242000,"Gerste Schrot",RAW,[GLUTEN],0,[FRUCTAN]
+C147000,"Gerste Grütze",RAW,[GLUTEN],0,[FRUCTAN]
+C143000,"Gerste Flocken",RAW,[GLUTEN],0,[FRUCTAN]
+C146000,"Gerste Grieß",RAW,[GLUTEN],0,[FRUCTAN]
+C446000,"Mais Stärke",RAW,[],0,[]
+C453000,"Reis Mehl",RAW,[],0,[]
+C351000,"Reis unpoliert, roh",RAW,[],0,[]
+C346000,"Mais Grieß",RAW,[],0,[]
+C347000,"Mais Grütze",RAW,[],0,[]
+# === KATEGORIE E (Fortsetzung) ===
+E432000,"Eierteigwaren roh",RAW,"[GLUTEN,EGG]",0,[]
+# === KATEGORIE F (Fortsetzung) ===
+F409100,"Wald-Erdbeere roh",RAW,[],2,"[FRUCTAN,SORBIT]"
+F306100,"Loganbeere roh",RAW,[],0,[FRUCTAN]
+F303100,"Brombeere roh",RAW,[],0,[FRUCTAN]
+F408000,"Moltebeere roh",RAW,[],0,[FRUCTAN]
+F321100,"Johannisbeere rot, roh",RAW,[],0,[FRUCTAN]
+F307100,"Boysenbeere roh",RAW,[],0,[FRUCTAN]
+F304100,"Heidelbeere roh",RAW,[],0,[FRUCTAN]
+F411100,"Wald-Himbeere roh",RAW,[],2,[FRUCTAN]
+# === KATEGORIE G (Fortsetzung) ===
+G553100,"Pfefferschote grün, roh",RAW,[],0,[]
+G542100,"Gemüsepaprika gelb, roh",RAW,[],0,[FRUCTAN]
+G554100,"Pfefferschote rot, roh",RAW,[],0,[]
+# === KATEGORIE H (Fortsetzung) ===
+H650100,"Mungbohnensprossen/Mungbohnenkeimlinge, roh",RAW,[],0,[GOS]
+H620100,"Sojabohnensprossen/Sojabohnenkeimlinge, roh",RAW,[SOY],0,[GOS]
+# === KATEGORIE M (Fortsetzung) ===
+M012200,"Feta mind. 45 % Fett i. Tr.",RAW,[LACTOSE],1,[LACTOSE]
+M502700,"Edelpilzkäse mind. 50 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+M502600,"Edelpilzkäse mind. 45 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+M502800,"Edelpilzkäse mind. 60 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+M887000,"Süßmolkenpulver",RAW,[LACTOSE],0,[LACTOSE]
+# === KATEGORIE P (Fortsetzung) ===
+P350000,"Fruchtwein (Obstwein)",RAW,[],3,[FRUCTAN]
+P355000,"Most",RAW,[],0,"[FRUCTAN,SORBIT]"
+P733000,"Whisky/Whiskey",RAW,[GLUTEN],3,[]
+P742000,"Arrak",RAW,[],3,[]
+P743000,"Rum 80 % vol",RAW,[],3,[]
+P7A4000,"Agavenbrand (Mezcal/Tequila)",RAW,[],3,[]
+P740000,"Brand aus Zuckerrohr (Cachaca)",RAW,[],3,[]
+P640000,"Calvados",RAW,[],3,"[FRUCTAN,SORBIT]"
+P7A3000,"Spirituosen mit Kümmel/Aquavit",RAW,[],3,[]
+P754100,"Obstgeist",RAW,[],3,[]
+# === KATEGORIE C (Fortsetzung) ===
+C549000,"Gerstenmalzextrakt",RAW,[GLUTEN],0,[FRUCTAN]
+# === KATEGORIE S (Fortsetzung) ===
+S122000,"Honigtauhonig (Waldhonig)",RAW,[],0,[FRUCTAN]
+# === KATEGORIE T (Fortsetzung) ===
+T105100,"Sardine roh",RAW,[FISH],0,[]
+T033000,"Schillerlocken (Dornhai, Bauchlappen, heiß geräuchert)",RAW,[FISH],3,[]
+T106100,"Sprotte roh",RAW,[FISH],0,[]
+T305100,"Goldbutt/Scholle, roh",RAW,[FISH],0,[]
+T307100,"Schwarzer Heilbutt roh",RAW,[FISH],0,[]
+T604100,"Katfisch/Steinbeißer, roh",RAW,[FISH],0,[]
+T512100,"Schleie roh",RAW,[FISH],0,[]
+T506100,"Wels roh",RAW,[FISH],0,[]
+T507100,"Pangasius/Schlankwels, roh",RAW,[FISH],0,[]
+T603100,"Zander roh",RAW,[FISH],0,[]
+T633100,"Meeräsche roh",RAW,[FISH],0,[]
+T617100,"Schafskopf (Meerbrasse) roh",RAW,[FISH],0,[]
+T710100,"Edelkrebs/Flusskrebs, roh",RAW,[CRUSTACEAN],0,[]
+T720100,"Languste roh",RAW,[CRUSTACEAN],0,[]
+T791100,"Große Sandklaffmuschel roh",RAW,[MOLLUSC],0,[]
+T797100,"Venusmuschel roh",RAW,[MOLLUSC],0,[]
+T793100,"Pilgermuschel/Jakobsmuschel, roh",RAW,[MOLLUSC],0,[]
+# === KATEGORIE U (Fortsetzung) ===
+U605000,"Schwein Rückenspeck, kernig, roh",RAW,[],0,[]
+U605700,"Schwein Speck, ohne Schwartenzug roh",RAW,[],0,[]
+U605800,"Schwein Fettabschnitte, geringer Schwartenzug roh",RAW,[],0,[]
+U807100,"Lamm Fettgewebe, intermuskulär roh",RAW,[],0,[]
+U783100,"Schaf Kochfleisch (Brust, fett) roh",RAW,[],0,[]
+U856100,"Hammel Brust, roh",RAW,[],0,[]
+U857100,"Lamm Brust, roh",RAW,[],0,[]
+U863100,"Schaf Bug/Schulter, fett, roh",RAW,[],0,[]
+U867100,"Lamm Bug/Schulter, roh",RAW,[],0,[]
+U751100,"Schaf Gulasch (Bug, mager) roh",RAW,[],0,[]
+U771100,"Schaf Bratenfleisch (Bug, mager) roh",RAW,[],0,[]
+U881100,"Schaf Keule, mager, roh",RAW,[],0,[]
+U871100,"Schaf Vorderhaxe, mager, roh",RAW,[],0,[]
+# === KATEGORIE V (Fortsetzung) ===
+V242100,"Wildkaninchen Fleisch, roh",RAW,[],0,[]
+V526100,"Hammel Hirn, roh",RAW,[],0,[]
+# === KATEGORIE C (Fortsetzung) ===
+C136000,"Hafer Grieß",RAW,[GLUTEN],0,[FRUCTAN]
+C353100,"Wildreis roh",RAW,[],0,[]
+C216000,"Weizen Stärke",RAW,[GLUTEN],0,[]
+C456000,"Reis Stärke",RAW,[],0,[]
+C356000,"Reis Grieß",RAW,[],0,[]
+C559000,"Reisnudeln roh",RAW,[],0,[]
+# === KATEGORIE H (Fortsetzung) ===
+H030400,"Glasnudeln aus Mungbohnenstärke, roh",RAW,[],0,[]
+# === KATEGORIE K: Kartoffeln, Stärke ===
+K230000,"Kartoffelstärke (Kartoffelmehl)",RAW,[],0,[]
+# === ERSTE COMPOSED! KATEGORIE E ===
+E609200,"Eierteigwaren Tortellini (Fleischfüllung) getrocknet",COMPOSED,,,
+E609100,"Eierteigwaren Tortelloni (Ricotta-Spinat-Füllung) getrocknet",COMPOSED,,,
+# === KATEGORIE F (Fortsetzung) ===
+F413100,"Wald-Brombeere roh",RAW,[],0,[FRUCTAN]
+F407100,"Moosbeere roh",RAW,[],0,[FRUCTAN]
+F401100,"Preiselbeere roh",RAW,[],0,[FRUCTAN]
+F322100,"Johannisbeere weiß, roh",RAW,[],0,[FRUCTAN]
+F323100,"Johannisbeere schwarz roh",RAW,[],0,[FRUCTAN]
+# === KATEGORIE M (Fortsetzung) ===
+M052000,"Salzlakenkäse aus Kuhmilch, Hirtenkäse, mind. 45 % Fett i. Tr.",RAW,[LACTOSE],1,[LACTOSE]
+M3A4300,"Salzlakenkäse aus Schafmilch, mind. 20 % Fett i. Tr.",RAW,[LACTOSE],1,[LACTOSE]
+M053000,"Salzlakenkäse aus Ziegenmilch, mind. 45 % Fett i. Tr.",RAW,[LACTOSE],1,[LACTOSE]
+M6A6800,"Salzlakenkäse aus Schafmilch, mind. 45 % Fett i. Tr.",RAW,[LACTOSE],1,[LACTOSE]
+M516700,"Danablu mind. 50 % Fett i. Tr.",RAW,[LACTOSE],2,[LACTOSE]
+# === KATEGORIE P (Fortsetzung) ===
+P721000,"Spirituosen mit Wacholder",RAW,[GLUTEN],3,[]
+P7A1000,"Spirituosen mit Anis",RAW,[],3,[]
+P730000,"Getreidebrand (Korn)",RAW,[GLUTEN],3,[]
+P620000,"Weinbrand/Brandy",RAW,[],3,[]
+P722000,"Gin",RAW,[GLUTEN],3,[]
+# === KATEGORIE T (Fortsetzung) ===
+T402100,"Stint roh",RAW,[FISH],0,[]
+T104100,"Sardelle roh",RAW,[FISH],0,[]
+T070100,"Seeteufel roh",RAW,[FISH],0,[]
+T305200,"Goldbutt/Scholle, tiefgefroren",RAW,[FISH],0,[]
+T311100,"Flunder roh",RAW,[FISH],0,[]
+T600100,"Meerbarbe roh",RAW,[FISH],0,[]
+T020100,"Tintenfisch roh",RAW,[MOLLUSC],0,[]
+T309100,"Seezunge roh",RAW,[FISH],0,[]
+T313100,"Rotzunge roh",RAW,[FISH],0,[]
+# === KATEGORIE W: Wurstwaren (roh = unverarbeitetes Fleisch) ===
+W412000,"Schwein Speck/Rückenspeck (grüner Speck) roh",RAW,[],0,[]
+# === KATEGORIE U (Fortsetzung) ===
+U205800,"Rind Fettgewebe, intermuskulär roh",RAW,[],0,[]
+U753100,"Schaf Gulasch (Bug, fett) roh",RAW,[],0,[]
+U773100,"Schaf Bratenfleisch (Bug, fett) roh",RAW,[],0,[]
+U866100,"Hammel Bug/Schulter, roh",RAW,[],0,[]
+U882100,"Schaf Keule, mittelfett, roh",RAW,[],0,[]
+U741100,"Schaf Schnitzel (Keule, mager) roh",RAW,[],0,[]
+U883100,"Schaf Keule, fett, roh",RAW,[],0,[]
+U405800,"Kalb Fettgewebe, intermuskulär roh",RAW,[],0,[]
+U892100,"Schaf Hinterhaxe, mittelfett, roh",RAW,[],0,[]
+U742100,"Schaf Schnitzel (Keule, mittelfett) roh",RAW,[],0,[]
+U886100,"Hammel Keule, roh",RAW,[],0,[]
+U872100,"Schaf Vorderhaxe, mittelfett, roh",RAW,[],0,[]
+# === KATEGORIE V (Fortsetzung) ===
+V122100,"Ziege Fleisch, roh",RAW,[],0,[]
+V050100,"Schnecken roh",RAW,[MOLLUSC],0,[]
+# === KATEGORIE F (Fortsetzung) ===
+F403100,"Schlehe roh",RAW,[],0,[FRUCTAN]
+F406100,"Holunderbeere roh",RAW,[],0,[FRUCTAN]
+# === KATEGORIE K (Fortsetzung) ===
+K512000,"Tapioka/Tapiokastärke",RAW,[],0,[]
+K213000,"Kartoffelpüree Instantpulver",RAW,[],0,[]
+K550000,"Pfeilwurzelmehl/Marantastärke",RAW,[],0,[]
+# === KATEGORIE P (Fortsetzung) ===
+P610000,"Cognac",RAW,[],3,[]
+P7A2000,"Spirituosen mit bitterem Geschmack (Bitter)",RAW,[],3,[]
+# === KATEGORIE B: Brot & Backwaren (COMPOSED!) ===
+B121000,"Roggenvollkornbrot",COMPOSED,,,
+B271000,"Roggenmischbrot",COMPOSED,,,
+B311000,"Weizenbrot/Weißbrot",COMPOSED,,,
+B511000,"Weizenbrötchen",COMPOSED,,,
+# === KATEGORIE C (Fortsetzung) ===
+C114000,"Weizen Keim",RAW,[GLUTEN],0,[FRUCTAN]
+C118000,"Quinoa weiß, roh",RAW,[],0,[]
+C211000,"Weizen Vollkornmehl",RAW,[GLUTEN],0,[FRUCTAN]
+C212000,"Weizen Backschrot, Type 1700",RAW,[GLUTEN],0,[FRUCTAN]
+C213100,"Weizen Mehl, Type 812",RAW,[GLUTEN],0,[FRUCTAN]
+C213200,"Weizen Mehl, Type 1050",RAW,[GLUTEN],0,[FRUCTAN]
+C213500,"Weizen Mehl, Type 1600",RAW,[GLUTEN],0,[FRUCTAN]
+C214100,"Weizen Mehl, Type 405",RAW,[GLUTEN],0,[FRUCTAN]
+C214200,"Weizen Mehl, Type 550",RAW,[GLUTEN],0,[FRUCTAN]
+C217000,"Weizen Kleie",RAW,[GLUTEN],0,[FRUCTAN]
+C223100,"Roggen Mehl, Type 815",RAW,[GLUTEN],0,[FRUCTAN]
+C235000,"Dinkel Vollkornmehl",RAW,[GLUTEN],0,[FRUCTAN]
+C322000,"Buchweizen roh",RAW,[],2,[]
+C332000,"Hirse roh",RAW,[],0,[]
+C515000,"Cornflakes gesüßt",COMPOSED,,,
+C515400,"Cornflakes ungesüßt",RAW,[],0,[]
+C532700,"Reiswaffeln ungesalzen",RAW,[],0,[]
+C533100,"Maiswaffeln gesalzen",RAW,[],0,[]
