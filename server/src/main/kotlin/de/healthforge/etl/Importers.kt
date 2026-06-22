@@ -49,28 +49,23 @@ private fun classpathReader(path: String): BufferedReader? = try {
 /**
  * BLS 4.0 Importer (Bundeslebensmittelschlüssel, CC BY 4.0).
  *
- * Liest die als CSV exportierte BLS-4.0-Hauptdatei (Komma-separiert, quoted).
- * Jede Zeile wird als RAW-Ingredient importiert.
- *
- * CSV-Format (via Google Sheets export aus BLS_4_0_Daten_2025_DE.xlsx):
- *   BLS Code,Lebensmittelbezeichnung,Food name,ENERCJ,... (Header-basiert)
+ * Phase 1 — RAW-Baseline: importiert NUR Einträge mit ", roh" im Namen.
+ * Reichert allergens_json, histamine_score, fodmap_flags_json aus bestehender
+ * DB per normalisiertem Name-Match an.
  *
  * Macro-Mapping (direkte Spalten):
- *   ENERCC → energyKcalPer100g, PROT625 → proteinGPer100g, FAT → fatGPer100g,
- *   CHO → carbsGPer100g, FIBT → fiberGPer100g
+ *   ENERCC→kcal, PROT625→protein, FAT→fat, CHO→carbs, FIBT→fiber,
+ *   SUGAR→sugar, FASAT→satfat, NACL→salt
  *
  * Micro-Mapping (→ micronutrients_json):
- *   VITAA→vitamin_a, VITD→vitamin_d, TOCPHA→vitamin_e, VITK1→vitamin_k,
- *   THIA→vitamin_b1, RIBF→vitamin_b2, NIA→vitamin_b3, PANTAC→vitamin_b5,
- *   VITB6C→vitamin_b6, FOL→vitamin_b9, VITB12→vitamin_b12, VITC→vitamin_c,
- *   CA→calcium, FE→eisen, K→kalium, CU→kupfer, MG→magnesium,
- *   MN→mangan, NA→natrium, P→phosphor, SE→selen, ZN→zink
- *
- * Wert-Konventionen:
- *  - Deutsche Dezimalkommas: "11,45" → 11.45
- *  - <LOQ / <LOD → null (unter Nachweisgrenze)
- *  - "-" → null (kein Wert)
- *  - Leer → null
+ *   VITAA→vitamin_a(µg), VITD→vitamin_d(µg), TOCPHA→vitamin_e(mg),
+ *   VITK1→vitamin_k(µg), THIA→vitamin_b1(mg), RIBF→vitamin_b2(mg),
+ *   NIA→vitamin_b3(mg), PANTAC→vitamin_b5(mg), VITB6→vitamin_b6(mg*),
+ *   FOL→vitamin_b9(µg), VITB12→vitamin_b12(µg), VITC→vitamin_c(mg),
+ *   CA→calcium(mg), FE→eisen(mg), K→kalium(mg), CU→kupfer(mg*),
+ *   MG→magnesium(mg), MN→mangan(mg*), NA→natrium(mg),
+ *   P→phosphor(mg), SE→selen(µg), ZN→zink(mg)
+ *   (* = BLS liefert µg, wir konvertieren zu mg)
  */
 @Component
 class BlsImporter(private val ingredients: IngredientRepository) : Importer {
@@ -78,37 +73,65 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
     override fun seedResourcePath() = "seed/bls_4_0.csv"
 
     companion object {
-        val BLS_TO_MICRO: Map<String, String> = mapOf(
-            "VITAA" to "vitamin_a",    // RAE [µg]
-            "VITD" to "vitamin_d",     // [µg]
-            "TOCPHA" to "vitamin_e",   // Alpha-Tocopherol [mg]
-            "VITK1" to "vitamin_k",    // Phyllochinon [µg]
-            "THIA" to "vitamin_b1",    // Thiamin [mg]
-            "RIBF" to "vitamin_b2",    // Riboflavin [mg]
-            "NIA" to "vitamin_b3",     // Niacin [mg]
-            "PANTAC" to "vitamin_b5",  // Pantothensäure [mg]
-            "VITB6C" to "vitamin_b6",  // [mg]
-            "FOL" to "vitamin_b9",     // Folat [µg]
-            "VITB12" to "vitamin_b12", // [µg]
-            "VITC" to "vitamin_c",     // [mg]
-            "CA" to "calcium",         // [mg]
-            "FE" to "eisen",           // [mg]
-            "K" to "kalium",           // [mg]
-            "CU" to "kupfer",          // [mg]
-            "MG" to "magnesium",       // [mg]
-            "MN" to "mangan",          // [mg]
-            "NA" to "natrium",         // [mg]
-            "P" to "phosphor",         // [mg]
-            "SE" to "selen",           // [µg]
-            "ZN" to "zink",            // [mg]
+        // BLS code → (our micro key, unit conversion factor: BLS→our)
+        val BLS_TO_MICRO: Map<String, Pair<String, Double>> = mapOf(
+            "VITAA" to ("vitamin_a" to 1.0),     // µg→µg
+            "VITD" to ("vitamin_d" to 1.0),       // µg→µg
+            "TOCPHA" to ("vitamin_e" to 1.0),     // mg→mg
+            "VITK1" to ("vitamin_k" to 1.0),      // µg→µg
+            "THIA" to ("vitamin_b1" to 1.0),      // mg→mg
+            "RIBF" to ("vitamin_b2" to 1.0),      // mg→mg
+            "NIA" to ("vitamin_b3" to 1.0),       // mg→mg
+            "PANTAC" to ("vitamin_b5" to 1.0),    // mg→mg
+            "VITB6" to ("vitamin_b6" to 0.001),   // µg→mg
+            "FOL" to ("vitamin_b9" to 1.0),       // µg→µg
+            "VITB12" to ("vitamin_b12" to 1.0),   // µg→µg
+            "VITC" to ("vitamin_c" to 1.0),       // mg→mg
+            "CA" to ("calcium" to 1.0),           // mg→mg
+            "FE" to ("eisen" to 1.0),             // mg→mg
+            "K" to ("kalium" to 1.0),             // mg→mg
+            "CU" to ("kupfer" to 0.001),          // µg→mg
+            "MG" to ("magnesium" to 1.0),         // mg→mg
+            "MN" to ("mangan" to 0.001),          // µg→mg
+            "NA" to ("natrium" to 1.0),           // mg→mg
+            "P" to ("phosphor" to 1.0),           // mg→mg
+            "SE" to ("selen" to 1.0),             // µg→µg
+            "ZN" to ("zink" to 1.0),              // mg→mg
         )
-        val MACRO_CODES = setOf("ENERCC", "PROT625", "FAT", "CHO", "FIBT")
+        val MACRO_CODES = setOf("ENERCC", "PROT625", "FAT", "CHO", "FIBT", "SUGAR", "FASAT", "NACL")
+
+        /** Name-Normalisierung wie SIGHI-Importer: lowercase, ß→ss, Diakritika entfernen. */
+        fun normalize(s: String): String {
+            val lower = s.lowercase()
+                .replace("ae", "ä").replace("oe", "ö").replace("ue", "ü")
+                .replace("ß", "ss")
+            val nfd = java.text.Normalizer.normalize(lower, java.text.Normalizer.Form.NFD)
+            return nfd.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
+        }
     }
 
     @Transactional
     override fun import(): Counts {
         val reader = classpathReader(seedResourcePath()) ?: return Counts.skipped
-        var inserted = 0; var updated = 0; var skipped = 0
+        var inserted = 0; var updated = 0; var enriched = 0; var skipped = 0
+
+        // --- Enrichment-Map aus bestehender DB aufbauen ---
+        val enrichment = mutableMapOf<String, EnrichmentData>()
+        for (e in ingredients.findAll()) {
+            val key = normalize(e.nameDe)
+            if (key.isNotBlank() && e.histamineScore != null || e.allergensJson != "[]" || e.fodmapFlagsJson != "[]") {
+                // Bei Mehrfach-Treffern: höchsten SIGHI-Score behalten (Vorsichtsprinzip)
+                val existing = enrichment[key]
+                if (existing == null || (e.histamineScore ?: 0) > (existing.histamineScore ?: 0)) {
+                    enrichment[key] = EnrichmentData(
+                        histamineScore = e.histamineScore,
+                        allergensJson = e.allergensJson,
+                        fodmapFlagsJson = e.fodmapFlagsJson,
+                    )
+                }
+            }
+        }
+        LOG.info("BLS 4.0: {} enrichment entries aus bestehender DB geladen", enrichment.size)
 
         reader.useLines { lines ->
             val iter = lines.iterator()
@@ -127,8 +150,8 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 colIndex[code]?.let { code to it }
             }.toMap()
 
-            val microIdx = BLS_TO_MICRO.mapNotNull { (blsCode, ourKey) ->
-                colIndex[blsCode]?.let { blsCode to (ourKey to it) }
+            val microIdx: Map<String, Pair<String, Pair<Int, Double>>> = BLS_TO_MICRO.mapNotNull { (blsCode, pair) ->
+                colIndex[blsCode]?.let { idx -> blsCode to (pair.first to (idx to pair.second)) }
             }.toMap()
 
             LOG.info("BLS 4.0: {} Macro-Spalten, {} von {} Micro-Spalten gemappt",
@@ -138,8 +161,12 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 if (raw.isBlank()) continue
                 val cols = parseCsvLine(raw)
                 val sourceId = cols.getOrNull(idxCode)?.trim().orEmpty()
-                val nameDe = cols.getOrNull(idxNameDe)?.trim().orEmpty()
+                val nameDeRaw = cols.getOrNull(idxNameDe)?.trim().orEmpty()
+                val nameDe = nameDeRaw.removeSurrounding("\"")
                 if (sourceId.isEmpty() || nameDe.isEmpty()) { skipped++; continue }
+
+                // Phase 1: nur RAW-Lebensmittel (enthalten ", roh")
+                if (!nameDe.contains(", roh")) { skipped++; continue }
 
                 val existing = ingredients.findBySourceAndSourceId(IngredientSource.BLS, sourceId)
                 val entity = existing.orElseGet {
@@ -151,17 +178,32 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 entity.fatGPer100g        = macroIdx["FAT"]?.let { parseBLS(cols.getOrNull(it)) }
                 entity.carbsGPer100g      = macroIdx["CHO"]?.let { parseBLS(cols.getOrNull(it)) }
                 entity.fiberGPer100g      = macroIdx["FIBT"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.sugarGPer100g      = macroIdx["SUGAR"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.satfatGPer100g     = macroIdx["FASAT"]?.let { parseBLS(cols.getOrNull(it)) }
+                entity.saltGPer100g       = macroIdx["NACL"]?.let { parseBLS(cols.getOrNull(it)) }
 
+                // Micronutrients mit Unit-Konversion
                 val micros = mutableMapOf<String, Double>()
-                for ((_, pair) in microIdx) {
-                    val (ourKey, idx) = pair
+                for ((_, triple) in microIdx) {
+                    val (ourKey, idxAndFactor) = triple
+                    val (idx, factor) = idxAndFactor
                     val num = parseBLS(cols.getOrNull(idx)) ?: continue
-                    if (num > BigDecimal.ZERO) micros[ourKey] = num.toDouble()
+                    val converted = if (factor != 1.0) num.toDouble() * factor else num.toDouble()
+                    if (converted > 0.0) micros[ourKey] = Math.round(converted * 1000.0) / 1000.0
                 }
                 if (micros.isNotEmpty()) {
                     entity.micronutrientsJson = micros.entries.joinToString(
                         prefix = "{", postfix = "}"
                     ) { (k, v) -> "\"$k\":$v" }
+                }
+
+                // Enrichment aus bestehender DB
+                val enr = enrichment[normalize(nameDe)]
+                if (enr != null) {
+                    if (enr.histamineScore != null) entity.histamineScore = enr.histamineScore
+                    if (enr.allergensJson != "[]") entity.allergensJson = enr.allergensJson
+                    if (enr.fodmapFlagsJson != "[]") entity.fodmapFlagsJson = enr.fodmapFlagsJson
+                    enriched++
                 }
 
                 entity.locked = true
@@ -170,9 +212,15 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 if (existing.isPresent) updated++ else inserted++
             }
         }
-        LOG.info("BLS 4.0: {} inserted, {} updated, {} skipped", inserted, updated, skipped)
+        LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped", inserted, updated, enriched, skipped)
         return Counts(inserted, updated, skipped)
     }
+
+    private data class EnrichmentData(
+        val histamineScore: Short?,
+        val allergensJson: String,
+        val fodmapFlagsJson: String,
+    )
 
     private fun parseCsvLine(line: String): List<String> {
         val result = mutableListOf<String>()
