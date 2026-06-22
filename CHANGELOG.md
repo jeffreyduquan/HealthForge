@@ -2,6 +2,14 @@
 
 ---
 
+## P7.S5e: BLS 4.0 Integration — Macro+Micro-Importer (2026-06-22)
+- **Neuer BlsImporter**: header-basiert, Macro+Micro-Mapping (21 Nährstoffe)
+- BLS 4.0 CSV (CC BY 4.0, ~7k Lebensmittel) als `seed/bls_4_0.csv`
+- Old deprecated BlsImporter (BLS 3.x skeleton) ersetzt
+- Docs: ReqSpec REQ-INGR-002 aktualisiert, Architecture um BLS-ETL ergänzt
+
+---
+
 ## P7.S5d: Progress-Bar-Vereinheitlichung & Wasser-Alarm-Fix (2026-06-19)
 
 ### Progress-Bar Redesign

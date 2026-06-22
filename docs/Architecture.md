@@ -40,11 +40,11 @@
     │ Port 8080     │  │ Port 9000     │  │ Port 5432    │
     └───────┬───────┘  └───────────────┘  └──────────────┘
             │ Cron jobs
-            ▼
-    ┌───────────────┐
-    │  OFF ETL      │  (Open Food Facts dump → staging → publish)
-    │  worker       │
-    └───────────────┘
+    ┌───────────────────────────────┐
+    │  BLS ETL  │  OFF ETL         │
+    │  (BLS 4.0)│  (Open Food Facts│
+    │  worker   │   dump→publish)   │
+    └───────────────────────────────┘
 ```
 
 Alle Komponenten laufen als Docker-Container auf einem **Netcup VPS** (Single-Host

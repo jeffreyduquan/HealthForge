@@ -119,7 +119,7 @@ HealthForge ships as **one v1.0 release** containing all features below. Develop
 | Req | Statement |
 |---|---|
 | REQ-INGR-001 | The server SHALL host a curated ingredient database covering both whole foods and branded products. |
-| REQ-INGR-002 | Source mix (locked): **BLS** (Bundeslebensmittelschlüssel) for whole-food baseline, **Open Food Facts** (filtered) for branded products, **Admin-curated overrides** for top-priority items. |
+| REQ-INGR-002 | Source mix (locked): **BLS 4.0** (Bundeslebensmittelschlüssel, CC BY 4.0) for ~7k whole-food baseline, **Open Food Facts** (filtered) for branded products, **Admin-curated overrides** for top-priority items. |
 | REQ-INGR-003 | A **SIGHI** mapping CSV (~400 entries, Swiss Interest Group Histamine Intolerance) SHALL be imported as Admin-curated data before MVP launch. |
 | REQ-INGR-004 | OFF ETL filter rules (initial): `lang=de OR countries_tags ∋ Germany`; `completeness ≥ 0.5`; `nutriments.energy-kcal_100g present`; dedupe by `(normalized_brand, normalized_name, net_weight_g)` keeping highest completeness. |
 | REQ-INGR-005 | OFF resync SHALL run weekly via a server cron job. Admin-curated values are sticky (not overwritten by resync). |
