@@ -1,12 +1,15 @@
 # BLS Curation Reference — Histamin, Allergene, FODMAP
 
-> **Quellen:** SIGHI-Leitfaden 2023/2024 (histaminintoleranz.ch, mastzellaktivierung.info), HistaCheck DE,
+> **Quellen:** SIGHI Food List 01.04.2016 (mastzellaktivierung.info/histaminintoleranz.ch),
 > Monash University FODMAP, EU-LMIV Anhang II.
-> **Stand:** 2026-06-22
+> **Stand:** 2026-06-22 — **KOMPLETT ÜBERARBEITET nach offizieller SIGHI-Liste**
 
 ---
 
 ## 1. SIGHI 0–3: Schnellreferenz nach Kategorie
+
+> ⚠️ **Quelle:** SIGHI Food List DE alphabetisch mit Kat (PDF), Stand 01.04.2016.
+> H = Histaminhaltig, L = Liberator, A = Andere Amine, B = DAO-Blocker, ? = unsicher
 
 ### Getreide & Pseudocerealien
 | Lebensmittel | Score |
@@ -16,6 +19,8 @@
 | **Buchweizen** | **2** |
 | Stärke (Mais, Reis, Kartoffel, Tapioka, Weizen) | 0 |
 | Weizenkeim, Weizenkleie | 0 |
+| **Malzextrakt** | **2** |
+| Cornflakes (ohne Malz) | 0 |
 
 ### Nüsse & Samen
 | Lebensmittel | Score |
@@ -24,36 +29,69 @@
 | **Walnüsse** | **3** |
 | **Erdnüsse, Cashew, Paranüsse, Pistazien** | **2** |
 | Kokosnuss (frisch) | 0 |
-| Leinsamen, Chia, Sesam, Mohn, Sonnenblumenkerne, Kürbiskerne | 0 |
-| Sprossen/Keimlinge (Soja, Alfalfa, Mung) | 1–2 |
+| Leinsamen, Chia, Mohn, Sonnenblumenkerne, Kürbiskerne | 0 |
+| Sesam | 1 |
 
 ### Obst
 | Lebensmittel | Score |
 |---|---|
-| Äpfel, Birnen, Kirschen, Pflaumen, Aprikosen, Pfirsiche, Weintrauben, Bananen, Mango, Melonen, Heidelbeeren, Brombeeren, Johannisbeeren, Preiselbeeren, Cranberry, Stachelbeeren, Holunder | 0 |
+| Äpfel, Kirschen, Pflaumen, Aprikosen, Pfirsiche, Nektarinen | 0 |
+| Weintrauben, Melonen (außer Wassermelone), Heidelbeeren | 0 |
+| Brombeeren, Johannisbeeren, Preiselbeeren, Cranberry | 0 |
+| Stachelbeeren, Holunder, Feigen, Datteln, Granatapfel, Kaki | 0 |
+| Litschi, Sternfrucht, Sanddorn, Hagebutte | 0 |
 | **Erdbeeren, Himbeeren** | **2** |
-| **Zitrusfrüchte (Orange, Zitrone, Grapefruit)** | **1** |
+| **Zitrusfrüchte (Orange, Grapefruit, Zitrone, Limette)** | **2–3** |
 | **Kiwi, Ananas** | **2** |
-| Papaya | 1 |
+| **Papaya** | **2** |
 | **Avocado** | **2** |
-| Feigen (frisch), Datteln (frisch), Granatapfel | 0 |
+| **Bananen** | **2** |
+| **Birne** | **1** |
+| **Mango** | **1** |
+| **Guave** | **2** |
+| Rhabarber | 1 |
 
 ### Gemüse
 | Lebensmittel | Score |
 |---|---|
-| Blattgemüse, Kohl, Brokkoli, Karotten, Kartoffeln, Zucchini, Gurken, Paprika, Zwiebeln, Knoblauch, Sellerie, Kürbis, Fenchel, Artischocken, Spargel, Rote Bete, Radieschen | 0 |
+| Blattgemüse, Brokkoli, Karotten, Kartoffeln, Zucchini, Gurken | 0 |
+| Paprika (mild), Fenchel, Artischocken, Spargel, Rote Bete | 0 |
+| Radieschen, Pastinaken, Kürbis, Kohl (Weiß-/Rot-/China-) | 0 |
+| Knollensellerie, Stangensellerie | 0 |
 | **Tomaten, Auberginen** | **2** |
-| **Spinat (nicht ganz frisch)** | **2** |
+| **Spinat** | **2** |
+| **Rucola** | **2** |
 | **Sauerkraut** | **3** |
-| Pilze (frisch) | 0 |
+| **Pilze (alle außer Champignons), Steinpilz, Morcheln** | **2** |
+| **Champignons** | **1** |
+| **Nori-Algen / Seetang** | **3** |
+| **Knoblauch** | **1** (gekocht besser) |
+| **Zwiebeln (alle außer weiße)** | **1** |
+| **Porree/Lauch** | **1** |
+| **Rosenkohl** | **1** |
+| **Kohlrabi** | **1** |
+| **Wirsing** | **1** |
+| **Meerrettich** | **1** |
+| **Paprika scharf / Chili** | **2** |
+| **Oliven (meist fermentiert)** | **2** |
+| **Essiggurken / Cornichons** | **2** |
+| **Hülsenfrüchte (Soja, Bohnen, Erbsen, Linsen)** | **2** |
+| Erbsen (Garten-, Spalt-) | 1 |
+| Zuckererbse | 1 |
 
 ### Fleisch (FRISCH, roh)
 | Lebensmittel | Score |
 |---|---|
-| Rind, Kalb, Schwein, Lamm, Huhn, Pute, Ente, Kaninchen, Wild, Innereien (ALLES FRISCH) | 0 |
+| Rind, Kalb (frisch) | 0 |
+| Huhn, Pute, Ente (frisch) | 0 |
+| Lamm, Kaninchen, Wild (frisch) | 0 |
+| **Schweinefleisch (frisch, unbehandelt)** | **1** |
+| Hackfleisch (unmittelbar nach Herstellung) | 0 |
+| **Innereien** | **2** |
 | Speck (roh, ungepökelt) | 0 |
-| Hackfleisch | 1 |
-| **Wurst, Schinken, Salami** | **2–3** |
+| **Wurst, Salami** | **3** |
+| **Rohschinken** | **3** |
+| **Räucherfleisch** | **3** |
 
 ### Fisch & Meeresfrüchte (FRISCH, roh)
 | Lebensmittel | Score |
@@ -61,34 +99,59 @@
 | ALLE Frischfische (tagesfrisch) | 0 |
 | Krustentiere, Muscheln, Tintenfisch (frisch) | 0 |
 | **Räucherfisch** | **3** |
-| **Fischkonserven (Thunfisch, Sardinen Dose)** | **3** |
+| **Fischkonserven** | **3** |
 
 ### Milchprodukte
 | Lebensmittel | Score |
 |---|---|
-| Milch (pasteurisiert, H-Milch), Joghurt (Natur), Quark, Frischkäse, Mozzarella, Ricotta, Butter, Sahne, Milchpulver, Molkepulver | 0 |
-| Jungkäse | 1 |
+| Milch (pasteurisiert, H-Milch), Quark, Frischkäse | 0 |
+| Mozzarella, Ricotta, Butter, Sahne (ohne Zusatzstoffe) | 0 |
+| Milchpulver, Molkepulver, Molke | 0 |
+| Ziegenmilch | 0 |
+| **Joghurt nature** | **1** |
+| **Jungkäse (z.B. junger Gouda)** | **0** |
+| **Gouda (gereift)** | **2** |
 | **Feta, Salzlakenkäse** | **1** |
-| **Hartkäse (Parmesan, Emmentaler, alter Gouda)** | **1–2** |
+| **Hartkäse / lange gereift (Emmentaler, Parmesan)** | **3** |
 | **Blauschimmelkäse (Roquefort, Gorgonzola, Edelpilz, Danablu)** | **2** |
+| **Käsezubereitungen (Mischungen mit Zutaten)** | **2** |
 
 ### Getränke
 | Lebensmittel | Score |
 |---|---|
-| Wasser, Kräutertee, Kaffeeersatz, Fruchtsaft (nicht Zitrus) | 0 |
-| Schwarztee, Grüntee, Kaffee | 1 |
-| Zitrussaft | 1 |
-| **Alkohol JEDER Art (Wein, Bier, Sekt, Spirituosen, Likör)** | **3** |
+| Wasser, Kräutertee (Kamille, Pfefferminz, Lindenblüte) | 0 |
+| Kaffee, Espresso, Cola | 1 |
+| Grüntee | 1 |
+| **Schwarztee** | **2** |
+| **Bier** | **2** |
+| **Weißwein** | **2** |
+| **Rotwein** | **3** |
+| **Sekt/Champagner** | **3** |
+| **Klare Schnäpse/Spirituosen (Wodka, Rum, Gin, Korn)** | **2** |
+| **Nicht klare Spirituosen (Whisky, Cognac)** | **3** |
+| **Weinbrand/Brandy** | **2** |
+| Zitrussaft | 2 |
+| **Haferdrink, Reisdrink** | **1** (enzymatisch fermentiert) |
+| **Sojadrink** | **2** |
 
 ### Sonstiges
 | Lebensmittel | Score |
 |---|---|
-| Zucker, Honig, Ahornsirup, Stevia | 0 |
-| Eier (frisch) | 0 |
+| Zucker, Honig, Ahornsirup, Stevia, Xylit | 0 |
 | Öle, Fette, Butter | 0 |
+| **Eier (Hühnerei, Vollei)** | **2** (Eigelb 0, Eiklar 2) |
 | **Kakao, Schokolade** | **2** |
-| Tofu (frisch, nicht fermentiert) | 0 |
-| Hülsenfrüchte (getrocknet, frisch gekocht) | 0–1 |
+| **Tofu** | **2** |
+| **Sojabohne, Sojamehl** | **2** |
+| **Hülsenfrüchte (Linsen, Kichererbsen)** | **2** |
+| **Glutamat, Hefeextrakt** | **2** |
+| **Backhefe** | **1** |
+| Essig: Branntweinessig | 0 |
+| Essig: Apfelessig | 1 |
+| Essig: Rot-/Weißweinessig, Balsamico | 3 |
+| **Senf** | **2** |
+| **Sojasauce** | **3** |
+| Bouillon/Brühwürfel | 2 |
 
 ---
 
@@ -97,10 +160,10 @@
 - **H** = Histaminhaltig | **L** = Liberator | **A** = Andere Amine | **B** = DAO-Blocker
 
 ### 🔑 Eherne Regeln:
-1. **Alkohol = IMMER 3** (Ethanol = DAO-Blocker + Liberator. Keine Ausnahme.)
+1. **Alkohol = IMMER ≥ 2** (Ethanol = DAO-Blocker + Liberator. Klar = 2, nicht-klar/gereift = 3)
 2. **Fermentiert ≥ 2** (je länger gereift, desto höher)
 3. **Geräuchert/Gepökelt = 3**
-4. **Frisches Fleisch/Fisch = 0** (nur tagesfrisch!)
+4. **Frisches Fleisch/Fisch = 0** (nur tagesfrisch! Schwein = 1)
 
 ---
 

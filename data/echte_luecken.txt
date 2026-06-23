@@ -1,0 +1,115 @@
+﻿T403100 :: Bachsaibling roh
+U579100 :: Schwein Schwartenbraten (Krustenbraten) roh
+T417100 :: Wildlachs roh
+U576100 :: Schwein Bratenfleisch (HÃ¼fte/Schinkenspeck) roh
+K706100 :: Butterpilz roh
+T094100 :: Lachsrogen roh
+G324100 :: Pak Choi roh
+U754100 :: Schaf Gulasch (Hals/Kamm/Nacken) roh
+U151100 :: Rind Gulasch (Bug) roh
+T206100 :: Schellfisch roh
+U583100 :: Schwein Kochfleisch (Bauch) roh
+T064100 :: Hecht roh
+U185100 :: Rind Kochfleisch (HÃ¼fte) roh
+F224100 :: Mirabelle roh
+U362100 :: Kalb Roulade (Keule) roh
+U163100 :: Rind Roulade (Oberschale) roh
+C119200 :: Couscous (Hartweizen) roh
+D079000 :: Pizzateig (mit Hefe) roh
+E605000 :: Kartoffel-Schupfnudeln roh
+U131100 :: Rind Steak (RÃ¼cken) roh
+G346100 :: Weinsauerkraut roh
+E470000 :: Eier-Frischteigwaren Ravioli (GemÃ¼sefÃ¼llung) roh
+D9A2000 :: Vollkornhefeteig sÃ¼ÃŸ roh
+G220100 :: Bleichsellerie roh
+E530000 :: Vollkorneierteigwaren roh
+U216100 :: Rind Filetsteak roh
+F608100 :: Satsuma roh
+G212100 :: GemÃ¼seamaranth roh
+Y912260 :: Frikadelle mit Bratkartoffeln aus rohen Kartoffeln und Tomatenketchup
+U563100 :: Schwein Roulade (Oberschale) roh
+F607100 :: Clementine roh
+U681700 :: Schwein Rohschinken
+F601100 :: Zitrone roh
+Y872053 :: Fruchtcreme roh gerÃ¼hrt (mit Gelatine)
+C119100 :: Bulgur (Hartweizen) roh
+M112300 :: Rohmilch/Vorzugsmilch
+G680100 :: Rettich roh
+U342100 :: Kalb Schnitzel (Keule) roh
+U371100 :: Kalb Bratenfleisch (Bug) roh
+K717100 :: Rotkappe roh
+U554100 :: Schwein Gulasch (Restbug) roh
+T424100 :: Meerforelle roh
+T033100 :: Dornhai roh
+Y813652 :: Rohrnudeln gebacken
+E632300 :: Dinkelvollkorneierteigwaren roh
+E603000 :: Eier-Frischteigwaren Ravioli (FleischfÃ¼llung) roh
+K270000 :: Gnocchi roh
+U642800 :: Schwein Bauch (wie gewachsen) RohpÃ¶kelware
+Y0A2040 :: HackfleischfÃ¼llung (fÃ¼r GemÃ¼se) roh
+U574100 :: Schwein Bratenfleisch (Bug ohne Fett und Schwarte) roh
+U575100 :: Schwein Bratenfleisch (Nuss) roh
+U642700 :: Schwein Bauch (wie gewachsen) RohpÃ¶kelware
+U564100 :: Schwein Dicke Rippe roh
+F223100 :: Zwetschge roh
+F504100 :: Dattel roh
+F211100 :: SÃ¼ÃŸkirsche roh
+G691100 :: Radieschen roh
+T415100 :: KÃ¶nigslachs roh
+S451000 :: Nuss-Nougat Rohmasse
+F604100 :: Grapefruit roh
+G430100 :: GemÃ¼sefenchel roh
+E632100 :: Dinkeleierteigwaren roh
+E606000 :: SemmelknÃ¶del roh
+G230100 :: Mangold roh
+E438000 :: Eier-Frischteigwaren roh
+K240400 :: KartoffelkloÃŸ (aus rohen Kartoffeln) Trockenprodukt
+U382100 :: Kalb Kochfleisch (Brust) roh
+F305100 :: Stachelbeere roh
+E607000 :: GrieÃŸklÃ¶ÃŸchen roh
+F609100 :: Tangerine roh
+U682700 :: Schwein Rohschinken
+U171100 :: Rind Bratenfleisch (Bug) roh
+U571100 :: Schwein Bratenfleisch (Bug mit Fett und Schwarte) roh
+U543100 :: Schwein Schnitzel (Nuss) roh
+S421000 :: Marzipan Rohmasse
+T120100 :: Pelamide roh
+T612100 :: Schwertfisch roh
+D9A4000 :: Vollkornplunderteig roh
+U221800 :: Rind Roastbeef (RÃ¼cken) RohpÃ¶kelware
+G693100 :: Wasabi roh
+E131100 :: Entenei roh
+T209100 :: Seehecht roh
+F602100 :: Limette roh
+U323100 :: Kalb Kotelett (RÃ¼cken) roh
+Y814010 :: Apfel-Bananenmus (roh) mit Rosinen
+U184100 :: Rind Kochfleisch (Bug) roh
+E608000 :: BÃ¶hmische KnÃ¶del roh
+F225100 :: Reineclaude roh
+U351100 :: Kalb Gulasch (Bug) roh
+T900300 :: MeeresfrÃ¼chtemischung roh
+U221100 :: Rind Roastbeef (RÃ¼cken) roh
+T121100 :: Thunfisch roh
+K704100 :: Birkenpilz roh
+T091100 :: Heringsrogen roh
+D7A7000 :: Plunderteig roh
+F613100 :: Kumquat roh
+T412100 :: Buckellachs roh
+T200100 :: Grenadier roh
+T202100 :: Leng roh
+U121100 :: Rind Kotelett (RÃ¼cken) roh
+D9A3000 :: VollkornmÃ¼rbeteig sÃ¼ÃŸ roh
+F501100 :: Ananas roh
+K750100 :: Mischpilze roh
+U541100 :: Schwein Schnitzel (Oberschale) roh
+G492100 :: BÃ¤rlauch roh
+T422100 :: Forelle roh
+T122100 :: WeiÃŸer Thun roh
+U221700 :: Rind Roastbeef (RÃ¼cken) RohpÃ¶kelware
+T124100 :: Gelbflossen-Thun roh
+F310100 :: Weintraube roh
+Y0A2060 :: Hackfleischteig roh (fÃ¼r Frikadellen
+F606100 :: Mandarine roh
+Y814210 :: Apfel-Bananen-Birnenmus roh
+G460100 :: Portulak roh
+F212100 :: Sauerkirsche roh

@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.io.BufferedReader
+import java.io.File
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
@@ -157,6 +158,10 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
             LOG.info("BLS 4.0: {} Macro-Spalten, {} von {} Micro-Spalten gemappt",
                 macroIdx.size, microIdx.size, BLS_TO_MICRO.size)
 
+            // Whitelist aus bls_curation.csv laden (nur RAW mit SIGHI-Score)
+            val curationCodes = loadCurationWhitelist()
+            LOG.info("BLS 4.0: {} kuratierte BLS-Codes als Whitelist geladen", curationCodes.size)
+
             for (raw in iter) {
                 if (raw.isBlank()) continue
                 val cols = parseCsvLine(raw)
@@ -165,8 +170,8 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 val nameDe = nameDeRaw.removeSurrounding("\"")
                 if (sourceId.isEmpty() || nameDe.isEmpty()) { skipped++; continue }
 
-                // Phase 1: nur RAW-Lebensmittel (enthalten ", roh")
-                if (!nameDe.contains(", roh")) { skipped++; continue }
+                // Nur Einträge, die in der Curation-Whitelist stehen
+                if (sourceId !in curationCodes) { skipped++; continue }
 
                 val existing = ingredients.findBySourceAndSourceId(IngredientSource.BLS, sourceId)
                 val entity = existing.orElseGet {
@@ -212,7 +217,7 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 if (existing.isPresent) updated++ else inserted++
             }
         }
-        LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped", inserted, updated, enriched, skipped)
+        LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped (Whitelist: curation)", inserted, updated, enriched, skipped)
         return Counts(inserted, updated, skipped)
     }
 
@@ -242,6 +247,28 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
         val s = raw.trim().removeSurrounding("\"")
         if (s.isEmpty() || s == "-" || s.startsWith("<")) return null
         return s.replace(',', '.').toBigDecimalOrNull()
+    }
+
+    /** Liest `../data/bls_curation.csv` und gibt die Menge aller BLS-Codes zurück,
+     *  die RAW sind UND einen SIGHI-Score (0-3) haben. */
+    private fun loadCurationWhitelist(): Set<String> {
+        val file = File("../data/bls_curation.csv")
+        if (!file.exists()) { LOG.warn("Curation-Whitelist: {} nicht gefunden", file); return emptySet() }
+        val codes = mutableSetOf<String>()
+        file.useLines { lines ->
+            for ((lineNo, raw) in lines.withIndex()) {
+                if (lineNo == 0 || raw.isBlank() || raw.startsWith("#")) continue
+                val cols = parseCsvLine(raw)
+                if (cols.size < 6) continue
+                val blsCode = cols[0].trim()
+                val type = cols[2].trim()
+                val sighiRaw = cols[4].trim()
+                if (type == "RAW" && sighiRaw.toShortOrNull() != null) {
+                    codes += blsCode
+                }
+            }
+        }
+        return codes
     }
 }
 

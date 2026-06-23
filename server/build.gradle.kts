@@ -170,3 +170,13 @@ tasks.register<JavaExec>("curateByWhitelist") {
     mainClass.set("de.healthforge.tools.CurateByWhitelist")
     workingDir = project.projectDir
 }
+
+tasks.register<JavaExec>("applyBlsCuration") {
+    group = "tools"
+    description = "Schreibt bls_curation.csv (SIGHI/Allergene/FODMAP) in die DB. Vorher: bootRun starten."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("de.healthforge.HealthForgeApplicationKt")
+    workingDir = project.projectDir
+    systemProperty("applyCurated", "true")
+    args("--spring.profiles.active=dev")
+}

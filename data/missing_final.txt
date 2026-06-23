@@ -1,0 +1,58 @@
+﻿BLS-roh: 325 | Curated RAW: 584 | Missing: 56
+---
+U331100 :: Kalb Steak (RÃ¼cken) roh
+X2A1080 :: Lauchsalat (roh) mit Saure-Sahne-Dressing
+X2A1130 :: Rotkohlsalat (roh) mit Essigmarinade
+X365743 :: Erdbeersauce roh
+X1A1070 :: WeiÃŸkrautsalat (gegart) mit rohem Mix aus Apfel-Karotte-Sellerie und Essigmarinade
+W540000 :: Hamburger Rauchfleisch (Rind Oberschale) RohpÃ¶kelware
+W411000 :: Schwein Speck (RÃ¼ckenspeck) RohpÃ¶kelware
+W171700 :: KÃ¼mmelwurst (Rohwurst)
+X206750 :: Rote-Bete-Salat (roh) mit Sellerie
+X2A1120 :: Rote-Bete-Salat (roh) mit Essigmarinade
+X985212 :: Rohrnudeln (aus Hefeteig mit Wasser zubereitet) gebacken
+G103100 :: Eisbergsalat roh
+X230512 :: Sauerkrautsalat (roh) mit Apfel
+X2A1040 :: Fenchelrohkost mit Joghurtmarinade
+X262712 :: Karottensalat (roh) mit Zitronenmarinade
+X262540 :: Karottensalat (roh) mit Saure-Sahne-Dressing
+X651063 :: Bratkartoffeln aus rohen Kartoffeln
+Y912260 :: Frikadelle mit Bratkartoffeln aus rohen Kartoffeln und Tomatenketchup
+Y872053 :: Fruchtcreme roh gerÃ¼hrt (mit Gelatine)
+X238310 :: WeiÃŸkrautsalat (roh) mit Essigmarinade
+X237460 :: Rotkohlsalat (roh) mit warmer Essigmarinade
+G109100 :: Zuckerhutsalat roh
+X200650 :: Sauerkrautsalat (roh) mit Saure-Sahne-Dressing
+X243450 :: Fenchelsalat (roh) mit Zitronenmarinade
+Y813652 :: Rohrnudeln gebacken
+Y0A2040 :: HackfleischfÃ¼llung (fÃ¼r GemÃ¼se) roh
+X230443 :: Sauerkrautsalat (roh) mit Apfel und gebratenem Speck
+W171300 :: Touristenwurst (Rohwurst)
+W164100 :: Schinkenwurst Krakauer Art (Rohwurst)
+X262612 :: Karottensalat (roh) mit Essigmarinade
+X9A6020 :: BlÃ¤tterteig (mit Butter) roh
+W181000 :: Rohpolnische WÃ¼rstchen/Polnische Bratwurst
+X671042 :: ThÃ¼ringer KlÃ¶ÃŸe (Mischung aus rohen und gekochten Kartoffeln)
+W164000 :: Schinkenwurst roh
+X231540 :: Blumenkohlsalat (roh) mit Saure-Sahne-Dressing
+X2A1100 :: Rote-Bete-Karottensalat (roh) mit Essigmarinade
+X2A1140 :: Sauerkrautsalat (roh) mit Apfel
+X235540 :: Kohlrabisalat (roh) mit Saure-Sahne-Dressing
+W171100 :: Knoblauchwurst roh
+X678112 :: Lippischer Pickert gebraten (aus Hefeteig mit roh geriebenen Kartoffeln und saurer Sahne)
+Y8A4000 :: GrieÃŸbrei (als Dessert) mit Erdbeersauce roh
+X2A1060 :: Kohlrabi-Karottensalat (roh) mit Zitronenmarinade
+U221800 :: Rind Roastbeef (RÃ¼cken) RohpÃ¶kelware
+X238060 :: WeiÃŸkrautsalat (roh) mit Speck-Essigmarinade
+Y814010 :: Apfel-Bananenmus (roh) mit Rosinen
+X673612 :: KartoffelklÃ¶ÃŸe von rohen Kartoffeln
+X2A1110 :: Rote-Bete-Salat (roh) mit Joghurtmarinade
+X2A1070 :: Kohlrabisalat (roh) mit Apfel
+W185000 :: Debrecziner roh
+W171200 :: Krakauer roh
+X2A1150 :: Selleriesalat (roh) mit Saure-Sahne-Dressing
+X2A1050 :: Karottensalat (roh) mit Joghurtmarinade
+U221700 :: Rind Roastbeef (RÃ¼cken) RohpÃ¶kelware
+Y0A2060 :: Hackfleischteig roh (fÃ¼r Frikadellen
+X6A5000 :: Kartoffelteig (aus gekochten Kartoffeln) roh
+Y814210 :: Apfel-Bananen-Birnenmus roh
