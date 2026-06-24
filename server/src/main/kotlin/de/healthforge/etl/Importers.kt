@@ -141,9 +141,11 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
             val iter = lines.iterator()
             if (!iter.hasNext()) return@useLines
             val header = parseCsvLine(iter.next())
-            val colIndex = header.withIndex().associate { (i, h) -> h.trim() to i }
+            // BLS 4.0 CSV header: "ENERCC Energie (Kilokalorien) [kcal/100g]"
+            // → wir indexieren nur den ersten Token (den BLS-Code)
+            val colIndex = header.withIndex().associate { (i, h) -> h.trim().substringBefore(" ") to i }
 
-            val idxCode = colIndex["BLS Code"] ?: -1
+            val idxCode = colIndex["BLS"] ?: -1
             val idxNameDe = colIndex["Lebensmittelbezeichnung"] ?: -1
             if (idxCode < 0 || idxNameDe < 0) {
                 LOG.warn("BLS 4.0: 'BLS Code'/'Lebensmittelbezeichnung' nicht im Header — Abbruch")
@@ -262,13 +264,12 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
         return s.replace(',', '.').toBigDecimalOrNull()
     }
 
-    /** Liest `../data/bls_curation.csv` und gibt eine Map BLS-Code → CurationRow zurück.
-     *  Enthält ALLE Einträge (RAW + COMPOSED), nicht nur die mit SIGHI-Score. */
+    /** Liest `seed/bls_curation.csv` vom Classpath und gibt eine Map BLS-Code → CurationRow zurück. */
     private fun loadCurationMap(): Map<String, CurationRow> {
-        val file = File("../data/bls_curation.csv")
-        if (!file.exists()) { LOG.warn("Curation-Map: {} nicht gefunden", file); return emptyMap() }
+        val reader = classpathReader("seed/bls_curation.csv")
+        if (reader == null) { LOG.warn("Curation-Map: seed/bls_curation.csv nicht im Classpath"); return emptyMap() }
         val map = mutableMapOf<String, CurationRow>()
-        file.useLines { lines ->
+        reader.useLines { lines ->
             for ((lineNo, raw) in lines.withIndex()) {
                 if (lineNo == 0 || raw.isBlank() || raw.startsWith("#")) continue
                 val cols = parseCsvLine(raw)
