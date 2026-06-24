@@ -116,12 +116,15 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
         val reader = classpathReader(seedResourcePath()) ?: return Counts.skipped
         var inserted = 0; var updated = 0; var enriched = 0; var skipped = 0
 
-        // --- Enrichment-Map aus bestehender DB aufbauen ---
+        // --- Curation-Map aus bls_curation.csv laden (BLS-Code → SIGHI/Allergene/FODMAP) ---
+        val curationMap = loadCurationMap()
+        LOG.info("BLS 4.0: {} kuratierte BLS-Codes geladen (SIGHI/Allergene/FODMAP)", curationMap.size)
+
+        // --- Name-basierte Enrichment-Map aus bestehender DB (Fallback) ---
         val enrichment = mutableMapOf<String, EnrichmentData>()
         for (e in ingredients.findAll()) {
             val key = normalize(e.nameDe)
-            if (key.isNotBlank() && e.histamineScore != null || e.allergensJson != "[]" || e.fodmapFlagsJson != "[]") {
-                // Bei Mehrfach-Treffern: höchsten SIGHI-Score behalten (Vorsichtsprinzip)
+            if (key.isNotBlank() && (e.histamineScore != null || e.allergensJson != "[]" || e.fodmapFlagsJson != "[]")) {
                 val existing = enrichment[key]
                 if (existing == null || (e.histamineScore ?: 0) > (existing.histamineScore ?: 0)) {
                     enrichment[key] = EnrichmentData(
@@ -132,7 +135,7 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 }
             }
         }
-        LOG.info("BLS 4.0: {} enrichment entries aus bestehender DB geladen", enrichment.size)
+        LOG.info("BLS 4.0: {} name-basierte Enrichment-Einträge aus bestehender DB", enrichment.size)
 
         reader.useLines { lines ->
             val iter = lines.iterator()
@@ -158,10 +161,6 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
             LOG.info("BLS 4.0: {} Macro-Spalten, {} von {} Micro-Spalten gemappt",
                 macroIdx.size, microIdx.size, BLS_TO_MICRO.size)
 
-            // Whitelist aus bls_curation.csv laden (nur RAW mit SIGHI-Score)
-            val curationCodes = loadCurationWhitelist()
-            LOG.info("BLS 4.0: {} kuratierte BLS-Codes als Whitelist geladen", curationCodes.size)
-
             for (raw in iter) {
                 if (raw.isBlank()) continue
                 val cols = parseCsvLine(raw)
@@ -170,8 +169,7 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 val nameDe = nameDeRaw.removeSurrounding("\"")
                 if (sourceId.isEmpty() || nameDe.isEmpty()) { skipped++; continue }
 
-                // Nur Einträge, die in der Curation-Whitelist stehen
-                if (sourceId !in curationCodes) { skipped++; continue }
+                // KEINE Whitelist mehr — ALLE BLS-Einträge werden importiert
 
                 val existing = ingredients.findBySourceAndSourceId(IngredientSource.BLS, sourceId)
                 val entity = existing.orElseGet {
@@ -202,13 +200,22 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                     ) { (k, v) -> "\"$k\":$v" }
                 }
 
-                // Enrichment aus bestehender DB
-                val enr = enrichment[normalize(nameDe)]
-                if (enr != null) {
-                    if (enr.histamineScore != null) entity.histamineScore = enr.histamineScore
-                    if (enr.allergensJson != "[]") entity.allergensJson = enr.allergensJson
-                    if (enr.fodmapFlagsJson != "[]") entity.fodmapFlagsJson = enr.fodmapFlagsJson
+                // --- Enrichment: zuerst Curation-Map (BLS-Code-basiert, präzise), dann Name-Fallback ---
+                val cur = curationMap[sourceId]
+                if (cur != null) {
+                    if (cur.histamineScore != null) entity.histamineScore = cur.histamineScore
+                    if (cur.allergensJson != "[]") entity.allergensJson = cur.allergensJson
+                    if (cur.fodmapFlagsJson != "[]") entity.fodmapFlagsJson = cur.fodmapFlagsJson
                     enriched++
+                } else {
+                    // Fallback: name-basierte Anreicherung aus bestehender DB
+                    val enr = enrichment[normalize(nameDe)]
+                    if (enr != null) {
+                        if (enr.histamineScore != null) entity.histamineScore = enr.histamineScore
+                        if (enr.allergensJson != "[]") entity.allergensJson = enr.allergensJson
+                        if (enr.fodmapFlagsJson != "[]") entity.fodmapFlagsJson = enr.fodmapFlagsJson
+                        enriched++
+                    }
                 }
 
                 entity.locked = true
@@ -217,11 +224,17 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
                 if (existing.isPresent) updated++ else inserted++
             }
         }
-        LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped (Whitelist: curation)", inserted, updated, enriched, skipped)
+        LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped (KOMPLETT-Import)", inserted, updated, enriched, skipped)
         return Counts(inserted, updated, skipped)
     }
 
     private data class EnrichmentData(
+        val histamineScore: Short?,
+        val allergensJson: String,
+        val fodmapFlagsJson: String,
+    )
+
+    private data class CurationRow(
         val histamineScore: Short?,
         val allergensJson: String,
         val fodmapFlagsJson: String,
@@ -249,26 +262,39 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
         return s.replace(',', '.').toBigDecimalOrNull()
     }
 
-    /** Liest `../data/bls_curation.csv` und gibt die Menge aller BLS-Codes zurück,
-     *  die RAW sind UND einen SIGHI-Score (0-3) haben. */
-    private fun loadCurationWhitelist(): Set<String> {
+    /** Liest `../data/bls_curation.csv` und gibt eine Map BLS-Code → CurationRow zurück.
+     *  Enthält ALLE Einträge (RAW + COMPOSED), nicht nur die mit SIGHI-Score. */
+    private fun loadCurationMap(): Map<String, CurationRow> {
         val file = File("../data/bls_curation.csv")
-        if (!file.exists()) { LOG.warn("Curation-Whitelist: {} nicht gefunden", file); return emptySet() }
-        val codes = mutableSetOf<String>()
+        if (!file.exists()) { LOG.warn("Curation-Map: {} nicht gefunden", file); return emptyMap() }
+        val map = mutableMapOf<String, CurationRow>()
         file.useLines { lines ->
             for ((lineNo, raw) in lines.withIndex()) {
                 if (lineNo == 0 || raw.isBlank() || raw.startsWith("#")) continue
                 val cols = parseCsvLine(raw)
                 if (cols.size < 6) continue
                 val blsCode = cols[0].trim()
-                val type = cols[2].trim()
+                val allergensRaw = cols[3].trim()
                 val sighiRaw = cols[4].trim()
-                if (type == "RAW" && sighiRaw.toShortOrNull() != null) {
-                    codes += blsCode
+                val fodmapRaw = cols[5].trim()
+                val sighiScore: Short? = sighiRaw.toShortOrNull()
+                val allergensJson = toJsonArray(allergensRaw)
+                val fodmapJson = toJsonArray(fodmapRaw)
+                // Nur eintragen wenn mindestens ein Wert gesetzt ist
+                if (sighiScore != null || allergensJson != "[]" || fodmapJson != "[]") {
+                    map[blsCode] = CurationRow(sighiScore, allergensJson, fodmapJson)
                 }
             }
         }
-        return codes
+        return map
+    }
+
+    private fun toJsonArray(raw: String): String {
+        val trimmed = raw.trim().removeSurrounding("\"")
+        if (trimmed == "[]" || trimmed.isBlank()) return "[]"
+        val inner = trimmed.removeSurrounding("[").removeSurrounding("]")
+        val items = inner.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        return items.joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
     }
 }
 
