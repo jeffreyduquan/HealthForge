@@ -2,6 +2,7 @@ package de.healthforge.etl
 
 import de.healthforge.ingredient.IngredientRepository
 import de.healthforge.ingredient.IngredientSource
+import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
@@ -12,11 +13,10 @@ import java.util.concurrent.Executors
 /**
  * P7.S4 — Auto-Start des BLS-ETL beim Boot (HINTERGRUND-Thread).
  *
- * 1. USDA_FDC-Purge läuft synchron (schnell, <1s).
+ * 1. USDA_FDC-Purge läuft synchron (schnell, <1s). Nutzt native SQL um
+ *    FK-Constraints auf recipe_ingredients zu umgehen.
  * 2. BLS-Import läuft ASYNCHRON im Hintergrund-Thread, damit der Server sofort
- *    ready ist und kein 502 Bad Gateway entsteht. Der Import von ~15.000 BLS-
- *    Einträgen dauert 30-90s — währenddessen sind noch keine Zutaten sichtbar,
- *    aber die API antwortet (leere Liste).
+ *    ready ist und kein 502 Bad Gateway entsteht.
  *
  * Idempotenz: USDA-Löschung bei jedem Boot. BLS-Import nur wenn noch keine
  * BLS-Einträge existieren.
@@ -26,6 +26,7 @@ import java.util.concurrent.Executors
 class EtlAutoStarter(
     private val orchestrator: EtlOrchestrator,
     private val ingredients: IngredientRepository,
+    private val em: EntityManager,
 ) : CommandLineRunner {
 
     private val log = LoggerFactory.getLogger(EtlAutoStarter::class.java)
@@ -33,6 +34,7 @@ class EtlAutoStarter(
         Thread(r, "etl-auto-starter").apply { isDaemon = true }
     }
 
+    @Transactional
     override fun run(vararg args: String?) {
         purgeUsdaFdc()
 
@@ -52,16 +54,30 @@ class EtlAutoStarter(
         }
     }
 
-    /** Löscht alle USDA_FDC-Einträge — idempotent, bei jedem Boot. */
+    /**
+     * Löscht alle USDA_FDC-Einträge via native SQL, inklusive abhängiger
+     * recipe_ingredients-Rows (FK constraint hat kein ON DELETE CASCADE).
+     */
     private fun purgeUsdaFdc() {
-        val stale = ingredients.findAll().filter { it.source == IngredientSource.USDA_FDC }
-        if (stale.isEmpty()) {
+        val staleIds = em.createNativeQuery(
+            "SELECT id FROM ingredients WHERE source = 'USDA_FDC'"
+        ).resultList
+        if (staleIds.isEmpty()) {
             log.info("EtlAutoStarter: keine USDA_FDC-Einträge zum Löschen")
             return
         }
-        log.info("EtlAutoStarter: lösche {} USDA_FDC-Einträge...", stale.size)
-        ingredients.deleteAll(stale)
-        log.info("EtlAutoStarter: {} USDA_FDC-Einträge gelöscht", stale.size)
+        log.info("EtlAutoStarter: lösche {} USDA_FDC-Einträge + abhängige recipe_ingredients...", staleIds.size)
+
+        // Zuerst abhängige recipe_ingredients-Rows löschen
+        em.createNativeQuery(
+            "DELETE FROM recipe_ingredients WHERE ingredient_id IN (SELECT id FROM ingredients WHERE source = 'USDA_FDC')"
+        ).executeUpdate()
+
+        // Dann die Ingredients selbst
+        val deleted = em.createNativeQuery(
+            "DELETE FROM ingredients WHERE source = 'USDA_FDC'"
+        ).executeUpdate()
+        log.info("EtlAutoStarter: {} USDA_FDC-Einträge gelöscht", deleted)
     }
 
     /** Importiert BLS (läuft im Hintergrund-Thread, nicht-blockierend). */
