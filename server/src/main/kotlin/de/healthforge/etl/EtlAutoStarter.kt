@@ -7,19 +7,19 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.Executors
 
 /**
- * P7.S4 — Auto-Start des BLS-ETL beim Boot.
+ * P7.S4 — Auto-Start des BLS-ETL beim Boot (HINTERGRUND-Thread).
  *
- * 1. Löscht ALLE USDA_FDC-Einträge (Migration von USDA → BLS als alleinige Quelle).
- * 2. Importiert BLS (Whitelist aus bls_curation.csv, ~400 RAW-Einträge mit
- *    SIGHI/FODMAP-Kuration), falls noch keine BLS-Einträge existieren.
+ * 1. USDA_FDC-Purge läuft synchron (schnell, <1s).
+ * 2. BLS-Import läuft ASYNCHRON im Hintergrund-Thread, damit der Server sofort
+ *    ready ist und kein 502 Bad Gateway entsteht. Der Import von ~15.000 BLS-
+ *    Einträgen dauert 30-90s — währenddessen sind noch keine Zutaten sichtbar,
+ *    aber die API antwortet (leere Liste).
  *
- * Reihenfolge: [Order(LOWEST_PRECEDENCE)] stellt sicher, dass Flyway-Migrationen
- * und alle anderen CommandLineRunner VOR diesem Runner gelaufen sind.
- *
- * Idempotenz: USDA_Löschung läuft bei JEDEM Boot (bis keine mehr da sind).
- * BLS-Import läuft nur, wenn noch keine BLS-Einträge existieren.
+ * Idempotenz: USDA-Löschung bei jedem Boot. BLS-Import nur wenn noch keine
+ * BLS-Einträge existieren.
  */
 @Component
 @Order(Int.MAX_VALUE)
@@ -29,11 +29,27 @@ class EtlAutoStarter(
 ) : CommandLineRunner {
 
     private val log = LoggerFactory.getLogger(EtlAutoStarter::class.java)
+    private val etlExecutor = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "etl-auto-starter").apply { isDaemon = true }
+    }
 
-    @Transactional
     override fun run(vararg args: String?) {
         purgeUsdaFdc()
-        importBlsIfMissing()
+
+        val blsCount = ingredients.findAll().count { it.source == IngredientSource.BLS }
+        if (blsCount > 0) {
+            log.info("EtlAutoStarter: {} BLS-Einträge vorhanden — Import übersprungen", blsCount)
+            return
+        }
+
+        log.info("EtlAutoStarter: keine BLS-Einträge — starte BLS-ETL im Hintergrund...")
+        etlExecutor.submit {
+            try {
+                importBls()
+            } catch (e: Exception) {
+                log.error("EtlAutoStarter: BLS-ETL im Hintergrund fehlgeschlagen", e)
+            }
+        }
     }
 
     /** Löscht alle USDA_FDC-Einträge — idempotent, bei jedem Boot. */
@@ -48,15 +64,10 @@ class EtlAutoStarter(
         log.info("EtlAutoStarter: {} USDA_FDC-Einträge gelöscht", stale.size)
     }
 
-    /** Importiert BLS, falls noch keine BLS-Einträge in der DB sind. */
-    private fun importBlsIfMissing() {
-        val blsCount = ingredients.findAll().count { it.source == IngredientSource.BLS }
-        if (blsCount > 0) {
-            log.info("EtlAutoStarter: {} BLS-Einträge vorhanden — Import übersprungen", blsCount)
-            return
-        }
-
-        log.info("EtlAutoStarter: keine BLS-Einträge — starte BLS-ETL...")
+    /** Importiert BLS (läuft im Hintergrund-Thread, nicht-blockierend). */
+    @Transactional
+    fun importBls() {
+        log.info("EtlAutoStarter: BLS-ETL gestartet...")
         try {
             val run = orchestrator.run(EtlSource.BLS)
             log.info(
