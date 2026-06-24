@@ -7,16 +7,16 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.concurrent.Executors
 
 /**
  * P7.S4 — Auto-Start des BLS-ETL beim Boot (HINTERGRUND-Thread).
  *
- * 1. USDA_FDC-Purge läuft synchron (schnell, <1s). Nutzt native SQL um
- *    FK-Constraints auf recipe_ingredients zu umgehen.
- * 2. BLS-Import läuft ASYNCHRON im Hintergrund-Thread, damit der Server sofort
- *    ready ist und kein 502 Bad Gateway entsteht.
+ * 1. USDA_FDC-Purge läuft synchron via native SQL.
+ * 2. BLS-Import läuft ASYNCHRON mit TransactionTemplate (damit @Transactional
+ *    im Hintergrund-Thread greift).
  *
  * Idempotenz: USDA-Löschung bei jedem Boot. BLS-Import nur wenn noch keine
  * BLS-Einträge existieren.
@@ -27,6 +27,7 @@ class EtlAutoStarter(
     private val orchestrator: EtlOrchestrator,
     private val ingredients: IngredientRepository,
     private val em: EntityManager,
+    private val txManager: PlatformTransactionManager,
 ) : CommandLineRunner {
 
     private val log = LoggerFactory.getLogger(EtlAutoStarter::class.java)
@@ -34,7 +35,6 @@ class EtlAutoStarter(
         Thread(r, "etl-auto-starter").apply { isDaemon = true }
     }
 
-    @Transactional
     override fun run(vararg args: String?) {
         purgeUsdaFdc()
 
@@ -45,11 +45,10 @@ class EtlAutoStarter(
         }
 
         log.info("EtlAutoStarter: keine BLS-Einträge — starte BLS-ETL im Hintergrund...")
+        val txTemplate = TransactionTemplate(txManager)
         etlExecutor.submit {
-            try {
+            txTemplate.executeWithoutResult {
                 importBls()
-            } catch (e: Exception) {
-                log.error("EtlAutoStarter: BLS-ETL im Hintergrund fehlgeschlagen", e)
             }
         }
     }
@@ -80,9 +79,8 @@ class EtlAutoStarter(
         log.info("EtlAutoStarter: {} USDA_FDC-Einträge gelöscht", deleted)
     }
 
-    /** Importiert BLS (läuft im Hintergrund-Thread, nicht-blockierend). */
-    @Transactional
-    fun importBls() {
+    /** Importiert BLS (läuft in TransactionTemplate-Transaktion). */
+    private fun importBls() {
         log.info("EtlAutoStarter: BLS-ETL gestartet...")
         try {
             val run = orchestrator.run(EtlSource.BLS)
