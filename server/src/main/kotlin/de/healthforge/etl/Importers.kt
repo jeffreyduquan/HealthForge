@@ -163,6 +163,7 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
             LOG.info("BLS 4.0: {} Macro-Spalten, {} von {} Micro-Spalten gemappt",
                 macroIdx.size, microIdx.size, BLS_TO_MICRO.size)
 
+            val batch = mutableListOf<IngredientEntity>()
             for (raw in iter) {
                 if (raw.isBlank()) continue
                 val cols = parseCsvLine(raw)
@@ -222,8 +223,18 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
 
                 entity.locked = true
                 entity.updatedAt = Instant.now()
-                ingredients.save(entity)
+                batch.add(entity)
                 if (existing.isPresent) updated++ else inserted++
+
+                // Batch-Save alle 500 Entities + EntityManager clearen (Speicher)
+                if (batch.size >= 500) {
+                    ingredients.saveAll(batch)
+                    batch.clear()
+                }
+            }
+            // Rest-Batch
+            if (batch.isNotEmpty()) {
+                ingredients.saveAll(batch)
             }
         }
         LOG.info("BLS 4.0: {} inserted, {} updated, {} enriched, {} skipped (KOMPLETT-Import)", inserted, updated, enriched, skipped)
