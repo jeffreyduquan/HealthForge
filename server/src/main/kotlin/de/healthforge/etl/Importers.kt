@@ -310,8 +310,11 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
     }
 }
 
-private fun String.toBigDecimalOrNull(): BigDecimal? =
-    trim().replace(',', '.').takeIf { it.isNotBlank() }?.toBigDecimalOrNull()
+private fun String.toBigDecimalOrNull(): BigDecimal? {
+    val cleaned = trim().replace(',', '.')
+    if (cleaned.isBlank()) return null
+    return try { BigDecimal(cleaned) } catch (_: NumberFormatException) { null }
+}
 
 /**
  * SIGHI Histamin-Verträglichkeits-Importer (REQ-INGR-003).
