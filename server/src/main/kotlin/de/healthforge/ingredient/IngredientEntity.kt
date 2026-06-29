@@ -12,7 +12,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
-enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL, USDA_FDC }
+enum class IngredientSource { BLS, SIGHI, OFF, USER, MANUAL }
 
 enum class IngredientStatus { PENDING, APPROVED, REJECTED }
 

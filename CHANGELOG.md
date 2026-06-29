@@ -2,6 +2,16 @@
 
 ---
 
+## P7.S5f: BLS-Nährstoff-Merger — BlsNutrientEnricher (2026-06-26)
+- **Neuer `BlsNutrientEnricher`**: `CommandLineRunner`, triggered via `-DmergeBlsNutrients=true`
+- Liest `seed/bls_4_0.csv` und reichert **bestehende** DB-Einträge mit fehlenden Makro-/Mikronährstoffen an (per normalisiertem Name-Match)
+- Überschreibt NUR NULL-Werte — bestehende SIGHI/Allergene/FODMAP bleiben erhalten
+- Gleiche Macro+Micro-Mapping-Logik wie `BlsImporter` (21 Mikronährstoffe mit Unit-Konversion)
+- Verhindert Doppel-Import: bei erneutem Lauf werden bereits befüllte Einträge übersprungen
+- Docs: Runbook um `mergeBlsNutrients`-Flag ergänzt
+
+---
+
 ## P7.S5e: BLS 4.0 Integration — Macro+Micro-Importer (2026-06-22)
 - **Neuer BlsImporter**: header-basiert, Macro+Micro-Mapping (21 Nährstoffe)
 - BLS 4.0 CSV (CC BY 4.0, ~7k Lebensmittel) als `seed/bls_4_0.csv`

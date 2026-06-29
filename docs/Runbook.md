@@ -1,11 +1,11 @@
-# HealthForge — Runbook (Operations)
+﻿# HealthForge â€” Runbook (Operations)
 
 **Version:** 1.0 (v1.0 Release-Gate, 2026-05-26)
 **Status:** LIVE
 **Scope:** Solo-Operator VPS-Deploy. Single Host. Kein Staging (LOCKED Q9).
 
 > Ziel: jede Routine-Operation und jeder Notfall ist in **einer Datei** mit
-> Copy-Paste-Befehlen abrufbar. Reihenfolge: häufig → selten → notfall.
+> Copy-Paste-Befehlen abrufbar. Reihenfolge: hÃ¤ufig â†’ selten â†’ notfall.
 
 ---
 
@@ -15,11 +15,11 @@
 |---|---:|---|
 | API | `api.healthforge.endgear.de` | 8080 intern | `healthforge-api` |
 | Admin-UI | `admin.healthforge.endgear.de` | static via Caddy | `healthforge-caddy` |
-| Caddy (HealthForge) | — | :8080 (HTTP) / :8443 (HTTPS) extern | `healthforge-caddy` |
+| Caddy (HealthForge) | â€” | :8080 (HTTP) / :8443 (HTTPS) extern | `healthforge-caddy` |
 | Caddy (Dwight) | dwight.endgear.de | :80 / :443 extern | `dwight-caddy-1` |
 | MinIO (objects) | `cdn.healthforge.endgear.de` | 9000 | `healthforge-minio` |
 | Postgres | (intern) | 5432 | `healthforge-postgres` |
-| Backup-Cron | (intern) | — | `healthforge-backup` |
+| Backup-Cron | (intern) | â€” | `healthforge-backup` |
 
 Compose-File: [deploy/docker-compose.prod.yml](../deploy/docker-compose.prod.yml).
 Reverse-Proxy-Config: [deploy/Caddyfile](../deploy/Caddyfile).
@@ -44,7 +44,7 @@ SPRING_PROFILES_ACTIVE=prod
 
 ## 2. Routine-Operations
 
-### 2.1 Status aller Services prüfen
+### 2.1 Status aller Services prÃ¼fen
 
 ```powershell
 ssh root@vps "cd /opt/healthforge && docker compose ps"
@@ -70,17 +70,17 @@ ssh root@vps "cd /opt/healthforge && docker compose pull api && docker compose u
 ssh root@vps "sleep 10 && curl -sf https://api.healthforge.endgear.de/actuator/health"
 ```
 
-Wenn Health nicht GREEN → siehe §4 Rollback.
+Wenn Health nicht GREEN â†’ siehe Â§4 Rollback.
 
-### 2.3a Datenbank-Migrationen manuell ausführen
+### 2.3a Datenbank-Migrationen manuell ausfÃ¼hren
 
-Manche Änderungen (neue Spalten auf bestehenden Tabellen) brauchen eine manuelle SQL-Migration zusätzlich zum Code-Deploy.
+Manche Ã„nderungen (neue Spalten auf bestehenden Tabellen) brauchen eine manuelle SQL-Migration zusÃ¤tzlich zum Code-Deploy.
 
 ```powershell
 ssh root@vps "docker exec -it healthforge-postgres psql -U healthforge -d healthforge"
 ```
 
-Dann folgende SQL ausführen (für die P7.S4-Änderungen):
+Dann folgende SQL ausfÃ¼hren (fÃ¼r die P7.S4-Ã„nderungen):
 
 ```sql
 ALTER TABLE invites ADD COLUMN IF NOT EXISTS download_used BOOLEAN DEFAULT FALSE;
@@ -91,13 +91,13 @@ ALTER TABLE invites ADD COLUMN IF NOT EXISTS download_used_at TIMESTAMP;
 ### 2.4 Admin-UI deployen
 
 CI rsync't das `dist/`-Verzeichnis nach `/opt/healthforge/admin-ui-dist/`.
-Caddy serviert sofort (kein Restart nötig).
+Caddy serviert sofort (kein Restart nÃ¶tig).
 
 ```powershell
 ssh root@vps "ls -la /opt/healthforge/admin-ui-dist/"
 ```
 
-Browser-Cache leeren: User mit `Ctrl+Shift+R`. Vite-Build hat fingerprinted Assets, daher kein Cache-Bust nötig.
+Browser-Cache leeren: User mit `Ctrl+Shift+R`. Vite-Build hat fingerprinted Assets, daher kein Cache-Bust nÃ¶tig.
 
 ### 2.5 Android-Release-APK signieren + verteilen
 
@@ -109,22 +109,22 @@ cd c:\Users\jawra\Documents\Projects\HealthForge\android_app
 
 Signing-Keystore: `~/.healthforge/healthforge-release.jks` (NICHT in Git).
 Passwords aus Password-Manager. APK wird in GitHub-Release als Asset hochgeladen
-(`v1.0.0` tag → CI baut + signiert automatisch via `android.yml`).
+(`v1.0.0` tag â†’ CI baut + signiert automatisch via `android.yml`).
 
 ---
 
 ## 3. Backups & Restore
 
-### 3.1 Backup-Status prüfen
+### 3.1 Backup-Status prÃ¼fen
 
 ```powershell
 ssh root@vps "ls -lah /opt/healthforge/backups/ | tail -10"
 ```
 
-Erwartung: Eine `dump-YYYYMMDD.sql.gz` pro Tag, Größe ~10–500 MB je nach DB-Wachstum.
-Retention 30 Tage (alte werden vom Backup-Container automatisch gelöscht).
+Erwartung: Eine `dump-YYYYMMDD.sql.gz` pro Tag, GrÃ¶ÃŸe ~10â€“500 MB je nach DB-Wachstum.
+Retention 30 Tage (alte werden vom Backup-Container automatisch gelÃ¶scht).
 
-### 3.2 Manuelles Backup auslösen (vor riskanten Operationen)
+### 3.2 Manuelles Backup auslÃ¶sen (vor riskanten Operationen)
 
 ```powershell
 ssh root@vps "cd /opt/healthforge && docker compose exec -T postgres pg_dump -U healthforge healthforge | gzip > /opt/healthforge/backups/dump-manual-$(date +%Y%m%d-%H%M).sql.gz"
@@ -133,10 +133,10 @@ ssh root@vps "ls -lah /opt/healthforge/backups/ | tail -3"
 
 ### 3.3 Postgres-Restore (Disaster-Recovery)
 
-> **Zerstörerisch** — restored DB überschreibt aktuelle Daten. Vorher `.env` und MinIO-Daten sichern.
+> **ZerstÃ¶rerisch** â€” restored DB Ã¼berschreibt aktuelle Daten. Vorher `.env` und MinIO-Daten sichern.
 
 ```powershell
-# 1. API + Backup-Container stoppen, damit DB ungestört ist.
+# 1. API + Backup-Container stoppen, damit DB ungestÃ¶rt ist.
 ssh root@vps "cd /opt/healthforge && docker compose stop api backup"
 
 # 2. Aktuelle DB droppen + neu anlegen.
@@ -145,7 +145,7 @@ ssh root@vps "cd /opt/healthforge && docker compose exec -T postgres psql -U hea
 # 3. Dump einspielen (Beispiel: gestriger Dump).
 ssh root@vps "gunzip -c /opt/healthforge/backups/dump-20260525.sql.gz | docker compose exec -T postgres psql -U healthforge healthforge"
 
-# 4. API wieder hochfahren — Flyway prüft Schema, sollte sauber laufen.
+# 4. API wieder hochfahren â€” Flyway prÃ¼ft Schema, sollte sauber laufen.
 ssh root@vps "cd /opt/healthforge && docker compose up -d api backup"
 ssh root@vps "sleep 15 && curl -sf https://api.healthforge.endgear.de/actuator/health"
 ```
@@ -154,7 +154,7 @@ ssh root@vps "sleep 15 && curl -sf https://api.healthforge.endgear.de/actuator/h
 
 Buckets liegen als Filesystem-Tree unter `/opt/healthforge/minio-data/<bucket>/`.
 Bei Verlust: aus letztem `tar`-Snapshot wiederherstellen oder Bucket neu erstellen
-(Rezept-Bilder gehen verloren — User-Toleranz akzeptiert per LOCKED Q8).
+(Rezept-Bilder gehen verloren â€” User-Toleranz akzeptiert per LOCKED Q8).
 
 ```powershell
 ssh root@vps "tar czf /opt/healthforge/backups/minio-$(date +%Y%m%d).tar.gz -C /opt/healthforge minio-data"
@@ -179,14 +179,14 @@ ssh root@vps "cd /opt/healthforge && docker compose up -d api"
 ssh root@vps "sleep 10 && curl -sf https://api.healthforge.endgear.de/actuator/health"
 ```
 
-Wenn Rollback erfolgreich → **kein** automatisches Roll-Forward; manuelle Untersuchung
+Wenn Rollback erfolgreich â†’ **kein** automatisches Roll-Forward; manuelle Untersuchung
 + Hotfix erforderlich.
 
 ### 4.2 DB-Migration-Rollback
 
 Flyway = **forward-only** (LOCKED Coding-Convention 07). Migration-Rollback NIE durch
 Editieren vorhandener Vx-Files; stattdessen **neues Vx+1-File** mit kompensierender
-DDL. Bei akuten Defekten siehe §3.3 Restore.
+DDL. Bei akuten Defekten siehe Â§3.3 Restore.
 
 ### 4.3 Admin-UI-Rollback
 
@@ -201,10 +201,10 @@ ssh root@vps "cd /opt/healthforge && tar xzf admin-ui-backup-<date>.tar.gz -C ad
 
 ### 5.1 API antwortet nicht (502 von Caddy)
 
-1. `docker compose ps` → ist `healthforge-api` UP?
-2. `docker compose logs --tail=100 api` → Stacktrace?
+1. `docker compose ps` â†’ ist `healthforge-api` UP?
+2. `docker compose logs --tail=100 api` â†’ Stacktrace?
 3. `docker compose restart api`
-4. Wenn weiterhin DOWN → Rollback §4.1.
+4. Wenn weiterhin DOWN â†’ Rollback Â§4.1.
 
 ### 5.2 Postgres OOM / Disk Full
 
@@ -213,9 +213,9 @@ ssh root@vps "df -h /var/lib/docker"
 ssh root@vps "docker system df"
 ```
 
-Aufräumen:
+AufrÃ¤umen:
 ```powershell
-ssh root@vps "docker system prune -af --volumes"   # ⚠ entfernt unused images+volumes
+ssh root@vps "docker system prune -af --volumes"   # âš  entfernt unused images+volumes
 ```
 
 > Niemals `docker volume rm postgres_data` ohne vorheriges Backup.
@@ -227,7 +227,7 @@ ssh root@vps "cd /opt/healthforge && docker compose logs --tail=200 caddy | grep
 ssh root@vps "cd /opt/healthforge && docker compose restart caddy"
 ```
 
-Caddy bezieht Let's-Encrypt automatisch; bei Rate-Limit (5 Versuche/Woche) 7 Tage warten oder Staging-CA für Tests nutzen.
+Caddy bezieht Let's-Encrypt automatisch; bei Rate-Limit (5 Versuche/Woche) 7 Tage warten oder Staging-CA fÃ¼r Tests nutzen.
 
 ### 5.4 Verdacht auf gehackten Admin-Account
 
@@ -235,44 +235,158 @@ Caddy bezieht Let's-Encrypt automatisch; bei Rate-Limit (5 Versuche/Woche) 7 Tag
 # 1. Admin-User-Session invalidieren (Refresh-Token rotieren).
 ssh root@vps "cd /opt/healthforge && docker compose exec postgres psql -U healthforge healthforge -c \"UPDATE users SET password_hash = '<NEW_BCRYPT>' WHERE email = 'admin@hf.local';\""
 
-# 2. Alle Audit-Log-Einträge der letzten 24h ansehen.
-# Admin-UI → /admin/audit
+# 2. Alle Audit-Log-EintrÃ¤ge der letzten 24h ansehen.
+# Admin-UI â†’ /admin/audit
 ```
 
 ### 5.5 Hohe Latenz nach Deploy
 
-1. Boot-Log prüfen: `docker compose logs --tail=300 api | grep -i 'startup\|flyway\|migrate'`.
+1. Boot-Log prÃ¼fen: `docker compose logs --tail=300 api | grep -i 'startup\|flyway\|migrate'`.
 2. DB-Connections gecheckt: `SELECT count(*) FROM pg_stat_activity WHERE datname='healthforge';` (Limit ist 100 default).
-3. Wenn Migration den Restart blockiert (z.B. langer V*) → kein automatisches Rollback,
+3. Wenn Migration den Restart blockiert (z.B. langer V*) â†’ kein automatisches Rollback,
    warten + Logs monitoren.
 
 ---
+
+## 6. ETL / Datenbank-Tools
+
+### 6.1 Baseline-Bereinigung auf BLS + Re-Import
+
+Nach dem Refactor auf neue Single-Source:
+- aktive Hauptquelle = `BLS`
+- SIGHI/Allergene/FODMAP = Curation-Layer (`seed`/Matcher)
+- `USDA_FDC` wird hart entfernt, falls Restdaten noch vorhanden sind.
+
+**1) Migration (einmalig bei Deployment/Refresh):**
+```powershell
+cd server
+.\gradlew.bat flywayMigrate
+```
+
+**2) BLS-Quelle laden (Admin-Bootstrap):**
+```powershell
+POST /admin/v1/etl/run?source=BLS
+```
+
+Hinweis: Der Endpoint ist nur fÃ¼r Admin-Session gedacht (Auth-Session + CSRF wie im Admin-Standard).
+
+**2a) Optional bei lokalen Checks:**
+```powershell
+curl.exe -X POST "http://localhost:8080/admin/v1/etl/run?source=BLS" `
+  -H "Content-Type: application/json" `
+  -H "X-CSRF-TOKEN: $env:CSRF_TOKEN" `
+  -b "JSESSIONID=$env:JSESSIONID"
+```
+
+**3) Validierung in DB (wichtig):**
+```sql
+-- Erwartung: keine aktive USDA_FDC-Zeilen
+SELECT source, COUNT(*) FROM etl_runs GROUP BY source ORDER BY source;
+SELECT source, COUNT(*) FROM ingredients GROUP BY source ORDER BY source;
+```
+Erwartet: primÃ¤r `BLS`, ggf. `SIGHI` fÃ¼r Zusatzanreicherung; `USDA_FDC` ohne Treffer.
+
+### 6.1a Copy/Paste Operations Guide (Dev + Prod)
+
+#### Dev (lokal)
+1. Migration:
+```powershell
+cd server
+.\gradlew.bat flywayMigrate
+```
+
+2. App starten (Auto-Run auf BLS bei leerer Ingredients-Tabelle, optionaler manueller Trigger falls erforderlich):
+```powershell
+.\gradlew.bat bootRun
+```
+
+3. Optionaler manueller Admin-Run:
+```powershell
+curl.exe -i -X POST "http://localhost:8080/admin/v1/etl/run?source=BLS" `
+  -H "Content-Type: application/json" `
+  -H "X-CSRF-TOKEN: $env:CSRF_TOKEN" `
+  -b "JSESSIONID=$env:JSESSIONID"
+```
+
+4. Checks im DB-Client:
+```sql
+SELECT source, COUNT(*) FROM ingredients GROUP BY source ORDER BY source;
+SELECT source, status, rowsinserted, rowsupdated, rowsskipped, started_at, finished_at
+FROM etl_runs ORDER BY started_at DESC LIMIT 20;
+```
+
+#### Prod (Remote/SSH)
+1. Migration via Compose:
+```powershell
+ssh root@vps "cd /opt/healthforge && docker compose exec api ./gradlew -p /app flywayMigrate"
+```
+
+2. Admin-Trigger (Session-basierter Call oder API-Gateway mit internem Admin-Proxy):
+```powershell
+curl.exe -i -X POST "https://api.healthforge.endgear.de/admin/v1/etl/run?source=BLS" `
+  -H "Content-Type: application/json" `
+  -H "X-CSRF-TOKEN: $env:CSRF_TOKEN" `
+  -b "JSESSIONID=$env:JSESSIONID"
+```
+> Wenn euer Admin-Setup API-Token statt JSESSIONID verwendet, nutzt dort euer Standard-Auth-Header und den passenden CSRF-Weg.
+
+3. Log + Datenbankkontrolle:
+```powershell
+ssh root@vps "docker compose logs --tail=200 api | grep -i -E 'EtlAutoStarter|Import|BlsNutrientEnricher|etl_runs'"
+ssh root@vps "docker compose exec -T api psql -U postgres -d healthforge -c ""SELECT source, COUNT(*) FROM ingredients GROUP BY source ORDER BY source;"""
+ssh root@vps "docker compose exec -T api psql -U postgres -d healthforge -c ""SELECT source, status, rowsinserted, rowsupdated, rowsskipped, started_at, finished_at FROM etl_runs ORDER BY started_at DESC LIMIT 20;"""
+```
+### 6.2 BLS-NÃ¤hrstoff-Anreicherung (BlsNutrientEnricher)
+
+FÃ¼llt fehlende Makro-/MikronÃ¤hrstoffe in bestehenden `ingredients`-EintrÃ¤gen
+aus der BLS 4.0-Datenbank (~7.000 Lebensmittel). Matcht per normalisiertem
+deutschen Namen. Ãœberschreibt NUR NULL/leere Felder.
+
+**Lokal (Dev):**
+```powershell
+cd server
+.\gradlew.bat bootRun -DmergeBlsNutrients=true
+```
+
+**Production (Docker):**
+```powershell
+# Einmaligen Run provozieren
+ssh root@vps "cd /opt/healthforge && docker compose exec -e JAVA_TOOL_OPTIONS='-DmergeBlsNutrients=true' api java -jar /app/app.jar --spring.profiles.active=prod"
+```
+
+**Idempotenz:** Bereits befÃ¼llte EintrÃ¤ge werden Ã¼bersprungen. Wiederholte
+AusfÃ¼hrung ist sicher.
+
+**Log-Kontrolle:** Nach dem Boot in den Logs nach `BlsNutrientEnricher` suchen:
+```powershell
+ssh root@vps "docker compose logs --tail=200 api | grep -i 'BlsNutrientEnricher'"
+```
 
 ## 6. Monitoring (manuell, kein APM in v1.0)
 
 Single-VPS-Setup, kein Prometheus / Grafana (LOCKED Q10-Konsequenz).
 
-- **Tägliche Smoke-Routine (Solo-Operator):**
+- **TÃ¤gliche Smoke-Routine (Solo-Operator):**
   ```powershell
   ssh root@vps "curl -sf https://api.healthforge.endgear.de/actuator/health; \
                 docker compose ps; \
                 ls -lh /opt/healthforge/backups/ | tail -3"
   ```
-- **Audit-Log-Review** in Admin-UI `/admin/audit` (90 Tage Retention, LOCKED Q11) — wöchentlich.
-- **Disk-Usage:** wöchentlich `df -h /var/lib/docker`.
-- **Postgres-Größe:** `SELECT pg_size_pretty(pg_database_size('healthforge'));`
+- **Audit-Log-Review** in Admin-UI `/admin/audit` (90 Tage Retention, LOCKED Q11) â€” wÃ¶chentlich.
+- **Disk-Usage:** wÃ¶chentlich `df -h /var/lib/docker`.
+- **Postgres-GrÃ¶ÃŸe:** `SELECT pg_size_pretty(pg_database_size('healthforge'));`
 
-Bei Auffälligkeiten → siehe §5.
+Bei AuffÃ¤lligkeiten â†’ siehe Â§5.
 
 ---
 
 ## 7. Update-Strategie
 
-- **Server (API):** Push to `main` → CI (gradle bootJar) → Docker-Publish (GHCR) → SSH-Deploy (docker compose pull + up -d). ~3-5 min Gesamtzeit.
-- **Admin-UI:** Push to `main` → CI (npm build) → SCP to VPS (`/opt/healthforge/admin-ui-dist/`). Caddy serviert sofort (kein Restart). ~1 min.
-- **Android:** Git-Tag `v*` → CI signed APK. Manuelle Verteilung an Beta-User. Alternativ APK via Admin-UI → Releases-Seite hochladen.
-- **APK Release (Admin-UI):** APK lokal bauen (`./gradlew assembleRelease`) → Im Admin-UI unter "APK Releases" hochladen → in MinIO gespeichert → Download-Link via Presigned-URL.
-- **Dependencies:** monatlicher Sweep — `gradle dependencyUpdates` (server+android),
+- **Server (API):** Push to `main` â†’ CI (gradle bootJar) â†’ Docker-Publish (GHCR) â†’ SSH-Deploy (docker compose pull + up -d). ~3-5 min Gesamtzeit.
+- **Admin-UI:** Push to `main` â†’ CI (npm build) â†’ SCP to VPS (`/opt/healthforge/admin-ui-dist/`). Caddy serviert sofort (kein Restart). ~1 min.
+- **Android:** Git-Tag `v*` â†’ CI signed APK. Manuelle Verteilung an Beta-User. Alternativ APK via Admin-UI â†’ Releases-Seite hochladen.
+- **APK Release (Admin-UI):** APK lokal bauen (`./gradlew assembleRelease`) â†’ Im Admin-UI unter "APK Releases" hochladen â†’ in MinIO gespeichert â†’ Download-Link via Presigned-URL.
+- **Dependencies:** monatlicher Sweep â€” `gradle dependencyUpdates` (server+android),
   `npm outdated` (admin-ui). Vor Major-Updates: Backup + manueller Smoke.
 
 ---
@@ -280,7 +394,7 @@ Bei Auffälligkeiten → siehe §5.
 ## 8. Kontakte & Eskalation
 
 - **Operator:** Solo-Dev (User).
-- **Domain-Registrar:** Netcup/Cloudflare (DNS-Records für `*.healthforge.endgear.de`).
+- **Domain-Registrar:** Netcup/Cloudflare (DNS-Records fÃ¼r `*.healthforge.endgear.de`).
 - **VPS-Provider:** Hetzner / Netcup (Support-Ticket bei Hardware-Failure).
 - **GitHub:** Repo `<org>/HealthForge` (CI/CD, Issues, Releases).
 
@@ -289,16 +403,17 @@ Bei Auffälligkeiten → siehe §5.
 ## 9. Pre-Flight Checklist (vor v1.0-Go-Live)
 
 - [ ] `.env` mit allen Secrets auf VPS unter `/opt/healthforge/.env` (chmod 600)
-- [ ] DNS-Records für `api`, `admin`, `cdn` Subdomains zeigen auf VPS-IP
-- [ ] `docker compose up -d` lokal getestet → alle Services healthy
-- [ ] Erster `pg_dump` manuell ausgelöst (siehe §3.2) — Backup-Datei vorhanden
+- [ ] DNS-Records fÃ¼r `api`, `admin`, `cdn` Subdomains zeigen auf VPS-IP
+- [ ] `docker compose up -d` lokal getestet â†’ alle Services healthy
+- [ ] Erster `pg_dump` manuell ausgelÃ¶st (siehe Â§3.2) â€” Backup-Datei vorhanden
 - [ ] Admin-User in DB angelegt (`INSERT INTO users ... role='ADMIN'`)
-- [ ] Admin-UI Login funktioniert (`/admin` → Login → Dashboard)
+- [ ] Admin-UI Login funktioniert (`/admin` â†’ Login â†’ Dashboard)
 - [ ] Smoke-Test alle 9 Admin-UI-Routen GREEN
-- [ ] Android Release-APK signiert + auf eigenes Gerät installiert + getestet
-- [ ] Mindestens ein Wasser-Reminder im Echtbetrieb beobachtet (08–22-Fenster)
-- [ ] Caddy TLS-Cert sichtbar grün (`curl -I https://api.healthforge.endgear.de`)
+- [ ] Android Release-APK signiert + auf eigenes GerÃ¤t installiert + getestet
+- [ ] Mindestens ein Wasser-Reminder im Echtbetrieb beobachtet (08â€“22-Fenster)
+- [ ] Caddy TLS-Cert sichtbar grÃ¼n (`curl -I https://api.healthforge.endgear.de`)
 
 ---
 
-**Ende Runbook v1.0.** Updates bei jedem Incident in §5 ergänzen.
+**Ende Runbook v1.0.** Updates bei jedem Incident in Â§5 ergÃ¤nzen.
+

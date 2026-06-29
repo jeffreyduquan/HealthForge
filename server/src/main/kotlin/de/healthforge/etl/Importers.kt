@@ -18,7 +18,7 @@ import java.util.UUID
  * the orchestrator opens an [EtlRunEntity] before and closes it after the call.
  *
  * Hinweis (P7.S2): bewusst NICHT `sealed`, damit Source-spezifische Importer
- * (z.B. `UsdaFdcImporter` im Sub-Package) registriert werden können.
+ * korrekt registriert werden können.
  */
 interface Importer {
     val source: EtlSource
@@ -406,12 +406,12 @@ class SighiImporter(private val ingredients: IngredientRepository) : Importer {
  * Expected CSV columns:
  *   code;product_name;brands;energy_kcal_100g;proteins_100g;carbohydrates_100g;sugars_100g;fat_100g;saturated_fat_100g;fiber_100g;salt_100g
  *
- * @deprecated P7.S2 Slice 3a (2026-05-28) — Superseded by [de.healthforge.etl.usda.UsdaFdcImporter].
- *   OFF-Datenqualität ist heterogen (Crowdsourced, fehlende Mikros); USDA-FDC ist die kuratierte
- *   Single-Source-of-Truth (REQ-DATA-SOURCE-001). Bean bleibt registriert für historische `etl_runs`.
+ * @deprecated LEGACY/Fallback-Importer für historische OFF-Dateien.
+ *   OFF-Datenqualität ist heterogen (Crowdsourced, fehlende Mikros).
+ *   Bean bleibt registriert für historische `etl_runs`.
  */
 @Deprecated(
-    message = "OFF-Importer wird durch UsdaFdcImporter abgelöst (P7.S2). Nicht für neuen Code verwenden.",
+    message = "OFF-Importer ist Legacy/Fallback. Nicht für neuen Code verwenden.",
     level = DeprecationLevel.WARNING,
 )
 @Component
@@ -473,9 +473,8 @@ class EtlOrchestrator(
     fun run(source: EtlSource, triggeredBy: UUID? = null): EtlRunEntity {
         val importer = byName[source] ?: error("No importer registered for $source")
         if (source == EtlSource.BLS || source == EtlSource.OFF) {
-            // P7.S2 Slice 3a: BLS+OFF sind @Deprecated zugunsten USDA_FDC. Trigger werden
-            // zugelassen (für Migrations-/Audit-Zwecke) aber im Log markiert.
-            log.warn("ETL: triggered DEPRECATED importer source={} — prefer USDA_FDC (REQ-DATA-SOURCE-001)", source)
+            // Legacy Sources kept for historical compatibility (z. B. Migrations-/Audit-Zwecke).
+            log.warn("ETL: triggered legacy importer source={} — current single-source baseline is BLS", source)
         }
         val run = runs.save(EtlRunEntity(source = source, triggeredBy = triggeredBy))
         try {
