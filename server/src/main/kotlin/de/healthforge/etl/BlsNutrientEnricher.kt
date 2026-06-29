@@ -204,7 +204,10 @@ class BlsNutrientEnricher(
         val iter = lines.iterator()
         if (!iter.hasNext()) return rows
         val header = parseCsvLine(iter.next())
-        val colIndex = header.withIndex().associate { (i, h) -> h.trim().substringBefore(" ") to i }
+        val colIndex = mutableMapOf<String, Int>()
+        for ((i, h) in header.withIndex()) {
+            colIndex.putIfAbsent(h.trim().substringBefore(" "), i)
+        }
 
         val idxCode = colIndex["BLS"] ?: -1
         val idxNameDe = colIndex["Lebensmittelbezeichnung"] ?: -1

@@ -143,7 +143,10 @@ class BlsImporter(private val ingredients: IngredientRepository) : Importer {
             val header = parseCsvLine(iter.next())
             // BLS 4.0 CSV header: "ENERCC Energie (Kilokalorien) [kcal/100g]"
             // → wir indexieren nur den ersten Token (den BLS-Code)
-            val colIndex = header.withIndex().associate { (i, h) -> h.trim().substringBefore(" ") to i }
+            val colIndex = mutableMapOf<String, Int>()
+            for ((i, h) in header.withIndex()) {
+                colIndex.putIfAbsent(h.trim().substringBefore(" "), i)
+            }
 
             val idxCode = colIndex["BLS"] ?: -1
             val idxNameDe = colIndex["Lebensmittelbezeichnung"] ?: -1
