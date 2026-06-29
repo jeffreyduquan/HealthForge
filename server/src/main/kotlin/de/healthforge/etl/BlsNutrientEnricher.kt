@@ -1,6 +1,7 @@
 package de.healthforge.etl
 
 import de.healthforge.ingredient.IngredientRepository
+import de.healthforge.ingredient.IngredientSource
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
@@ -74,6 +75,7 @@ class BlsNutrientEnricher(
      * Einzelner Nährstoff-Datensatz aus der BLS-CSV.
      */
     private data class BlsNutrientRow(
+        val sourceId: String,
         val nameDe: String,
         val energyKcal: BigDecimal?,
         val protein: BigDecimal?,
@@ -100,6 +102,8 @@ class BlsNutrientEnricher(
         }
         log.info("BlsNutrientEnricher: {} BLS-Nährstoffdatensätze geladen", blsRows.size)
 
+        val blsByCode = blsRows.associateBy { it.sourceId }
+
         // Normalized-Name → BlsNutrientRow (bei Mehrfachtreffern: letzter gewinnt — BLS-Reihenfolge ist meist aufsteigend)
         val blsIndex = mutableMapOf<String, BlsNutrientRow>()
         for (row in blsRows) {
@@ -114,50 +118,59 @@ class BlsNutrientEnricher(
 
         for (ing in ingredients.findAll()) {
             val key = normalize(ing.nameDe)
-            val blsRow = blsIndex[key]
+            val blsRow = if (ing.source == IngredientSource.BLS && !ing.sourceId.isNullOrBlank()) {
+                blsByCode[ing.sourceId.orEmpty()]
+            } else {
+                blsIndex[key]
+            }
             if (blsRow == null) { noMatch++; continue }
             matched++
 
             var changed = false
+            val authoritativeBls = ing.source == IngredientSource.BLS
 
-            // Makros: nur NULL-Werte überschreiben
-            if (ing.energyKcalPer100g == null && blsRow.energyKcal != null) {
+            // BLS is the baseline source of truth; repair/overwrite BLS rows from the BLS seed.
+            if ((authoritativeBls || ing.energyKcalPer100g == null) && blsRow.energyKcal != null && ing.energyKcalPer100g != blsRow.energyKcal) {
                 ing.energyKcalPer100g = blsRow.energyKcal; changed = true
             }
-            if (ing.proteinGPer100g == null && blsRow.protein != null) {
+            if ((authoritativeBls || ing.proteinGPer100g == null) && blsRow.protein != null && ing.proteinGPer100g != blsRow.protein) {
                 ing.proteinGPer100g = blsRow.protein; changed = true
             }
-            if (ing.fatGPer100g == null && blsRow.fat != null) {
+            if ((authoritativeBls || ing.fatGPer100g == null) && blsRow.fat != null && ing.fatGPer100g != blsRow.fat) {
                 ing.fatGPer100g = blsRow.fat; changed = true
             }
-            if (ing.carbsGPer100g == null && blsRow.carbs != null) {
+            if ((authoritativeBls || ing.carbsGPer100g == null) && blsRow.carbs != null && ing.carbsGPer100g != blsRow.carbs) {
                 ing.carbsGPer100g = blsRow.carbs; changed = true
             }
-            if (ing.fiberGPer100g == null && blsRow.fiber != null) {
+            if ((authoritativeBls || ing.fiberGPer100g == null) && blsRow.fiber != null && ing.fiberGPer100g != blsRow.fiber) {
                 ing.fiberGPer100g = blsRow.fiber; changed = true
             }
-            if (ing.sugarGPer100g == null && blsRow.sugar != null) {
+            if ((authoritativeBls || ing.sugarGPer100g == null) && blsRow.sugar != null && ing.sugarGPer100g != blsRow.sugar) {
                 ing.sugarGPer100g = blsRow.sugar; changed = true
             }
-            if (ing.satfatGPer100g == null && blsRow.satfat != null) {
+            if ((authoritativeBls || ing.satfatGPer100g == null) && blsRow.satfat != null && ing.satfatGPer100g != blsRow.satfat) {
                 ing.satfatGPer100g = blsRow.satfat; changed = true
             }
-            if (ing.saltGPer100g == null && blsRow.salt != null) {
+            if ((authoritativeBls || ing.saltGPer100g == null) && blsRow.salt != null && ing.saltGPer100g != blsRow.salt) {
                 ing.saltGPer100g = blsRow.salt; changed = true
             }
 
-            // Mikros: nur fehlende Keys ergänzen
             val existingMicros = parseMicros(ing.micronutrientsJson)
-            val mergedMicros = existingMicros.toMutableMap()
-            for ((key, value) in blsRow.micronutrients) {
-                if (!mergedMicros.containsKey(key)) {
-                    mergedMicros[key] = value
+            val mergedMicros = if (authoritativeBls) {
+                blsRow.micronutrients.toMutableMap()
+            } else {
+                existingMicros.toMutableMap().also { merged ->
+                    for ((microKey, value) in blsRow.micronutrients) {
+                        if (!merged.containsKey(microKey)) {
+                            merged[microKey] = value
+                        }
+                    }
                 }
             }
-            if (mergedMicros.size > existingMicros.size) {
+            if (mergedMicros != existingMicros) {
                 ing.micronutrientsJson = mergedMicros.entries.joinToString(
                     prefix = "{", postfix = "}"
-                ) { (k, v) -> "\"$k\":$v" }
+                ) { (microKey, value) -> "\"$microKey\":$value" }
                 changed = true
             }
 
@@ -169,7 +182,6 @@ class BlsNutrientEnricher(
                 skipped++
             }
         }
-
         log.info(
             "BlsNutrientEnricher: fertig — matched={} enriched={} skipped(bereits voll)={} noMatch={}",
             matched, enriched, skipped, noMatch
@@ -194,9 +206,10 @@ class BlsNutrientEnricher(
         val header = parseCsvLine(iter.next())
         val colIndex = header.withIndex().associate { (i, h) -> h.trim().substringBefore(" ") to i }
 
+        val idxCode = colIndex["BLS"] ?: -1
         val idxNameDe = colIndex["Lebensmittelbezeichnung"] ?: -1
-        if (idxNameDe < 0) {
-            log.warn("BlsNutrientEnricher: 'Lebensmittelbezeichnung' nicht im Header")
+        if (idxCode < 0 || idxNameDe < 0) {
+            log.warn("BlsNutrientEnricher: 'BLS'/'Lebensmittelbezeichnung' nicht im Header")
             return rows
         }
 
@@ -214,11 +227,13 @@ class BlsNutrientEnricher(
         for (raw in iter) {
             if (raw.isBlank()) continue
             val cols = parseCsvLine(raw)
+            val sourceId = cols.getOrNull(idxCode)?.trim().orEmpty()
             val nameDeRaw = cols.getOrNull(idxNameDe)?.trim().orEmpty()
             val nameDe = nameDeRaw.removeSurrounding("\"")
-            if (nameDe.isEmpty()) continue
+            if (sourceId.isEmpty() || nameDe.isEmpty()) continue
 
             rows += BlsNutrientRow(
+                sourceId = sourceId,
                 nameDe = nameDe,
                 energyKcal = macroIdx["ENERCC"]?.let { parseBLS(cols.getOrNull(it)) },
                 protein    = macroIdx["PROT625"]?.let { parseBLS(cols.getOrNull(it)) },
